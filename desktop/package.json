@@ -1,0 +1,40 @@
+{
+  "name": "thinkrag-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ThinkRAG desktop client based on Electron + React",
+  "author": "ThinkRAG Team",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "start": "electron .",
+    "build": "node scripts/build-target.js",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.thinkrag.desktop",
+    "productName": "ThinkRAG Desktop",
+    "files": [
+      "src/**/*",
+      "resources/**/*"
+    ],
+    "directories": {
+      "buildResources": "resources"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.2",
+    "electron-builder": "^24.13.3"
+  }
+}
