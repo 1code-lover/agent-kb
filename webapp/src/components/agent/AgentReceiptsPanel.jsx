@@ -1,0 +1,36 @@
+function renderOutput(output) {
+  if (output == null) {
+    return "-";
+  }
+  if (typeof output === "string") {
+    return output;
+  }
+  return JSON.stringify(output, null, 2);
+}
+
+export default function AgentReceiptsPanel({ receipts }) {
+  return (
+    <section className="agent-panel">
+      <div className="panel-heading">
+        <div>
+          <p className="panel-eyebrow">Receipts</p>
+          <h3>Tool Receipts</h3>
+        </div>
+      </div>
+
+      {receipts.length === 0 && <div className="empty-block">No receipts yet.</div>}
+      <div className="stack-list">
+        {receipts.map((receipt) => (
+          <article key={receipt.id} className="stack-card">
+            <div className="stack-title-row">
+              <strong>{receipt.tool_name}</strong>
+              <span>{receipt.status}</span>
+            </div>
+            <p className="stack-subtle">{receipt.created_at || "-"}</p>
+            <pre className="receipt-code">{renderOutput(receipt.output)}</pre>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import ShellLayout from "./components/ShellLayout";
+import AgentPage from "./pages/AgentPage";
 import QueryPage from "./pages/QueryPage";
 import KbFilePage from "./pages/KbFilePage";
 import SettingsPage from "./pages/SettingsPage";
@@ -13,7 +14,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<ShellLayout />}>
-        <Route index element={<QueryPage />} />
+        <Route index element={<AgentPage />} />
+        <Route path="agent" element={<AgentPage />} />
+        <Route path="query" element={<QueryPage />} />
         <Route path="kb-file" element={<KbFilePage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="models" element={<ModelsPage />} />

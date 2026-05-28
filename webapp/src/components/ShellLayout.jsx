@@ -1,39 +1,34 @@
-/**
- * 文件功能：
- * - 提供桌面端页面通用壳层布局（侧边导航 + 内容区）。
- */
-
 import { Link, Outlet, useLocation } from "react-router-dom";
 
 const navs = [
-  { to: "/", label: "Workspace" },
-  { to: "/kb-file", label: "KB File" },
-  { to: "/settings", label: "Settings" },
-  { to: "/models", label: "Models" },
+  { to: "/", label: "Agent" },
+  { to: "/kb-file", label: "Import Files" },
+  { to: "/kb-web", label: "Import Web" },
   { to: "/kb-manage", label: "KB Manage" },
-  { to: "/kb-web", label: "KB Web" },
+  { to: "/models", label: "Models" },
+  { to: "/settings", label: "Settings" },
   { to: "/storage", label: "Storage" },
   { to: "/advanced", label: "Advanced" }
 ];
 
-/**
- * 功能：
- * - 渲染应用主壳层并标记当前激活导航。
- *
- * 输出：
- * - JSX.Element: 应用壳层布局。
- */
 export default function ShellLayout() {
   const location = useLocation();
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <h1>ThinkRAG</h1>
-        {navs.map((item) => (
-          <Link key={item.to} className={location.pathname === item.to ? "active" : ""} to={item.to}>
-            {item.label}
-          </Link>
-        ))}
+        <div className="brand-block">
+          <p className="brand-eyebrow">Desktop Only</p>
+          <h1>Foxglove</h1>
+          <p className="brand-copy">Agent first. KB as tool.</p>
+        </div>
+        <nav className="sidebar-nav">
+          {navs.map((item) => (
+            <Link key={item.to} className={location.pathname === item.to ? "active" : ""} to={item.to}>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </aside>
       <main className="content">
         <Outlet />

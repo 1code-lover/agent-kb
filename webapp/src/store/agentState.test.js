@@ -1,25 +1,23 @@
-/**
- * 文件功能：
- * - 验证 Agent 工作台状态辅助函数的行为。
- */
-
 import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
-  createWorkspaceState,
   appendTimelineEvent,
-  mapAgentRunToTimeline
+  buildManualTimeline,
+  buildReadFileTemplate,
+  createWorkspaceState,
+  mapAgentRunToTimeline,
+  mergeApprovalTimeline,
+  mergeReceipts
 } from "./agentState.js";
 
-test("createWorkspaceState should return default workspace shape", () => {
+test("createWorkspaceState should return the target desktop workspace shape", () => {
   const state = createWorkspaceState();
-  assert.equal(state.runState, "idle");
-  assert.deepEqual(state.timeline, []);
-  assert.deepEqual(state.plan, []);
-  assert.deepEqual(state.evidence, []);
-  assert.equal(state.taskState, null);
-  assert.deepEqual(state.pendingActions, []);
+
+  assert.equal(state.currentMode, "agent");
+  assert.equal(state.knowledgeScope.kb_name, "foxglove_beifen");
+  assert.deepEqual(state.receipts, []);
+  assert.equal(state.lastAnswer, "");
 });
 
 test("appendTimelineEvent should append event with monotonic seq", () => {
@@ -32,30 +30,75 @@ test("appendTimelineEvent should append event with monotonic seq", () => {
   assert.equal(second[1].seq, 2);
 });
 
-test("mapAgentRunToTimeline should include user message and step events", () => {
-  const timeline = mapAgentRunToTimeline("fix bug", {
-    answer: "done",
+test("buildManualTimeline should create submission timeline", () => {
+  const timeline = buildManualTimeline("scan workspace", "agent");
+
+  assert.equal(timeline.length, 2);
+  assert.equal(timeline[0].type, "task");
+  assert.equal(timeline[0].meta.mode, "agent");
+});
+
+test("mapAgentRunToTimeline should prefer backend timeline when available", () => {
+  const timeline = mapAgentRunToTimeline({
+    timeline: [
+      { type: "user", content: "fix issue" },
+      { type: "assistant", content: "done" }
+    ]
+  });
+
+  assert.equal(timeline[0].seq, 1);
+  assert.equal(timeline[1].content, "done");
+});
+
+test("mapAgentRunToTimeline should fallback to steps when backend timeline missing", () => {
+  const timeline = mapAgentRunToTimeline({
+    question: "search kb",
+    answer: "found",
     steps: [
       {
         step: "kb_search",
-        title: "检索知识库",
+        title: "KB Search",
         status: "completed",
         risk_level: "low",
         receipt_id: "r1",
         evidence_ids: ["ev-1"],
-        summary: "命中 1 条证据"
-      },
-      { step: "patch file" }
+        summary: "Found 1 evidence item"
+      }
     ]
   });
 
-  assert.equal(timeline[0].type, "user");
-  assert.equal(timeline[0].content, "fix bug");
-  assert.equal(timeline[1].type, "assistant");
-  assert.equal(timeline[1].content, "done");
   assert.equal(timeline[2].type, "step");
-  assert.equal(timeline[2].content, "命中 1 条证据");
-  assert.equal(timeline[2].meta.status, "completed");
-  assert.equal(timeline[2].meta.evidenceIds[0], "ev-1");
-  assert.equal(timeline[3].content, "patch file");
+  assert.equal(timeline[2].meta.receiptId, "r1");
+});
+
+test("mergeReceipts should sort receipts by created_at descending", () => {
+  const receipts = mergeReceipts([
+    { id: "1", created_at: "2026-05-28T10:00:00Z" },
+    { id: "2", created_at: "2026-05-28T11:00:00Z" }
+  ]);
+
+  assert.equal(receipts[0].id, "2");
+});
+
+test("mergeApprovalTimeline should append approval timeline after existing entries", () => {
+  const merged = mergeApprovalTimeline(
+    [
+      { seq: 1, type: "task", content: "cmd" },
+      { seq: 2, type: "status", content: "waiting" }
+    ],
+    {
+      timeline: [
+        { type: "step", content: "approved" },
+        { type: "assistant", content: "done" }
+      ]
+    }
+  );
+
+  assert.equal(merged.length, 4);
+  assert.equal(merged[2].content, "approved");
+  assert.equal(merged[3].seq, 4);
+});
+
+test("buildReadFileTemplate should return a Windows path template", () => {
+  assert.match(buildReadFileTemplate(), /^[A-Z]:\\\\/);
 });

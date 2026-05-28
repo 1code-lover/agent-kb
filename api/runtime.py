@@ -64,7 +64,14 @@ class RuntimeState:
             provider = current_llm_info.get("service_provider", "")
             api_base = (current_llm_info.get("api_base") or "").strip().replace("`", "")
             api_key = current_llm_info.get("api_key") or ""
-            fingerprint = (provider, model_name, api_base)
+            fingerprint = (
+                provider,
+                model_name,
+                api_base,
+                api_key,
+                llm_settings.get("temperature", config.TEMPERATURE),
+                llm_settings.get("system_prompt", config.SYSTEM_PROMPT),
+            )
             if getattr(Settings, "llm", None) is not None and self.llm_fingerprint == fingerprint:
                 return True
 

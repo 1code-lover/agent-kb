@@ -1,7 +1,10 @@
-"""模型服务，封装模型配置与候选项读取。"""
+"""Model configuration and provider management services."""
 
 from __future__ import annotations
 
+import json
+import urllib.error
+import urllib.request
 from typing import Any
 
 import config
@@ -10,63 +13,45 @@ from api.schemas import (
     CustomProviderCreateRequest,
     ModelSelectRequest,
 )
+from api.services.fallback_store import FALLBACK_CONFIG_STORE
 
 CUSTOM_PROVIDER_STORE_KEY = "custom_llm_providers"
 
 
 def _get_config_store():
-    """惰性加载配置存储。"""
     try:
         from server.stores.config_store import CONFIG_STORE
 
         return CONFIG_STORE
     except Exception:
-        if not hasattr(_get_config_store, "_memory_store"):
-            _get_config_store._memory_store = {}
+        return FALLBACK_CONFIG_STORE
 
-        class _FallbackStore:
-            def get(self, key):
-                """
-                从内存回退存储读取配置值。
 
-                Args:
-                    key: 配置键名。
-
-                Returns:
-                    Any: 键对应的值，不存在时返回 None。
-                """
-                return _get_config_store._memory_store.get(key)
-
-            def put(self, key, value):
-                """
-                写入配置到内存回退存储。
-
-                Args:
-                    key: 配置键名。
-                    value: 配置值。
-
-                Returns:
-                    None
-                """
-                _get_config_store._memory_store[key] = value
-
-        return _FallbackStore()
+def _mask_api_key(value: str) -> str:
+    if not value:
+        return ""
+    if len(value) <= 8:
+        return "*" * len(value)
+    return f"{value[:4]}***{value[-4:]}"
 
 
 def get_model_options() -> dict[str, Any]:
-    """获取可选模型列表和当前配置。"""
     config_store = _get_config_store()
     providers: dict[str, Any] = {}
+
     for name, provider in config.LLM_API_LIST.items():
         cloned = dict(provider)
+        cloned["name"] = name
         if "api_key" in cloned and cloned["api_key"]:
-            cloned["api_key"] = "***"
+            cloned["api_key"] = _mask_api_key(cloned["api_key"])
         providers[name] = cloned
+
     custom_provider_names: list[str] = []
     for provider in _get_custom_providers():
         cloned = dict(provider)
+        cloned["name"] = provider["name"]
         if "api_key" in cloned and cloned["api_key"]:
-            cloned["api_key"] = "***"
+            cloned["api_key"] = _mask_api_key(cloned["api_key"])
         providers[provider["name"]] = cloned
         custom_provider_names.append(provider["name"])
 
@@ -76,28 +61,32 @@ def get_model_options() -> dict[str, Any]:
         "embedding_models": list(config.EMBEDDING_MODEL_PATH.keys()),
         "reranker_models": list(config.RERANKER_MODEL_PATH.keys()),
         "current_llm_info": config_store.get("current_llm_info"),
+        "current_llm_settings": config_store.get("current_llm_settings"),
     }
 
 
 def select_model(request: ModelSelectRequest) -> dict[str, Any]:
-    """保存当前模型选择。"""
     config_store = _get_config_store()
     payload = request.model_dump(exclude_none=True)
     provider = _find_provider(request.service_provider)
-    if provider is not None:
-        payload.setdefault("api_base", provider.get("api_base", ""))
-        payload.setdefault("api_key", provider.get("api_key", ""))
-        payload.setdefault("api_key_valid", True if provider.get("api_key") or request.service_provider == "Ollama" else False)
+    if provider is None:
+        raise ValueError("provider not found")
+
+    payload.setdefault("api_base", provider.get("api_base", ""))
+    payload.setdefault("api_key", provider.get("api_key", ""))
+    payload["api_base"] = (payload.get("api_base") or "").strip().rstrip("/")
+    payload["api_key"] = payload.get("api_key") or ""
+    payload["api_key_valid"] = True if payload["api_key"] or request.service_provider == "Ollama" else False
     config_store.put("current_llm_info", payload)
     return payload
 
 
 def _find_provider(name: str) -> dict[str, Any] | None:
-    """按名称查找内置或自定义 provider。"""
     if name in config.LLM_API_LIST:
         provider = dict(config.LLM_API_LIST[name])
         provider["name"] = name
         return provider
+
     for provider in _get_custom_providers():
         if provider.get("name") == name:
             return dict(provider)
@@ -105,7 +94,6 @@ def _find_provider(name: str) -> dict[str, Any] | None:
 
 
 def _get_custom_providers() -> list[dict[str, Any]]:
-    """读取已保存的自定义 provider 列表。"""
     config_store = _get_config_store()
     providers = config_store.get(CUSTOM_PROVIDER_STORE_KEY)
     if isinstance(providers, list):
@@ -114,13 +102,11 @@ def _get_custom_providers() -> list[dict[str, Any]]:
 
 
 def _save_custom_providers(providers: list[dict[str, Any]]) -> None:
-    """持久化自定义 provider 列表。"""
     config_store = _get_config_store()
     config_store.put(CUSTOM_PROVIDER_STORE_KEY, providers)
 
 
 def add_custom_provider(request: CustomProviderCreateRequest) -> dict[str, Any]:
-    """新增或更新自定义 provider。"""
     providers = _get_custom_providers()
     payload = request.model_dump()
     normalized = {
@@ -146,32 +132,62 @@ def add_custom_provider(request: CustomProviderCreateRequest) -> dict[str, Any]:
 
 
 def delete_custom_provider(name: str) -> dict[str, Any]:
-    """删除自定义 provider。"""
     target_name = name.strip()
+    config_store = _get_config_store()
     providers = _get_custom_providers()
     new_providers = [item for item in providers if item.get("name") != target_name]
     if len(new_providers) == len(providers):
         raise ValueError("custom provider not found")
     _save_custom_providers(new_providers)
+
+    current_llm_info = config_store.get("current_llm_info") or {}
+    if current_llm_info.get("service_provider") == target_name:
+        config_store.put("current_llm_info", {})
+
     return {"name": target_name, "deleted": True}
 
 
-def _check_openai_compatible(model_name: str, api_base: str, api_key: str) -> bool:
-    """检查 OpenAI 兼容接口连通性。"""
-    from server.models.llm_api import check_openai_llm
+def _chat_completions_url(api_base: str) -> str:
+    return f"{api_base.strip().rstrip('/')}/chat/completions"
 
-    return check_openai_llm(model_name=model_name, api_base=api_base, api_key=api_key)
+
+def _check_openai_compatible(model_name: str, api_base: str, api_key: str) -> tuple[bool, str]:
+    url = _chat_completions_url(api_base)
+    payload = json.dumps(
+        {
+            "model": model_name,
+            "messages": [{"role": "user", "content": "ping"}],
+            "max_tokens": 1,
+            "temperature": 0,
+        }
+    ).encode("utf-8")
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    request = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+
+    try:
+        with urllib.request.urlopen(request, timeout=8) as response:
+            if 200 <= response.status < 300:
+                return True, "reachable"
+            return False, f"http_{response.status}"
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        return False, f"http_{exc.code}: {detail[:200]}"
+    except Exception as exc:
+        return False, str(exc)
 
 
 def test_custom_provider_connection(request: CustomProviderConnectionTestRequest) -> dict[str, Any]:
-    """测试自定义 provider 连通性。"""
-    reachable = _check_openai_compatible(
+    reachable, detail = _check_openai_compatible(
         request.model.strip(),
         request.api_base.strip().rstrip("/"),
         request.api_key,
     )
     return {
         "reachable": reachable,
+        "detail": detail,
         "api_base": request.api_base.strip().rstrip("/"),
         "model": request.model.strip(),
     }

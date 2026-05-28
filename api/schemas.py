@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -83,12 +83,21 @@ class ApiEnvelope(BaseModel):
     request_id: str
 
 
+class KnowledgeScope(BaseModel):
+    """知识范围。"""
+
+    kb_id: str = Field(default="default")
+    kb_name: str = Field(default="Default KB")
+
+
 class AgentRunRequest(BaseModel):
     """Agent 执行请求。"""
 
     question: str = Field(..., min_length=1)
     session_id: str = Field(default="default")
-    mode: str = Field(default="auto")
+    mode: Literal["agent", "kb_search", "read_file", "run_cmd"] = "agent"
+    tool_hint: str | None = None
+    knowledge_scope: KnowledgeScope = Field(default_factory=KnowledgeScope)
 
 
 class AgentReceiptQuery(BaseModel):
@@ -105,3 +114,80 @@ class AgentApprovalRequest(BaseModel):
     approve: bool
     reason: str = ""
     approver: str = "local-user"
+
+
+class TaskState(BaseModel):
+    """任务状态摘要。"""
+
+    status: Literal["idle", "running", "completed", "waiting_approval", "failed"]
+    pending_approval_count: int = 0
+    updated_at: str
+
+
+class PlanItem(BaseModel):
+    """计划项。"""
+
+    id: str
+    title: str
+    status: Literal["pending", "completed", "waiting_approval", "failed"]
+
+
+class StepItem(BaseModel):
+    """步骤项。"""
+
+    step: str
+    title: str
+    status: Literal["pending", "completed", "waiting_approval", "failed"]
+    risk_level: Literal["low", "medium", "high"] | None = None
+    receipt_id: str | None = None
+    action_id: str | None = None
+    evidence_ids: list[str] = Field(default_factory=list)
+    summary: str = ""
+
+
+class TimelineItem(BaseModel):
+    """时间线项。"""
+
+    type: str
+    content: str
+    meta: dict[str, Any] | None = None
+
+
+class EvidenceItem(BaseModel):
+    """证据项。"""
+
+    id: str
+    title: str
+    source: str
+    page: str | None = None
+    score: float | None = None
+    excerpt: str = ""
+    receipt_id: str | None = None
+    kb_id: str = "default"
+
+
+class PendingActionItem(BaseModel):
+    """待审批动作。"""
+
+    action_id: str
+    session_id: str
+    command: str
+    risk_level: Literal["low", "medium", "high"]
+    status: str
+    created_at: str
+
+
+class AgentRunData(BaseModel):
+    """Agent 运行结果。"""
+
+    session_id: str
+    question: str
+    knowledge_scope: KnowledgeScope
+    answer: str
+    task_state: TaskState
+    plan: list[PlanItem] = Field(default_factory=list)
+    steps: list[StepItem] = Field(default_factory=list)
+    timeline: list[TimelineItem] = Field(default_factory=list)
+    evidence: list[EvidenceItem] = Field(default_factory=list)
+    receipts: list[dict[str, Any]] = Field(default_factory=list)
+    pending_actions: list[PendingActionItem] = Field(default_factory=list)

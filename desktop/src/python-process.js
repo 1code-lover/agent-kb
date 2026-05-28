@@ -1,16 +1,33 @@
 /**
- * 管理 Python API 子进程生命周期。
+ * Manage the local Python API child process lifecycle.
  */
 const { spawn } = require("node:child_process");
+const fs = require("node:fs");
 const path = require("node:path");
 
 let pythonProcess = null;
 
-function getPythonCommand() {
-  if (process.platform === "win32") {
-    return "python";
+function resolvePythonCommand(projectRoot) {
+  const candidates =
+    process.platform === "win32"
+      ? [
+          path.join(projectRoot, ".venv", "Scripts", "python.exe"),
+          path.join(projectRoot, "venv", "Scripts", "python.exe"),
+          "python"
+        ]
+      : [
+          path.join(projectRoot, ".venv", "bin", "python"),
+          path.join(projectRoot, "venv", "bin", "python"),
+          "python3"
+        ];
+
+  for (const candidate of candidates) {
+    if (!candidate.includes(path.sep) || fs.existsSync(candidate)) {
+      return candidate;
+    }
   }
-  return "python3";
+
+  return process.platform === "win32" ? "python" : "python3";
 }
 
 function startPythonApi(projectRoot) {
@@ -18,7 +35,7 @@ function startPythonApi(projectRoot) {
     return pythonProcess;
   }
 
-  const cmd = getPythonCommand();
+  const cmd = resolvePythonCommand(projectRoot);
   const script = path.join(projectRoot, "run_api.py");
   pythonProcess = spawn(cmd, [script], {
     cwd: projectRoot,
@@ -69,5 +86,6 @@ async function waitForApiReady(retries = 20, intervalMs = 500) {
 module.exports = {
   startPythonApi,
   stopPythonApi,
-  waitForApiReady
+  waitForApiReady,
+  resolvePythonCommand
 };

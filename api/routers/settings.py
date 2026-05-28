@@ -71,7 +71,10 @@ def select_model(request: ModelSelectRequest) -> dict:
     输出：
     - dict: 标准化 API 响应，data 为应用结果。
     """
-    return success_response(model_service.select_model(request))
+    try:
+        return success_response(model_service.select_model(request))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/model/providers")
