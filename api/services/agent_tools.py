@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -15,6 +16,7 @@ from api.services import chat_service
 from api.services.approval_service import CMD_ALLOWLIST
 from api.services.fallback_store import FALLBACK_CONFIG_STORE
 from api.services.tool_receipt_store import append_receipt
+from utils.logging_utils import COMMAND_LOG_FILE, append_json_log, now_iso, safe_preview
 
 
 def normalize_evidence(sources: list[dict[str, Any]], receipt_id: str | None = None) -> list[dict[str, Any]]:
@@ -115,7 +117,7 @@ def run_llm_chat(session_id: str, question: str) -> dict[str, Any]:
 
 
 def run_kb_search(session_id: str, question: str) -> dict[str, Any]:
-    result = chat_service.query(QueryRequest(question=question, session_id=session_id))
+    result = chat_service.query(QueryRequest(question=question, session_id=session_id), record_history=False)
     sources = result.get("sources", [])
     receipt = append_receipt(
         session_id=session_id,
@@ -147,6 +149,7 @@ def run_cmd(session_id: str, command: str, enforce_allowlist: bool = True) -> di
     cmd = command.strip()
     if enforce_allowlist and cmd not in CMD_ALLOWLIST:
         raise ValueError("command not allowed")
+    started_at = time.perf_counter()
     completed = subprocess.run(
         cmd,
         shell=True,
@@ -162,5 +165,23 @@ def run_cmd(session_id: str, command: str, enforce_allowlist: bool = True) -> di
         input_data={"command": cmd},
         output_data={"exit_code": completed.returncode, "output": output[:2000]},
         status="ok" if completed.returncode == 0 else "error",
+    )
+    append_json_log(
+        "command_logger",
+        COMMAND_LOG_FILE,
+        {
+            "logged_at": now_iso(),
+            "session_id": session_id,
+            "command": cmd,
+            "enforce_allowlist": enforce_allowlist,
+            "cwd": os.getcwd(),
+            "exit_code": completed.returncode,
+            "duration_ms": round((time.perf_counter() - started_at) * 1000, 2),
+            "status": "ok" if completed.returncode == 0 else "error",
+            "receipt_id": receipt["id"],
+            "stdout_preview": safe_preview(completed.stdout),
+            "stderr_preview": safe_preview(completed.stderr),
+            "combined_output_preview": safe_preview(output),
+        },
     )
     return {"result": {"exit_code": completed.returncode, "output": output}, "receipt": receipt}

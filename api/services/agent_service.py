@@ -1,12 +1,14 @@
-"""Compatibility layer over the target-state agent runtime."""
+"""Compatibility layer over the agent runtime."""
 
 from __future__ import annotations
 
 from api.services.agent_runtime import build_plan, mark_completed
 from api.services.agent_tools import run_cmd
-from api.services.approval_service import get_action, get_pending_actions as list_pending_actions
+from api.services.approval_service import get_action, get_pending_actions as list_pending_actions, resolve_action
+from api.services.session_store import append_chat_message, replace_run_artifacts
 from api.services.timeline_service import build_task_state, build_timeline
 from api.services.tool_receipt_store import append_receipt, list_receipts
+from utils.logging_utils import APPROVAL_LOG_FILE, append_json_log, new_trace_id, now_iso, safe_preview
 
 
 def run_agent(request):
@@ -24,6 +26,7 @@ def get_pending_actions(session_id: str):
 
 
 def resolve_pending_action(action_id: str, approve: bool, reason: str = "", approver: str = "local-user") -> dict:
+    trace_id = new_trace_id("approval")
     action = get_action(action_id)
     if action is None:
         raise ValueError("action not found")
@@ -32,18 +35,32 @@ def resolve_pending_action(action_id: str, approve: bool, reason: str = "", appr
 
     session_id = action["session_id"]
     command = action["command"]
-    pending_actions = []
-
     if not approve:
-        action["status"] = "rejected"
-        action["review_reason"] = reason
-        action["reviewed_by"] = approver
+        action = resolve_action(action_id, "rejected", reason, approver)
+        pending_actions = list_pending_actions(session_id)
         approval_receipt = append_receipt(
             session_id=session_id,
             tool_name="run_cmd_approval",
             input_data={"action_id": action_id, "command": command, "approver": approver},
             output_data={"message": "command rejected by user", "review_reason": reason},
             status="rejected",
+        )
+        append_json_log(
+            "approval_logger",
+            APPROVAL_LOG_FILE,
+            {
+                "logged_at": now_iso(),
+                "trace_id": trace_id,
+                "event": "approval_resolved",
+                "action_id": action_id,
+                "session_id": session_id,
+                "decision": "rejected",
+                "approver": approver,
+                "risk_level": action["risk_level"],
+                "command": command,
+                "review_reason": reason,
+                "receipt_id": approval_receipt["id"],
+            },
         )
         plan = build_plan("run_cmd")
         mark_completed(plan, "plan-risk")
@@ -60,7 +77,10 @@ def resolve_pending_action(action_id: str, approve: bool, reason: str = "", appr
             }
         ]
         answer = "Command was rejected."
-        return {
+        timeline = build_timeline(command, answer, steps)
+        append_chat_message(session_id, "assistant", answer)
+        result = {
+            "trace_id": trace_id,
             "action_id": action_id,
             "status": "rejected",
             "review_reason": reason,
@@ -69,21 +89,55 @@ def resolve_pending_action(action_id: str, approve: bool, reason: str = "", appr
             "task_state": task_state,
             "plan": plan,
             "steps": steps,
-            "timeline": build_timeline(command, answer, steps),
+            "timeline": timeline,
             "receipts": list_receipts(session_id=session_id, limit=20),
             "pending_actions": pending_actions,
         }
+        replace_run_artifacts(
+            session_id,
+            {
+                "timeline": timeline,
+                "plan": plan,
+                "receipts": result["receipts"],
+                "pending_actions": pending_actions,
+                "task_state": task_state,
+                "approval_message": "审批结果：rejected",
+                "workspace": {
+                    "run_state": task_state["status"],
+                    "last_answer": answer,
+                },
+            },
+        )
+        return result
 
     output = run_cmd(session_id=session_id, command=command, enforce_allowlist=False)
-    action["status"] = "approved"
-    action["review_reason"] = reason
-    action["reviewed_by"] = approver
+    action = resolve_action(action_id, "approved", reason, approver)
+    pending_actions = list_pending_actions(session_id)
     approval_receipt = append_receipt(
         session_id=session_id,
         tool_name="run_cmd_approval",
         input_data={"action_id": action_id, "command": command, "approver": approver},
         output_data={"message": "command approved by user", "review_reason": reason, "run_receipt_id": output["receipt"]["id"]},
         status="approved",
+    )
+    append_json_log(
+        "approval_logger",
+        APPROVAL_LOG_FILE,
+        {
+            "logged_at": now_iso(),
+            "trace_id": trace_id,
+            "event": "approval_resolved",
+            "action_id": action_id,
+            "session_id": session_id,
+            "decision": "approved",
+            "approver": approver,
+            "risk_level": action["risk_level"],
+            "command": command,
+            "review_reason": reason,
+            "approval_receipt_id": approval_receipt["id"],
+            "run_receipt_id": output["receipt"]["id"],
+            "command_result_preview": safe_preview(output["result"]),
+        },
     )
 
     plan = build_plan("run_cmd")
@@ -109,7 +163,10 @@ def resolve_pending_action(action_id: str, approve: bool, reason: str = "", appr
         },
     ]
     task_state = build_task_state("completed", pending_actions)
-    return {
+    timeline = build_timeline(command, answer, steps)
+    append_chat_message(session_id, "assistant", answer)
+    result = {
+        "trace_id": trace_id,
         "action_id": action_id,
         "status": "approved",
         "review_reason": reason,
@@ -119,7 +176,23 @@ def resolve_pending_action(action_id: str, approve: bool, reason: str = "", appr
         "task_state": task_state,
         "plan": plan,
         "steps": steps,
-        "timeline": build_timeline(command, answer, steps),
+        "timeline": timeline,
         "receipts": list_receipts(session_id=session_id, limit=20),
         "pending_actions": pending_actions,
     }
+    replace_run_artifacts(
+        session_id,
+        {
+            "timeline": timeline,
+            "plan": plan,
+            "receipts": result["receipts"],
+            "pending_actions": pending_actions,
+            "task_state": task_state,
+            "approval_message": "审批结果：approved",
+            "workspace": {
+                "run_state": task_state["status"],
+                "last_answer": answer,
+            },
+        },
+    )
+    return result

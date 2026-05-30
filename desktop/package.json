@@ -1,9 +1,9 @@
 {
-  "name": "thinkrag-desktop",
+  "name": "northagent-desktop",
   "version": "0.1.0",
   "private": true,
-  "description": "ThinkRAG desktop client based on Electron + React",
-  "author": "ThinkRAG Team",
+  "description": "NorthAgent desktop client based on Electron + React",
+  "author": "NorthAgent",
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",
@@ -13,8 +13,9 @@
     "build:mac": "electron-builder --mac"
   },
   "build": {
-    "appId": "com.thinkrag.desktop",
-    "productName": "ThinkRAG Desktop",
+    "appId": "com.northagent.desktop",
+    "productName": "NorthAgent",
+    "icon": "resources/icon.png",
     "files": [
       "src/**/*",
       "resources/**/*"
@@ -23,11 +24,13 @@
       "buildResources": "resources"
     },
     "mac": {
+      "icon": "resources/icon.png",
       "target": [
         "dmg"
       ]
     },
     "win": {
+      "icon": "resources/icon.ico",
       "target": [
         "nsis"
       ]

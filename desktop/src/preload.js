@@ -1,8 +1,14 @@
 /**
- * Electron preload，最小能力暴露。
+ * Electron preload exposes a minimal desktop bridge.
  */
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("thinkragDesktop", {
-  runtime: "desktop"
-});
+const desktopBridge = {
+  runtime: "desktop",
+  appName: "NorthAgent",
+  pickFiles: (options) => ipcRenderer.invoke("northagent:pick-files", options),
+};
+
+contextBridge.exposeInMainWorld("northAgentDesktop", desktopBridge);
+contextBridge.exposeInMainWorld("foxgloveDesktop", desktopBridge);
+contextBridge.exposeInMainWorld("thinkragDesktop", desktopBridge);

@@ -31,3 +31,13 @@ export async function deleteCustomProvider(name) {
   const response = await client.delete(`/api/model/providers/${encodeURIComponent(name)}`);
   return unwrapEnvelope(response);
 }
+
+export async function exportProviderConfig() {
+  const response = await client.get("/api/model/providers/export");
+  return unwrapEnvelope(response);
+}
+
+export async function importProviderConfig(payload) {
+  const response = await client.post("/api/model/providers/import", payload);
+  return unwrapEnvelope(response);
+}

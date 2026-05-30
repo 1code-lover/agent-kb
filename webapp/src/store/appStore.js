@@ -4,6 +4,7 @@ import {
   buildManualTimeline,
   createWorkspaceState,
   mapAgentRunToTimeline,
+  mapSessionSnapshot,
   mergeApprovalTimeline,
   mergeReceipts,
   replaceTimeline
@@ -25,7 +26,13 @@ const useAppStore = create((set) => ({
   setPendingActions: (pendingActions) => set({ pendingActions: pendingActions || [] }),
   setApprovalMessage: (approvalMessage) => set({ approvalMessage }),
   setLastAnswer: (lastAnswer) => set({ lastAnswer }),
-  resetWorkspace: () => set((state) => ({ sessionId: state.sessionId, ...createWorkspaceState() })),
+  setAttachedFiles: (attachedFiles) => set({ attachedFiles: attachedFiles || [] }),
+  setEnabledSkills: (enabledSkills) => set({ enabledSkills: enabledSkills || [] }),
+  setActiveDetail: (activeDetail) => set({ activeDetail }),
+  setShowDetails: (showDetails) => set({ showDetails }),
+  markSessionLoaded: () => set({ sessionLoaded: true }),
+  resetWorkspace: () => set((state) => ({ sessionId: state.sessionId, ...createWorkspaceState(), sessionLoaded: true })),
+  hydrateSessionSnapshot: (snapshot) => set({ ...mapSessionSnapshot(snapshot) }),
   appendTimeline: (event) =>
     set((state) => ({
       timeline: appendTimelineEvent(state.timeline, event)
@@ -40,7 +47,7 @@ const useAppStore = create((set) => ({
       timeline: replaceTimeline(buildManualTimeline(question, mode))
     }),
   hydrateFromAgentRun: (runData) =>
-    set({
+    set((state) => ({
       timeline: mapAgentRunToTimeline(runData),
       plan: runData?.plan || [],
       evidence: runData?.evidence || [],
@@ -48,8 +55,16 @@ const useAppStore = create((set) => ({
       taskState: runData?.task_state || null,
       pendingActions: runData?.pending_actions || [],
       lastAnswer: runData?.answer || "",
-      runState: runData?.task_state?.status || "completed"
-    }),
+      runState: runData?.task_state?.status || "completed",
+      draftQuestion: "",
+      taskGoal: runData?.question || state.taskGoal,
+      showDetails:
+        state.showDetails ||
+        (runData?.pending_actions || []).length > 0 ||
+        (runData?.receipts || []).length > 0 ||
+        (runData?.evidence || []).length > 0,
+      activeDetail: (runData?.pending_actions || []).length > 0 ? "approvals" : state.activeDetail
+    })),
   hydrateFromApproval: (result) =>
     set((state) => ({
       timeline: mergeApprovalTimeline(state.timeline, result),
@@ -58,8 +73,12 @@ const useAppStore = create((set) => ({
       taskState: result?.task_state || state.taskState,
       pendingActions: result?.pending_actions || [],
       lastAnswer: result?.answer || state.lastAnswer,
-      runState: result?.task_state?.status || state.runState
+      approvalMessage: result?.status ? `审批结果：${result.status}` : state.approvalMessage,
+      runState: result?.task_state?.status || state.runState,
+      showDetails: true,
+      activeDetail: "receipts"
     }))
 }));
 
 export default useAppStore;
+

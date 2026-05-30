@@ -1,8 +1,8 @@
 export const AGENT_MODES = [
   { value: "agent", label: "Agent" },
-  { value: "kb_search", label: "KB Search" },
-  { value: "read_file", label: "Read File" },
-  { value: "run_cmd", label: "Run Command" }
+  { value: "kb_search", label: "知识检索" },
+  { value: "read_file", label: "读文件" },
+  { value: "run_cmd", label: "命令执行" }
 ];
 
 function normalizeTimelineItem(item, index) {
@@ -19,7 +19,7 @@ export function createWorkspaceState() {
     currentMode: "agent",
     knowledgeScope: {
       kb_id: "default",
-      kb_name: "foxglove_beifen"
+      kb_name: "NorthAgent Workspace"
     },
     taskGoal: "",
     draftQuestion: "",
@@ -31,7 +31,12 @@ export function createWorkspaceState() {
     taskState: null,
     pendingActions: [],
     approvalMessage: "",
-    lastAnswer: ""
+    lastAnswer: "",
+    attachedFiles: [],
+    enabledSkills: ["planner", "file_context", "safe_command"],
+    activeDetail: "receipts",
+    showDetails: false,
+    sessionLoaded: false
   };
 }
 
@@ -46,7 +51,7 @@ export function replaceTimeline(timeline) {
 export function buildManualTimeline(question, mode) {
   return [
     {
-      type: "task",
+      type: "user",
       content: question,
       meta: {
         mode,
@@ -55,7 +60,7 @@ export function buildManualTimeline(question, mode) {
     },
     {
       type: "status",
-      content: "Task submitted. Waiting for Agent Runtime.",
+      content: "任务已提交，正在等待 Agent Runtime 执行。",
       meta: {
         mode
       }
@@ -120,3 +125,29 @@ export function mergeApprovalTimeline(existingTimeline, result) {
 export function buildReadFileTemplate() {
   return "C:\\\\path\\\\to\\\\file.txt";
 }
+
+export function mapSessionSnapshot(snapshot) {
+  const workspace = snapshot?.workspace || {};
+  const uiState = snapshot?.ui_state || {};
+  return {
+    currentMode: workspace.current_mode || "agent",
+    knowledgeScope: workspace.knowledge_scope || { kb_id: "default", kb_name: "NorthAgent Workspace" },
+    taskGoal: workspace.task_goal || "",
+    draftQuestion: workspace.draft_question || "",
+    runState: workspace.run_state || "idle",
+    timeline: replaceTimeline(snapshot?.timeline || []),
+    plan: snapshot?.plan || [],
+    evidence: snapshot?.evidence || [],
+    receipts: mergeReceipts(snapshot?.receipts || []),
+    taskState: snapshot?.task_state || null,
+    pendingActions: snapshot?.pending_actions || [],
+    approvalMessage: snapshot?.approval_message || "",
+    lastAnswer: workspace.last_answer || "",
+    attachedFiles: workspace.attached_files || [],
+    enabledSkills: workspace.enabled_skills || ["planner", "file_context", "safe_command"],
+    activeDetail: uiState.active_detail || "receipts",
+    showDetails: Boolean(uiState.show_details),
+    sessionLoaded: true
+  };
+}
+

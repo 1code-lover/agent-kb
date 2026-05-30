@@ -3,12 +3,12 @@ export default function AgentEvidencePanel({ evidence }) {
     <section className="agent-panel">
       <div className="panel-heading">
         <div>
-          <p className="panel-eyebrow">Evidence</p>
-          <h3>Evidence Panel</h3>
+          <p className="panel-eyebrow">证据</p>
+          <h3>知识检索返回</h3>
         </div>
       </div>
 
-      {evidence.length === 0 && <div className="empty-block">No evidence returned.</div>}
+      {evidence.length === 0 ? <div className="empty-block">这一轮没有返回知识证据。</div> : null}
       <div className="stack-list">
         {evidence.map((item) => (
           <article key={item.id} className="stack-card">
@@ -20,10 +20,11 @@ export default function AgentEvidencePanel({ evidence }) {
               {item.source}
               {item.page && item.page !== "N/A" ? ` / p.${item.page}` : ""}
             </p>
-            <p>{item.excerpt || "No excerpt"}</p>
+            <p>{item.excerpt || "无摘要"}</p>
           </article>
         ))}
       </div>
     </section>
   );
 }
+

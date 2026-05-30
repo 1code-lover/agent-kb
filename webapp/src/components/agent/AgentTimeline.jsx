@@ -1,45 +1,46 @@
-function renderMeta(meta) {
-  if (!meta) {
-    return null;
-  }
+function getBubbleType(type) {
+  if (type === "user") return "user";
+  if (type === "assistant") return "assistant";
+  if (type === "error") return "error";
+  return "system";
+}
 
-  const pairs = [];
-  if (meta.title) pairs.push(meta.title);
-  if (meta.status) pairs.push(meta.status);
-  if (meta.riskLevel) pairs.push(`risk=${meta.riskLevel}`);
-  if (meta.evidenceIds?.length) pairs.push(`evidence=${meta.evidenceIds.join(", ")}`);
-  if (meta.reviewReason) pairs.push(`reason=${meta.reviewReason}`);
-
-  if (pairs.length === 0) {
-    return null;
-  }
-
-  return <p className="timeline-meta">{pairs.join(" / ")}</p>;
+function getRoleLabel(type) {
+  if (type === "user") return "你";
+  if (type === "assistant") return "Agent";
+  if (type === "error") return "错误";
+  return "系统";
 }
 
 export default function AgentTimeline({ timeline }) {
-  return (
-    <section className="agent-panel">
-      <div className="panel-heading">
-        <div>
-          <p className="panel-eyebrow">Timeline</p>
-          <h3>Execution Timeline</h3>
-        </div>
-      </div>
+  const normalizedTimeline = timeline.filter((item) => item?.content);
 
-      <div className="timeline-list">
-        {timeline.length === 0 && <div className="empty-block">No execution events yet.</div>}
-        {timeline.map((item) => (
-          <article key={item.seq} className={`timeline-card timeline-${item.type}`}>
-            <div className="timeline-card-head">
-              <span className="timeline-seq">#{item.seq}</span>
-              <span className="timeline-type">{item.type}</span>
-            </div>
-            <p className="timeline-content">{item.content}</p>
-            {renderMeta(item.meta)}
+  return (
+    <section className="agent-chat-thread">
+      {normalizedTimeline.length === 0 ? (
+        <div className="chat-row chat-row-assistant">
+          <article className="chat-bubble chat-bubble-assistant">
+            <div className="chat-bubble-label">Agent</div>
+            <div className="chat-bubble-content">直接输入任务就行，我会按当前模型开始处理。</div>
           </article>
-        ))}
-      </div>
+        </div>
+      ) : null}
+
+      {normalizedTimeline.map((item) => {
+        const bubbleType = getBubbleType(item.type);
+        return (
+          <div
+            key={item.seq}
+            className={bubbleType === "user" ? "chat-row chat-row-user" : "chat-row chat-row-assistant"}
+          >
+            <article className={`chat-bubble chat-bubble-${bubbleType}`}>
+              <div className="chat-bubble-label">{getRoleLabel(bubbleType)}</div>
+              <div className="chat-bubble-content">{item.content}</div>
+            </article>
+          </div>
+        );
+      })}
     </section>
   );
 }
+

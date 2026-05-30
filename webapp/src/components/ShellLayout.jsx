@@ -1,36 +1,37 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 
 const navs = [
-  { to: "/", label: "Agent" },
-  { to: "/kb-file", label: "Import Files" },
-  { to: "/kb-web", label: "Import Web" },
-  { to: "/kb-manage", label: "KB Manage" },
-  { to: "/models", label: "Models" },
-  { to: "/settings", label: "Settings" },
-  { to: "/storage", label: "Storage" },
-  { to: "/advanced", label: "Advanced" }
+  { to: "/agent", label: "Agent" },
+  { to: "/models", label: "模型" },
+  { to: "/knowledge", label: "知识库" }
 ];
 
 export default function ShellLayout() {
   const location = useLocation();
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand-block">
-          <p className="brand-eyebrow">Desktop Only</p>
-          <h1>Foxglove</h1>
-          <p className="brand-copy">Agent first. KB as tool.</p>
+    <div className="app-shell app-shell-minimal">
+      <aside className="sidebar sidebar-minimal">
+        <div className="sidebar-header sidebar-brand-block">
+          <img className="sidebar-brand-mark" src="/northagent-mark.svg" alt="NorthAgent" />
+          <span className="sidebar-title">NorthAgent</span>
+          <span className="sidebar-subtitle">Desktop Agent Workspace</span>
         </div>
-        <nav className="sidebar-nav">
+
+        <nav className="sidebar-nav sidebar-nav-minimal">
           {navs.map((item) => (
-            <Link key={item.to} className={location.pathname === item.to ? "active" : ""} to={item.to}>
+            <Link
+              key={item.to}
+              className={location.pathname === item.to || (location.pathname === "/" && item.to === "/agent") ? "active" : ""}
+              to={item.to}
+            >
               {item.label}
             </Link>
           ))}
         </nav>
       </aside>
-      <main className="content">
+
+      <main className="content content-minimal">
         <Outlet />
       </main>
     </div>

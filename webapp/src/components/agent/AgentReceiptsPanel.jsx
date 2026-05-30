@@ -13,12 +13,12 @@ export default function AgentReceiptsPanel({ receipts }) {
     <section className="agent-panel">
       <div className="panel-heading">
         <div>
-          <p className="panel-eyebrow">Receipts</p>
-          <h3>Tool Receipts</h3>
+          <p className="panel-eyebrow">回执</p>
+          <h3>运行细节</h3>
         </div>
       </div>
 
-      {receipts.length === 0 && <div className="empty-block">No receipts yet.</div>}
+      {receipts.length === 0 ? <div className="empty-block">当前还没有工具回执。</div> : null}
       <div className="stack-list">
         {receipts.map((receipt) => (
           <article key={receipt.id} className="stack-card">
@@ -34,3 +34,4 @@ export default function AgentReceiptsPanel({ receipts }) {
     </section>
   );
 }
+

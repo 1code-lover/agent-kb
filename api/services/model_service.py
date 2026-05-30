@@ -12,8 +12,11 @@ from api.schemas import (
     CustomProviderConnectionTestRequest,
     CustomProviderCreateRequest,
     ModelSelectRequest,
+    ProviderConfigImportRequest,
 )
 from api.services.fallback_store import FALLBACK_CONFIG_STORE
+from api.services.session_store import update_session
+from utils.logging_utils import MODEL_TEST_LOG_FILE, append_json_log, new_trace_id, now_iso
 
 CUSTOM_PROVIDER_STORE_KEY = "custom_llm_providers"
 
@@ -78,6 +81,18 @@ def select_model(request: ModelSelectRequest) -> dict[str, Any]:
     payload["api_key"] = payload.get("api_key") or ""
     payload["api_key_valid"] = True if payload["api_key"] or request.service_provider == "Ollama" else False
     config_store.put("current_llm_info", payload)
+    update_session(
+        request.session_id,
+        {
+            "workspace": {
+                "provider": {
+                    "name": payload["service_provider"],
+                    "base_url": payload["api_base"],
+                    "model": payload["model"],
+                }
+            }
+        },
+    )
     return payload
 
 
@@ -106,18 +121,26 @@ def _save_custom_providers(providers: list[dict[str, Any]]) -> None:
     config_store.put(CUSTOM_PROVIDER_STORE_KEY, providers)
 
 
-def add_custom_provider(request: CustomProviderCreateRequest) -> dict[str, Any]:
-    providers = _get_custom_providers()
-    payload = request.model_dump()
+def _normalize_provider_payload(payload: dict[str, Any], existing_provider: dict[str, Any] | None = None) -> dict[str, Any]:
+    incoming_api_key = payload.get("api_key", "")
+    persisted_api_key = existing_provider.get("api_key", "") if existing_provider else ""
     normalized = {
         "name": payload["name"].strip(),
         "provider": payload["name"].strip(),
         "api_base": payload["api_base"].strip().rstrip("/"),
         "models": [item.strip() for item in payload["models"] if item.strip()],
-        "api_key": payload["api_key"],
+        "api_key": incoming_api_key if incoming_api_key else persisted_api_key,
     }
     if len(normalized["models"]) == 0:
         raise ValueError("models cannot be empty")
+    return normalized
+
+
+def add_custom_provider(request: CustomProviderCreateRequest) -> dict[str, Any]:
+    providers = _get_custom_providers()
+    payload = request.model_dump()
+    existing_provider = next((item for item in providers if item.get("name") == payload["name"].strip()), None)
+    normalized = _normalize_provider_payload(payload, existing_provider)
 
     updated = False
     for idx, provider in enumerate(providers):
@@ -128,7 +151,51 @@ def add_custom_provider(request: CustomProviderCreateRequest) -> dict[str, Any]:
     if not updated:
         providers.append(normalized)
     _save_custom_providers(providers)
-    return {"name": normalized["name"], "api_base": normalized["api_base"], "models": normalized["models"]}
+    return {
+        "name": normalized["name"],
+        "api_base": normalized["api_base"],
+        "models": normalized["models"],
+        "api_key_saved": bool(normalized["api_key"]),
+    }
+
+
+def export_provider_config() -> dict[str, Any]:
+    config_store = _get_config_store()
+    return {
+        "custom_llm_providers": _get_custom_providers(),
+        "current_llm_info": config_store.get("current_llm_info"),
+    }
+
+
+def import_provider_config(request: ProviderConfigImportRequest) -> dict[str, Any]:
+    config_store = _get_config_store()
+    existing_providers = _get_custom_providers()
+    existing_provider_map = {item.get("name"): item for item in existing_providers}
+
+    if request.mode == "merge":
+        merged_provider_map = {item.get("name"): item for item in existing_providers}
+    else:
+        merged_provider_map = {}
+
+    for item in request.custom_llm_providers:
+        payload = item.model_dump()
+        name = payload["name"].strip()
+        merged_provider_map[name] = _normalize_provider_payload(payload, existing_provider_map.get(name))
+
+    normalized_providers = list(merged_provider_map.values())
+    _save_custom_providers(normalized_providers)
+
+    current_llm_info = request.current_llm_info.model_dump(exclude_none=True) if request.current_llm_info else None
+    if current_llm_info is not None:
+        config_store.put("current_llm_info", current_llm_info)
+    elif request.mode == "replace":
+        config_store.put("current_llm_info", {})
+
+    return {
+        "mode": request.mode,
+        "provider_count": len(normalized_providers),
+        "current_llm_info": config_store.get("current_llm_info"),
+    }
 
 
 def delete_custom_provider(name: str) -> dict[str, Any]:
@@ -151,7 +218,7 @@ def _chat_completions_url(api_base: str) -> str:
     return f"{api_base.strip().rstrip('/')}/chat/completions"
 
 
-def _check_openai_compatible(model_name: str, api_base: str, api_key: str) -> tuple[bool, str]:
+def _check_openai_compatible(model_name: str, api_base: str, api_key: str, trace_id: str) -> tuple[bool, str, dict[str, Any]]:
     url = _chat_completions_url(api_base)
     payload = json.dumps(
         {
@@ -166,28 +233,98 @@ def _check_openai_compatible(model_name: str, api_base: str, api_key: str) -> tu
         "Authorization": f"Bearer {api_key}",
     }
     request = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+    meta: dict[str, Any] = {
+        "trace_id": trace_id,
+        "tested_at": now_iso(),
+        "api_base": api_base,
+        "request_url": url,
+        "model": model_name,
+        "api_key_present": bool(api_key),
+    }
 
     try:
         with urllib.request.urlopen(request, timeout=8) as response:
+            meta["status_code"] = response.status
             if 200 <= response.status < 300:
-                return True, "reachable"
-            return False, f"http_{response.status}"
+                meta["result"] = "reachable"
+                return True, "reachable", meta
+            meta["result"] = "http_error"
+            return False, f"http_{response.status}", meta
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="ignore")
-        return False, f"http_{exc.code}: {detail[:200]}"
+        meta["status_code"] = exc.code
+        meta["result"] = "http_error"
+        meta["detail"] = detail[:800]
+        return False, f"http_{exc.code}: {detail[:200]}", meta
     except Exception as exc:
-        return False, str(exc)
+        meta["result"] = "exception"
+        meta["exception_type"] = type(exc).__name__
+        meta["detail"] = str(exc)
+        return False, str(exc), meta
 
 
 def test_custom_provider_connection(request: CustomProviderConnectionTestRequest) -> dict[str, Any]:
-    reachable, detail = _check_openai_compatible(
-        request.model.strip(),
-        request.api_base.strip().rstrip("/"),
-        request.api_key,
+    trace_id = new_trace_id("modeltest")
+    normalized_api_base = request.api_base.strip().rstrip("/")
+    normalized_model = request.model.strip()
+    api_key = request.api_key
+
+    if not api_key and request.provider_name:
+        provider = _find_provider(request.provider_name)
+        if provider:
+            api_key = provider.get("api_key", "")
+
+    if not api_key:
+        detail = "api_key is required"
+        append_json_log(
+            "model_test_logger",
+            MODEL_TEST_LOG_FILE,
+            {
+                "trace_id": trace_id,
+                "tested_at": now_iso(),
+                "api_base": normalized_api_base,
+                "model": normalized_model,
+                "provider_name": request.provider_name,
+                "reachable": False,
+                "detail": detail,
+                "api_key_present": False,
+            },
+        )
+        return {
+            "reachable": False,
+            "detail": detail,
+            "trace_id": trace_id,
+            "log_file": str(MODEL_TEST_LOG_FILE),
+            "api_base": normalized_api_base,
+            "model": normalized_model,
+        }
+
+    reachable, detail, meta = _check_openai_compatible(
+        normalized_model,
+        normalized_api_base,
+        api_key,
+        trace_id,
     )
+    log_payload = {
+        "trace_id": trace_id,
+        "tested_at": meta.get("tested_at", now_iso()),
+        "api_base": normalized_api_base,
+        "model": normalized_model,
+        "reachable": reachable,
+        "detail": detail,
+        "request_url": meta.get("request_url"),
+        "status_code": meta.get("status_code"),
+        "exception_type": meta.get("exception_type"),
+        "api_key_present": meta.get("api_key_present"),
+        "raw_detail": meta.get("detail", ""),
+    }
+    append_json_log("model_test_logger", MODEL_TEST_LOG_FILE, log_payload)
+
     return {
         "reachable": reachable,
         "detail": detail,
-        "api_base": request.api_base.strip().rstrip("/"),
-        "model": request.model.strip(),
+        "trace_id": trace_id,
+        "log_file": str(MODEL_TEST_LOG_FILE),
+        "api_base": normalized_api_base,
+        "model": normalized_model,
     }
