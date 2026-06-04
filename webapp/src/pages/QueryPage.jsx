@@ -60,13 +60,19 @@ export default function QueryPage() {
       const data = res.data;
       hydrateFromAgentRun(question, data);
 
-      const receiptsRes = await getAgentReceipts(sessionId, 20);
-      setAgentReceipts(receiptsRes.data.receipts || []);
-
-      const pendingRes = await getPendingActions(sessionId);
-      setPendingActions(pendingRes.data.pending_actions || []);
-
-      setRunState((pendingRes.data.pending_actions || []).length > 0 ? "waiting_approval" : "completed");
+      // 并行请求，提高性能
+      if (sessionId) {
+        const [receiptsRes, pendingRes] = await Promise.all([
+          getAgentReceipts(sessionId, 20),
+          getPendingActions(sessionId)
+        ]);
+        setAgentReceipts(receiptsRes.data.receipts || []);
+        setPendingActions(pendingRes.data.pending_actions || []);
+        setRunState((pendingRes.data.pending_actions || []).length > 0 ? "waiting_approval" : "completed");
+      } else {
+        setRunState("completed");
+      }
+      
       setQuestion("");
       setTaskGoal("");
     },

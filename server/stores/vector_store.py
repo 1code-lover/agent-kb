@@ -93,4 +93,27 @@ def create_vector_store(type=config.DEFAULT_VS_TYPE):
         raise ValueError(f"Invalid vector store type: {type}")
 
 
-VECTOR_STORE = create_vector_store()
+# 延迟初始化，避免模块加载时依赖未就绪
+_VECTOR_STORE = None
+
+
+def get_vector_store():
+    """
+    功能：
+    获取向量存储实例（延迟初始化）
+
+    输出：
+    - VectorStore: 向量存储实例
+
+    执行逻辑：
+    1. 首次调用时创建实例
+    2. 后续调用返回缓存实例
+    """
+    global _VECTOR_STORE
+    if _VECTOR_STORE is None:
+        _VECTOR_STORE = create_vector_store()
+    return _VECTOR_STORE
+
+
+# 保持向后兼容
+VECTOR_STORE = None

@@ -108,7 +108,8 @@ class CommandValidator:
                     # 检查参数模式
                     if "args_pattern" in entry:
                         args = " ".join(parts[1:])
-                        if entry["args_pattern"].match(args):
+                        # 使用 fullmatch 确保完整匹配，而非只匹配开头
+                        if entry["args_pattern"].fullmatch(args):
                             allowed = True
                             break
                     else:

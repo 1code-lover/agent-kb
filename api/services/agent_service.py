@@ -7,7 +7,7 @@ import re
 import shlex
 import subprocess
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -26,6 +26,39 @@ _command_validator = CommandValidator(config.COMMAND_SECURITY, path_validator=_p
 
 _PENDING_ACTIONS: dict[str, dict[str, Any]] = {}
 _SESSION_ACTIONS: dict[str, list[str]] = defaultdict(list)
+
+# 清理阈值（小时）
+ACTION_CLEANUP_HOURS = 24
+
+
+def cleanup_old_actions() -> int:
+    """
+    功能：
+    清理过期的待审批动作，防止内存泄漏
+
+    输出：
+    - int: 清理的动作数量
+
+    执行逻辑：
+    1. 计算截止时间
+    2. 找出所有过期的动作
+    3. 从存储中删除
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=ACTION_CLEANUP_HOURS)
+    expired = []
+    for action_id, action in _PENDING_ACTIONS.items():
+        try:
+            created_at = datetime.fromisoformat(action["created_at"])
+            if created_at < cutoff:
+                expired.append(action_id)
+        except (KeyError, ValueError):
+            # 无效数据也清理
+            expired.append(action_id)
+
+    for action_id in expired:
+        del _PENDING_ACTIONS[action_id]
+
+    return len(expired)
 
 
 def _now_iso() -> str:

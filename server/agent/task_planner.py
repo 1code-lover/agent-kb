@@ -264,7 +264,7 @@ class TaskPlanner:
         """
         type_to_tool = {
             StepType.READ_FILE: "read_file",
-            StepType.WRITE_FILE: "read_file",
+            StepType.WRITE_FILE: "write_file",
             StepType.RUN_CMD: "run_cmd",
             StepType.KB_SEARCH: "kb_search",
             StepType.ANALYZE: "analyze",

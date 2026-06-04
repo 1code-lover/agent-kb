@@ -39,10 +39,15 @@ class PathValidator:
         else:
             real_path = os.path.abspath(path)
         
+        # 规范化路径，防止路径遍历攻击
+        real_path = os.path.normpath(real_path)
+        
         # 2. 检查是否在允许目录内
         in_allowed = False
         for allowed_dir in self.allowed_dirs:
-            if real_path.startswith(allowed_dir + os.sep) or real_path == allowed_dir:
+            # 规范化允许目录
+            allowed_dir = os.path.normpath(allowed_dir)
+            if real_path == allowed_dir or real_path.startswith(allowed_dir + os.sep):
                 in_allowed = True
                 break
         

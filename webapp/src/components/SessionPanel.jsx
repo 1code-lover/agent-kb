@@ -6,9 +6,10 @@
  * 1. 从 appStore 读取会话列表。
  * 2. 点击会话切换当前 sessionId。
  * 3. 新建会话时生成唯一 ID。
+ * 4. 会话列表持久化到 localStorage。
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useAppStore from "../store/appStore";
 
 /**
@@ -24,6 +25,40 @@ function generateId() {
 
 /**
  * 功能：
+ * 从 localStorage 加载会话列表
+ *
+ * 输出：
+ * - Array: 会话列表
+ */
+function loadSessions() {
+  try {
+    const saved = localStorage.getItem("thinkrag-sessions");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.warn("Failed to load sessions from localStorage:", e);
+  }
+  return [{ id: "desktop-default", title: "默认会话", time: new Date().toLocaleTimeString() }];
+}
+
+/**
+ * 功能：
+ * 保存会话列表到 localStorage
+ *
+ * 输入：
+ * - sessions(Array): 会话列表
+ */
+function saveSessions(sessions) {
+  try {
+    localStorage.setItem("thinkrag-sessions", JSON.stringify(sessions));
+  } catch (e) {
+    console.warn("Failed to save sessions to localStorage:", e);
+  }
+}
+
+/**
+ * 功能：
  * 会话列表面板组件
  *
  * 输出：
@@ -34,9 +69,12 @@ export default function SessionPanel() {
   const setSessionId = useAppStore((s) => s.setSessionId);
   const resetWorkspace = useAppStore((s) => s.resetWorkspace);
 
-  const [sessions, setSessions] = useState([
-    { id: "desktop-default", title: "默认会话", time: new Date().toLocaleTimeString() }
-  ]);
+  const [sessions, setSessions] = useState(loadSessions);
+
+  // 会话列表变化时持久化
+  useEffect(() => {
+    saveSessions(sessions);
+  }, [sessions]);
 
   /**
    * 功能：
