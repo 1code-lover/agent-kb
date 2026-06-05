@@ -18,6 +18,14 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _SESSION_DIR = _PROJECT_ROOT / config.STORAGE_DIR / "sessions"
 _CURRENT_VERSION = 1
 
+# 记忆限制配置（支持长上下文模型，设置较大值）
+MAX_CHAT_HISTORY = 1000    # 聊天历史最大条数（约 100K tokens）
+MAX_TIMELINE = 500         # 时间线最大条数
+MAX_PLAN = 100             # 计划最大步骤数
+MAX_EVIDENCE = 200         # 证据最大条数
+MAX_RECEIPTS = 500         # 回执最大条数
+MAX_PENDING_ACTIONS = 100  # 待审批动作最大条数
+
 
 def _ensure_session_dir() -> None:
     _SESSION_DIR.mkdir(parents=True, exist_ok=True)
@@ -208,6 +216,8 @@ def append_chat_message(session_id: str, role: str, content: str) -> dict[str, A
             "created_at": now_iso(),
         }
     )
+    # 限制聊天历史条数，保留最新的
+    snapshot["chat_history"] = snapshot["chat_history"][-MAX_CHAT_HISTORY:]
     return save_session(session_id, snapshot)
 
 
@@ -226,7 +236,8 @@ def append_receipt(session_id: str, receipt: dict[str, Any]) -> dict[str, Any]:
     snapshot = load_session(session_id)
     receipts = snapshot.get("receipts", [])
     receipts.append(receipt)
-    snapshot["receipts"] = receipts[-200:]
+    # 限制回执条数，保留最新的
+    snapshot["receipts"] = receipts[-MAX_RECEIPTS:]
     return save_session(session_id, snapshot)
 
 
@@ -239,7 +250,8 @@ def append_pending_action(session_id: str, action: dict[str, Any]) -> dict[str, 
     snapshot = load_session(session_id)
     actions = snapshot.get("pending_actions", [])
     actions.append(action)
-    snapshot["pending_actions"] = actions
+    # 限制待审批动作条数，保留最新的
+    snapshot["pending_actions"] = actions[-MAX_PENDING_ACTIONS:]
     return save_session(session_id, snapshot)
 
 
@@ -285,6 +297,13 @@ def replace_run_artifacts(session_id: str, payload: dict[str, Any]) -> dict[str,
     for key in ("timeline", "plan", "evidence", "receipts", "pending_actions", "task_state"):
         if key in payload:
             snapshot[key] = deepcopy(payload[key])
+
+    # 应用限制
+    snapshot["timeline"] = snapshot.get("timeline", [])[-MAX_TIMELINE:]
+    snapshot["plan"] = snapshot.get("plan", [])[-MAX_PLAN:]
+    snapshot["evidence"] = snapshot.get("evidence", [])[-MAX_EVIDENCE:]
+    snapshot["receipts"] = snapshot.get("receipts", [])[-MAX_RECEIPTS:]
+    snapshot["pending_actions"] = snapshot.get("pending_actions", [])[-MAX_PENDING_ACTIONS:]
 
     if "approval_message" in payload:
         snapshot["approval_message"] = payload["approval_message"]
