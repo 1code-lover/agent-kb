@@ -1,3 +1,8 @@
+"""
+文件功能：命令硬拒绝过滤器
+文件描述：定义高危命令模式列表，检查命令是否应被硬拒绝执行
+核心逻辑：使用正则表达式匹配命令字符串，命中硬拒绝模式则返回拒绝原因
+"""
 from __future__ import annotations
 
 import re
@@ -20,9 +25,16 @@ class CommandFilter:
     @staticmethod
     def check_hard_deny(command: str) -> str | None:
         """
-        检查命令是否被硬拒绝
-
-        返回 None 表示命令可执行，返回字符串表示拒绝原因
+        函数名：check_hard_deny
+        入参：
+            - command (str): 待检查的命令字符串
+        功能：检查命令是否命中硬拒绝模式
+        运行逻辑：
+            1. 将命令转为小写并去除首尾空格
+            2. 遍历硬拒绝模式列表
+            3. 使用正则表达式匹配命令
+            4. 命中则返回拒绝原因，否则返回 None
+        出参：str | None - None 表示命令可执行，字符串表示拒绝原因
         """
         normalized = (command or "").strip().lower()
         for pattern, reason in HARD_DENY_PATTERNS:

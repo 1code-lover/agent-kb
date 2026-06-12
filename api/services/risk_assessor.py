@@ -20,7 +20,13 @@ class RiskLevel(str, Enum):
 
     @property
     def needs_approval(self) -> bool:
-        """是否需要审批"""
+        """
+        函数名：needs_approval
+        入参：无
+        功能：判断该风险等级是否需要审批
+        运行逻辑：L2 和 L3 需要审批，L0 和 L1 不需要
+        出参：bool - True 表示需要审批
+        """
         return self in {RiskLevel.L2, RiskLevel.L3}
 
 
@@ -29,7 +35,21 @@ class RiskAssessor:
 
     @staticmethod
     def _assess_single(command: str) -> RiskLevel:
-        """评估单个命令的风险等级"""
+        """
+        函数名：_assess_single
+        入参：
+            - command (str): 单个命令字符串
+        功能：评估单个命令的风险等级
+        运行逻辑：
+            1. 将命令转为小写并去除首尾空格
+            2. 使用正则匹配判断命令类型：
+               - L0：只读命令（pwd, ls, cat 等）
+               - L1：安全本地命令（python --version, git status 等）
+               - L2：修改性命令（rm, pip install, git commit 等）
+               - L3：系统级命令（shutdown, reboot, sudo 等）
+            3. 未匹配到则默认返回 L2
+        出参：RiskLevel - 风险等级枚举值
+        """
         normalized = (command or "").strip().lower()
         if re.match(r'\b(pwd|ls|dir|whoami|cat|type|echo|head|tail|grep|find|wc)\b', normalized):
             return RiskLevel.L0
@@ -44,7 +64,17 @@ class RiskAssessor:
 
     @staticmethod
     def assess(command: str) -> RiskLevel:
-        """评估命令的整体风险等级（支持管道命令取最高风险）"""
+        """
+        函数名：assess
+        入参：
+            - command (str): 命令字符串（支持管道命令）
+        功能：评估命令的整体风险等级
+        运行逻辑：
+            1. 使用 CommandParser 解析命令管道
+            2. 对每个子命令调用 _assess_single 评估风险
+            3. 取最高风险等级作为整体风险
+        出参：RiskLevel - 命令的整体风险等级
+        """
         parsed = CommandParser.parse(command)
         levels = [RiskAssessor._assess_single(item) for item in parsed.sub_commands or [command]]
         if not levels:
