@@ -161,7 +161,7 @@ class StepItem(BaseModel):
     step: str
     title: str
     status: Literal["pending", "completed", "waiting_approval", "failed"]
-    risk_level: Literal["low", "medium", "high"] | None = None
+    risk_level: Literal["L0", "L1", "L2", "L3"] | None = None
     receipt_id: str | None = None
     action_id: str | None = None
     evidence_ids: list[str] = Field(default_factory=list)
@@ -189,7 +189,7 @@ class PendingActionItem(BaseModel):
     action_id: str
     session_id: str
     command: str
-    risk_level: Literal["low", "medium", "high"]
+    risk_level: Literal["L0", "L1", "L2", "L3"]
     status: str
     created_at: str
     review_reason: str = ""
