@@ -40,7 +40,11 @@ def validate_command_policy(command: str) -> tuple[bool, str]:
 
 
 def classify_command_risk(command: str) -> str:
-    """分类命令风险等级，返回 L0/L1/L2/L3"""
+    """分类命令风险等级，返回 L0/L1/L2/L3，硬拒绝命令直接返回 L3"""
+    from api.services.command_filter import CommandFilter
+    deny_reason = CommandFilter.check_hard_deny(command)
+    if deny_reason:
+        return "L3"
     return RiskAssessor.assess(command).value
 
 
