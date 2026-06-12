@@ -1,12 +1,14 @@
 """
 文件功能：命令风险评估器
 文件描述：实现 L0-L3 风险分级模型，用于评估命令执行的风险等级
-核心逻辑：通过正则匹配将命令分类到不同风险等级，支持管道命令取最高风险
+核心逻辑：通过正则匹配将命令分类到不同风险等级，使用 CommandParser 解析管道命令取最高风险
 """
 from __future__ import annotations
 
 import re
 from enum import Enum
+
+from api.services.command_parser import CommandParser
 
 
 class RiskLevel(str, Enum):
@@ -43,9 +45,8 @@ class RiskAssessor:
     @staticmethod
     def assess(command: str) -> RiskLevel:
         """评估命令的整体风险等级（支持管道命令取最高风险）"""
-        # 先按管道分割命令
-        parts = re.split(r'\s*[|;&]{1,2}\s*', command)
-        levels = [RiskAssessor._assess_single(item) for item in parts if item.strip()]
+        parsed = CommandParser.parse(command)
+        levels = [RiskAssessor._assess_single(item) for item in parsed.sub_commands or [command]]
         if not levels:
             return RiskLevel.L0
         return max(levels, key=lambda item: list(RiskLevel).index(item))
