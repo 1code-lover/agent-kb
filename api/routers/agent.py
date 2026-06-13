@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 
 from api.schemas import AgentApprovalRequest, AgentRunRequest, AgentSessionResetRequest, AgentSessionUpdateRequest
-from api.services import agent_service
+from api.services import agent_runtime
 from api.services.session_store import load_session, reset_session, update_session
 from api.services.skill_registry import list_skills
 from utils.api_response import success_response
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/agent", tags=["agent"])
 @router.post("/run")
 def run_agent(request: AgentRunRequest) -> dict:
     try:
-        return success_response(agent_service.run_agent(request))
+        return success_response(agent_runtime.run_agent(request))
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
@@ -27,19 +27,19 @@ def run_agent(request: AgentRunRequest) -> dict:
 
 @router.get("/receipts")
 def get_receipts(session_id: str = "desktop-default", limit: int = 50) -> dict:
-    return success_response({"session_id": session_id, "receipts": agent_service.get_agent_receipts(session_id, limit)})
+    return success_response({"session_id": session_id, "receipts": agent_runtime.list_receipts(session_id, limit)})
 
 
 @router.get("/pending")
 def get_pending_actions(session_id: str = "desktop-default") -> dict:
-    return success_response({"session_id": session_id, "pending_actions": agent_service.get_pending_actions(session_id)})
+    return success_response({"session_id": session_id, "pending_actions": agent_runtime.get_pending_actions(session_id)})
 
 
 @router.post("/approvals")
 def approve_action(request: AgentApprovalRequest) -> dict:
     try:
         return success_response(
-            agent_service.resolve_pending_action(
+            agent_runtime.resolve_pending_action(
                 request.action_id,
                 request.approve,
                 request.reason,
@@ -89,4 +89,3 @@ def reset_session_snapshot(request: AgentSessionResetRequest) -> dict:
 @router.get("/skills")
 def get_skill_registry() -> dict:
     return success_response({"skills": list_skills()})
-

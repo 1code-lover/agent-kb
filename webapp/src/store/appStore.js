@@ -73,7 +73,7 @@ const useAppStore = create((set) => ({
       taskState: result?.task_state || state.taskState,
       pendingActions: result?.pending_actions || [],
       lastAnswer: result?.answer || state.lastAnswer,
-      approvalMessage: result?.status ? `审批结果：${result.status}` : state.approvalMessage,
+      approvalMessage: result?.status ? `Approval result: ${result.status}` : state.approvalMessage,
       runState: result?.task_state?.status || state.runState,
       showDetails: true,
       activeDetail: "receipts"
@@ -81,4 +81,3 @@ const useAppStore = create((set) => ({
 }));
 
 export default useAppStore;
-

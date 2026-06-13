@@ -34,7 +34,7 @@ test("buildManualTimeline should create submission timeline", () => {
   const timeline = buildManualTimeline("scan workspace", "agent");
 
   assert.equal(timeline.length, 2);
-  assert.equal(timeline[0].type, "task");
+  assert.equal(timeline[0].type, "user");
   assert.equal(timeline[0].meta.mode, "agent");
 });
 
