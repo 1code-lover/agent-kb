@@ -8,20 +8,37 @@ from typing import Any
 from api.runtime import runtime_state
 from api.schemas import DeleteDocsRequest
 from server.utils.file import get_save_dir
+from server.security.filename_sanitizer import FilenameSanitizer
+
+# 文件大小限制（100MB）
+MAX_FILE_SIZE = 100 * 1024 * 1024
 
 
 def import_files(files: list[Any], chunk_size: int, chunk_overlap: int) -> dict[str, Any]:
-    """导入文件并构建索引。"""
+    """导入文件并构建索引（带文件名清理）。"""
     runtime_state.ensure_models_ready(require_llm=False)
     manager = runtime_state.get_index_manager()
     save_dir = get_save_dir()
     os.makedirs(save_dir, exist_ok=True)
     uploaded_files: list[dict[str, Any]] = []
     for file in files:
-        target_path = os.path.join(save_dir, file.filename)
+        # 1. 检查文件大小
+        file_content = file.file.read()
+        if len(file_content) > MAX_FILE_SIZE:
+            raise ValueError(f"File too large: {len(file_content)} bytes (max: {MAX_FILE_SIZE})")
+        file.file.seek(0)
+        
+        # 2. 清理文件名
+        safe_filename = FilenameSanitizer.sanitize(file.filename)
+        
+        # 3. 生成唯一文件名（避免并发竞态条件）
+        unique_filename = FilenameSanitizer.generate_unique_filename(safe_filename)
+        target_path = os.path.join(save_dir, unique_filename)
+        
+        # 4. 写入文件
         with open(target_path, "wb") as buffer:
-            buffer.write(file.file.read())
-        uploaded_files.append({"name": file.filename, "type": file.content_type, "size": os.path.getsize(target_path)})
+            buffer.write(file_content)
+        uploaded_files.append({"name": unique_filename, "type": file.content_type, "size": len(file_content)})
 
     nodes = manager.load_files(uploaded_files, chunk_size, chunk_overlap)
     return {"files": uploaded_files, "indexed_chunks": len(nodes or [])}

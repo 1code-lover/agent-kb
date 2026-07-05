@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from time import perf_counter
+from typing import Any
 
 from api.services.agent_router import extract_path_from_text, route_agent_task
 from api.services.agent_tools import run_cmd, run_kb_search, run_llm_chat, run_read_file
-from api.services.approval_service import classify_command_risk, create_pending_action, get_pending_actions
+from api.services.approval_service import classify_command_risk, create_pending_action, get_action, get_pending_actions, resolve_action, validate_command_policy
 from api.services.session_store import append_chat_message, replace_run_artifacts
 from api.services.timeline_service import build_task_state, build_timeline
-from api.services.tool_receipt_store import list_receipts
+from api.services.tool_receipt_store import append_receipt, list_receipts
 from utils.logging_utils import AGENT_RUN_LOG_FILE, append_json_log, new_trace_id, now_iso, safe_preview
 
 
@@ -123,6 +124,9 @@ def run_agent(request) -> dict:
 
         elif tool_name == "run_cmd":
             command = question.removeprefix("cmd:").strip() if question.lower().startswith("cmd:") else question
+            allowed, reason = validate_command_policy(command)
+            if not allowed:
+                raise ValueError(f"Command blocked by security policy: {reason}")
             risk_level = classify_command_risk(command)
             append_json_log(
                 "agent_run_logger",
@@ -300,3 +304,85 @@ def run_agent(request) -> dict:
     )
     return result
 
+
+def resolve_pending_action(action_id: str, approve: bool, reason: str = "", approver: str = "local-user") -> dict[str, Any]:
+    action = get_action(action_id)
+    if action is None:
+        raise ValueError("action not found")
+    if action.get("status") != "pending":
+        raise ValueError("action already resolved")
+
+    session_id = action["session_id"]
+    next_status = "approved" if approve else "rejected"
+    updated_action = resolve_action(action_id, next_status, reason, approver)
+    if updated_action is None:
+        raise ValueError("action not found")
+
+    result_payload: dict[str, Any] | None = None
+    if approve:
+        cmd_output = run_cmd(session_id=session_id, command=action["command"])
+        result_payload = cmd_output["result"]
+
+    append_receipt(
+        session_id=session_id,
+        tool_name="run_cmd_approval",
+        input_data={"action_id": action_id, "command": action["command"], "approver": approver},
+        output_data={
+            "message": "command approved by user" if approve else "command rejected by user",
+            "review_reason": reason,
+            "result": result_payload,
+        },
+        status=next_status,
+    )
+
+    pending_actions = get_pending_actions(session_id)
+    status = "completed" if not pending_actions else "waiting_approval"
+    answer = "Command finished." if approve else "Command was rejected."
+    if approve and result_payload is not None:
+        answer = result_payload.get("output") or answer
+
+    timeline = build_timeline(
+        action["command"],
+        answer,
+        [
+            {
+                "step": "run_cmd_approval",
+                "title": "Command approval reviewed",
+                "status": "completed",
+                "risk_level": action.get("risk_level"),
+                "action_id": action_id,
+                "summary": f"{next_status}: {action['command']}",
+            }
+        ],
+    )
+    task_state = build_task_state(status, pending_actions)
+    receipts = list_receipts(session_id=session_id, limit=20)
+
+    replace_run_artifacts(
+        session_id,
+        {
+            "timeline": timeline,
+            "receipts": receipts,
+            "pending_actions": pending_actions,
+            "task_state": task_state,
+            "approval_message": f"Approval result: {next_status}",
+            "workspace": {
+                "run_state": task_state["status"],
+                "last_answer": answer,
+            },
+        },
+    )
+
+    return {
+        "action_id": action_id,
+        "status": next_status,
+        "review_reason": reason,
+        "reviewed_by": approver,
+        "reviewed_at": updated_action.get("reviewed_at", now_iso()),
+        "result": result_payload,
+        "timeline": timeline,
+        "receipts": receipts,
+        "pending_actions": pending_actions,
+        "task_state": task_state,
+        "answer": answer,
+    }

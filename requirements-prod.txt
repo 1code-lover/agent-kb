@@ -1,0 +1,9 @@
+-r requirements.txt
+
+# 生产环境依赖
+redis>=5.0.0
+
+# 生产环境：gunicorn 作为进程管理器，配合 uvicorn worker 使用
+# uvicorn 已在 requirements.txt 中，作为 ASGI 服务器
+# 启动示例：gunicorn -w 4 -k uvicorn.workers.UvicornWorker api.app:app
+gunicorn>=21.2.0

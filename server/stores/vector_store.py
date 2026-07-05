@@ -8,6 +8,7 @@
 3. 根据运行环境初始化全局 VECTOR_STORE。
 """
 
+import os
 import config
 
 
@@ -24,6 +25,16 @@ def create_vector_store(type=config.DEFAULT_VS_TYPE):
     Raises:
         ValueError: 传入不支持的向量存储类型时抛出。
     """
+    # 开发模式强制使用 simple，忽略 type 参数
+    if config.DEV_MODE:
+        from llama_index.core.vector_stores import SimpleVectorStore
+        persist_path = os.path.join(config.STORAGE_DIR, "vector")
+        if os.path.exists(persist_path):
+            return SimpleVectorStore.from_persist_dir(persist_path)
+        else:
+            return SimpleVectorStore()
+    
+    # 生产模式根据配置选择
     if type == "chroma":
         # Chroma 适合本地持久化场景，默认作为生产环境主向量库。
 
@@ -43,7 +54,7 @@ def create_vector_store(type=config.DEFAULT_VS_TYPE):
                 Returns:
                     Any: 原始 query 的返回结果。
                 """
-                # Chroma 的 where/where_document 不能传空字典，需改成“未传参”语义。
+                # Chroma 的 where/where_document 不能传空字典，需改成"未传参"语义。
                 if kwargs.get("where") == {}:
                     kwargs.pop("where", None)
                 if kwargs.get("where_document") == {}:
@@ -78,14 +89,31 @@ def create_vector_store(type=config.DEFAULT_VS_TYPE):
             uri=".lancedb", mode="overwrite", query_type="vector", reranker=reranker
         )
         return lance_vector_store
-    elif type == "simple":
-        from llama_index.core.vector_stores import SimpleVectorStore
-        return SimpleVectorStore()
     else:
         raise ValueError(f"Invalid vector store type: {type}")
 
 
-if config.THINKRAG_ENV == "production":
-    VECTOR_STORE = create_vector_store(type="chroma")
-else:
-    VECTOR_STORE = create_vector_store(type="simple")
+# 延迟初始化，避免模块加载时依赖未就绪
+_VECTOR_STORE = None
+
+
+def get_vector_store():
+    """
+    功能：
+    获取向量存储实例（延迟初始化）
+
+    输出：
+    - VectorStore: 向量存储实例
+
+    执行逻辑：
+    1. 首次调用时创建实例
+    2. 后续调用返回缓存实例
+    """
+    global _VECTOR_STORE
+    if _VECTOR_STORE is None:
+        _VECTOR_STORE = create_vector_store()
+    return _VECTOR_STORE
+
+
+# 保持向后兼容
+VECTOR_STORE = None

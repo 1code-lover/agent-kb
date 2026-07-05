@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# 测试
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# 代码质量
+ruff>=0.1.0

@@ -7,13 +7,17 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+import config
+from api.services.risk_assessor import RiskAssessor
 from api.services.session_store import append_pending_action, find_pending_action
 from api.services.session_store import list_pending_actions as load_pending_actions
 from api.services.session_store import update_pending_action
 from api.services.tool_receipt_store import append_receipt
+from server.security.command_validator import CommandValidator
+from server.security.path_validator import PathValidator
 from utils.logging_utils import APPROVAL_LOG_FILE, append_json_log, now_iso as log_now_iso
 
-CMD_ALLOWLIST = {"dir", "ls", "pwd", "whoami", "python --version"}
+CMD_ALLOWLIST = {"ls", "pwd", "whoami", "date"}
 HIGH_RISK_PATTERNS = [
     r"\brm\s+-rf\b",
     r"\bdel\s+/f\b",
@@ -23,19 +27,25 @@ HIGH_RISK_PATTERNS = [
     r"\bcurl\b.*\|\s*(bash|sh|powershell)\b",
 ]
 
+_path_validator = PathValidator(config.PATH_SECURITY)
+_command_validator = CommandValidator(config.COMMAND_SECURITY, path_validator=_path_validator)
+
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def validate_command_policy(command: str) -> tuple[bool, str]:
+    return _command_validator.validate((command or "").strip())
+
+
 def classify_command_risk(command: str) -> str:
-    normalized = (command or "").strip().lower()
-    for pattern in HIGH_RISK_PATTERNS:
-        if re.search(pattern, normalized):
-            return "high"
-    if normalized in CMD_ALLOWLIST:
-        return "low"
-    return "medium"
+    """分类命令风险等级，返回 L0/L1/L2/L3，硬拒绝命令直接返回 L3"""
+    from api.services.command_filter import CommandFilter
+    deny_reason = CommandFilter.check_hard_deny(command)
+    if deny_reason:
+        return "L3"
+    return RiskAssessor.assess(command).value
 
 
 def create_pending_action(session_id: str, command: str, risk_level: str) -> dict[str, Any]:
@@ -88,6 +98,6 @@ def resolve_action(action_id: str, status: str, reason: str = "", approver: str 
             "status": status,
             "review_reason": reason,
             "reviewed_by": approver,
+            "reviewed_at": now_iso(),
         },
     )
-
