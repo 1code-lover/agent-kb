@@ -360,3 +360,425 @@ button {
   padding: 6px 8px;
   text-align: left;
 }
+
+/* ── Knowledge Base Layout ── */
+
+.knowledge-layout {
+  display: flex;
+  gap: 16px;
+  min-height: calc(100vh - 120px);
+}
+
+.kb-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: #111827;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kb-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kb-sidebar-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.kb-sidebar-add {
+  background: #059669;
+  color: #fff;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kb-sidebar-add:hover {
+  background: #047857;
+}
+
+.kb-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: #1e293b;
+  border-radius: 6px;
+}
+
+.kb-create-form input {
+  font-size: 13px;
+}
+
+.kb-create-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.kb-create-actions button {
+  flex: 1;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.kb-btn-cancel {
+  background: #475569 !important;
+}
+
+.kb-btn-cancel:hover {
+  background: #64748b !important;
+}
+
+.kb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.kb-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #cbd5e1;
+  background: #1e293b;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.kb-item:hover {
+  background: #2d3a4f;
+  border-color: #475569;
+}
+
+.kb-item.active {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #3b82f6;
+}
+
+.kb-item-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kb-item-id {
+  font-size: 11px;
+  opacity: 0.6;
+  width: 100%;
+}
+
+.kb-item-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.kb-btn-icon {
+  background: transparent !important;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.kb-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.kb-btn-icon-danger:hover {
+  color: #ef4444 !important;
+}
+
+.kb-item-edit {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  align-items: center;
+}
+
+.kb-item-edit input {
+  flex: 1;
+  font-size: 12px;
+  padding: 2px 4px;
+}
+
+.kb-item-edit button {
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+/* ── Knowledge Main Content ── */
+
+.knowledge-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.knowledge-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.knowledge-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.kb-meta {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.kb-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 0;
+}
+
+.kb-tab {
+  background: transparent !important;
+  color: #94a3b8;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+}
+
+.kb-tab:hover {
+  color: #e2e8f0;
+}
+
+.kb-tab.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
+
+.kb-tab-content {
+  flex: 1;
+}
+
+/* ── Document List ── */
+
+.kb-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kb-doc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kb-search-input {
+  flex: 1;
+  max-width: 300px;
+}
+
+.kb-btn-danger {
+  background: #dc2626 !important;
+}
+
+.kb-btn-danger:hover {
+  background: #b91c1c !important;
+}
+
+.kb-btn-danger:disabled {
+  background: #6b7280 !important;
+  cursor: not-allowed;
+}
+
+.kb-doc-count {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-left: auto;
+}
+
+.kb-doc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.kb-doc-table th,
+.kb-doc-table td {
+  border: 1px solid #334155;
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.kb-doc-table th {
+  background: #1e293b;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.kb-doc-table tr.selected {
+  background: #1e3a5f;
+}
+
+.kb-doc-table tr:hover {
+  background: #1e293b;
+}
+
+.kb-doc-path {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kb-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 20px !important;
+}
+
+.kb-pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.kb-pagination button {
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+/* ── Upload ── */
+
+.kb-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kb-dropzone {
+  border: 2px dashed #475569;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.15s;
+}
+
+.kb-dropzone:hover,
+.kb-dropzone.drag-over {
+  border-color: #60a5fa;
+  background: #1e3a5f;
+  color: #bfdbfe;
+}
+
+.kb-file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kb-file-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #1e293b;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.kb-file-list li span {
+  flex: 1;
+}
+
+.kb-upload-btn {
+  align-self: flex-start;
+}
+
+/* ── Web Import ── */
+
+.kb-web-import {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.kb-web-import label {
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
+.kb-toggle-advanced {
+  background: transparent !important;
+  color: #93c5fd;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+}
+
+.kb-toggle-advanced:hover {
+  color: #60a5fa;
+}
+
+.kb-advanced-params {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.kb-param-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kb-param-row label {
+  font-size: 13px;
+  min-width: 80px;
+}
+
+.kb-param-row input {
+  width: 100px;
+}
+
+.success {
+  color: #4ade80;
+}

@@ -20,6 +20,7 @@ import { importWeb } from "../api/kb";
  */
 export default function KbWebPage() {
   const [urlsText, setUrlsText] = useState("");
+  const [kbId, setKbId] = useState("default");
   const [chunkSize, setChunkSize] = useState(2048);
   const [chunkOverlap, setChunkOverlap] = useState(512);
 
@@ -27,15 +28,6 @@ export default function KbWebPage() {
     mutationFn: (payload) => importWeb(payload)
   });
 
-  /**
-   * 提交 URL 列表执行导入。
-   *
-   * 输入：
-   * - event: 表单提交事件。
-   *
-   * 输出：
-   * - 无返回值，通过 mutation 异步处理请求。
-   */
   const onSubmit = (event) => {
     event.preventDefault();
     const urls = urlsText
@@ -45,13 +37,17 @@ export default function KbWebPage() {
     if (urls.length === 0) {
       return;
     }
-    importMutation.mutate({ urls, chunk_size: chunkSize, chunk_overlap: chunkOverlap });
+    importMutation.mutate({ urls, chunk_size: chunkSize, chunk_overlap: chunkOverlap, kb_id: kbId });
   };
 
   return (
     <section>
       <h2>KB Web</h2>
       <form onSubmit={onSubmit}>
+        <div className="setting-row">
+          <label>知识库 ID</label>
+          <input value={kbId} onChange={(e) => setKbId(e.target.value)} placeholder="default" />
+        </div>
         <textarea
           rows={6}
           value={urlsText}

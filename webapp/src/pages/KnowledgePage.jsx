@@ -1,77 +1,63 @@
-import { Link } from "react-router-dom";
+/**
+ * 文件功能：
+ * - 知识库统一管理页面，集成侧边栏、文档列表、文件上传、网页导入。
+ */
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { listDocs } from "../api/kb";
+import { KbProvider, useKb } from "../components/kb/KbContext";
+import KbSidebar from "../components/kb/KbSidebar";
+import KbDocumentList from "../components/kb/KbDocumentList";
+import KbUpload from "../components/kb/KbUpload";
+import KbWebImport from "../components/kb/KbWebImport";
+
+const TABS = [
+  { key: "docs", label: "文档列表" },
+  { key: "upload", label: "文件上传" },
+  { key: "web", label: "网页导入" },
+];
+
+function KnowledgeContent() {
+  const { selectedKbId, kbList } = useKb();
+  const [tab, setTab] = useState("docs");
+  const currentKb = kbList.find((k) => k.kb_id === selectedKbId);
+
+  return (
+    <div className="knowledge-layout">
+      <KbSidebar />
+      <div className="knowledge-main">
+        <div className="knowledge-header">
+          <h2>{currentKb?.kb_name || "知识库管理"}</h2>
+          <span className="kb-meta">ID: {selectedKbId}</span>
+        </div>
+
+        <div className="kb-tabs">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              className={`kb-tab ${tab === t.key ? "active" : ""}`}
+              onClick={() => setTab(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="kb-tab-content">
+          {tab === "docs" && <KbDocumentList />}
+          {tab === "upload" && <KbUpload onSuccess={() => setTab("docs")} />}
+          {tab === "web" && <KbWebImport onSuccess={() => setTab("docs")} />}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function KnowledgePage() {
   return (
-    <section className="agent-workspace">
-      <header className="page-header">
-        <div>
-          <p className="hero-eyebrow">Knowledge</p>
-          <h2>知识库会作为 NorthAgent 的下一阶段能力接入</h2>
-          <p className="hero-copy">
-            当前这一版先把桌面 Agent 的主链路打顺：模型配置、任务输入、执行过程、审批和回执。知识库不会单独喧宾夺主，而是以后作为
-            `kb_search` 工具接入。
-          </p>
-        </div>
-      </header>
-
-      <div className="knowledge-roadmap-grid">
-        <section className="agent-panel knowledge-hero-panel">
-          <div className="panel-heading">
-            <div>
-              <p className="panel-eyebrow">当前阶段</p>
-              <h3>先把 Agent 做到顺手、稳定、可扩展</h3>
-            </div>
-          </div>
-
-          <div className="stack-list">
-            <article className="stack-card">
-              <strong>现在优先做什么</strong>
-              <p className="stack-subtle">先保证模型配置、Agent 对话、供应商切换、审批流和回执链路可用。</p>
-            </article>
-            <article className="stack-card">
-              <strong>知识库以后怎么接</strong>
-              <p className="stack-subtle">后续把知识库作为 `kb_search` 工具接入 Agent，而不是单独做成主入口。</p>
-            </article>
-            <article className="stack-card">
-              <strong>为什么先不做重</strong>
-              <p className="stack-subtle">如果 Agent 主链路还没打顺，先堆上传、入库和检索页面，只会让产品更复杂。</p>
-            </article>
-          </div>
-        </section>
-
-        <section className="agent-panel knowledge-side-panel">
-          <div className="panel-heading">
-            <div>
-              <p className="panel-eyebrow">下一步</p>
-              <h3>知识库接入路线</h3>
-            </div>
-          </div>
-
-          <div className="stack-list">
-            <article className="stack-card">
-              <strong>1. 接检索工具</strong>
-              <p className="stack-subtle">先提供稳定的 `kb_search` 工具能力，让 Agent 可以在对话里调知识库。</p>
-            </article>
-            <article className="stack-card">
-              <strong>2. 再做导入入口</strong>
-              <p className="stack-subtle">等工具层稳定后，再补文件导入、网页入库和索引管理页面。</p>
-            </article>
-            <article className="stack-card">
-              <strong>3. 最后做体验整合</strong>
-              <p className="stack-subtle">把证据引用、知识来源和检索范围控制融到 Agent 工作区里。</p>
-            </article>
-          </div>
-
-          <div className="agent-form-row">
-            <Link className="primary-button link-button" to="/agent">
-              回到 Agent
-            </Link>
-            <Link className="secondary-button link-button" to="/models">
-              先去配置模型
-            </Link>
-          </div>
-        </section>
-      </div>
-    </section>
+    <KbProvider>
+      <KnowledgeContent />
+    </KbProvider>
   );
 }

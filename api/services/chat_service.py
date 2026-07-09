@@ -20,6 +20,7 @@ def _normalize_sources(response: Any) -> list[dict[str, Any]]:
                 "page": metadata.get("page_label", "N/A"),
                 "score": getattr(node, "score", None),
                 "text": getattr(content_node, "text", "") if content_node is not None else "",
+                "kb_id": metadata.get("kb_id", "default"),
             }
         )
     return sources
@@ -29,7 +30,7 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
     if not runtime_state.ensure_index_loaded():
         raise ValueError("Knowledge base is empty. Please import documents first.")
 
-    engine = runtime_state.build_query_engine()
+    engine = runtime_state.build_query_engine(kb_ids=request.kb_ids)
     answer = engine.query(request.question)
     answer_text = getattr(answer, "response", str(answer))
 

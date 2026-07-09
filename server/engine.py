@@ -14,6 +14,7 @@
 """
 
 import config as config
+from server.kb_filter import KBIdFilter
 from server.models.reranker import create_reranker_model
 from server.prompt import text_qa_template, refine_template
 from server.retriever import SimpleFusionRetriever
@@ -27,6 +28,7 @@ def create_query_engine(
     use_reranker=config.USE_RERANKER,
     top_n=config.RERANKER_MODEL_TOP_N,
     reranker=config.DEFAULT_RERANKER_MODEL,
+    kb_ids: list[str] | None = None,
 ):
     """
     功能：
@@ -39,6 +41,7 @@ def create_query_engine(
     - use_reranker(bool): 是否启用重排模型。
     - top_n(int): 重排后保留的候选数量。
     - reranker(str): 重排模型名称。
+    - kb_ids(list[str]|None): 可选，限制搜索的知识库 ID 列表。
 
     执行逻辑：
     1. 按 use_reranker 动态创建 node_postprocessors。
@@ -48,8 +51,12 @@ def create_query_engine(
     输出：
     - RetrieverQueryEngine: 可直接执行 query/chat 的引擎实例。
     """
-    # 仅在启用重排时注册后处理器，避免不必要的模型开销。
-    node_postprocessors = [create_reranker_model(model_name=reranker, top_n=top_n)] if use_reranker else []
+    # 构建 node_postprocessors：重排器 + KBId 过滤器
+    node_postprocessors = []
+    if use_reranker:
+        node_postprocessors.append(create_reranker_model(model_name=reranker, top_n=top_n))
+    if kb_ids:
+        node_postprocessors.append(KBIdFilter(kb_ids=kb_ids))
     retriever = SimpleFusionRetriever(vector_index=index, top_k=top_k)
 
     query_engine = RetrieverQueryEngine.from_args(

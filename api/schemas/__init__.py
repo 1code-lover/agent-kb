@@ -15,17 +15,20 @@ class QueryRequest(BaseModel):
     use_reranker: bool | None = None
     top_n: int | None = None
     reranker_model: str | None = None
+    kb_ids: list[str] | None = None
 
 
 class UrlImportRequest(BaseModel):
     urls: list[str]
     chunk_size: int = 2048
     chunk_overlap: int = 512
+    kb_id: str = "default"
 
 
 class DeleteDocsRequest(BaseModel):
     doc_ids: list[str] = Field(default_factory=list)
     paths: list[str] = Field(default_factory=list)
+    kb_id: str = "default"
 
 
 class SettingsUpdateRequest(BaseModel):

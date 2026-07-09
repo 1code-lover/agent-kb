@@ -119,8 +119,11 @@ class RuntimeState:
                 return True
             return False
 
-    def build_query_engine(self) -> Any:
+    def build_query_engine(self, kb_ids: list[str] | None = None) -> Any:
         """根据配置构建查询引擎。
+
+        Args:
+            kb_ids: 可选，限制搜索的知识库 ID 列表。
 
         Returns:
             可执行 query 的查询引擎。
@@ -140,6 +143,7 @@ class RuntimeState:
             top_k=llm_settings.get("top_k", config.TOP_K),
             top_n=llm_settings.get("top_n", config.RERANKER_MODEL_TOP_N),
             reranker=llm_settings.get("reranker_model", config.DEFAULT_RERANKER_MODEL),
+            kb_ids=kb_ids,
         )
 
 
@@ -147,7 +151,7 @@ runtime_state = RuntimeState()
 
 
 def bootstrap_runtime() -> None:
-    """初始化运行时依赖。"""
+    """初始化运行时依赖（配置 + 默认知识库）。"""
     try:
         from server.stores.config_store import CONFIG_STORE
     except Exception:
@@ -167,3 +171,9 @@ def bootstrap_runtime() -> None:
                 "reranker_model": config.DEFAULT_RERANKER_MODEL,
             },
         )
+
+    # 确保 default 知识库存在
+    from server.kb_registry import KBRegistry
+    registry = KBRegistry()
+    if not registry.exists("default"):
+        registry.create_kb("default", "Default Knowledge Base")

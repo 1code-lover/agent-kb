@@ -148,24 +148,10 @@ class IndexManager:
             self.init_index(nodes=nodes)
         return self.index
 
-    # Build index based on documents under 'data' folder
     def load_dir(self, input_dir, chunk_size, chunk_overlap):
         """
         功能：
         - 从目录读取文档并构建/更新索引。
-
-        输入：
-        - input_dir(str): 文档目录路径。
-        - chunk_size(int): 分块大小。
-        - chunk_overlap(int): 分块重叠。
-
-        执行逻辑：
-        1. 更新全局分块参数。
-        2. 扫描目录读取文档。
-        3. 执行摄取流水线并写入索引。
-
-        输出：
-        - list: 生成的节点列表，若无文档返回空列表。
         """
         Settings.chunk_size = chunk_size
         Settings.chunk_overlap = chunk_overlap
@@ -179,19 +165,10 @@ class IndexManager:
             print("No documents found")
             return []
         
-    # get file's directory and create index
-    def load_files(self, uploaded_files, chunk_size, chunk_overlap):
+    def load_files(self, uploaded_files, chunk_size, chunk_overlap, kb_id: str | None = None):
         """
         功能：
-        - 从上传文件列表读取内容并写入索引。
-
-        输入：
-        - uploaded_files(list): 包含文件名信息的上传结果。
-        - chunk_size(int): 分块大小。
-        - chunk_overlap(int): 分块重叠。
-
-        输出：
-        - list: 处理后的节点列表，若无文档返回空列表。
+        - 从上传文件列表读取内容并写入索引，可选指定 kb_id。
         """
         Settings.chunk_size = chunk_size
         Settings.chunk_overlap = chunk_overlap
@@ -202,15 +179,16 @@ class IndexManager:
         if len(documents) > 0:
             pipeline = AdvancedIngestionPipeline()
             nodes = pipeline.run(documents=documents)
+            if kb_id is not None:
+                for n in nodes:
+                    n.metadata["kb_id"] = kb_id
             index = self.insert_nodes(nodes)
             return nodes
         else:         
             print("No documents found")
             return []
         
-    # Get URL and create index
-    # https://docs.llamaindex.ai/en/stable/examples/data_connectors/WebPageDemo/
-    def load_websites(self, websites, chunk_size, chunk_overlap):
+    def load_websites(self, websites, chunk_size, chunk_overlap, kb_id: str | None = None):
         """
         功能：
         - 从网页 URL 抓取文本并写入索引。
@@ -294,6 +272,9 @@ class IndexManager:
         if not nodes:
             return []
 
+        if kb_id is not None:
+            for n in nodes:
+                n.metadata["kb_id"] = kb_id
         self.insert_nodes(nodes)
         return nodes
 

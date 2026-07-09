@@ -8,7 +8,7 @@
  * 3. 显示导入状态与错误信息。
  */
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { importFiles, listDocs } from "../api/kb";
 
@@ -20,39 +20,33 @@ import { importFiles, listDocs } from "../api/kb";
  */
 export default function KbFilePage() {
   const [files, setFiles] = useState([]);
-  const docsQuery = useQuery({ queryKey: ["docs"], queryFn: listDocs });
+  const [kbId, setKbId] = useState("default");
+  const docsQuery = useQuery({ queryKey: ["docs", kbId], queryFn: () => listDocs(kbId) });
 
   const uploadMutation = useMutation({
-    mutationFn: (payload) => importFiles(payload),
+    mutationFn: ({ formData, id }) => importFiles(formData, id),
     onSuccess: () => docsQuery.refetch()
   });
 
-  const fileCount = useMemo(() => files.length, [files]);
+  const fileCount = files.length;
 
-  /**
-   * 提交上传文件并触发导入。
-   *
-   * 输入：
-   * - event: 表单事件。
-   *
-   * 输出：
-   * - 无返回值，通过 mutation 更新导入状态。
-   */
   const onUpload = (event) => {
     event.preventDefault();
-    if (files.length === 0) {
-      return;
-    }
+    if (files.length === 0) return;
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     formData.append("chunk_size", "2048");
     formData.append("chunk_overlap", "512");
-    uploadMutation.mutate(formData);
+    uploadMutation.mutate({ formData, id: kbId });
   };
 
   return (
     <section>
       <h2>KB File</h2>
+      <div className="setting-row">
+        <label>知识库 ID</label>
+        <input value={kbId} onChange={(e) => setKbId(e.target.value)} placeholder="default" />
+      </div>
       <form onSubmit={onUpload} className="upload-form">
         <input type="file" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
         <button type="submit" disabled={uploadMutation.isPending}>
