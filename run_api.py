@@ -15,11 +15,13 @@ LOG_CONFIG = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
+            "()": "uvicorn.logging.DefaultFormatter",
             "format": "%(asctime)s  %(levelprefix)s  %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
             "use_colors": True,
         },
         "access": {
+            "()": "uvicorn.logging.AccessFormatter",
             "format": "%(asctime)s  %(levelprefix)s  %(client_addr)s - %(request_line)s %(status_code)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
             "use_colors": True,
