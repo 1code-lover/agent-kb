@@ -3,8 +3,9 @@
 
 import re
 from typing import List, Optional, Any
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 import logging
+
+from .compat import RecursiveCharacterTextSplitter
 
 logger = logging.getLogger(__name__)
 

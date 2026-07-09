@@ -11,12 +11,11 @@
 
 import os
 from llama_index.core import Settings
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from config import DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODEL_PATH, MODEL_DIR
 from server.utils.hf_mirror import use_hf_mirror
 
 
-def create_embedding_model(model_name=DEFAULT_EMBEDDING_MODEL) -> HuggingFaceEmbedding:
+def create_embedding_model(model_name=DEFAULT_EMBEDDING_MODEL):
     """
     创建 embedding 模型并注册到全局 Settings。
 
@@ -30,6 +29,7 @@ def create_embedding_model(model_name=DEFAULT_EMBEDDING_MODEL) -> HuggingFaceEmb
         若检测到本地模型目录存在同名路径，会优先加载本地模型以减少网络依赖。
     """
     try:
+        from llama_index.embeddings.huggingface import HuggingFaceEmbedding
         use_hf_mirror()
         model_path = EMBEDDING_MODEL_PATH[model_name]
         if MODEL_DIR is not None:

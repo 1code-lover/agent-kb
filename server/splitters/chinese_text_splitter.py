@@ -1,9 +1,11 @@
 # Chinese text splitter
 # Source：LangchainChatChat, QAnything
 
-from langchain_text_splitters import CharacterTextSplitter
 import re
 from typing import List
+
+from .compat import CharacterTextSplitter
+
 
 class ChineseTextSplitter(CharacterTextSplitter):
     def __init__(self, pdf: bool = False, sentence_size: int = 250, **kwargs):

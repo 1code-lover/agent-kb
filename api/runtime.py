@@ -50,7 +50,7 @@ class RuntimeState:
         with self.lock:
             llm_settings = CONFIG_STORE.get("current_llm_settings") or {}
             embedding_model = llm_settings.get("embedding_model", config.DEFAULT_EMBEDDING_MODEL)
-            if getattr(Settings, "embed_model", None) is None or self.embedding_model_name != embedding_model:
+            if Settings._embed_model is None or self.embedding_model_name != embedding_model:
                 created = create_embedding_model(embedding_model)
                 if created is None:
                     raise RuntimeError(f"Embedding model unavailable: {embedding_model}")

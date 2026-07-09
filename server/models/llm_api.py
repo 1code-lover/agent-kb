@@ -6,11 +6,15 @@
 1. 根据用户配置创建 ChatOpenAI 并包装为 LangChainLLM。
 2. 将可用实例写入 Settings.llm，供查询链路复用。
 3. 在连通性检测中将常见错误分类，输出可读诊断信息。
+
+注意：
+- 导入 langchain_openai / llama-index-llms-langchain 有 torch 等重量级依赖，
+  因此采用函数内延迟导入，避免启动时因缺失包或 DLL 加载失败。
 """
 
+from __future__ import annotations
+
 from llama_index.core import Settings
-from langchain_openai import ChatOpenAI
-from llama_index.llms.langchain import LangChainLLM
 
 
 def _classify_openai_error(e: Exception) -> str:
@@ -39,7 +43,7 @@ def create_openai_llm(
     api_key: str,
     temperature: float = 0.5,
     system_prompt: str = None,
-) -> ChatOpenAI:
+):
     """
     创建 OpenAI 兼容 LLM 实例并注册到 Settings.llm。
 
@@ -54,6 +58,9 @@ def create_openai_llm(
         ChatOpenAI | None: 成功返回 LLM 包装实例，失败返回 None。
     """
     try:
+        from langchain_openai import ChatOpenAI
+        from llama_index.llms.langchain import LangChainLLM
+
         llm = LangChainLLM(
             llm=ChatOpenAI(
                 openai_api_base=api_base,
@@ -84,6 +91,8 @@ def check_openai_llm(model_name, api_base, api_key) -> bool:
     """
     # 通过一次最小调用验证模型可用性，避免保存不可用配置。
     try:
+        from langchain_openai import ChatOpenAI
+
         llm = ChatOpenAI(
             openai_api_base=api_base,
             openai_api_key=api_key,
