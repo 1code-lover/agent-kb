@@ -1,0 +1,4 @@
+﻿interface:
+  display_name: "开发故事沉淀"
+  short_description: "把 bug、feature、refactor 沉淀成故事，并在 commit/push 前补录遗漏。"
+  default_prompt: "使用 $dev-story-capture，把刚完成的 bug、feature 或 refactor 沉淀成一份面试可复用的开发故事；如果是在 git commit 或 git push 前，则顺带检查是否有未补录的开发故事。"

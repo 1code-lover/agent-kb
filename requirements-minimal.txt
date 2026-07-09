@@ -1,0 +1,24 @@
+# 最小依赖集：仅 API + 嵌入 + PDF 解析
+# 跳过 streamlit/langchain/chromadb/lancedb/redis 等非必需项
+
+# 核心 RAG 框架
+llama-index-core>=0.11.0
+llama-index-embeddings-huggingface>=0.3.0
+llama-index-readers-file>=0.2.0
+
+# FastAPI 服务
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+
+# PDF 解析（llama-index-readers-file 依赖）
+pypdf>=3.0.0
+
+# 文本处理
+jieba>=0.42.0
+docx2txt>=0.8
+
+# 模型加载（HuggingFace）
+torch>=2.0.0
+transformers>=4.30.0
+sentence-transformers>=2.2.0
