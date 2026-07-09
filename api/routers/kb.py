@@ -39,33 +39,27 @@ def list_kbs() -> dict:
     return success_response({"items": kb_service.list_kbs()})
 
 
-@router.get("/{kb_id}")
-def get_kb(kb_id: str) -> dict:
-    """获取指定知识库"""
-    result = kb_service.get_kb(kb_id)
-    if result is None:
-        raise HTTPException(status_code=404, detail="知识库不存在")
-    return success_response(result)
+# ── 文档管理（静态路由，必须在 /{kb_id} 之前声明）──
 
-
-@router.put("/{kb_id}")
-def update_kb(kb_id: str, request: KBUpdateRequest) -> dict:
-    """更新知识库名称"""
+@router.get("/list")
+def list_docs(kb_id: str | None = None) -> dict:
+    """查询知识库文档列表（可选按 kb_id 过滤）"""
     try:
-        result = kb_service.update_kb(kb_id, request.kb_name)
+        return success_response({"docs": kb_service.list_docs(kb_id=kb_id)})
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.delete("/docs")
+def delete_docs(request: DeleteDocsRequest) -> dict:
+    """删除指定知识库文档"""
+    try:
+        result = kb_service.delete_docs(request)
         return success_response(result)
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-
-
-@router.delete("/{kb_id}")
-def delete_kb(kb_id: str) -> dict:
-    """删除知识库（含级联删除关联文档）"""
-    try:
-        kb_service.delete_kb(kb_id)
-        return success_response({"deleted": True})
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 # ── 文件/网页导入 ──
@@ -95,24 +89,32 @@ def import_web(request: UrlImportRequest) -> dict:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-# ── 文档管理 ──
+# ── KB CRUD（带参数的动态路由，放在最后）──
 
-@router.get("/list")
-def list_docs(kb_id: str | None = None) -> dict:
-    """查询知识库文档列表（可选按 kb_id 过滤）"""
+@router.get("/{kb_id}")
+def get_kb(kb_id: str) -> dict:
+    """获取指定知识库"""
+    result = kb_service.get_kb(kb_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="知识库不存在")
+    return success_response(result)
+
+
+@router.put("/{kb_id}")
+def update_kb(kb_id: str, request: KBUpdateRequest) -> dict:
+    """更新知识库名称"""
     try:
-        return success_response({"docs": kb_service.list_docs(kb_id=kb_id)})
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@router.delete("/docs")
-def delete_docs(request: DeleteDocsRequest) -> dict:
-    """删除指定知识库文档"""
-    try:
-        result = kb_service.delete_docs(request)
+        result = kb_service.update_kb(kb_id, request.kb_name)
         return success_response(result)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.delete("/{kb_id}")
+def delete_kb(kb_id: str) -> dict:
+    """删除知识库（含级联删除关联文档）"""
+    try:
+        kb_service.delete_kb(kb_id)
+        return success_response({"deleted": True})
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
