@@ -95,3 +95,29 @@ class KBRegistry:
     def exists(self, kb_id: str) -> bool:
         """检查知识库是否存在"""
         return any(item["kb_id"] == kb_id for item in self._read())
+
+    def add_doc_count(self, kb_id: str, delta: int = 1) -> None:
+        """增加指定知识库的文档计数（文件不存在时静默忽略）"""
+        try:
+            data = self._read()
+        except FileNotFoundError:
+            return
+        for item in data:
+            if item["kb_id"] == kb_id:
+                item["doc_count"] = item.get("doc_count", 0) + delta
+                item["updated_at"] = self._now()
+                self._write(data)
+                return
+
+    def set_doc_count(self, kb_id: str, count: int) -> None:
+        """直接设置指定知识库的文档计数（文件不存在时静默忽略）"""
+        try:
+            data = self._read()
+        except FileNotFoundError:
+            return
+        for item in data:
+            if item["kb_id"] == kb_id:
+                item["doc_count"] = count
+                item["updated_at"] = self._now()
+                self._write(data)
+                return

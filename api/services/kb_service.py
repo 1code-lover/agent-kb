@@ -80,6 +80,7 @@ def import_files(files: list[Any], chunk_size: int, chunk_overlap: int, kb_id: s
         uploaded_files.append({"name": unique_filename, "type": file.content_type, "size": len(file_content)})
 
     nodes = manager.load_files(uploaded_files, chunk_size, chunk_overlap, kb_id=kb_id)
+    _get_registry().add_doc_count(kb_id, len(uploaded_files))
     return {"files": uploaded_files, "indexed_chunks": len(nodes or []), "kb_id": kb_id}
 
 
@@ -88,6 +89,7 @@ def import_urls(urls: list[str], chunk_size: int, chunk_overlap: int, kb_id: str
     runtime_state.ensure_models_ready(require_llm=False)
     manager = runtime_state.get_index_manager()
     nodes = manager.load_websites(urls, chunk_size, chunk_overlap, kb_id=kb_id)
+    _get_registry().add_doc_count(kb_id, len(urls))
     return {"urls": urls, "indexed_chunks": len(nodes or []), "kb_id": kb_id}
 
 
@@ -148,4 +150,6 @@ def delete_docs(request: DeleteDocsRequest) -> dict[str, int]:
         if ref_doc_id in id_targets or (path and path in path_targets):
             manager.delete_ref_doc(ref_doc_id)
             deleted += 1
+            kb_id = metadata.get("kb_id") or request.kb_id
+            _get_registry().add_doc_count(kb_id, -1)
     return {"deleted": deleted}

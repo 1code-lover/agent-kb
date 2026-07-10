@@ -31,7 +31,9 @@ Start-Sleep -Seconds 1
 # 启动后端（日志 1MB 轮转 + 时间戳，由 run_api.py 内置处理）
 Write-Host "[1] Starting backend (--reload)..." -ForegroundColor Cyan
 $env:PYTHONPATH = $ROOT
-$env:UVICORN_LOG_CONFIG = "1"  # 仅标记
+# 清理 PATH 避免 Python 3.10 / 其他工具 DLL 冲突
+$clean = [Environment]::GetEnvironmentVariable("Path","User") -replace 'C:\\Users\\ethan1.zhao\\AppData\\Local\\Programs\\Python\\Python310\\[^;]*;?',''
+$env:Path = "C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\;C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\Scripts\;$env:SystemRoot\system32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
 Start-Process -FilePath "python" -ArgumentList "run_api.py" -WorkingDirectory $ROOT -WindowStyle Hidden
 Start-Sleep -Seconds 4
 Write-Host "    logs: $LOG_DIR\backend.log / access.log (1MB auto-rotate)" -ForegroundColor Green
