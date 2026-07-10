@@ -155,6 +155,8 @@ class IndexManager:
         """
         Settings.chunk_size = chunk_size
         Settings.chunk_overlap = chunk_overlap
+        from server.text_splitter import create_text_splitter
+        Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         documents = SimpleDirectoryReader(input_dir=input_dir, recursive=True).load_data()
         if len(documents) > 0:
             pipeline = AdvancedIngestionPipeline()
@@ -172,6 +174,8 @@ class IndexManager:
         """
         Settings.chunk_size = chunk_size
         Settings.chunk_overlap = chunk_overlap
+        from server.text_splitter import create_text_splitter
+        Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         save_dir = get_save_dir()
         files = [os.path.join(save_dir, file["name"]) for file in uploaded_files]
         print(files)
@@ -212,6 +216,8 @@ class IndexManager:
         """
         Settings.chunk_size = chunk_size
         Settings.chunk_overlap = chunk_overlap
+        from server.text_splitter import create_text_splitter
+        Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
         from server.readers.beautiful_soup_web import BeautifulSoupWebReader
 
