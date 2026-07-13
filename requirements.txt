@@ -28,6 +28,11 @@ ollama==0.3.3
 # Text Processing
 docx2txt==0.8
 
+# PDF & OCR
+pymupdf==1.28.0
+paddleocr==3.7.0
+paddlepaddle==3.2.2
+
 # New Dependencies
 jieba==0.42.1
 fastapi==0.104.0

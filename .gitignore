@@ -9,7 +9,10 @@ storage/
 .chroma/
 .lancedb/
 # Test files
-test_*.*
+/test_*.*
+_test_*.py
+_upload_test.py
+test_output/
 
 # Python venv
 .venv/

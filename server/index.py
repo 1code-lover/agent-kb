@@ -157,7 +157,11 @@ class IndexManager:
         Settings.chunk_overlap = chunk_overlap
         from server.text_splitter import create_text_splitter
         Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        documents = SimpleDirectoryReader(input_dir=input_dir, recursive=True).load_data()
+        file_paths = []
+        for root, _dirs, files in os.walk(input_dir):
+            for f in files:
+                file_paths.append(os.path.join(root, f))
+        documents = self._load_documents(file_paths) if file_paths else []
         if len(documents) > 0:
             pipeline = AdvancedIngestionPipeline()
             nodes = pipeline.run(documents=documents)
@@ -167,6 +171,30 @@ class IndexManager:
             print("No documents found")
             return []
         
+    def _load_documents(self, file_paths):
+        """
+        功能：
+        - 从文件路径列表读取 Document，PDF 自动走 OCR 回退。
+        """
+        non_pdf, pdf_docs = [], []
+        for fp in file_paths:
+            ext = os.path.splitext(fp)[1].lower()
+            if ext == '.pdf':
+                from server.readers.pdf_ocr import PDFOCRReader
+                reader = PDFOCRReader()
+                docs = reader.load_data(fp)
+                if docs:
+                    pdf_docs.extend(docs)
+                else:
+                    print(f'  跳过空 PDF: {fp}')
+            else:
+                non_pdf.append(fp)
+        if non_pdf:
+            from_dirs = SimpleDirectoryReader(input_files=non_pdf).load_data()
+        else:
+            from_dirs = []
+        return from_dirs + pdf_docs
+
     def load_files(self, uploaded_files, chunk_size, chunk_overlap, kb_id: str | None = None):
         """
         功能：
@@ -179,7 +207,7 @@ class IndexManager:
         save_dir = get_save_dir()
         files = [os.path.join(save_dir, file["name"]) for file in uploaded_files]
         print(files)
-        documents = SimpleDirectoryReader(input_files=files).load_data()
+        documents = self._load_documents(files)
         if len(documents) > 0:
             pipeline = AdvancedIngestionPipeline()
             nodes = pipeline.run(documents=documents)
