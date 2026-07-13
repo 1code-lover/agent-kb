@@ -38,7 +38,7 @@ def normalize_evidence(sources: list[dict[str, Any]], receipt_id: str | None = N
                 "score": source.get("score"),
                 "excerpt": (source.get("text") or "")[:600],
                 "receipt_id": receipt_id,
-                "kb_id": "default",
+                "kb_id": source.get("kb_id", "default"),
             }
         )
     return evidence
@@ -123,8 +123,11 @@ def run_llm_chat(session_id: str, question: str) -> dict[str, Any]:
     return {"result": result, "receipt": receipt, "evidence": []}
 
 
-def run_kb_search(session_id: str, question: str) -> dict[str, Any]:
-    result = chat_service.query(QueryRequest(question=question, session_id=session_id), record_history=False)
+def run_kb_search(session_id: str, question: str, kb_ids: list[str] | None = None) -> dict[str, Any]:
+    result = chat_service.query(
+        QueryRequest(question=question, session_id=session_id, kb_ids=kb_ids),
+        record_history=False,
+    )
     sources = result.get("sources", [])
     receipt = append_receipt(
         session_id=session_id,

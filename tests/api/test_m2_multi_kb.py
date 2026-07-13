@@ -339,3 +339,27 @@ class TestM2ChatServiceKbIds:
                 req = QueryRequest(question="test")
                 query(req, record_history=False)
                 mock_build.assert_called_once_with(kb_ids=None)
+
+
+class TestM2AgentEvidenceKbId:
+    """Agent evidence 保留真实 kb_id"""
+
+    def test_normalize_evidence_preserves_source_kb_id(self):
+        from api.services.agent_tools import normalize_evidence
+
+        evidence = normalize_evidence(
+            [
+                {
+                    "file": "a.txt",
+                    "page": "1",
+                    "score": 0.9,
+                    "text": "abc",
+                    "kb_id": "kb_product",
+                }
+            ],
+            receipt_id="receipt-1",
+        )
+
+        assert len(evidence) == 1
+        assert evidence[0]["kb_id"] == "kb_product"
+        assert evidence[0]["receipt_id"] == "receipt-1"

@@ -1,25 +1,28 @@
-文档一致性审查结果（第三轮）
+﻿评审对象：项目现状快速审阅（重点：docs/project.md）
+评审日期：2026-07-13
 
-========================================
-问题2：FRD模块与PRD功能需求对应关系 ✅ 已解决
-========================================
+优点：
+1. docs/project.md 已经能较完整概括项目目标、技术栈、架构、当前进度和已知问题，适合作为新协作者的第一入口。
+2. 项目核心能力已经形成闭环：FastAPI 后端、React/Electron 桌面壳、Agent runtime、知识库 CRUD、PDF OCR 回退链路都已落地。
+3. 自动化测试状态较好，当前快测实际执行结果为 83 passed, 1 deselected，说明近期改动后的主干稳定性不错。
+4. 故障排查文档与 PDF OCR 进展文档较具体，能帮助快速理解近期工作重心。
 
-FRD M2模块已更新（第80-93行）：
-- 标题：M2 多知识库导入 + 文档管理（FR-02, FR-04, FR-05）
-- 明确包含FR-02、FR-04、FR-05三个功能需求
-- 接口补充：
-  - GET /api/kb/{kb_id}/docs?page=&page_size= — FR-04 文档列表
-  - DELETE /api/kb/{kb_id}/docs/{doc_id} — FR-05 文档删除
+需要改进的地方：
+1. docs/project.md 对“多知识库后端已完成”的描述略偏乐观，当前代码仍存在未打通的链路：
+   - Agent 的 kb_search 没有消费 knowledge_scope / kb_ids；
+   - Agent evidence 仍写死 kb_id=default；
+   - web 导入接口没有把请求中的 kb_id 继续传给 kb_service.import_urls。
+2. 多知识库当前更接近“单索引 + metadata 过滤”，不是物理隔离的多索引架构；docs/project.md 没有明确说明这一实现边界。
+3. 文档存在漂移：
+   - docs/spec/knowledge_base_visibility_and_multi_kb_design.md 中部分“现状”已过期；
+   - docs/guide/DOCS_INDEX.md 没有纳入 docs/project.md；
+   - docs/dev/changelog/2026-07-03.md 声称删除 docs/ai-skills，但目录仍存在。
+4. docs/project.md 中测试现状写的是“50+ 用例”，实际快测已到 83 passed，建议同步更新。
+5. 测试虽全绿，但仍有 FastAPI on_event deprecation warning，说明启动生命周期管理还有技术债。
 
-========================================
-总结
-========================================
-
-问题                          状态
-PRD与Plan阶段划分不一致       ✅ 已解决
-FRD模块与PRD对应不清晰       ✅ 已解决
-Plan测试与RTM未完全对应       ✅ 已解决
-性能验证标准缺失              ✅ 已解决
-前端测试未关联阶段            ✅ 已解决
-
-结论：所有5个不一致问题已全部解决。4个文档（PRD、FRD、RTM、Plan）已达到一致性标准，可进入编码阶段。
+具体建议：
+1. 先补多知识库闭环：把 Agent knowledge_scope 接到 run_kb_search / QueryRequest.kb_ids，并修正 evidence 的真实 kb_id 透传。
+2. 修复 web 导入 kb_id 丢失问题，确保文件导入和网页导入的多知识库行为一致。
+3. 更新 docs/project.md、docs/guide/DOCS_INDEX.md、docs/spec/knowledge_base_visibility_and_multi_kb_design.md，使“项目总览 / 设计文档 / 当前代码”三者一致。
+4. 明确文档治理策略：保留还是清理 docs 根目录下的旧入口文件，避免与 spec/plan/test 分类目录长期并存造成认知冲突。
+5. 后续安排一个小任务处理环境启动标准化（系统 Python 3.12 与 .venv 的取舍）以及 FastAPI lifespan 替换。

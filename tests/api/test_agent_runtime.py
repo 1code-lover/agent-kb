@@ -1,16 +1,23 @@
 from __future__ import annotations
 
+from unittest.mock import patch
+
 from api.schemas import AgentRunRequest, KnowledgeScope
 from api.services import agent_runtime
 from api.services.session_store import load_session, reset_session
 
 
-def _request(question: str, session_id: str, mode: str = "run_cmd") -> AgentRunRequest:
+def _request(
+    question: str,
+    session_id: str,
+    mode: str = "run_cmd",
+    knowledge_scope: KnowledgeScope | None = None,
+) -> AgentRunRequest:
     return AgentRunRequest(
         question=question,
         session_id=session_id,
         mode=mode,
-        knowledge_scope=KnowledgeScope(),
+        knowledge_scope=knowledge_scope or KnowledgeScope(),
     )
 
 
@@ -70,3 +77,27 @@ def test_approving_pending_action_executes_command_and_persists_result() -> None
     assert snapshot["workspace"]["last_answer"] == result["answer"]
     assert all(action["status"] != "pending" for action in snapshot["pending_actions"])
 
+
+
+def test_kb_search_passes_knowledge_scope_as_kb_ids() -> None:
+    session_id = "test-agent-runtime-kb-scope"
+    reset_session(session_id)
+
+    request = _request(
+        "帮我查产品文档",
+        session_id,
+        mode="kb_search",
+        knowledge_scope=KnowledgeScope(kb_id="my-kb", kb_name="My KB"),
+    )
+
+    with patch("api.services.agent_runtime.run_kb_search") as mock_run_kb_search:
+        mock_run_kb_search.return_value = {
+            "result": {"answer": "ok"},
+            "receipt": {"id": "receipt-1"},
+            "evidence": [],
+        }
+        result = agent_runtime.run_agent(request)
+
+    mock_run_kb_search.assert_called_once_with(session_id, "帮我查产品文档", kb_ids=["my-kb"])
+    assert result["task_state"]["status"] == "completed"
+    assert result["answer"] == "ok"

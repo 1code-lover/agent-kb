@@ -83,7 +83,12 @@ def import_files(
 def import_web(request: UrlImportRequest) -> dict:
     """导入网页并构建索引"""
     try:
-        result = kb_service.import_urls(request.urls, request.chunk_size, request.chunk_overlap)
+        result = kb_service.import_urls(
+            request.urls,
+            request.chunk_size,
+            request.chunk_overlap,
+            kb_id=request.kb_id,
+        )
         return success_response(result)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

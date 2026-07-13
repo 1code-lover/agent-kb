@@ -1,6 +1,7 @@
 """KB CRUD 路由测试"""
 
 import tempfile
+from unittest.mock import patch
 from pathlib import Path
 
 import pytest
@@ -91,3 +92,31 @@ class TestKbSchemas:
     def test_delete_nonexistent_kb(self):
         resp = client.delete("/api/kb/nonexistent")
         assert resp.status_code == 404
+
+
+class TestKbWebImport:
+    """KB 网页导入路由测试"""
+
+    def test_web_import_passes_kb_id_to_service(self):
+        with patch("api.routers.kb.kb_service.import_urls") as mock_import_urls:
+            mock_import_urls.return_value = {"imported": 1, "kb_id": "my-kb"}
+
+            resp = client.post(
+                "/api/kb/web/import",
+                json={
+                    "urls": ["https://example.com"],
+                    "chunk_size": 2048,
+                    "chunk_overlap": 512,
+                    "kb_id": "my-kb",
+                },
+            )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["code"] == 0
+        mock_import_urls.assert_called_once_with(
+            ["https://example.com"],
+            2048,
+            512,
+            kb_id="my-kb",
+        )

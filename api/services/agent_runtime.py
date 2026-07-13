@@ -173,7 +173,9 @@ def run_agent(request) -> dict:
                 status = "waiting_approval"
 
         elif tool_name == "kb_search":
-            output = run_kb_search(session_id, question)
+            kb_id = request.knowledge_scope.kb_id.strip() if request.knowledge_scope.kb_id else ""
+            kb_ids = [kb_id] if kb_id else None
+            output = run_kb_search(session_id, question, kb_ids=kb_ids)
             evidence = output["evidence"]
             mark_completed(plan, "plan-search", "plan-answer", "plan-trace")
             steps.append(
