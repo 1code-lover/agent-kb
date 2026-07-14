@@ -148,6 +148,7 @@ python -m pytest tests/ -q -m "not slow"
 | `docs/spec/desktop_project_design.md` | 桌面端项目设计 |
 | `docs/test/desktop_regression_checklist.md` | 桌面版回归清单 |
 | `docs/20260713-pdf-ocr-quality/` | PDF OCR 进展文档 |
+| `docs/20260714-dev-runtime-cors-startup/` | 本地开发运行链路与 CORS 修复测试报告 |
 | `docs/interview/dev-stories/` | 开发故事沉淀（面试复盘材料） |
 | `docs/troubleshooting/` | 按时间戳组织的排查记录 |
 | `评审建议.txt` | 最新评审意见（仓库根） |
