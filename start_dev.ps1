@@ -1,10 +1,14 @@
-# ThinkRAG 开发模式一键启动
+﻿# ThinkRAG 开发模式一键启动
 # 后端日志 1MB 自动轮转 + 时间戳，前端日志输出到文件
 
 param([switch]$Stop)
 
 $ROOT = "C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb"
 $LOG_DIR = "$ROOT\logs"
+$NPM_CMD = (Get-Command npm.cmd -ErrorAction SilentlyContinue).Source
+if (-not $NPM_CMD) { $NPM_CMD = (Get-Command npm -ErrorAction SilentlyContinue).Source }
+$NODE_CMD = (Get-Command node.exe -ErrorAction SilentlyContinue).Source
+$NODE_DIR = if ($NODE_CMD) { Split-Path -Parent $NODE_CMD } else { "" }
 New-Item -ItemType Directory -Path $LOG_DIR -Force -ErrorAction SilentlyContinue | Out-Null
 
 # 停止模式
@@ -12,7 +16,7 @@ if ($Stop) {
     Write-Host "Stopping services..." -ForegroundColor Yellow
     @(18080, 5173) | ForEach-Object {
         Get-NetTCPConnection -LocalPort $_ -ErrorAction SilentlyContinue | ForEach-Object {
-            try { Stop-Process -Id $_.OwningProcess -Force } catch {}
+            if ($_.OwningProcess -gt 0) { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
         }
     }
     Write-Host "Stopped." -ForegroundColor Green; return
@@ -23,7 +27,7 @@ Write-Host "=== ThinkRAG Dev Mode ===" -ForegroundColor Cyan
 # 清理旧端口
 @(18080, 5173) | ForEach-Object {
     Get-NetTCPConnection -LocalPort $_ -ErrorAction SilentlyContinue | ForEach-Object {
-        try { Stop-Process -Id $_.OwningProcess -Force } catch {}
+        if ($_.OwningProcess -gt 0) { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
     }
 }
 Start-Sleep -Seconds 1
@@ -33,7 +37,7 @@ Write-Host "[1] Starting backend (--reload)..." -ForegroundColor Cyan
 $env:PYTHONPATH = $ROOT
 # 清理 PATH 避免 Python 3.10 / 其他工具 DLL 冲突
 $clean = [Environment]::GetEnvironmentVariable("Path","User") -replace 'C:\\Users\\ethan1.zhao\\AppData\\Local\\Programs\\Python\\Python310\\[^;]*;?',''
-$env:Path = "C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\;C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\Scripts\;$env:SystemRoot\system32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
+$env:Path = "C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\;C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\Scripts\;$NODE_DIR;$env:SystemRoot\system32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
 Start-Process -FilePath "python" -ArgumentList "run_api.py" -WorkingDirectory $ROOT -WindowStyle Hidden
 Start-Sleep -Seconds 4
 Write-Host "    logs: $LOG_DIR\backend.log / access.log (1MB auto-rotate)" -ForegroundColor Green
@@ -41,7 +45,8 @@ Write-Host "    logs: $LOG_DIR\backend.log / access.log (1MB auto-rotate)" -Fore
 # 启动前端（Vite 日志）
 Write-Host "[2] Starting frontend (HMR)..." -ForegroundColor Cyan
 $fl = "$LOG_DIR\frontend.log"
-Start-Process -FilePath "npm" -ArgumentList "run dev" -WorkingDirectory "$ROOT\webapp" -RedirectStandardOutput "$LOG_DIR\frontend_out.log" -RedirectStandardError "$LOG_DIR\frontend_err.log" -WindowStyle Hidden
+if (-not $NPM_CMD) { throw "npm.cmd not found before PATH cleanup" }
+Start-Process -FilePath $NPM_CMD -ArgumentList "run dev" -WorkingDirectory "$ROOT\webapp" -RedirectStandardOutput "$LOG_DIR\frontend_out.log" -RedirectStandardError "$LOG_DIR\frontend_err.log" -WindowStyle Hidden
 Start-Sleep -Seconds 2
 Write-Host "    log: $LOG_DIR\frontend_out.log" -ForegroundColor Green
 

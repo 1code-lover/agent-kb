@@ -13,12 +13,26 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import agent, chat, health, kb, settings
 from api.runtime import bootstrap_runtime
 from utils.api_response import error_response
 
 app = FastAPI(title="ThinkRAG Local API", version="0.1.0")
+
+FRONTEND_DEV_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=FRONTEND_DEV_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(health.router)
 app.include_router(chat.router)

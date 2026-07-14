@@ -1,8 +1,8 @@
 {
-  "last_generated_hash": "b31babe690cc065721461f0798cc9b38d660a146",
+  "last_generated_hash": "35ff8bfd244c2a2544579bfa05141f0b990861e1",
   "last_generated_push_hash": null,
-  "last_prompted_hash": "b31babe690cc065721461f0798cc9b38d660a146",
+  "last_prompted_hash": "35ff8bfd244c2a2544579bfa05141f0b990861e1",
   "last_prompt_decision": "generated",
-  "last_capture_time": "2026-07-13T20:36:40+08:00",
-  "last_story_file": "2026-07-13-bug-multi-kb-agent-web-import-closure.md"
+  "last_capture_time": "2026-07-14T21:20:00+08:00",
+  "last_story_file": "2026-07-14-bug-dev-runtime-cors-startup.md"
 }
