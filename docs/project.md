@@ -158,6 +158,7 @@ python -m pytest tests/ -q -m "not slow"
 
 | hash | 说明 |
 |---|---|
+| `cc80145` | fix: repair local dev runtime startup and cors |
 | `35ff8bf` | fix: close multi-kb agent and web import loop |
 | `b31babe` | docs: add project overview for AI context |
 | `052cc81` | test(api): add multi-kb and agent runtime coverage |
