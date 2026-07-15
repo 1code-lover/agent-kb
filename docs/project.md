@@ -3,7 +3,7 @@
 > 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构和已知问题。
 > **维护规则**：每次有意义的提交后更新本文的「最近提交」与「当前进度」「已知问题」三节；重大架构变化更新「架构」节。日期使用绝对日期。
 
-最近更新：2026-07-14
+最近更新：2026-07-15
 
 ---
 
@@ -76,6 +76,8 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - **最小多知识库基础能力已落地**：`KBRegistry`、`KBIdFilter`、KB CRUD 路由、默认 `default` KB 启动自动创建、`QueryRequest.kb_ids` 查询入口已存在。
 - **多知识库最小闭环已补齐**（2026-07-13）：Agent `knowledge_scope.kb_id` 现已透传为 `kb_ids` 参与 KB 查询，Agent evidence 会返回真实 `kb_id`，`POST /api/kb/web/import` 也会把请求里的 `kb_id` 继续传给 `kb_service.import_urls()`。
 - **本地开发联调链路已修复**（2026-07-14）：`start_dev.ps1` 可在 Windows PowerShell 下正常解析并同时拉起 API 18080 + Web 5173；FastAPI 已放行 Vite 开发源的 CORS 预检，知识库页面不再因 `Network Error` 卡在加载失败。
+- **知识库导入与嵌入质量基线已实测**（2026-07-14）：未配置 LLM 时，独立测试库成功导入 UTF-8 中文文档并完成向量检索；20 组语义烟测结果为 Recall@1 50%、Recall@3 95%、Recall@5 100%、MRR 0.71，证明候选召回可用但首位排序仍需优化。
+- **多知识库目录化存储阶段 5 测试已通过**（2026-07-15）：`docs/20260714-kb-directory-storage/` 已形成 PRD、FRD、RTM、Plan、Test Plan 和 Test Report；代码已实现 `data/{kb_id}/` 原始文件目录化、导入前 KB active 校验、共享索引 metadata 写入、list/delete 严格隔离、空 KB 删除保护、registry 原子写与迁移脚本。正式测试覆盖核心目录化、KB/Agent 回归、非 slow 全量和覆盖率门禁，测试报告已于 2026-07-15 审核通过，当前进入阶段 6 的开发故事沉淀、commit 与 push。
 - **Agent runtime + 审批流已可用**：命令解析、风险分级 L0-L3、硬拒绝过滤、pending action 审批（approve/reject）、回执存储、session 快照持久化已接通。
 - **PDF OCR 回退已落地**（`4a10f54`）：`PDFOCRReader` 先用 PyMuPDF 读文字层，无有效文字层时回退 PaddleOCR 逐页识别；`server/index.py` 统一走 `_load_documents()`。
 - **OCR 质量评估已补齐**（`4a10f54`）：`scripts/pdf_ocr_quality.py` 可做关键词召回率评估，并有配套测试。
@@ -86,13 +88,16 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 
 1. 主产品骨架已经具备；
 2. 最近一轮重点成果是 PDF OCR、Windows 环境修复、多知识库最小闭环补齐，以及本地 API/Web 联调链路修复；
-3. 当前主要矛盾已经从“接口是否打通”转为“共享单索引方案是否继续收紧与升级”，同时继续补齐桌面/浏览器真实运行路径的回归覆盖。
+3. 当前主要矛盾已经从“接口是否打通”转为“共享单索引方案是否继续收紧与升级”；原始文件从 `data/` 根目录平铺改为 `data/{kb_id}/` 的编码、阶段 5 正式测试与测试报告评审均已完成，下一步进入 commit 与 push。
 
 ### 测试
 - 快测（默认）：`python -m pytest tests/ -q -m "not slow"`
-- 2026-07-14 本地全量快测结果：`python -m pytest tests/ -q -m "not slow"` -> `88 passed, 1 deselected, 2 warnings in 5.88s`
+- 2026-07-14 本地全量快测最新复跑结果：`python -m pytest tests/ -q -m "not slow"` -> `88 passed, 1 deselected, 2 warnings in 11.29s`
 - 2026-07-14 本地定向回归结果：`python -m pytest tests/api/test_app_cors.py tests/api/test_agent_runtime.py tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py -q` -> `44 passed, 2 warnings in 4.73s`
+- 2026-07-14 多知识库现状基线：`python -m pytest tests/api/test_kb_registry.py tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py tests/api/test_agent_runtime.py -q` -> `55 passed, 2 warnings in 4.54s`。该结果仅验证编码前逻辑多库链路。
+- 2026-07-15 多知识库目录化存储阶段 5 正式测试通过：语法自检通过；`git diff --check` 退出码 0 且仅有 LF/CRLF 提示；占位词检查无命中；核心目录化功能 `90 passed in 9.36s`；KB/多 KB/Agent 定向回归 `45 passed, 2 warnings in 3.70s`；API + integration + scripts + utils + QA fixture 扩展回归 `164 passed, 2 warnings in 5.18s`；默认非 slow 全量门禁 `168 passed, 1 deselected, 2 warnings in 5.74s`；目录化相关文件覆盖率最终 `84%`，高于 `>=80%` 门禁。详见 `docs/20260714-kb-directory-storage/20260714-kb-directory-storage-test-report.md`。
 - 2026-07-14 本地运行烟测：`powershell -NoProfile -ExecutionPolicy Bypass -File .\start_dev.ps1` 可拉起 API/Web；`GET /api/health` 返回 `code=0,message=ok`；`OPTIONS /api/kb` 对 `Origin: http://127.0.0.1:5173` 返回 `200` 且 `Access-Control-Allow-Origin=http://127.0.0.1:5173`；`GET http://127.0.0.1:5173/` 返回 `200`；Chrome headless 打开 `/knowledge` 显示 `ID: default`、`暂无文档`，无 `Network Error`，console errors 为空。
+- 2026-07-14 嵌入与导入烟测：`bge-small-zh-v1.5` 可输出 512 维向量；20 组 UTF-8 中文检索 Recall@1=50%、Recall@3=95%、Recall@5=100%、MRR=0.71；测试库 `embedding-quality-smoke-20260714` 导入 1 个文件并生成 1 个分块，限定 KB 检索命中；未配置 LLM 时问答接口按设计返回 503。详见 `docs/20260714-embedding-rag-quality-evaluation/`。
 - 当前快测已覆盖：PDF OCR 功能 + 质量、KBRegistry、KB 路由、M2 多 KB、agent runtime、CORS 预检、command filter/parser、tool registry、receipt persistence 等主线能力。
 - 慢测（真实 PaddleOCR，约 12 分钟 / 样本）：`python -m pytest -q -m slow -s`，默认不跑。
 - 当前 warning 主要来自 FastAPI 的 `@app.on_event("startup")` 弃用提示，后续宜迁移到 lifespan 写法。
@@ -101,12 +106,13 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 
 ## 5. 已知问题和限制
 
-- **多知识库仍是过渡架构**：当前实现更接近“单索引 + `kb_id` metadata 过滤”，不是物理多索引隔离。`config.DEFAULT_INDEX_NAME` 仍是单个 `knowledge_base`，`RuntimeState` 也只维护一个 `IndexManager`。
+- **多知识库仍是过渡架构**：当前实现更接近“单索引 + `kb_id` metadata 过滤”，不是物理多索引隔离。`config.DEFAULT_INDEX_NAME` 仍是单个 `knowledge_base`，`RuntimeState` 也只维护一个 `IndexManager`；本轮已把新导入原始文件改为 `data/{kb_id}/`，但 `storage/` 不拆分，旧索引 metadata/query 一致性仍需通过重导或重建索引验收。
 - **旧数据兼容策略会放宽过滤**：`KBIdFilter` 目前仍保留“没有 `kb_id` metadata 的节点”，适合迁移期，但意味着旧数据可能绕过严格库过滤。
 - **Windows 环境仍然脆弱**：torch / onnxruntime 对 PATH 中其他 Python 版本的 DLL 敏感。`start_dev.ps1` 会清理 PATH 并保留 Python 3.12 与当前 Node 目录，手动跑命令也需注意。详见 `docs/troubleshooting/20260710-0953-path-conflict-torch-dll.md`。
 - **运行环境分裂**：当前依赖主要装在**系统 Python 3.12**，`.venv` 已不再可信（缺 pymupdf / paddleocr / torch 等关键依赖）。新机器建议直接用系统 py312，或重新构建新的 venv。
 - **OCR 仍然较慢**：PaddleOCR 在 CPU 上整本扫描件约 2 分钟 / 页，6 页国标样本约 12 分钟，已用 `slow` marker 隔离。
 - **OCR 质量口径仍偏基础**：目前只做关键词召回率，未覆盖 CER 字符准确率、表格结构还原、版面顺序等更细指标。
+- **嵌入首位排序质量仍需优化**：20 组项目领域合成语义测试中 Recall@3=95%、Recall@5=100%，但 Recall@1=50%、MRR=0.71，且 10/20 用例的正确段落分数低于最高干扰项；当前 `use_reranker=false`，尚未完成重排模型和 `bge-large-zh-v1.5` 对照测试。
 - **空知识库下问答仍会明确失败**：默认 `default` KB 启动可见，但未导入文档时真实检索会返回 `Knowledge base is empty. Please import documents first.`；这是当前预期行为，不代表 API/Web 链路异常。
 - **文档需要联动维护**：`docs/project.md`、`docs/guide/DOCS_INDEX.md`、`docs/spec/knowledge_base_visibility_and_multi_kb_design.md` 已持续按当前代码口径同步；后续代码变更时仍需同步更新，避免再次漂移。
 - **Streamlit 仍在并存**：`app.py` / `frontend/` 作为迁移回退保留，功能未与后端 API 完全对等，不能再作为判断当前主线能力的唯一依据。
@@ -149,6 +155,8 @@ python -m pytest tests/ -q -m "not slow"
 | `docs/test/desktop_regression_checklist.md` | 桌面版回归清单 |
 | `docs/20260713-pdf-ocr-quality/` | PDF OCR 进展文档 |
 | `docs/20260714-dev-runtime-cors-startup/` | 本地开发运行链路与 CORS 修复测试报告 |
+| `docs/20260714-embedding-rag-quality-evaluation/` | 嵌入检索、真实导入和 RAG 问答前置条件测试方案与报告 |
+| `docs/20260714-kb-directory-storage/` | 多知识库目录化存储 PRD/FRD/RTM/Plan/Test Plan/Test Report |
 | `docs/interview/dev-stories/` | 开发故事沉淀（面试复盘材料） |
 | `docs/troubleshooting/` | 按时间戳组织的排查记录 |
 | `评审建议.txt` | 最新评审意见（仓库根） |

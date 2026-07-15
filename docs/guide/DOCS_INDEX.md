@@ -1,7 +1,7 @@
 # ThinkRAG 文档总索引
 
 > 定位：`docs/project.md` 负责“项目当前状态”，本文负责“文档怎么找”。如果两者与代码不一致，应优先修正文档，而不是继续沿用过期口径。
-> 最近更新：2026-07-13
+> 最近更新：2026-07-15
 
 ## 1. 协作快速入口
 
@@ -22,6 +22,8 @@
 |---|---|---|
 | `docs/20260706-multi-kb-frontend-refactor/` | 2026-07-06 多知识库前端重构需求包 | 当前专题文档 |
 | `docs/20260713-pdf-ocr-quality/` | 2026-07-13 PDF OCR 质量专题 | 当前专题文档 |
+| `docs/20260714-embedding-rag-quality-evaluation/` | 2026-07-14 嵌入检索、真实导入与问答质量评估专题 | 当前专题文档 |
+| `docs/20260714-kb-directory-storage/` | 2026-07-14 多知识库原始文件目录化存储需求包 | 阶段 5 正式测试与测试报告评审已通过，待提交推送 |
 | `docs/spec/` | 需求、设计、接口、产品规划等规范文档 | 当前主分类目录 |
 | `docs/plan/` | 实施方案、执行计划 | 当前主分类目录 |
 | `docs/test/` | 测试方案、回归清单、手工测试清单 | 当前主分类目录 |
@@ -57,6 +59,8 @@
 ### 3.3 当前活跃专题
 - `docs/20260706-multi-kb-frontend-refactor/`：多知识库前端交互重构专题，已按新命名规范组织。
 - `docs/20260713-pdf-ocr-quality/`：PDF OCR 回退与质量评估专题。
+- `docs/20260714-embedding-rag-quality-evaluation/`：本地 BGE 嵌入质量、独立知识库真实导入、LLM 问答前置条件及后续阿里百炼测试口径。
+- `docs/20260714-kb-directory-storage/`：将新导入原始文件调整为 `data/{kb_id}/`，并建立 QA fixture schema；当前已完成 PRD/FRD/RTM/Plan/Test Plan/Test Report，阶段 5 正式测试与测试报告评审已通过，待提交推送。
 
 ### 3.4 运行、测试与排障
 - `docs/guide/desktop_runbook.md`：本地启动 / 联调说明。

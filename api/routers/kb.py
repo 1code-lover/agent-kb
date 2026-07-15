@@ -1,12 +1,11 @@
 """
-模块功能：
-- 提供知识库 CRUD、文件/网页导入、文档列表和删除接口。
+知识库 API 路由。
 
-执行逻辑：
-1. 接收 KB CRUD 请求并调用 kb_service 操作 registry。
-2. 接收文件/URL 请求并调用 kb_service 进行索引构建。
-3. 返回知识库文档列表和删除结果。
-4. 将异常统一映射为 HTTPException。
+职责：
+1. 将 KB CRUD 请求转交给 kb_service 和 registry。
+2. 将文件/URL 导入请求转交给服务层处理。
+3. 返回统一 API 响应结构。
+4. 将稳定 KB 服务异常映射为 HTTPException。
 """
 
 from __future__ import annotations
@@ -16,53 +15,78 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from api.schemas import DeleteDocsRequest, UrlImportRequest
 from api.schemas.kb import KBCreateRequest, KBUpdateRequest
 from api.services import kb_service
+from server.kb_errors import (
+    KBConflictError,
+    KBConsistencyError,
+    KBNotFoundError,
+    KBServiceError,
+    KBUnavailableError,
+    KBValidationError,
+)
 from utils.api_response import success_response
 
 router = APIRouter(prefix="/api/kb", tags=["knowledge-base"])
 
 
-# ── KB CRUD ──
+def _raise_http_from_kb_error(exc: KBServiceError) -> None:
+    """把稳定服务异常映射为明确的 HTTP 状态码。"""
+    if isinstance(exc, (KBValidationError, KBUnavailableError)):
+        status_code = 400
+    elif isinstance(exc, KBNotFoundError):
+        status_code = 404
+    elif isinstance(exc, KBConflictError):
+        status_code = 409
+    elif isinstance(exc, KBConsistencyError):
+        status_code = 500
+    else:
+        status_code = 400
+    raise HTTPException(status_code=status_code, detail=exc.message) from exc
+
+
+# KB CRUD 基础接口。
 
 @router.post("")
 def create_kb(request: KBCreateRequest) -> dict:
-    """创建知识库"""
+    """创建知识库。"""
     try:
         result = kb_service.create_kb(request.kb_id, request.kb_name)
         return success_response(result)
-    except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
 
 
 @router.get("")
 def list_kbs() -> dict:
-    """获取全部知识库列表"""
+    """列出所有知识库。"""
     return success_response({"items": kb_service.list_kbs()})
 
 
-# ── 文档管理（静态路由，必须在 /{kb_id} 之前声明）──
+# 兼容旧前端路径，必须放在 /{kb_id} 动态路由之前。
 
 @router.get("/list")
 def list_docs(kb_id: str | None = None) -> dict:
-    """查询知识库文档列表（可选按 kb_id 过滤）"""
+    """列出文档，按可选 kb_id 严格隔离。"""
     try:
         return success_response({"docs": kb_service.list_docs(kb_id=kb_id)})
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.delete("/docs")
 def delete_docs(request: DeleteDocsRequest) -> dict:
-    """删除指定知识库文档"""
+    """删除知识库内文档。"""
     try:
         result = kb_service.delete_docs(request)
         return success_response(result)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-# ── 文件/网页导入 ──
+# 文件与网页导入接口。
 
 @router.post("/file/import")
 def import_files(
@@ -71,17 +95,19 @@ def import_files(
     chunk_overlap: int = Form(512),
     kb_id: str = Form("default"),
 ) -> dict:
-    """导入上传文件并构建索引（支持按知识库导入）"""
+    """导入本地文件并写入指定知识库目录。"""
     try:
         result = kb_service.import_files(files, chunk_size, chunk_overlap, kb_id=kb_id)
         return success_response(result)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @router.post("/web/import")
 def import_web(request: UrlImportRequest) -> dict:
-    """导入网页并构建索引"""
+    """导入网页 URL。"""
     try:
         result = kb_service.import_urls(
             request.urls,
@@ -90,16 +116,21 @@ def import_web(request: UrlImportRequest) -> dict:
             kb_id=request.kb_id,
         )
         return success_response(result)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-# ── KB CRUD（带参数的动态路由，放在最后）──
+# 动态 KB CRUD 路由，必须放在静态子路径之后。
 
 @router.get("/{kb_id}")
 def get_kb(kb_id: str) -> dict:
-    """获取指定知识库"""
-    result = kb_service.get_kb(kb_id)
+    """获取知识库详情。"""
+    try:
+        result = kb_service.get_kb(kb_id)
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
     if result is None:
         raise HTTPException(status_code=404, detail="知识库不存在")
     return success_response(result)
@@ -107,19 +138,19 @@ def get_kb(kb_id: str) -> dict:
 
 @router.put("/{kb_id}")
 def update_kb(kb_id: str, request: KBUpdateRequest) -> dict:
-    """更新知识库名称"""
+    """更新知识库名称。"""
     try:
         result = kb_service.update_kb(kb_id, request.kb_name)
         return success_response(result)
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
 
 
 @router.delete("/{kb_id}")
 def delete_kb(kb_id: str) -> dict:
-    """删除知识库（含级联删除关联文档）"""
+    """删除空知识库；非空知识库不会级联删除。"""
     try:
         kb_service.delete_kb(kb_id)
         return success_response({"deleted": True})
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)

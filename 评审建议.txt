@@ -1,28 +1,32 @@
-﻿评审对象：项目现状快速审阅（重点：docs/project.md）
-评审日期：2026-07-13
+﻿多知识库目录化存储测试报告评审建议
 
-优点：
-1. docs/project.md 已经能较完整概括项目目标、技术栈、架构、当前进度和已知问题，适合作为新协作者的第一入口。
-2. 项目核心能力已经形成闭环：FastAPI 后端、React/Electron 桌面壳、Agent runtime、知识库 CRUD、PDF OCR 回退链路都已落地。
-3. 自动化测试状态较好，当前快测实际执行结果为 83 passed, 1 deselected，说明近期改动后的主干稳定性不错。
-4. 故障排查文档与 PDF OCR 进展文档较具体，能帮助快速理解近期工作重心。
+评审对象：
+C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb\docs\20260714-kb-directory-storage\20260714-kb-directory-storage-test-report.md
 
-需要改进的地方：
-1. docs/project.md 对“多知识库后端已完成”的描述略偏乐观，当前代码仍存在未打通的链路：
-   - Agent 的 kb_search 没有消费 knowledge_scope / kb_ids；
-   - Agent evidence 仍写死 kb_id=default；
-   - web 导入接口没有把请求中的 kb_id 继续传给 kb_service.import_urls。
-2. 多知识库当前更接近“单索引 + metadata 过滤”，不是物理隔离的多索引架构；docs/project.md 没有明确说明这一实现边界。
-3. 文档存在漂移：
-   - docs/spec/knowledge_base_visibility_and_multi_kb_design.md 中部分“现状”已过期；
-   - docs/guide/DOCS_INDEX.md 没有纳入 docs/project.md；
-   - docs/dev/changelog/2026-07-03.md 声称删除 docs/ai-skills，但目录仍存在。
-4. docs/project.md 中测试现状写的是“50+ 用例”，实际快测已到 83 passed，建议同步更新。
-5. 测试虽全绿，但仍有 FastAPI on_event deprecation warning，说明启动生命周期管理还有技术债。
+评审结论：
+通过。测试报告已满足阶段 5 正式测试执行的审核要求，可以进入下一步开发故事沉淀；开发故事完成并确认无新增未验证改动后，再按仓库流程进入 stage / commit / push。
 
-具体建议：
-1. 先补多知识库闭环：把 Agent knowledge_scope 接到 run_kb_search / QueryRequest.kb_ids，并修正 evidence 的真实 kb_id 透传。
-2. 修复 web 导入 kb_id 丢失问题，确保文件导入和网页导入的多知识库行为一致。
-3. 更新 docs/project.md、docs/guide/DOCS_INDEX.md、docs/spec/knowledge_base_visibility_and_multi_kb_design.md，使“项目总览 / 设计文档 / 当前代码”三者一致。
-4. 明确文档治理策略：保留还是清理 docs 根目录下的旧入口文件，避免与 spec/plan/test 分类目录长期并存造成认知冲突。
-5. 后续安排一个小任务处理环境启动标准化（系统 Python 3.12 与 .venv 的取舍）以及 FastAPI lifespan 替换。
+审核依据：
+1. 报告记录了执行上下文：工作目录、分支、基准 commit、Python / pytest / coverage / pytest-cov 版本，以及文件系统隔离策略。
+2. 报告覆盖了测试方案要求的正式命令：语法自检、文档/格式门禁、核心目录化测试、KB/多 KB/Agent 定向回归、扩展回归、非 slow 全量门禁和覆盖率门禁。
+3. 报告如实记录了首次覆盖率失败：TOTAL 70%，并说明失败原因是 `server/index.py` 统计范围较大且原覆盖不足。
+4. 报告记录了明确修复动作：新增 `tests/api/test_index_manager_coverage.py`，补齐 `IndexManager` 多条关键分支覆盖。
+5. 最终覆盖率门禁通过：TOTAL 873 statements，141 missing，84%，高于测试方案要求的 >= 80%。
+6. 功能与回归测试结果均通过：核心目录化 90 passed，定向回归 45 passed，扩展回归 164 passed，非 slow 全量 168 passed。
+7. FastAPI `@app.on_event("startup")` warning 已标注为非本需求引入且非阻断；真实 OCR slow 测试未执行的原因和非阻断依据也已说明。
+8. 阶段 5 验收表逐项覆盖导入前校验、目录落盘、明确 file_paths、list/delete 隔离、KB 删除一致性、registry 原子写、迁移脚本、QA fixture、防回归、覆盖率和文档格式门禁。
+
+复核结果：
+1. 当前工作区执行 `git diff --check` 退出码为 0，仅有 LF/CRLF 提示，无空白格式错误。
+2. 当前环境已能发现 `coverage` 和 `pytest_cov` 模块，且 `requirements-dev.txt` 已补充 `coverage>=7.0.0`、`pytest-cov>=4.1.0`，覆盖率工具依赖已具备可复现性。
+3. 新增覆盖率测试文件 `tests/api/test_index_manager_coverage.py` 已存在。
+
+无需阻断的改进建议：
+1. P2：测试报告的语法自检命令可以补充 `server/kb_errors.py`。当前该文件已被测试和覆盖率统计间接覆盖，不影响通过结论；但作为新增生产文件，后续报告或复跑命令可把它加入 `py_compile` 列表。
+2. P2：如果项目文档是在测试报告生成后才同步更新，建议在最终测试报告或提交流程记录中补一句“项目文档同步后已重新执行 `git diff --check`”。我当前复核 `git diff --check` 已通过，因此不阻断。
+3. P2：若后续希望把 `docs/guide/DOCS_INDEX.md` 纳入占位词扫描，需要注意 `HowToDownloadModels` 会被大小写不敏感的 `TODO` 简单匹配误伤；建议占位词扫描采用更精确的正则边界或白名单说明。
+
+下一步建议：
+1. 进入开发故事沉淀，按仓库规则运行 `$dev-story-capture`，记录本次目录化存储实现、测试结果、覆盖率修复和关键权衡。
+2. 开发故事完成后，再检查 working tree 是否有故事生成后的新增改动；如有，必要时补充轻量自检。
+3. 最后进入 git stage / conventional commit / push。

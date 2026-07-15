@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from api.app import app
 from api.services import kb_service
+from server.kb_errors import KBNotFoundError, KBUnavailableError, KBValidationError
 from server.kb_registry import KBRegistry
 
 # 用临时路径覆盖 registry 存储路径
@@ -19,16 +20,15 @@ client = TestClient(app)
 
 
 @pytest.fixture(autouse=True)
-def _setup_and_teardown():
-    """每个测试前重建空 registry"""
-    registry = KBRegistry(storage_path=REGISTRY_PATH)
-    # 替换服务层的全局 registry
+def _setup_and_teardown(tmp_path, monkeypatch):
+    """隔离测试用 registry、索引目录和 data 目录。"""
+    monkeypatch.chdir(tmp_path)
+    registry = KBRegistry(storage_path=tmp_path / "storage" / "kb_registry.json")
+    # 让服务层延迟创建测试 registry。
     import api.services.kb_service as ks
     ks._registry = registry
     yield
-    if REGISTRY_PATH.exists():
-        REGISTRY_PATH.unlink()
-
+    ks._registry = None
 
 class TestKbSchemas:
     """KB 请求/响应 schema 验证"""
@@ -120,3 +120,20 @@ class TestKbWebImport:
             512,
             kb_id="my-kb",
         )
+
+    @pytest.mark.parametrize(
+        ("exc", "expected_status"),
+        [
+            (KBNotFoundError("知识库不存在: missing"), 404),
+            (KBValidationError("非法知识库ID"), 400),
+            (KBUnavailableError("知识库不可用: inactive-kb"), 400),
+        ],
+    )
+    def test_web_import_maps_kb_errors(self, exc, expected_status):
+        with patch("api.routers.kb.kb_service.import_urls", side_effect=exc):
+            resp = client.post(
+                "/api/kb/web/import",
+                json={"urls": ["https://example.com"], "kb_id": "missing"},
+            )
+
+        assert resp.status_code == expected_status

@@ -130,14 +130,18 @@ class TestM2KbServiceImport:
 
         with patch("api.services.kb_service.runtime_state.get_index_manager", return_value=mock_manager):
             with patch("api.services.kb_service.runtime_state.ensure_models_ready"):
-                with patch("api.services.kb_service.get_save_dir", return_value=tmp_save):
-                    mock_file = MagicMock()
-                    mock_file.file.read.return_value = b"content"
-                    mock_file.filename = "test.txt"
-                    result = import_files([mock_file], 2048, 512, kb_id="my-kb")
-                    assert result["kb_id"] == "my-kb"
-                    call_kwargs = mock_manager.load_files.call_args[1]
-                    assert call_kwargs["kb_id"] == "my-kb"
+                with patch("api.services.kb_service._ensure_kb_active", return_value={"kb_id": "my-kb", "status": "active"}):
+                    with patch("api.services.kb_service._get_registry") as mock_registry_factory:
+                        mock_registry_factory.return_value.add_doc_count.return_value = None
+                        with patch("api.services.kb_service.get_kb_data_dir", return_value=__import__("pathlib").Path(tmp_save)):
+                            mock_file = MagicMock()
+                            mock_file.file.read.return_value = b"content"
+                            mock_file.filename = "test.txt"
+                            mock_file.content_type = "text/plain"
+                            result = import_files([mock_file], 2048, 512, kb_id="my-kb")
+                            assert result["kb_id"] == "my-kb"
+                            call_kwargs = mock_manager.load_files.call_args[1]
+                            assert call_kwargs["kb_id"] == "my-kb"
 
     def test_import_urls_with_kb_id(self):
         """import_urls 调用 IndexManager.load_websites 时传入 kb_id"""
@@ -148,10 +152,13 @@ class TestM2KbServiceImport:
 
         with patch("api.services.kb_service.runtime_state.get_index_manager", return_value=mock_manager):
             with patch("api.services.kb_service.runtime_state.ensure_models_ready"):
-                result = import_urls(["https://example.com"], 2048, 512, kb_id="my-kb")
-                assert result["kb_id"] == "my-kb"
-                call_kwargs = mock_manager.load_websites.call_args[1]
-                assert call_kwargs["kb_id"] == "my-kb"
+                with patch("api.services.kb_service._ensure_kb_active", return_value={"kb_id": "my-kb", "status": "active"}):
+                    with patch("api.services.kb_service._get_registry") as mock_registry_factory:
+                        mock_registry_factory.return_value.add_doc_count.return_value = None
+                        result = import_urls(["https://example.com"], 2048, 512, kb_id="my-kb")
+                        assert result["kb_id"] == "my-kb"
+                        call_kwargs = mock_manager.load_websites.call_args[1]
+                        assert call_kwargs["kb_id"] == "my-kb"
 
     def test_list_docs_filters_by_kb_id(self):
         """list_docs 传入 kb_id 时只返回该知识库的文档"""
@@ -201,8 +208,8 @@ class TestM2KbServiceImport:
             docs = list_docs()
             assert len(docs) == 2
 
-    def test_list_docs_filter_keeps_unlabeled_docs(self):
-        """过滤时，未标注 kb_id 的旧文档仍然保留"""
+    def test_list_docs_filter_excludes_unlabeled_docs_for_non_default(self):
+        """旧无 kb_id 节点只归 default KB，非 default 不应混入。"""
         from api.services.kb_service import list_docs
 
         mock_manager = MagicMock()
@@ -222,8 +229,8 @@ class TestM2KbServiceImport:
 
         with patch("api.services.kb_service.runtime_state.get_index_manager", return_value=mock_manager):
             docs = list_docs(kb_id="my-kb")
-            # 旧文档无 kb_id metadata 仍然保留（兼容）
-            assert len(docs) == 2
+            assert len(docs) == 1
+            assert docs[0]["id"] == "doc2"
 
     def test_delete_docs_with_kb_id(self):
         """delete_docs 支持在指定 kb_id 内删除"""

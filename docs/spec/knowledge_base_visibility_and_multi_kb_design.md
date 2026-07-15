@@ -24,7 +24,7 @@
 
 如果未来真的进入多人共享场景，应另起权限设计文档，而不是继续把权限逻辑混进当前最小多知识库方案。
 
-## 3. 2026-07-13 代码现状
+## 3. 2026-07-14 代码现状
 
 ### 3.1 已经落地的部分
 
@@ -37,6 +37,7 @@
 | 检索过滤 | `server/engine.py` 已支持 `kb_ids`，并通过 `KBIdFilter` 做 metadata 过滤 | `server/engine.py`、`server/kb_filter.py` |
 | KB 目录 CRUD | 已有 `POST /api/kb`、`GET /api/kb`、`GET/PUT/DELETE /api/kb/{kb_id}` | `api/routers/kb.py`、`api/services/kb_service.py` |
 | 文件导入绑定 KB | `POST /api/kb/file/import` 支持表单 `kb_id`，并透传到 `kb_service.import_files(..., kb_id=...)` | `api/routers/kb.py`、`api/services/kb_service.py` |
+| 原始文件布局 | 文件仍由无参 `get_save_dir()` 写入共享 `data/` 根目录 | `server/utils/file.py`、`api/services/kb_service.py` |
 | URL 导入数据模型 | `UrlImportRequest` 已有 `kb_id` 字段；`kb_service.import_urls(..., kb_id=...)` 也已支持 | `api/schemas/__init__.py`、`api/services/kb_service.py` |
 | 文档列表 / 删除 | `GET /api/kb/list?kb_id=...`、`DELETE /api/kb/docs` 已存在 | `api/routers/kb.py`、`api/services/kb_service.py` |
 | Agent 工作区状态 | `AgentRunRequest`、session snapshot、workspace state 都已携带 `knowledge_scope` | `api/schemas/__init__.py`、`api/services/agent_runtime.py` |
@@ -58,12 +59,17 @@
 - **写入时尽量给文档打上 `kb_id` metadata**
 - **查询时按 `kb_ids` 做后置过滤**
 - **为了兼容旧数据，未标注 `kb_id` 的节点暂时仍会被保留**
+- **本轮目录化编码已将新导入原始文件写入 `data/{kb_id}/`；历史根目录文件需通过迁移脚本或重导处理**
 
 这说明当前多知识库能力更准确的说法应是：
 
 > **单共享索引 + `kb_id` metadata 过滤的过渡方案**
 
 而不是“已经完成物理多库隔离”。
+
+### 3.4 已编码的目录化存储
+
+2026-07-15 已形成 `docs/20260714-kb-directory-storage/` PRD/FRD/RTM/Plan/Test Plan/Test Report，并完成阶段 5 正式测试。新导入文件保存为 `data/{kb_id}/`，导入前校验 KB active，列表和删除按 `kb_id` 严格隔离；旧无 `kb_id` 节点只归 `default`。第一阶段仍保留共享向量索引，迁移脚本只移动原始文件，不自动修复旧索引 metadata/query 一致性。当前等待测试报告评审。
 
 ## 4. 最小正式契约
 
@@ -134,7 +140,7 @@
 }
 ```
 
-注意：**当前 schema 和 service 都支持 `kb_id`，但 router 还没有继续传下去**。这属于已知实现缺口，不是目标契约本身的问题。
+当前 router 已把请求中的 `kb_id` 透传到 `kb_service.import_urls()`，网页导入与文件导入已使用同一知识库归属契约。
 
 ### 4.4 文档管理契约
 
@@ -182,13 +188,14 @@
    - `api/routers/kb.py` 的 `import_web()` 已改为调用
    - `kb_service.import_urls(request.urls, request.chunk_size, request.chunk_overlap, kb_id=request.kb_id)`
 
-### 5.2 当前仍应后续推进的事
+### 5.2 当前仍应继续推进的事
 
 1. **明确旧数据兼容边界**
    - 当前 `KBIdFilter` 保留“无 `kb_id` metadata 节点”，适合过渡期
    - 但必须在产品和文档口径里明确这是泄漏风险，不是严格隔离
 
 2. **继续演进隔离模型**
+   - 本轮已完成并测试通过原始文件 `data/{kb_id}/` 目录归属
    - 物理多索引 / 多 namespace 隔离
    - 更严格的 `kb_id` 合法性校验
    - 删除动作的权限控制
@@ -219,9 +226,16 @@
 
 当前仓库已经有多知识库相关测试基础，主要分布在：
 - `tests/api/test_kb_registry.py`
+- `tests/api/test_kb_registry_atomic.py`
 - `tests/api/test_kb_routes.py`
 - `tests/api/test_m2_multi_kb.py`
 - `tests/api/test_agent_runtime.py`
+- `tests/api/test_kb_directory_storage.py`
+- `tests/api/test_kb_docs_isolation.py`
+- `tests/api/test_index_manager_coverage.py`
+- `tests/utils/test_file_kb_paths.py`
+- `tests/scripts/test_migrate_kb_directory_storage.py`
+- `tests/test_rag_quality_fixtures.py`
 
 2026-07-13 本轮已补上三类回归断言：
 1. Agent `kb_search` 会把 `knowledge_scope` 转成 `kb_ids`
@@ -229,8 +243,10 @@
 3. `POST /api/kb/web/import` 会把请求中的 `kb_id` 透传到 `kb_service.import_urls()`
 
 本地验证结果：
-- `python -m pytest tests/api/test_agent_runtime.py tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py -q` -> `42 passed, 2 warnings in 6.80s`
-- `python -m pytest tests/ -q -m "not slow"` -> `86 passed, 1 deselected, 2 warnings in 4.14s`
+- 2026-07-15 阶段 5 核心目录化功能：`python -m pytest tests/utils/test_file_kb_paths.py tests/api/test_kb_directory_storage.py tests/api/test_kb_docs_isolation.py tests/api/test_kb_registry.py tests/api/test_kb_registry_atomic.py tests/scripts/test_migrate_kb_directory_storage.py tests/test_rag_quality_fixtures.py tests/api/test_index_manager_coverage.py -q` -> `90 passed in 9.36s`
+- 2026-07-15 KB / 多 KB / Agent 定向回归：`python -m pytest tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py tests/api/test_agent_runtime.py -q` -> `45 passed, 2 warnings in 3.70s`
+- 2026-07-15 非 slow 全量门禁：`python -m pytest tests -q -m "not slow"` -> `168 passed, 1 deselected, 2 warnings in 5.74s`
+- 2026-07-15 目录化相关文件覆盖率：`coverage report --include=... --fail-under=80` -> `84%`
 
 ## 8. 当前结论
 
@@ -239,7 +255,7 @@
 更准确的项目口径应该是：
 
 1. **基础设施与最小闭环都已落地**：registry、`kb_ids` 契约、查询过滤、KB CRUD、文件/网页导入绑定 KB、Agent scope 透传、Agent evidence 真值都已经有了。
-2. **当前主要风险已收敛到旧数据兼容与架构层级**：也就是未标注 `kb_id` 的历史节点仍可能被检索到。
+2. **当前主要风险集中在旧数据迁移和共享索引架构层级**：新导入原始文件已进入 `data/{kb_id}/`，但历史根目录文件与旧索引 metadata/query 一致性需要迁移、重导或重建索引处理。
 3. **当前方案是共享索引上的 metadata 过滤过渡态**：适合先把最小多知识库跑通，但不应对外宣称成“物理隔离多库架构”。
 
 在当前阶段，最重要的不是继续扩展权限概念，而是决定何时收紧旧数据兼容策略，以及是否推进到物理隔离方案。

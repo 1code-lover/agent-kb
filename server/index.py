@@ -14,10 +14,11 @@
 """
 
 import os
+from pathlib import Path
+from typing import Any
 from llama_index.core import Settings, StorageContext, VectorStoreIndex
 from llama_index.core import load_index_from_storage, load_indices_from_storage
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
-from server.utils.file import get_save_dir
 from server.stores.strage_context import STORAGE_CONTEXT
 from server.ingestion import AdvancedIngestionPipeline
 from config import DEV_MODE
@@ -195,26 +196,68 @@ class IndexManager:
             from_dirs = []
         return from_dirs + pdf_docs
 
-    def load_files(self, uploaded_files, chunk_size, chunk_overlap, kb_id: str | None = None):
+    def load_files(
+        self,
+        file_paths: list[str | Path],
+        chunk_size: int,
+        chunk_overlap: int,
+        kb_id: str | None = None,
+    ) -> list[Any]:
         """
-        功能：
-        - 从上传文件列表读取内容并写入索引，可选指定 kb_id。
+        说明：
+        - 文件真实路径由服务层确认；这里不再二次拼接全局保存目录，只补充 kb_id。
         """
         Settings.chunk_size = chunk_size
         Settings.chunk_overlap = chunk_overlap
         from server.text_splitter import create_text_splitter
         Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        save_dir = get_save_dir()
-        files = [os.path.join(save_dir, file["name"]) for file in uploaded_files]
-        print(files)
-        documents = self._load_documents(files)
+
+        files = [Path(file_path).resolve() for file_path in file_paths]
+        print([str(file_path) for file_path in files])
+        documents = self._load_documents([str(file_path) for file_path in files])
+        file_by_name = {file_path.name: file_path for file_path in files}
         if len(documents) > 0:
+            for document in documents:
+                if hasattr(document, "metadata") and isinstance(getattr(document, "metadata"), dict):
+                    metadata = sanitize_for_json(document.metadata)
+                    raw_path = metadata.get("file_path")
+                    resolved_path = None
+                    if raw_path:
+                        try:
+                            resolved_path = Path(raw_path).resolve()
+                        except OSError:
+                            resolved_path = None
+                    if resolved_path is None and len(files) == 1:
+                        resolved_path = files[0]
+                    if resolved_path is not None:
+                        metadata["file_path"] = str(resolved_path)
+                        metadata["file_name"] = metadata.get("file_name") or resolved_path.name
+                    document.metadata = metadata
+
             pipeline = AdvancedIngestionPipeline()
             nodes = pipeline.run(documents=documents)
-            if kb_id is not None:
-                for n in nodes:
+            for n in nodes:
+                if not hasattr(n, "metadata") or not isinstance(getattr(n, "metadata"), dict):
+                    n.metadata = {}
+                n.metadata = sanitize_for_json(n.metadata)
+                raw_path = n.metadata.get("file_path")
+                resolved_path = None
+                if raw_path:
+                    try:
+                        resolved_path = Path(raw_path).resolve()
+                    except OSError:
+                        resolved_path = None
+                if resolved_path is None:
+                    file_name = n.metadata.get("file_name")
+                    resolved_path = file_by_name.get(file_name) if file_name else None
+                if resolved_path is None and len(files) == 1:
+                    resolved_path = files[0]
+                if resolved_path is not None:
+                    n.metadata["file_path"] = str(resolved_path)
+                    n.metadata["file_name"] = Path(resolved_path).name
+                if kb_id is not None:
                     n.metadata["kb_id"] = kb_id
-            index = self.insert_nodes(nodes)
+            self.insert_nodes(nodes)
             return nodes
         else:         
             print("No documents found")

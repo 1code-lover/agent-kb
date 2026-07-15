@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "id",
+    "query",
+    "expected_answer",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "query": {
+      "type": "string"
+    },
+    "search_kb_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_answer": {
+      "type": "string"
+    },
+    "relevant_documents": {
+      "type": "array"
+    },
+    "answerable": {
+      "type": "boolean"
+    },
+    "difficulty": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "verified"
+      ]
+    }
+  }
+}
