@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import AgentApprovalPanel from "../components/agent/AgentApprovalPanel";
@@ -14,39 +20,64 @@ import {
   getPendingActions,
   runAgent,
   updateAgentSession,
-  uploadFilesToKnowledge
+  uploadFilesToKnowledge,
 } from "../api/agent";
+import { getHistory, queryChat } from "../api/chat";
 import { getModelOptions, selectModel } from "../api/models";
+import { readApiData } from "../api/response";
+import { KbProvider, useKb } from "../components/kb/KbContext";
+import {
+  AGENT_EXPERIENCES,
+  buildChatPayload,
+  buildChatSessionId,
+  buildExperienceSummary,
+} from "../domain/agentExperience";
 import useAppStore from "../store/appStore";
+import "./agent-page.css";
+
+const DEFAULT_KNOWLEDGE_SCOPE = {
+  kb_id: "default",
+  kb_name: "默认知识库",
+};
+
+function safeBuildChatSessionId({ experience, sessionId, selectedKbId }) {
+  try {
+    return buildChatSessionId({ experience, sessionId, selectedKbId });
+  } catch {
+    return "";
+  }
+}
 
 function createAttachmentFromPath(path, index = 0) {
   const normalizedPath = path || "";
   const name = normalizedPath.split(/[/\\]/).pop() || normalizedPath;
   return {
-    id: `local-${Date.now()}-${index}`,
+    id: "local-" + Date.now() + "-" + index,
     name,
     path: normalizedPath,
     source: "desktop_pick",
-    status: "selected"
+    status: "selected",
   };
 }
 
 function createAttachmentFromImportedFile(file, index = 0) {
   return {
-    id: `import-${Date.now()}-${index}`,
+    id: "import-" + Date.now() + "-" + index,
     name: file.name,
     path: file.path || "",
     source: "upload_import",
     status: "imported",
     size: file.size,
-    content_type: file.type
+    content_type: file.type,
   };
 }
 
 function mergeAttachments(existingFiles, nextFiles) {
-  const merged = [...existingFiles];
-  for (const nextFile of nextFiles) {
-    const exists = merged.some((item) => item.path && nextFile.path && item.path === nextFile.path);
+  const merged = [...(existingFiles || [])];
+  for (const nextFile of nextFiles || []) {
+    const exists = merged.some(
+      (item) => item.path && nextFile.path && item.path === nextFile.path,
+    );
     if (!exists) {
       merged.push(nextFile);
     }
@@ -54,7 +85,340 @@ function mergeAttachments(existingFiles, nextFiles) {
   return merged;
 }
 
-export default function AgentPage() {
+function formatMessageTime(value) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatScore(score) {
+  return typeof score === "number" ? score.toFixed(3) : "-";
+}
+
+function ExperienceTabs({ experience, onChange }) {
+  return (
+    <div className="qa-experience-switcher" role="tablist" aria-label="问答体验切换">
+      {AGENT_EXPERIENCES.map((item) => (
+        <button
+          key={item.value}
+          type="button"
+          role="tab"
+          aria-selected={experience === item.value}
+          className={
+            experience === item.value
+              ? "qa-experience-tab active"
+              : "qa-experience-tab"
+          }
+          onClick={() => onChange(item.value)}
+        >
+          <span className="qa-experience-tab-title">{item.label}</span>
+          <span className="qa-experience-tab-desc">{item.description}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function QaConversation({ messages, pendingQuestion, historyLoading, chatBusy }) {
+  const hasMessages = (messages || []).length > 0;
+
+  return (
+    <section className="qa-surface-card qa-conversation-card">
+      <div className="qa-section-head">
+        <div>
+          <p className="qa-section-eyebrow">会话记录</p>
+          <h2>问答线程</h2>
+        </div>
+        {historyLoading ? <span className="toolbar-pill subtle">正在同步历史…</span> : null}
+      </div>
+
+      <div className="qa-conversation-thread">
+        {!hasMessages && !pendingQuestion ? (
+          <div className="empty-block">还没有对话记录，先输入一个问题试试。</div>
+        ) : null}
+
+        {(messages || []).map((item, index) => {
+          const role = item.role === "user" ? "user" : "assistant";
+          return (
+            <article
+              key={item.id || role + "-" + index}
+              className={
+                role === "user"
+                  ? "qa-message-row qa-message-row-user"
+                  : "qa-message-row qa-message-row-assistant"
+              }
+            >
+              <div className={role === "user" ? "qa-message qa-message-user" : "qa-message qa-message-assistant"}>
+                <div className="qa-message-meta">
+                  <span>{role === "user" ? "你" : "助手"}</span>
+                  <span>{formatMessageTime(item.created_at)}</span>
+                </div>
+                <div className="qa-message-body">{item.content}</div>
+              </div>
+            </article>
+          );
+        })}
+
+        {pendingQuestion ? (
+          <>
+            <article className="qa-message-row qa-message-row-user">
+              <div className="qa-message qa-message-user pending">
+                <div className="qa-message-meta">
+                  <span>你</span>
+                  <span>刚刚</span>
+                </div>
+                <div className="qa-message-body">{pendingQuestion}</div>
+              </div>
+            </article>
+            <article className="qa-message-row qa-message-row-assistant">
+              <div className="qa-message qa-message-assistant pending">
+                <div className="qa-message-meta">
+                  <span>助手</span>
+                  <span>{chatBusy ? "生成中" : "排队中"}</span>
+                </div>
+                <div className="qa-message-body">正在检索并组织回答，请稍候…</div>
+              </div>
+            </article>
+          </>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function SourceList({ sources }) {
+  return (
+    <section className="qa-surface-card qa-source-card">
+      <div className="qa-section-head">
+        <div>
+          <p className="qa-section-eyebrow">引用来源</p>
+          <h2>最近一次召回</h2>
+        </div>
+        <span className="toolbar-pill subtle">{sources.length} 条</span>
+      </div>
+
+      {sources.length === 0 ? (
+        <div className="empty-block">
+          暂无来源信息。成功问答后，这里会展示召回文档、页码和分数。
+        </div>
+      ) : (
+        <div className="qa-source-list">
+          {sources.map((item, index) => (
+            <article key={(item.file || "source") + "-" + index} className="qa-source-item">
+              <div className="qa-source-title-row">
+                <strong>{item.file || "未命名文档"}</strong>
+                <span>{"score " + formatScore(item.score)}</span>
+              </div>
+              <p className="stack-subtle">
+                {"kb_id=" + (item.kb_id || "default")}
+                {item.page && item.page !== "N/A" ? " / 页码 " + item.page : ""}
+              </p>
+              <p className="qa-source-excerpt">{item.text || "未返回片段内容。"}</p>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function KnowledgeScopeSelector({ selectedKbId, selectedKb, kbList, kbLoading, onSelectKb }) {
+  return (
+    <section className="qa-surface-card qa-kb-target-card">
+      <div className="qa-section-head">
+        <div>
+          <p className="qa-section-eyebrow">知识库范围</p>
+          <h2>选择问答目标</h2>
+        </div>
+      </div>
+
+      <div className="qa-kb-bar">
+        <label className="qa-field-label" htmlFor="knowledge-kb-select">
+          Active 知识库
+        </label>
+        <select
+          id="knowledge-kb-select"
+          className="qa-select"
+          value={selectedKbId || ""}
+          disabled={kbLoading}
+          onChange={(event) => onSelectKb(event.target.value)}
+        >
+          <option value="">请选择知识库</option>
+          {kbList.map((kb) => (
+            <option key={kb.kb_id} value={kb.kb_id}>
+              {(kb.kb_name || kb.kb_id) + "（" + kb.kb_id + "）"}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="qa-inline-tip">
+        {selectedKb
+          ? "当前问答将严格限定在“" + (selectedKb.kb_name || selectedKb.kb_id) + "”（kb_id=" + selectedKb.kb_id + "）范围内。"
+          : "知识库问答必须先显式选择一个 active 知识库，避免误用默认库。"}
+      </div>
+    </section>
+  );
+}
+
+function QaWorkbench(props) {
+  const {
+    experience,
+    selectedKb,
+    selectedKbId,
+    kbList,
+    kbLoading,
+    onSelectKb,
+    currentModelLabel,
+    modelReady,
+    question,
+    onQuestionChange,
+    onSubmit,
+    messages,
+    sources,
+    pendingQuestion,
+    error,
+    historyLoading,
+    chatBusy,
+  } = props;
+
+  const summary = buildExperienceSummary({ experience, selectedKb });
+  const submitDisabled =
+    chatBusy ||
+    !question.trim() ||
+    !modelReady ||
+    (experience === "knowledge" && !selectedKbId);
+
+  return (
+    <div className="qa-page-shell">
+      <header className="qa-hero-card">
+        <div className="qa-hero-content">
+          <div className="qa-hero-copy">
+            <span className="qa-eyebrow">问答工作台</span>
+            <h1>先问答，再决定是否进入 Agent 高级模式</h1>
+            <p>{summary}</p>
+          </div>
+          <div className="qa-hero-meta">
+            <span className="qa-badge">{"当前模型：" + currentModelLabel}</span>
+            <span className="qa-badge">
+              {"当前范围：" + (experience === "knowledge" ? (selectedKb?.kb_name || "未选择知识库") : "全部知识范围")}
+            </span>
+            <span className="qa-badge">{"可用知识库：" + kbList.length + " 个"}</span>
+          </div>
+        </div>
+        <div className="qa-hero-actions">
+          <Link className="secondary-button link-button" to="/knowledge">
+            管理知识库
+          </Link>
+          <Link className="secondary-button link-button" to="/models">
+            模型配置
+          </Link>
+        </div>
+      </header>
+
+      <div className="qa-layout">
+        <div className="qa-main-column">
+          {experience === "knowledge" ? (
+            <KnowledgeScopeSelector
+              selectedKbId={selectedKbId}
+              selectedKb={selectedKb}
+              kbList={kbList}
+              kbLoading={kbLoading}
+              onSelectKb={onSelectKb}
+            />
+          ) : null}
+
+          <section className="qa-surface-card qa-compose-card">
+            <div className="qa-section-head">
+              <div>
+                <p className="qa-section-eyebrow">立即提问</p>
+                <h2>{experience === "knowledge" ? "知识库定向问答" : "基础问答"}</h2>
+              </div>
+              <span className="toolbar-pill subtle">{modelReady ? currentModelLabel : "尚未配置模型"}</span>
+            </div>
+
+            <form className="qa-compose-form" onSubmit={onSubmit}>
+              <textarea
+                className="qa-compose-input"
+                rows={5}
+                value={question}
+                onChange={(event) => onQuestionChange(event.target.value)}
+                placeholder={
+                  experience === "knowledge"
+                    ? "例如：这份知识库里对实习要求是怎么描述的？"
+                    : "例如：帮我总结一下当前知识库里有哪些主题。"
+                }
+              />
+              <div className="qa-compose-actions">
+                <div className="qa-inline-tip">
+                  {experience === "knowledge" && !selectedKbId
+                    ? "请先在上方选择知识库后再发送问题。"
+                    : "问答会保留独立会话历史，方便你连续追问。"}
+                </div>
+                <button type="submit" className="primary-button" disabled={submitDisabled}>
+                  {chatBusy ? "回答生成中…" : "发送问题"}
+                </button>
+              </div>
+            </form>
+
+            {error ? <div className="banner-info banner-danger">{error}</div> : null}
+            {!modelReady ? (
+              <div className="banner-info">
+                还没有可用模型，请先前往模型配置页完成提供商与模型选择。
+              </div>
+            ) : null}
+          </section>
+
+          <QaConversation
+            messages={messages}
+            pendingQuestion={pendingQuestion}
+            historyLoading={historyLoading}
+            chatBusy={chatBusy}
+          />
+        </div>
+
+        <aside className="qa-side-column">
+          <section className="qa-surface-card qa-summary-card">
+            <div className="qa-section-head">
+              <div>
+                <p className="qa-section-eyebrow">当前状态</p>
+                <h2>工作台概览</h2>
+              </div>
+            </div>
+            <div className="qa-summary-list">
+              <div className="qa-summary-item">
+                <span>体验模式</span>
+                <strong>{AGENT_EXPERIENCES.find((item) => item.value === experience)?.label}</strong>
+              </div>
+              <div className="qa-summary-item">
+                <span>模型状态</span>
+                <strong>{modelReady ? "已就绪" : "待配置"}</strong>
+              </div>
+              <div className="qa-summary-item">
+                <span>知识库范围</span>
+                <strong>{experience === "knowledge" ? (selectedKb?.kb_name || "未选择") : "全局检索"}</strong>
+              </div>
+            </div>
+          </section>
+
+          <SourceList sources={sources} />
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function AgentRuntimePanel({ selectedKbId, selectedKb }) {
   const sessionId = useAppStore((state) => state.sessionId);
   const currentMode = useAppStore((state) => state.currentMode);
   const knowledgeScope = useAppStore((state) => state.knowledgeScope);
@@ -87,6 +451,7 @@ export default function AgentPage() {
   const hydrateFromAgentRun = useAppStore((state) => state.hydrateFromAgentRun);
   const hydrateFromApproval = useAppStore((state) => state.hydrateFromApproval);
   const hydrateSessionSnapshot = useAppStore((state) => state.hydrateSessionSnapshot);
+  const markSessionLoaded = useAppStore((state) => state.markSessionLoaded);
 
   const saveTimerRef = useRef(null);
 
@@ -95,7 +460,7 @@ export default function AgentPage() {
     queryFn: () => getAgentSession(sessionId),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    staleTime: 30000
+    staleTime: 30000,
   });
 
   const receiptsQuery = useQuery({
@@ -103,7 +468,7 @@ export default function AgentPage() {
     queryFn: () => getAgentReceipts(sessionId, 20),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    staleTime: 30000
+    staleTime: 30000,
   });
 
   const pendingQuery = useQuery({
@@ -111,7 +476,7 @@ export default function AgentPage() {
     queryFn: () => getPendingActions(sessionId),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    staleTime: 30000
+    staleTime: 30000,
   });
 
   const skillsQuery = useQuery({
@@ -119,7 +484,7 @@ export default function AgentPage() {
     queryFn: getAgentSkills,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    staleTime: 300000
+    staleTime: 300000,
   });
 
   const modelOptionsQuery = useQuery({
@@ -127,7 +492,7 @@ export default function AgentPage() {
     queryFn: getModelOptions,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    staleTime: 60000
+    staleTime: 60000,
   });
 
   const currentModel = modelOptionsQuery.data?.current_llm_info || null;
@@ -137,14 +502,15 @@ export default function AgentPage() {
   const providerItems = useMemo(() => {
     const names = Object.keys(providers);
     const currentProviderName = currentModel?.service_provider || sessionProvider?.name || "";
-    const ordered = currentProviderName && names.includes(currentProviderName)
-      ? [currentProviderName, ...names.filter((item) => item !== currentProviderName)]
-      : names;
+    const ordered =
+      currentProviderName && names.includes(currentProviderName)
+        ? [currentProviderName, ...names.filter((item) => item !== currentProviderName)]
+        : names;
 
     return ordered.map((providerName) => ({
       value: providerName,
       label: providerName,
-      models: providers[providerName]?.models || []
+      models: providers[providerName]?.models || [],
     }));
   }, [providers, currentModel, sessionProvider]);
 
@@ -153,16 +519,18 @@ export default function AgentPage() {
     if (currentProviderName && providers[currentProviderName]) {
       return {
         name: currentProviderName,
-        ...providers[currentProviderName]
+        ...providers[currentProviderName],
       };
     }
+
     const firstProviderName = providerItems[0]?.value;
     if (!firstProviderName) {
       return null;
     }
+
     return {
       name: firstProviderName,
-      ...providers[firstProviderName]
+      ...providers[firstProviderName],
     };
   }, [providerItems, providers, currentModel, sessionProvider]);
 
@@ -170,9 +538,9 @@ export default function AgentPage() {
     () => ({
       items: providerItems,
       value: selectedProvider?.name || "",
-      disabled: providerItems.length === 0
+      disabled: providerItems.length === 0,
     }),
-    [providerItems, selectedProvider]
+    [providerItems, selectedProvider],
   );
 
   const modelItems = useMemo(() => {
@@ -181,18 +549,20 @@ export default function AgentPage() {
     }
     return (selectedProvider.models || []).map((modelName) => ({
       value: modelName,
-      label: modelName
+      label: modelName,
     }));
   }, [selectedProvider]);
 
   const modelOptions = useMemo(() => {
     const currentModelName = currentModel?.model || sessionProvider?.model || "";
-    const nextValue = modelItems.some((item) => item.value === currentModelName) ? currentModelName : modelItems[0]?.value || "";
+    const nextValue = modelItems.some((item) => item.value === currentModelName)
+      ? currentModelName
+      : modelItems[0]?.value || "";
 
     return {
       items: modelItems,
       value: nextValue,
-      disabled: modelItems.length === 0
+      disabled: modelItems.length === 0,
     };
   }, [modelItems, currentModel, sessionProvider]);
 
@@ -202,10 +572,14 @@ export default function AgentPage() {
     if (!providerName || !modelName) {
       return "未启用模型";
     }
-    return `${providerName} / ${modelName}`;
+    return providerName + " / " + modelName;
   }, [currentModel, sessionProvider]);
 
-  const hasDetailContent = receipts.length > 0 || evidence.length > 0 || pendingActions.length > 0 || approvalMessage;
+  const hasDetailContent =
+    receipts.length > 0 ||
+    evidence.length > 0 ||
+    pendingActions.length > 0 ||
+    Boolean(approvalMessage);
 
   useEffect(() => {
     if (sessionQuery.data?.snapshot) {
@@ -214,8 +588,18 @@ export default function AgentPage() {
   }, [sessionQuery.data, hydrateSessionSnapshot]);
 
   useEffect(() => {
+    if (sessionQuery.isError) {
+      markSessionLoaded();
+    }
+  }, [sessionQuery.isError, markSessionLoaded]);
+
+  useEffect(() => {
     if (skillsQuery.data?.skills?.length && enabledSkills.length === 0) {
-      setEnabledSkills(skillsQuery.data.skills.filter((item) => item.status === "enabled").map((item) => item.id));
+      setEnabledSkills(
+        skillsQuery.data.skills
+          .filter((item) => item.status === "enabled")
+          .map((item) => item.id),
+      );
     }
   }, [skillsQuery.data, enabledSkills.length, setEnabledSkills]);
 
@@ -238,7 +622,7 @@ export default function AgentPage() {
 
   useEffect(() => {
     if (!sessionLoaded) {
-      return;
+      return undefined;
     }
 
     if (saveTimerRef.current) {
@@ -249,7 +633,7 @@ export default function AgentPage() {
       ? {
           name: currentModel.service_provider || "",
           base_url: currentModel.api_base || "",
-          model: currentModel.model || ""
+          model: currentModel.model || "",
         }
       : sessionProvider || { name: "", base_url: "", model: "" };
 
@@ -265,12 +649,12 @@ export default function AgentPage() {
           last_answer: lastAnswer,
           provider: providerPatch,
           attached_files: attachedFiles,
-          enabled_skills: enabledSkills
+          enabled_skills: enabledSkills,
         },
         ui_state: {
           active_detail: activeDetail,
-          show_details: showDetails
-        }
+          show_details: showDetails,
+        },
       }).catch(() => {});
     }, 400);
 
@@ -293,7 +677,7 @@ export default function AgentPage() {
     activeDetail,
     showDetails,
     currentModel,
-    sessionProvider
+    sessionProvider,
   ]);
 
   const runMutation = useMutation({
@@ -307,9 +691,9 @@ export default function AgentPage() {
     onError: (error) => {
       appendTimeline({
         type: "error",
-        content: error.message || "任务执行失败。"
+        content: error.message || "任务执行失败。",
       });
-    }
+    },
   });
 
   const approvalMutation = useMutation({
@@ -321,14 +705,14 @@ export default function AgentPage() {
     },
     onError: (error) => {
       setApprovalMessage(error.message || "审批失败。");
-    }
+    },
   });
 
   const quickSwitchMutation = useMutation({
     mutationFn: (payload) => selectModel(payload),
     onSuccess: async () => {
       await modelOptionsQuery.refetch();
-    }
+    },
   });
 
   const uploadMutation = useMutation({
@@ -339,26 +723,37 @@ export default function AgentPage() {
       }
       formData.append("chunk_size", "2048");
       formData.append("chunk_overlap", "512");
+      formData.append("kb_id", selectedKbId || knowledgeScope?.kb_id || DEFAULT_KNOWLEDGE_SCOPE.kb_id);
       return uploadFilesToKnowledge(formData);
     },
     onSuccess: (result) => {
-      const importedAttachments = (result.files || []).map((file, index) => createAttachmentFromImportedFile(file, index));
+      const importedAttachments = (result.files || []).map((file, index) =>
+        createAttachmentFromImportedFile(file, index),
+      );
       setAttachedFiles(mergeAttachments(attachedFiles, importedAttachments));
       appendTimeline({
         type: "status",
-        content: `已导入 ${result.files?.length || 0} 个文件，可在知识检索模式中使用。`
+        content:
+          "已导入 " +
+          (result.files?.length || 0) +
+          " 个文件到知识库 " +
+          (result.kb_id || selectedKbId || knowledgeScope?.kb_id || DEFAULT_KNOWLEDGE_SCOPE.kb_id) +
+          "。",
       });
     },
     onError: (error) => {
       appendTimeline({
         type: "error",
-        content: error.message || "文件导入失败。"
+        content: error.message || "文件导入失败。",
       });
-    }
+    },
   });
 
   const isBusy = runMutation.isPending || approvalMutation.isPending || quickSwitchMutation.isPending;
   const canRunAgent = currentMode !== "agent" || Boolean(currentModel?.service_provider && currentModel?.model);
+  const uploadTargetText = selectedKb
+    ? (selectedKb.kb_name || selectedKb.kb_id) + "（kb_id=" + selectedKb.kb_id + "）"
+    : (knowledgeScope?.kb_name || DEFAULT_KNOWLEDGE_SCOPE.kb_name) + "（kb_id=" + (knowledgeScope?.kb_id || DEFAULT_KNOWLEDGE_SCOPE.kb_id) + "）";
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -369,7 +764,7 @@ export default function AgentPage() {
     if (!canRunAgent) {
       appendTimeline({
         type: "error",
-        content: "先去模型配置页启用一个模型。"
+        content: "请先在模型配置页启用一个可用模型。",
       });
       return;
     }
@@ -379,7 +774,7 @@ export default function AgentPage() {
       question,
       session_id: sessionId,
       mode: currentMode,
-      knowledge_scope: knowledgeScope
+      knowledge_scope: knowledgeScope,
     });
   }
 
@@ -394,7 +789,7 @@ export default function AgentPage() {
       service_provider: nextProviderName,
       model: nextModelName,
       api_base: nextProvider.api_base,
-      session_id: sessionId
+      session_id: sessionId,
     });
   }
 
@@ -402,11 +797,12 @@ export default function AgentPage() {
     if (!selectedProvider || nextModelName === modelOptions.value) {
       return;
     }
+
     quickSwitchMutation.mutate({
       service_provider: selectedProvider.name,
       model: nextModelName,
       api_base: selectedProvider.api_base,
-      session_id: sessionId
+      session_id: sessionId,
     });
   }
 
@@ -415,14 +811,14 @@ export default function AgentPage() {
     if (!desktopBridge?.pickFiles) {
       appendTimeline({
         type: "error",
-        content: "当前环境不支持桌面文件选择，请使用上传并导入。"
+        content: "当前环境不支持桌面文件选择，请使用上传并导入。",
       });
       return;
     }
 
     const result = await desktopBridge.pickFiles({
       title: "选择本地文件",
-      multiSelections: true
+      multiSelections: true,
     });
 
     if (result?.canceled || !result?.filePaths?.length) {
@@ -436,7 +832,7 @@ export default function AgentPage() {
     setDraftQuestion(result.filePaths[0]);
     appendTimeline({
       type: "status",
-      content: `已选择 ${result.filePaths.length} 个本地文件，读文件模式将优先读取第一项。`
+      content: "已选择 " + result.filePaths.length + " 个本地文件，读文件模式将优先读取第一项。",
     });
   }
 
@@ -450,96 +846,298 @@ export default function AgentPage() {
   }
 
   return (
-    <section className="agent-chat-page rebuilt">
-      <header className="agent-chat-toolbar">
-        <div className="agent-chat-toolbar-left">
-          <span className="toolbar-pill">{currentModelLabel}</span>
+    <section className="qa-agent-mode">
+      <header className="qa-hero-card agent-hero-card">
+        <div className="qa-hero-content">
+          <div className="qa-hero-copy">
+            <span className="qa-eyebrow">Agent 高级模式</span>
+            <h1>复杂任务、工具调用、审批与回执都保留在这里</h1>
+            <p>当基础问答不够用时，可以切到 Agent 高级模式继续执行读文件、知识检索、命令执行和审批流。</p>
+          </div>
+          <div className="qa-hero-meta">
+            <span className="qa-badge">{"当前模型：" + currentModelLabel}</span>
+            <span className="qa-badge">{"运行状态：" + runState}</span>
+            <span className="qa-badge">{"上传目标：" + uploadTargetText}</span>
+          </div>
         </div>
-        <div className="agent-chat-toolbar-right">
-          <button
-            type="button"
-            className="secondary-button subtle-button"
-            onClick={() => setShowDetails(!showDetails)}
-          >
-            {showDetails ? "隐藏详情" : "查看详情"}
-          </button>
-          <Link className="secondary-button subtle-button link-button" to="/models">
+        <div className="qa-hero-actions">
+          <Link className="secondary-button link-button" to="/knowledge">
+            管理知识库
+          </Link>
+          <Link className="secondary-button link-button" to="/models">
             模型配置
           </Link>
         </div>
       </header>
 
-      <div className={showDetails && hasDetailContent ? "agent-chat-layout rebuilt with-drawer" : "agent-chat-layout rebuilt"}>
-        <div className="agent-chat-main rebuilt">
-          <AgentTimeline timeline={timeline} />
-          <AgentInputPanel
-            question={draftQuestion}
-            mode={currentMode}
-            disabled={isBusy || (currentMode === "agent" && !canRunAgent)}
-            providerOptions={providerOptions}
-            modelOptions={modelOptions}
-            attachedFiles={attachedFiles}
-            enabledSkills={enabledSkills}
-            uploadBusy={uploadMutation.isPending}
-            onQuestionChange={setDraftQuestion}
-            onModeChange={setCurrentMode}
-            onProviderChange={handleProviderChange}
-            onModelChange={handleModelChange}
-            onSubmit={handleSubmit}
-            onPickLocalFiles={handlePickLocalFiles}
-            onUploadFiles={handleUploadFiles}
-            onRemoveAttachedFile={handleRemoveAttachedFile}
-          />
-        </div>
-
-        {showDetails && hasDetailContent ? (
-          <aside className="agent-detail-drawer rebuilt">
-            <div className="mode-switcher drawer-tabs">
-              {pendingActions.length > 0 ? (
-                <button
-                  type="button"
-                  className={activeDetail === "approvals" ? "mode-chip active" : "mode-chip"}
-                  onClick={() => setActiveDetail("approvals")}
-                >
-                  审批
-                </button>
-              ) : null}
-              {receipts.length > 0 ? (
-                <button
-                  type="button"
-                  className={activeDetail === "receipts" ? "mode-chip active" : "mode-chip"}
-                  onClick={() => setActiveDetail("receipts")}
-                >
-                  回执
-                </button>
-              ) : null}
-              {evidence.length > 0 ? (
-                <button
-                  type="button"
-                  className={activeDetail === "evidence" ? "mode-chip active" : "mode-chip"}
-                  onClick={() => setActiveDetail("evidence")}
-                >
-                  证据
-                </button>
-              ) : null}
-            </div>
-
-            <div className="agent-detail-scroll">
-              {activeDetail === "approvals" ? (
-                <AgentApprovalPanel
-                  pendingActions={pendingActions}
-                  approvalMessage={approvalMessage}
-                  disabled={approvalMutation.isPending}
-                  onReview={(payload) => approvalMutation.mutate(payload)}
-                />
-              ) : null}
-              {activeDetail === "evidence" ? <AgentEvidencePanel evidence={evidence} /> : null}
-              {activeDetail === "receipts" ? <AgentReceiptsPanel receipts={receipts} /> : null}
-            </div>
-          </aside>
-        ) : null}
+      <div className="agent-runtime-note banner-info">
+        {selectedKb
+          ? "当前已选知识库：" + (selectedKb.kb_name || selectedKb.kb_id) + "（kb_id=" + selectedKb.kb_id + "）。Agent 在 kb_search 模式下会优先使用该范围。"
+          : "当前使用知识范围：" + (knowledgeScope?.kb_name || DEFAULT_KNOWLEDGE_SCOPE.kb_name) + "。如果要定向到某个知识库，可先切换到“知识库问答”选择目标。"}
       </div>
+
+      <section className="agent-chat-page">
+        <header className="agent-chat-toolbar">
+          <div className="agent-chat-toolbar-left">
+            <span className="toolbar-pill">{currentModelLabel}</span>
+            <span className="toolbar-pill subtle">{"状态：" + runState}</span>
+          </div>
+          <div className="agent-chat-toolbar-right">
+            <button
+              type="button"
+              className="secondary-button subtle-button"
+              onClick={() => setShowDetails(!showDetails)}
+            >
+              {showDetails ? "隐藏详情" : "查看详情"}
+            </button>
+          </div>
+        </header>
+
+        <div className={showDetails && hasDetailContent ? "agent-chat-layout with-drawer" : "agent-chat-layout"}>
+          <div className="agent-chat-main">
+            <AgentTimeline timeline={timeline} />
+            <AgentInputPanel
+              question={draftQuestion}
+              mode={currentMode}
+              disabled={isBusy || (currentMode === "agent" && !canRunAgent)}
+              providerOptions={providerOptions}
+              modelOptions={modelOptions}
+              attachedFiles={attachedFiles}
+              enabledSkills={enabledSkills}
+              uploadBusy={uploadMutation.isPending}
+              onQuestionChange={setDraftQuestion}
+              onModeChange={setCurrentMode}
+              onProviderChange={handleProviderChange}
+              onModelChange={handleModelChange}
+              onSubmit={handleSubmit}
+              onPickLocalFiles={handlePickLocalFiles}
+              onUploadFiles={handleUploadFiles}
+              onRemoveAttachedFile={handleRemoveAttachedFile}
+            />
+          </div>
+
+          {showDetails && hasDetailContent ? (
+            <aside className="agent-detail-drawer">
+              <div className="mode-switcher drawer-tabs">
+                {pendingActions.length > 0 ? (
+                  <button
+                    type="button"
+                    className={activeDetail === "approvals" ? "mode-chip active" : "mode-chip"}
+                    onClick={() => setActiveDetail("approvals")}
+                  >
+                    审批
+                  </button>
+                ) : null}
+                {receipts.length > 0 ? (
+                  <button
+                    type="button"
+                    className={activeDetail === "receipts" ? "mode-chip active" : "mode-chip"}
+                    onClick={() => setActiveDetail("receipts")}
+                  >
+                    回执
+                  </button>
+                ) : null}
+                {evidence.length > 0 ? (
+                  <button
+                    type="button"
+                    className={activeDetail === "evidence" ? "mode-chip active" : "mode-chip"}
+                    onClick={() => setActiveDetail("evidence")}
+                  >
+                    证据
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="agent-detail-scroll">
+                {activeDetail === "approvals" ? (
+                  <AgentApprovalPanel
+                    pendingActions={pendingActions}
+                    approvalMessage={approvalMessage}
+                    disabled={approvalMutation.isPending}
+                    onReview={(payload) => approvalMutation.mutate(payload)}
+                  />
+                ) : null}
+                {activeDetail === "evidence" ? <AgentEvidencePanel evidence={evidence} /> : null}
+                {activeDetail === "receipts" ? <AgentReceiptsPanel receipts={receipts} /> : null}
+              </div>
+            </aside>
+          ) : null}
+        </div>
+      </section>
     </section>
   );
 }
 
+function AgentPageContent() {
+  const sessionId = useAppStore((state) => state.sessionId);
+  const knowledgeScope = useAppStore((state) => state.knowledgeScope);
+  const setKnowledgeScope = useAppStore((state) => state.setKnowledgeScope);
+
+  const { kbList, selectedKbId, selectedKb, loading: kbLoading, selectKb } = useKb();
+
+  const [experience, setExperience] = useState("basic");
+  const [chatQuestion, setChatQuestion] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatSources, setChatSources] = useState([]);
+  const [chatError, setChatError] = useState("");
+  const [pendingQuestion, setPendingQuestion] = useState("");
+
+  const modelOptionsQuery = useQuery({
+    queryKey: ["agent-model-options"],
+    queryFn: getModelOptions,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 60000,
+  });
+
+  const activeKbList = useMemo(
+    () => (kbList || []).filter((kb) => kb.status === "active"),
+    [kbList],
+  );
+
+  const currentModel = modelOptionsQuery.data?.current_llm_info || null;
+  const currentModelLabel =
+    currentModel?.service_provider && currentModel?.model
+      ? currentModel.service_provider + " / " + currentModel.model
+      : "未启用模型";
+  const modelReady = Boolean(currentModel?.service_provider && currentModel?.model);
+
+  useEffect(() => {
+    const nextKnowledgeScope = selectedKb?.kb_id
+      ? { kb_id: selectedKb.kb_id, kb_name: selectedKb.kb_name || selectedKb.kb_id }
+      : DEFAULT_KNOWLEDGE_SCOPE;
+
+    if (
+      knowledgeScope?.kb_id !== nextKnowledgeScope.kb_id ||
+      knowledgeScope?.kb_name !== nextKnowledgeScope.kb_name
+    ) {
+      setKnowledgeScope(nextKnowledgeScope);
+    }
+  }, [knowledgeScope, selectedKb, setKnowledgeScope]);
+
+  const chatSessionId = useMemo(
+    () => safeBuildChatSessionId({ experience, sessionId, selectedKbId }),
+    [experience, selectedKbId, sessionId],
+  );
+
+  const historyQuery = useQuery({
+    queryKey: ["agent-chat-history", chatSessionId],
+    enabled: experience !== "agent" && Boolean(chatSessionId),
+    queryFn: async () => {
+      const response = await getHistory(chatSessionId);
+      return readApiData(response) || { session_id: chatSessionId, messages: [] };
+    },
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 0,
+  });
+
+  useEffect(() => {
+    setChatMessages(historyQuery.data?.messages || []);
+  }, [historyQuery.data]);
+
+  useEffect(() => {
+    setChatError("");
+    setPendingQuestion("");
+    setChatSources([]);
+  }, [chatSessionId, experience]);
+
+  const chatMutation = useMutation({
+    mutationFn: async (payload) => {
+      const queryResponse = await queryChat(payload);
+      const queryData = readApiData(queryResponse) || {};
+      const historyResponse = await getHistory(queryData.session_id || payload.session_id);
+      const historyData = readApiData(historyResponse) || { messages: [] };
+      return {
+        ...queryData,
+        messages: historyData.messages || [],
+      };
+    },
+    onMutate: (payload) => {
+      setChatError("");
+      setPendingQuestion(payload.question);
+    },
+    onSuccess: (result) => {
+      setPendingQuestion("");
+      setChatQuestion("");
+      setChatSources(result.sources || []);
+      setChatMessages(result.messages || []);
+      historyQuery.refetch();
+    },
+    onError: (error) => {
+      setPendingQuestion("");
+      setChatError(error.message || "问答请求失败，请稍后重试。");
+    },
+  });
+
+  const handleExperienceChange = useCallback((nextExperience) => {
+    setExperience(nextExperience);
+    setChatError("");
+    setPendingQuestion("");
+  }, []);
+
+  const handleChatSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      if (!modelReady) {
+        setChatError("请先到模型配置页启用一个模型，再开始问答。");
+        return;
+      }
+
+      try {
+        const payload = buildChatPayload({
+          experience,
+          question: chatQuestion,
+          sessionId,
+          selectedKbId,
+        });
+        chatMutation.mutate(payload);
+      } catch (error) {
+        setChatError(error.message || "提问参数无效。");
+      }
+    },
+    [chatMutation, chatQuestion, experience, modelReady, selectedKbId, sessionId],
+  );
+
+  if (experience === "agent") {
+    return (
+      <div className="qa-page-frame">
+        <ExperienceTabs experience={experience} onChange={handleExperienceChange} />
+        <AgentRuntimePanel selectedKbId={selectedKbId} selectedKb={selectedKb} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="qa-page-frame">
+      <ExperienceTabs experience={experience} onChange={handleExperienceChange} />
+      <QaWorkbench
+        experience={experience}
+        selectedKb={selectedKb}
+        selectedKbId={selectedKbId}
+        kbList={activeKbList}
+        kbLoading={kbLoading}
+        onSelectKb={selectKb}
+        currentModelLabel={currentModelLabel}
+        modelReady={modelReady}
+        question={chatQuestion}
+        onQuestionChange={setChatQuestion}
+        onSubmit={handleChatSubmit}
+        messages={chatMessages}
+        sources={chatSources}
+        pendingQuestion={pendingQuestion}
+        error={chatError}
+        historyLoading={historyQuery.isLoading || historyQuery.isFetching}
+        chatBusy={chatMutation.isPending}
+      />
+    </div>
+  );
+}
+
+export default function AgentPage() {
+  return (
+    <KbProvider>
+      <AgentPageContent />
+    </KbProvider>
+  );
+}

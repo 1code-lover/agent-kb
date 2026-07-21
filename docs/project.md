@@ -1,9 +1,9 @@
-# 项目总览 (docs/project.md)
+﻿# 项目总览 (docs/project.md)
 
 > 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构和已知问题。
 > **维护规则**：每次有意义的提交后更新本文的「最近提交」与「当前进度」「已知问题」三节；重大架构变化更新「架构」节。日期使用绝对日期。
 
-最近更新：2026-07-15
+最近更新：2026-07-16
 
 ---
 
@@ -78,6 +78,11 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - **本地开发联调链路已修复**（2026-07-14）：`start_dev.ps1` 可在 Windows PowerShell 下正常解析并同时拉起 API 18080 + Web 5173；FastAPI 已放行 Vite 开发源的 CORS 预检，知识库页面不再因 `Network Error` 卡在加载失败。
 - **知识库导入与嵌入质量基线已实测**（2026-07-14）：未配置 LLM 时，独立测试库成功导入 UTF-8 中文文档并完成向量检索；20 组语义烟测结果为 Recall@1 50%、Recall@3 95%、Recall@5 100%、MRR 0.71，证明候选召回可用但首位排序仍需优化。
 - **多知识库目录化存储阶段 5 测试已通过**（2026-07-15）：`docs/20260714-kb-directory-storage/` 已形成 PRD、FRD、RTM、Plan、Test Plan 和 Test Report；代码已实现 `data/{kb_id}/` 原始文件目录化、导入前 KB active 校验、共享索引 metadata 写入、list/delete 严格隔离、空 KB 删除保护、registry 原子写与迁移脚本。正式测试覆盖核心目录化、KB/Agent 回归、非 slow 全量和覆盖率门禁，测试报告已于 2026-07-15 审核通过，当前进入阶段 6 的开发故事沉淀、commit 与 push。
+- **粮仓知识库本地资料已规范化整理**（2026-07-15）：`data/grain-knowledge-base/` 已按 `docs/01-*` 至 `docs/07-*` 主题目录组织主资料，并将重复副本隔离到 `docs/98-duplicates-to-review/`；已维护知识库级 `readme.md`、`index.md`、分类 README、`qa/` 评测资料和 `data/kb-index.md` 多知识库总索引。当前目录共 255 个原始资料文件，其中主资料 126 个、重复/隔离副本 129 个；本地 registry 中 `grain-knowledge-base` 为 active，`doc_count=25`（含 smoke/手动重复导入副本），因此目录整理完成但向量索引尚非全量导入。已新增 `scripts/import_grain_kb_batches.py` 分批导入工具，支持 dry-run 计划、DOCX/PDF 分批 apply 和 JSON 报告；2026-07-15 已完成 5 个 DOCX 的脚本化 apply smoke（120 chunks）和 5 组 HTTP 问答 smoke。
+- **粮仓知识库 smoke 问答链路已跑通**（2026-07-15）：修复 LlamaIndex 默认 OpenAI fallback、索引加载前 embedding 预热、非字符串 `file_path` metadata、陈旧向量 id KeyError 以及非 default 查询混入 default 来源的问题；最终 Q1-Q4 领域问题回答正确，Q5 实时价格越界问题能说明上下文无相关信息，sources 均限定在 `grain-knowledge-base`。
+- **导入功能独立 smoke 已通过**（2026-07-15）：为避免污染正式粮仓知识库，新增临时 KB `import-smoke-20260715-192353` 验证创建 KB、`POST /api/kb/file/import`、`data/{kb_id}/` 落盘、文档列表、问答召回和跨 KB 负向隔离；测试问题“导入功能烟测代号是什么？”在临时 KB 回答“蓝麦”，在 `grain-knowledge-base` 不泄漏该答案。报告位于 `data/grain-knowledge-base/qa/import-function-smoke-20260715-192353.json`。
+- **上传目标知识库显式选择 P1 已修复**（2026-07-16）：`/knowledge` 初始不再静默选中 `default`；只有用户显式选择已登记且 active 的 KB 后，文档列表、文件上传和网页导入才可用。知识库列表支持创建、重命名、删除，新建成功后自动选择；导入区显示目标名称、`kb_id` 和 `data/{kb_id}/`。同时修复 Axios 统一响应体二次解包导致列表误显示为空的问题，并补充上传 API 回归测试。Node 回归 18/18、前端 API/规则覆盖率 80.92%、后端定向回归 29/29、Vite 构建和浏览器 smoke 均通过。
+- **上传 400 根因已修复**（2026-07-16）：定位到 `webapp/src/api/kb.js` 与 `webapp/src/api/agent.js` 手动设置了 `Content-Type: multipart/form-data`，导致浏览器未自动补齐 multipart boundary，请求到 FastAPI 时返回 `Missing boundary in multipart.` 并报 400。现已移除该请求头，并新增 `webapp/src/api/kb.test.js` 回归验证上传调用仅传 `FormData` 与 `kb_id`，不再显式覆盖 multipart 头；定向 Node 回归、覆盖率与 `npm run build` 已通过。
 - **Agent runtime + 审批流已可用**：命令解析、风险分级 L0-L3、硬拒绝过滤、pending action 审批（approve/reject）、回执存储、session 快照持久化已接通。
 - **PDF OCR 回退已落地**（`4a10f54`）：`PDFOCRReader` 先用 PyMuPDF 读文字层，无有效文字层时回退 PaddleOCR 逐页识别；`server/index.py` 统一走 `_load_documents()`。
 - **OCR 质量评估已补齐**（`4a10f54`）：`scripts/pdf_ocr_quality.py` 可做关键词召回率评估，并有配套测试。
@@ -89,6 +94,7 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 1. 主产品骨架已经具备；
 2. 最近一轮重点成果是 PDF OCR、Windows 环境修复、多知识库最小闭环补齐，以及本地 API/Web 联调链路修复；
 3. 当前主要矛盾已经从“接口是否打通”转为“共享单索引方案是否继续收紧与升级”；原始文件从 `data/` 根目录平铺改为 `data/{kb_id}/` 的编码、阶段 5 正式测试与测试报告评审均已完成，下一步进入 commit 与 push。
+4. 粮仓知识库的本地资料分类、索引和 QA 骨架已经具备，上传前显式选择目标 KB 的 P1 已解除；下一步先在专用 smoke KB 完成一次用户真实上传复验，再补齐粮仓主资料导入、阿里云/百炼配置下的嵌入质量评测，以及基于 verified QA 的问答效果报告。
 
 ### 测试
 - 快测（默认）：`python -m pytest tests/ -q -m "not slow"`
@@ -96,7 +102,9 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - 2026-07-14 本地定向回归结果：`python -m pytest tests/api/test_app_cors.py tests/api/test_agent_runtime.py tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py -q` -> `44 passed, 2 warnings in 4.73s`
 - 2026-07-14 多知识库现状基线：`python -m pytest tests/api/test_kb_registry.py tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py tests/api/test_agent_runtime.py -q` -> `55 passed, 2 warnings in 4.54s`。该结果仅验证编码前逻辑多库链路。
 - 2026-07-15 多知识库目录化存储阶段 5 正式测试通过：语法自检通过；`git diff --check` 退出码 0 且仅有 LF/CRLF 提示；占位词检查无命中；核心目录化功能 `90 passed in 9.36s`；KB/多 KB/Agent 定向回归 `45 passed, 2 warnings in 3.70s`；API + integration + scripts + utils + QA fixture 扩展回归 `164 passed, 2 warnings in 5.18s`；默认非 slow 全量门禁 `168 passed, 1 deselected, 2 warnings in 5.74s`；目录化相关文件覆盖率最终 `84%`，高于 `>=80%` 门禁。详见 `docs/20260714-kb-directory-storage/20260714-kb-directory-storage-test-report.md`。
-- 2026-07-14 本地运行烟测：`powershell -NoProfile -ExecutionPolicy Bypass -File .\start_dev.ps1` 可拉起 API/Web；`GET /api/health` 返回 `code=0,message=ok`；`OPTIONS /api/kb` 对 `Origin: http://127.0.0.1:5173` 返回 `200` 且 `Access-Control-Allow-Origin=http://127.0.0.1:5173`；`GET http://127.0.0.1:5173/` 返回 `200`；Chrome headless 打开 `/knowledge` 显示 `ID: default`、`暂无文档`，无 `Network Error`，console errors 为空。
+- 2026-07-15 粮仓知识库资料整理校验：本地扫描 `data/grain-knowledge-base/docs/` 得到 255 个资料文件，格式为 157 个 PDF、98 个 DOCX；主资料目录唯一 SHA256 数为 126，重复/隔离区 129 个文件；已生成 `_maintenance/2026-07-15-main-duplicate-isolation/move-manifest.json` 记录 2 个主目录重复别名的隔离移动。
+- 2026-07-16 粮仓知识库 UI 基线：`/api/kb` 可见 `grain-knowledge-base`，浏览器文档列表当前显示 14 个已索引文档，路径和 `kb_id` 均限定在粮仓库；上传目标显式选择修复后，初始不选库，选择粮仓库后文件与网页导入目标提示一致。人工真实上传步骤见 `docs/20260715-grain-kb-evaluation/20260715-grain-kb-evaluation-test-guide.md`。
+- 2026-07-16 本地浏览器 smoke：`/knowledge` 初始显示“请选择知识库”，三个功能标签禁用；侧边栏展示 4 个真实 KB；选中 `grain-knowledge-base` 后显示 14 个文档以及明确的文件/网页导入目标，console error/warn 为空。服务启动与 CORS 基线仍沿用 2026-07-14 已通过结果。
 - 2026-07-14 嵌入与导入烟测：`bge-small-zh-v1.5` 可输出 512 维向量；20 组 UTF-8 中文检索 Recall@1=50%、Recall@3=95%、Recall@5=100%、MRR=0.71；测试库 `embedding-quality-smoke-20260714` 导入 1 个文件并生成 1 个分块，限定 KB 检索命中；未配置 LLM 时问答接口按设计返回 503。详见 `docs/20260714-embedding-rag-quality-evaluation/`。
 - 当前快测已覆盖：PDF OCR 功能 + 质量、KBRegistry、KB 路由、M2 多 KB、agent runtime、CORS 预检、command filter/parser、tool registry、receipt persistence 等主线能力。
 - 慢测（真实 PaddleOCR，约 12 分钟 / 样本）：`python -m pytest -q -m slow -s`，默认不跑。
@@ -113,6 +121,7 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - **OCR 仍然较慢**：PaddleOCR 在 CPU 上整本扫描件约 2 分钟 / 页，6 页国标样本约 12 分钟，已用 `slow` marker 隔离。
 - **OCR 质量口径仍偏基础**：目前只做关键词召回率，未覆盖 CER 字符准确率、表格结构还原、版面顺序等更细指标。
 - **嵌入首位排序质量仍需优化**：20 组项目领域合成语义测试中 Recall@3=95%、Recall@5=100%，但 Recall@1=50%、MRR=0.71，且 10/20 用例的正确段落分数低于最高干扰项；当前 `use_reranker=false`，尚未完成重排模型和 `bge-large-zh-v1.5` 对照测试。
+- **粮仓知识库还未完成全量向量化**：`data/grain-knowledge-base/` 目录已整理并建立索引，但本地 registry 当前 `doc_count=25`，且包含 smoke/手动重复导入副本，仍低于主资料 126 个文件；正式问答验收前需要按 `index.md` 的主资料清单补齐导入或重建索引，并输出检索/问答评测报告。
 - **空知识库下问答仍会明确失败**：默认 `default` KB 启动可见，但未导入文档时真实检索会返回 `Knowledge base is empty. Please import documents first.`；这是当前预期行为，不代表 API/Web 链路异常。
 - **文档需要联动维护**：`docs/project.md`、`docs/guide/DOCS_INDEX.md`、`docs/spec/knowledge_base_visibility_and_multi_kb_design.md` 已持续按当前代码口径同步；后续代码变更时仍需同步更新，避免再次漂移。
 - **Streamlit 仍在并存**：`app.py` / `frontend/` 作为迁移回退保留，功能未与后端 API 完全对等，不能再作为判断当前主线能力的唯一依据。
@@ -157,6 +166,8 @@ python -m pytest tests/ -q -m "not slow"
 | `docs/20260714-dev-runtime-cors-startup/` | 本地开发运行链路与 CORS 修复测试报告 |
 | `docs/20260714-embedding-rag-quality-evaluation/` | 嵌入检索、真实导入和 RAG 问答前置条件测试方案与报告 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储 PRD/FRD/RTM/Plan/Test Plan/Test Report |
+| `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入、嵌入检索与问答人工验收测试指南 |
+| `docs/20260716-kb-upload-target-selection/` | 上传前显式选择目标知识库的修复说明、计划、测试方案与报告 |
 | `docs/interview/dev-stories/` | 开发故事沉淀（面试复盘材料） |
 | `docs/troubleshooting/` | 按时间戳组织的排查记录 |
 | `评审建议.txt` | 最新评审意见（仓库根） |
@@ -177,3 +188,20 @@ python -m pytest tests/ -q -m "not slow"
 | `1e0bda8` | docs: restructure troubleshooting log into timestamped per-session files under docs/troubleshooting/ |
 
 查看完整历史：`git log --oneline -30`
+
+
+## 9. 2026-07-17 incremental update
+
+- Topic folder: `docs/20260717-agent-qa-page-refactor/`
+- Scope: `/agent` page refactor, question-first workflow, and retriever hardening for historical bad index data.
+- Front-end status: `/agent` now supports basic chat, KB-scoped chat, and Agent advanced mode in one page.
+- Backend status: stale wrong-dimension embeddings are pruned before vector retrieval; BM25 build skips empty or unserializable historical nodes, so `/api/chat/query` no longer fails with the previous 400 regression.
+- Validation on 2026-07-17: Node rule tests passed (14/14), `pytest tests/api/test_retriever_stale_vectors.py -q` passed (7 passed), `npm run build` passed, direct HTTP verification returned 200, and browser smoke on `http://127.0.0.1:5173/agent` succeeded.
+- Known data caveat: KB `20260716` is still a smoke dataset and can return noisy sources; use `grain-knowledge-base` for formal QA.
+
+## 10. 2026-07-17 grain KB QA set expansion
+
+- `data/grain-knowledge-base/qa/verified.jsonl` ?? 24 ???? 30 ??????????????????????????????????
+- `data/grain-knowledge-base/qa/draft.jsonl` ?? 20 ???? 26 ?????????????/?????????????????
+- ?? `data/grain-knowledge-base/qa/question-groups.md`?? QA ???? 6 ??????? 12 ? smoke / ?? verified / hard draft ????????
+- ?? Grain QA ???? 56 ?????????????????????????

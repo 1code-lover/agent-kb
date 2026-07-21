@@ -1,4 +1,4 @@
-"""
+﻿"""
 模块功能：
 - 提供 ThinkRAG 的检索器实现，包括 BM25、混合检索与融合检索。
 
@@ -10,6 +10,17 @@
 
 from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.retrievers import VectorIndexRetriever
+from llama_index.core.indices.vector_store.retrievers.retriever import log_vector_store_query_result
+from llama_index.core.schema import BaseNode
+from llama_index.core.schema import MetadataMode
+from llama_index.core.vector_stores.utils import metadata_dict_to_node, node_to_metadata_dict
+from llama_index.core.vector_stores.types import (
+    FilterCondition,
+    FilterOperator,
+    MetadataFilter,
+    MetadataFilters,
+    VectorStoreQueryResult,
+)
 from llama_index.retrievers.bm25 import BM25Retriever
 
 # BM25Retriever 默认分词器对中文支持不足：
@@ -17,6 +28,46 @@ from llama_index.retrievers.bm25 import BM25Retriever
 
 import jieba
 from typing import List
+
+
+def build_kb_metadata_filters(kb_ids: list[str] | None):
+    """按 kb_id 构建向量检索与 BM25 检索共用的 metadata 过滤条件。"""
+    if not kb_ids:
+        return None
+    return MetadataFilters(
+        filters=[
+            MetadataFilter(key="kb_id", value=kb_id, operator=FilterOperator.EQ)
+            for kb_id in kb_ids
+        ],
+        condition=FilterCondition.OR,
+    )
+
+
+def filter_bm25_compatible_nodes(nodes: list[BaseNode]) -> list[BaseNode]:
+    """过滤出与 BM25 索引构建兼容的节点，跳过空内容或元数据异常的节点。"""
+    compatible_nodes: list[BaseNode] = []
+    skipped: list[str] = []
+
+    for node in nodes or []:
+        try:
+            content = node.get_content(metadata_mode=MetadataMode.EMBED)
+            if not isinstance(content, str) or not content.strip():
+                skipped.append(getattr(node, "node_id", "<unknown>"))
+                continue
+
+            metadata_dict_to_node(node_to_metadata_dict(node))
+            compatible_nodes.append(node)
+        except Exception:
+            skipped.append(getattr(node, "node_id", "<unknown>"))
+
+    if skipped:
+        preview = ", ".join(skipped[:3])
+        print(
+            "Skip BM25-incompatible nodes before retriever build: "
+            f"{preview}; skipped={len(skipped)}"
+        )
+
+    return compatible_nodes
 
 
 def chinese_tokenizer(text: str) -> List[str]:
@@ -73,6 +124,132 @@ def clamp_top_k_to_corpus(vector_index, top_k: int) -> int:
         return max(1, int(top_k))
 
 
+class SafeVectorIndexRetriever(VectorIndexRetriever):
+    """在标准 VectorIndexRetriever 基础上加固：剔除失效向量 id 和维度不兼容的历史 embedding。"""
+
+    def _filter_stale_query_result_ids(self, query_result: VectorStoreQueryResult) -> VectorStoreQueryResult:
+        """
+        功能：
+        - 过滤 vector_store 返回结果中不存在于 index_struct.nodes_dict 的陈旧 node_id。
+
+        背景：
+        - 历史导入/删除操作可能导致 vector_store 里残留已失效的向量 id。
+        - LlamaIndex 原生 VectorIndexRetriever 遇到这类 id 会直接抛 KeyError，导致整次查询失败。
+        - 这里提前剔除，保证检索链路对历史脏数据具备容错能力。
+        """
+        if query_result.nodes is not None or not query_result.ids:
+            return query_result
+
+        index_struct = getattr(self._index, "index_struct", None)
+        nodes_dict = getattr(index_struct, "nodes_dict", {}) or {}
+        valid_ids: list[str] = []
+        valid_similarities: list[float] = []
+        skipped_ids: list[str] = []
+
+        for position, node_id in enumerate(query_result.ids):
+            if node_id in nodes_dict:
+                valid_ids.append(node_id)
+                if query_result.similarities is not None and position < len(query_result.similarities):
+                    valid_similarities.append(query_result.similarities[position])
+            else:
+                skipped_ids.append(node_id)
+
+        if skipped_ids:
+            preview = ", ".join(skipped_ids[:3])
+            print(
+                "Skip stale vector ids not found in index_struct.nodes_dict: "
+                f"{preview}; skipped={len(skipped_ids)}"
+            )
+
+        similarities = valid_similarities if query_result.similarities is not None else None
+        return VectorStoreQueryResult(nodes=None, similarities=similarities, ids=valid_ids)
+
+    def _prune_incompatible_vector_embeddings(self, query_embedding) -> int:
+        """剔除与当前查询向量维度不一致的历史 embedding，避免向量检索时因维度不匹配报错。"""
+        if query_embedding is None:
+            return 0
+
+        try:
+            expected_dim = len(query_embedding)
+        except TypeError:
+            return 0
+
+        if expected_dim <= 0:
+            return 0
+
+        vector_data = getattr(self._vector_store, "data", None)
+        embedding_dict = getattr(vector_data, "embedding_dict", None)
+        if not isinstance(embedding_dict, dict) or not embedding_dict:
+            return 0
+
+        metadata_dict = getattr(vector_data, "metadata_dict", None)
+        ref_doc_dict = getattr(vector_data, "text_id_to_ref_doc_id", None)
+        invalid_ids: list[str] = []
+
+        for node_id, embedding in embedding_dict.items():
+            try:
+                current_dim = len(embedding)
+            except TypeError:
+                current_dim = -1
+            if current_dim != expected_dim:
+                invalid_ids.append(node_id)
+
+        if not invalid_ids:
+            return 0
+
+        for node_id in invalid_ids:
+            embedding_dict.pop(node_id, None)
+            if isinstance(metadata_dict, dict):
+                metadata_dict.pop(node_id, None)
+            if isinstance(ref_doc_dict, dict):
+                ref_doc_dict.pop(node_id, None)
+
+        preview = ", ".join(invalid_ids[:3])
+        print(
+            "Pruned incompatible vector embeddings before retrieval: "
+            f"expected_dim={expected_dim}, removed={len(invalid_ids)}, sample={preview}"
+        )
+        return len(invalid_ids)
+
+    def _get_nodes_with_embeddings(self, query_bundle_with_embeddings):
+        """在获取节点前先剔除失效向量 id 和不兼容 embedding，再走 LlamaIndex 原生查询流程。"""
+        query = self._build_vector_store_query(query_bundle_with_embeddings)
+        self._prune_incompatible_vector_embeddings(getattr(query, "query_embedding", None))
+        query_result = self._vector_store.query(query, **self._kwargs)
+        query_result = self._filter_stale_query_result_ids(query_result)
+
+        nodes_to_fetch = self._determine_nodes_to_fetch(query_result)
+        if nodes_to_fetch:
+            fetched_nodes: list[BaseNode] = self._docstore.get_nodes(
+                node_ids=nodes_to_fetch, raise_error=False
+            )
+            query_result.nodes = self._insert_fetched_nodes_into_query_result(
+                query_result, fetched_nodes
+            )
+
+        log_vector_store_query_result(query_result)
+        return self._convert_nodes_to_scored_nodes(query_result)
+
+    async def _aget_nodes_with_embeddings(self, query_bundle_with_embeddings):
+        """在获取节点前先剔除失效向量 id 和不兼容 embedding，再走 LlamaIndex 原生查询流程。"""
+        query = self._build_vector_store_query(query_bundle_with_embeddings)
+        self._prune_incompatible_vector_embeddings(getattr(query, "query_embedding", None))
+        query_result = await self._vector_store.aquery(query, **self._kwargs)
+        query_result = self._filter_stale_query_result_ids(query_result)
+
+        nodes_to_fetch = self._determine_nodes_to_fetch(query_result)
+        if nodes_to_fetch:
+            fetched_nodes: list[BaseNode] = await self._docstore.aget_nodes(
+                node_ids=nodes_to_fetch, raise_error=False
+            )
+            query_result.nodes = self._insert_fetched_nodes_into_query_result(
+                query_result, fetched_nodes
+            )
+
+        log_vector_store_query_result(query_result)
+        return self._convert_nodes_to_scored_nodes(query_result)
+
+
 class SimpleBM25Retriever(BM25Retriever):
     @classmethod
     def from_defaults(cls, index, similarity_top_k, **kwargs) -> "BM25Retriever":
@@ -94,18 +271,14 @@ class SimpleBM25Retriever(BM25Retriever):
         - BM25Retriever: 初始化后的 BM25 检索器。
         """
         docstore = index.docstore
+        nodes = filter_bm25_compatible_nodes(list(docstore.docs.values()))
 
-        # 限制 top_k，避免 bm25s 在语料极小时抛 ValueError。
-        try:
-            corpus_size = len(docstore.docs)
-        except Exception:
-            corpus_size = None
-
-        if corpus_size is not None:
-            similarity_top_k = max(1, min(int(similarity_top_k), int(corpus_size)))
+        # 约束 top_k 不超过语料规模，否则 bm25s 库内部会抛 ValueError。
+        corpus_size = len(nodes)
+        similarity_top_k = max(1, min(int(similarity_top_k), int(corpus_size)))
 
         return BM25Retriever.from_defaults(
-            docstore=docstore,
+            nodes=nodes,
             similarity_top_k=similarity_top_k,
             verbose=True,
             tokenizer=chinese_tokenizer,
@@ -134,7 +307,7 @@ class SimpleHybridRetriever(BaseRetriever):
         self.top_k = top_k
 
         # 向量检索负责语义召回。
-        self.vector_retriever = VectorIndexRetriever(
+        self.vector_retriever = SafeVectorIndexRetriever(
             index=vector_index, similarity_top_k=top_k, verbose=True,
         )
 
@@ -212,7 +385,7 @@ class SimpleFusionRetriever(QueryFusionRetriever):
     - 使用 QueryFusionRetriever 融合向量检索与 BM25 检索结果。
     """
 
-    def __init__(self, vector_index, top_k=2, mode=FUSION_MODES.DIST_BASED_SCORE):
+    def __init__(self, vector_index, top_k=2, mode=FUSION_MODES.DIST_BASED_SCORE, kb_ids: list[str] | None = None):
         """
         输入：
         - vector_index: 向量索引实例。
@@ -227,13 +400,15 @@ class SimpleFusionRetriever(QueryFusionRetriever):
         top_k = clamp_top_k_to_corpus(vector_index, top_k)
         self.top_k = top_k
         self.mode = mode
+        self._kb_ids: set[str] | None = set(kb_ids) if kb_ids else None
+        self._kb_filters = build_kb_metadata_filters(kb_ids)
 
-        self.vector_retriever = VectorIndexRetriever(
-            index=vector_index, similarity_top_k=top_k, verbose=True,
+        self.vector_retriever = SafeVectorIndexRetriever(
+            index=vector_index, similarity_top_k=top_k, verbose=True, filters=self._kb_filters,
         )
 
         self.bm25_retriever = SimpleBM25Retriever.from_defaults(
-            index=vector_index, similarity_top_k=top_k,
+            index=vector_index, similarity_top_k=top_k, filters=self._kb_filters,
         )
 
         super().__init__(
@@ -245,3 +420,27 @@ class SimpleFusionRetriever(QueryFusionRetriever):
             use_async=True,
             verbose=True,
         )
+
+
+    def _node_allowed_by_kb(self, node) -> bool:
+        """判断节点是否属于当前查询限定的知识库范围。"""
+        if not self._kb_ids:
+            return True
+        kb_id = getattr(getattr(node, "node", None), "metadata", {}).get("kb_id")
+        if kb_id is None:
+            return "default" in self._kb_ids
+        return kb_id in self._kb_ids
+
+    def _filter_nodes_by_kb(self, nodes):
+        """在融合检索器返回层兜底过滤 kb_id，避免后置过滤遗漏。"""
+        if not self._kb_ids:
+            return nodes
+        return [node for node in nodes if self._node_allowed_by_kb(node)]
+
+    def _retrieve(self, query_bundle):
+        """同步融合检索后按 kb_id 过滤结果。"""
+        return self._filter_nodes_by_kb(super()._retrieve(query_bundle))
+
+    async def _aretrieve(self, query_bundle):
+        """异步融合检索后按 kb_id 过滤结果。"""
+        return self._filter_nodes_by_kb(await super()._aretrieve(query_bundle))

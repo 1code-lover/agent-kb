@@ -12,7 +12,7 @@ class KBIdFilter(BaseNodePostprocessor):
     """知识库 ID 后置过滤器
 
     根据节点 metadata 中的 "kb_id" 字段进行过滤。
-    未标注 kb_id 的节点默认保留（兼容旧数据）。
+    未标注 kb_id 的节点只归 default；非 default 查询不得混入旧数据。
     kb_ids 为空或 None 时不过滤。
     """
 
@@ -31,9 +31,13 @@ class KBIdFilter(BaseNodePostprocessor):
     ) -> list[NodeWithScore]:
         if not self._kb_ids:
             return nodes
-        # 无 kb_id 元数据的节点默认保留（兼容旧数据）
-        return [
-            n
-            for n in nodes
-            if n.node.metadata.get("kb_id") is None or n.node.metadata.get("kb_id") in self._kb_ids
-        ]
+        # 无 kb_id 的旧节点只归 default；非 default 查询不能混入旧节点或 default 节点。
+        result: list[NodeWithScore] = []
+        for node in nodes:
+            kb_id = node.node.metadata.get("kb_id")
+            if kb_id is None:
+                if "default" in self._kb_ids:
+                    result.append(node)
+            elif kb_id in self._kb_ids:
+                result.append(node)
+        return result

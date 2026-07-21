@@ -452,17 +452,14 @@ button {
 
 .kb-item {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  padding: 8px 10px;
   border-radius: 6px;
-  cursor: pointer;
   font-size: 13px;
   color: #cbd5e1;
   background: #1e293b;
   border: 1px solid transparent;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
 .kb-item:hover {
@@ -476,8 +473,27 @@ button {
   border-color: #3b82f6;
 }
 
-.kb-item-name {
+.kb-item-select {
+  display: flex;
   flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.kb-item-select:disabled {
+  cursor: not-allowed;
+}
+
+.kb-item-name {
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -492,6 +508,7 @@ button {
 .kb-item-actions {
   display: flex;
   gap: 2px;
+  padding-right: 6px;
 }
 
 .kb-btn-icon {
@@ -781,4 +798,93 @@ button {
 
 .success {
   color: #4ade80;
+}
+
+/* ── Explicit KB target selection ── */
+
+.kb-sidebar-hint,
+.kb-sidebar-status {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.kb-create-form label {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.kb-item.disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.kb-item-select:focus-visible,
+.kb-dropzone:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+.kb-tab:disabled {
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.kb-target-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 12px 14px;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+.kb-target-card.ready {
+  border-color: #2563eb;
+  background: #172554;
+}
+
+.kb-target-card.missing {
+  border-color: #f59e0b;
+  background: #451a03;
+  color: #fde68a;
+}
+
+.kb-target-card code {
+  color: #bfdbfe;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.kb-dropzone.disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background: #0f172a;
+}
+
+.kb-dropzone.disabled:hover {
+  border-color: #475569;
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+.kb-selection-empty {
+  padding: 32px 20px;
+  border: 1px dashed #475569;
+  border-radius: 8px;
+  color: #cbd5e1;
+  text-align: center;
+  background: #111827;
+}
+
+.kb-page-notice {
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid #166534;
+  border-radius: 6px;
+  background: #052e16;
 }

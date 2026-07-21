@@ -259,6 +259,38 @@ def test_load_files_maps_nodes_by_file_name_and_normalizes_metadata(monkeypatch:
     manager.insert_nodes.assert_called_once_with(nodes)
 
 
+
+def test_load_files_ignores_non_string_file_path_metadata_and_maps_by_file_name(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    a = tmp_path / "a.txt"
+    b = tmp_path / "b.txt"
+    a.write_text("alpha", encoding="utf-8")
+    b.write_text("bravo", encoding="utf-8")
+    manager = _manager()
+    docs = [
+        SimpleNamespace(metadata={"file_path": {"bad": "shape"}, "file_name": "b.txt"}),
+    ]
+    monkeypatch.setattr(manager, "_load_documents", MagicMock(return_value=docs))
+    monkeypatch.setattr(manager, "insert_nodes", MagicMock())
+
+    class FakePipeline:
+        def run(self, documents):
+            assert documents[0].metadata["file_path"] == str(b.resolve())
+            assert documents[0].metadata["file_name"] == "b.txt"
+            return [SimpleNamespace(metadata={"file_path": {"bad": "shape"}, "file_name": "b.txt"})]
+
+    monkeypatch.setattr(index_module, "AdvancedIngestionPipeline", FakePipeline)
+
+    nodes = manager.load_files([a, b], 128, 16, kb_id="kb-a")
+
+    assert nodes[0].metadata["file_path"] == str(b.resolve())
+    assert nodes[0].metadata["file_name"] == "b.txt"
+    assert nodes[0].metadata["kb_id"] == "kb-a"
+    manager.insert_nodes.assert_called_once_with(nodes)
+
+
 def test_load_websites_uses_fallback_filters_docs_and_inserts(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[list[str]] = []
 

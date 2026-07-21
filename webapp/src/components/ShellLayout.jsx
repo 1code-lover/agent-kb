@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 
 const navs = [
-  { to: "/agent", label: "Agent" },
+  { to: "/agent", label: "问答" },
   { to: "/models", label: "模型" },
   { to: "/knowledge", label: "知识库" },
   { to: "/settings", label: "设置" },
@@ -27,7 +27,7 @@ export default function ShellLayout() {
               key={item.to}
               className={
                 location.pathname === item.to ||
-                (location.pathname.startsWith(item.to + "/")) ||
+                location.pathname.startsWith(item.to + "/") ||
                 (location.pathname === "/" && item.to === "/agent")
                   ? "active"
                   : ""

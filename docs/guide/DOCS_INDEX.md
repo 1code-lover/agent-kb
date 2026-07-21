@@ -1,7 +1,7 @@
-# ThinkRAG 文档总索引
+﻿# ThinkRAG 文档总索引
 
 > 定位：`docs/project.md` 负责“项目当前状态”，本文负责“文档怎么找”。如果两者与代码不一致，应优先修正文档，而不是继续沿用过期口径。
-> 最近更新：2026-07-15
+> 最近更新：2026-07-16
 
 ## 1. 协作快速入口
 
@@ -24,6 +24,8 @@
 | `docs/20260713-pdf-ocr-quality/` | 2026-07-13 PDF OCR 质量专题 | 当前专题文档 |
 | `docs/20260714-embedding-rag-quality-evaluation/` | 2026-07-14 嵌入检索、真实导入与问答质量评估专题 | 当前专题文档 |
 | `docs/20260714-kb-directory-storage/` | 2026-07-14 多知识库原始文件目录化存储需求包 | 阶段 5 正式测试与测试报告评审已通过，待提交推送 |
+| `docs/20260715-grain-kb-evaluation/` | 2026-07-15 粮仓知识库导入、嵌入检索与问答测试指南 | 当前专题文档；已补充分批导入脚本、运行时修复和 5 组 HTTP 问答 smoke 结果。 |
+| `docs/20260716-kb-upload-target-selection/` | 上传目标知识库显式选择修复、multipart 400 根因定位与验证记录 |
 | `docs/spec/` | 需求、设计、接口、产品规划等规范文档 | 当前主分类目录 |
 | `docs/plan/` | 实施方案、执行计划 | 当前主分类目录 |
 | `docs/test/` | 测试方案、回归清单、手工测试清单 | 当前主分类目录 |
@@ -61,6 +63,9 @@
 - `docs/20260713-pdf-ocr-quality/`：PDF OCR 回退与质量评估专题。
 - `docs/20260714-embedding-rag-quality-evaluation/`：本地 BGE 嵌入质量、独立知识库真实导入、LLM 问答前置条件及后续阿里百炼测试口径。
 - `docs/20260714-kb-directory-storage/`：将新导入原始文件调整为 `data/{kb_id}/`，并建立 QA fixture schema；当前已完成 PRD/FRD/RTM/Plan/Test Plan/Test Report，阶段 5 正式测试与测试报告评审已通过，待提交推送。
+- `docs/20260715-grain-kb-evaluation/`：粮仓知识库 `grain-knowledge-base` 的导入、嵌入检索、问答质量和人工验收测试指南；记录 DOCX apply smoke、stale vector 容错和多 KB 来源隔离验证。
+- `docs/20260716-kb-upload-target-selection/`：`/knowledge` 页上传目标显式选择专题；已补充 Markdown 上传 400 的真正根因——前端手动写 multipart 头导致 boundary 丢失——以及对应的 API 回归测试。
+
 
 ### 3.4 运行、测试与排障
 - `docs/guide/desktop_runbook.md`：本地启动 / 联调说明。
@@ -117,3 +122,11 @@
    - 受影响的专题设计文档
 4. **新需求文档必须落在同一个 `docs/YYYYMMDD-topic/` 目录下**，不要再把 PRD / 计划 / 测试报告散落回 `docs/` 根目录。
 5. **评审后先写 `评审建议.txt`，再按建议修改**，保持“评审结论 → 修改动作”链路可追溯。
+
+
+## 6. 2026-07-17 addendum
+
+- New topic folder: `docs/20260717-agent-qa-page-refactor/`
+- Focus: `/agent` question-first workspace refactor, retriever 400 root-cause fix, and smoke test evidence.
+- Key outputs: PRD / FRD / RTM / plan / test plan / test report in the same topic directory.
+- Recommended use: when the current question is about `/agent` page UX, KB-scoped chat, stale embeddings, or empty Markdown causing 400, read this folder together with `docs/project.md`.

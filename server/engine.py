@@ -57,7 +57,7 @@ def create_query_engine(
         node_postprocessors.append(create_reranker_model(model_name=reranker, top_n=top_n))
     if kb_ids:
         node_postprocessors.append(KBIdFilter(kb_ids=kb_ids))
-    retriever = SimpleFusionRetriever(vector_index=index, top_k=top_k)
+    retriever = SimpleFusionRetriever(vector_index=index, top_k=top_k, kb_ids=kb_ids)
 
     query_engine = RetrieverQueryEngine.from_args(
         retriever=retriever,

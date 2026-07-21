@@ -64,11 +64,19 @@ class TestM2KbIdFilter:
         result = filtr.postprocess_nodes([node])
         assert len(result) == 0
 
-    def test_kb_id_filter_no_kb_id_in_metadata(self):
-        """节点无 kb_id 元数据时，保留（兼容旧数据）"""
+    def test_kb_id_filter_no_kb_id_in_metadata_for_non_default(self):
+        """节点无 kb_id 元数据时只归 default，非 default 查询应过滤掉。"""
         from server.kb_filter import KBIdFilter
         node = self._make_node({"file_name": "test.txt"})
         filtr = KBIdFilter(kb_ids=["my-kb"])
+        result = filtr.postprocess_nodes([node])
+        assert len(result) == 0
+
+    def test_kb_id_filter_no_kb_id_in_metadata_for_default(self):
+        """节点无 kb_id 元数据时允许 default 查询保留。"""
+        from server.kb_filter import KBIdFilter
+        node = self._make_node({"file_name": "test.txt"})
+        filtr = KBIdFilter(kb_ids=["default"])
         result = filtr.postprocess_nodes([node])
         assert len(result) == 1
 

@@ -1,4 +1,4 @@
-import client from "./client";
+import client from "./client.js";
 
 function unwrapEnvelope(response) {
   if (response?.code !== 0) {
@@ -63,9 +63,6 @@ export async function getAgentSkills() {
 }
 
 export async function uploadFilesToKnowledge(formData) {
-  const response = await client.post("/api/kb/file/import", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  });
+  const response = await client.post("/api/kb/file/import", formData);
   return unwrapEnvelope(response);
 }
-

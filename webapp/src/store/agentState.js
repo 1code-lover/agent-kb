@@ -2,7 +2,7 @@ export const AGENT_MODES = [
   { value: "agent", label: "Agent" },
   { value: "kb_search", label: "知识检索" },
   { value: "read_file", label: "读文件" },
-  { value: "run_cmd", label: "命令执行" }
+  { value: "run_cmd", label: "命令执行" },
 ];
 
 function normalizeTimelineItem(item, index) {
@@ -10,7 +10,7 @@ function normalizeTimelineItem(item, index) {
     seq: index + 1,
     type: item?.type || "status",
     content: item?.content || "",
-    meta: item?.meta || null
+    meta: item?.meta || null,
   };
 }
 
@@ -19,7 +19,7 @@ export function createWorkspaceState() {
     currentMode: "agent",
     knowledgeScope: {
       kb_id: "default",
-      kb_name: "NorthAgent Workspace"
+      kb_name: "默认知识库",
     },
     taskGoal: "",
     draftQuestion: "",
@@ -36,7 +36,7 @@ export function createWorkspaceState() {
     enabledSkills: ["planner", "file_context", "safe_command"],
     activeDetail: "receipts",
     showDetails: false,
-    sessionLoaded: false
+    sessionLoaded: false,
   };
 }
 
@@ -53,18 +53,13 @@ export function buildManualTimeline(question, mode) {
     {
       type: "user",
       content: question,
-      meta: {
-        mode,
-        stage: "submitted"
-      }
+      meta: { mode, stage: "submitted" },
     },
     {
       type: "status",
       content: "任务已提交，正在等待 Agent Runtime 执行。",
-      meta: {
-        mode
-      }
-    }
+      meta: { mode },
+    },
   ];
 }
 
@@ -93,8 +88,8 @@ export function mapAgentRunToTimeline(runData) {
         riskLevel: step?.risk_level || null,
         receiptId: step?.receipt_id || null,
         actionId: step?.action_id || null,
-        evidenceIds: step?.evidence_ids || []
-      }
+        evidenceIds: step?.evidence_ids || [],
+      },
     });
   }
 
@@ -116,7 +111,7 @@ export function mergeApprovalTimeline(existingTimeline, result) {
     merged.push({
       type: item.type,
       content: item.content,
-      meta: item.meta
+      meta: item.meta,
     });
   }
   return replaceTimeline(merged);
@@ -131,7 +126,10 @@ export function mapSessionSnapshot(snapshot) {
   const uiState = snapshot?.ui_state || {};
   return {
     currentMode: workspace.current_mode || "agent",
-    knowledgeScope: workspace.knowledge_scope || { kb_id: "default", kb_name: "NorthAgent Workspace" },
+    knowledgeScope: workspace.knowledge_scope || {
+      kb_id: "default",
+      kb_name: "默认知识库",
+    },
     taskGoal: workspace.task_goal || "",
     draftQuestion: workspace.draft_question || "",
     runState: workspace.run_state || "idle",
@@ -147,7 +145,6 @@ export function mapSessionSnapshot(snapshot) {
     enabledSkills: workspace.enabled_skills || ["planner", "file_context", "safe_command"],
     activeDetail: uiState.active_detail || "receipts",
     showDetails: Boolean(uiState.show_details),
-    sessionLoaded: true
+    sessionLoaded: true,
   };
 }
-

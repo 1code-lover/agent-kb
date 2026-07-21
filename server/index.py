@@ -25,6 +25,25 @@ from config import DEV_MODE
 from server.utils_json import sanitize_for_json  # metadata 清洗，避免 Tag 不可序列化
 
 
+def _resolve_path_metadata(value: Any) -> Path | None:
+    """将 metadata 中的路径字段安全解析为绝对路径。
+
+    LlamaIndex 读取器或外部 reader 可能把 file_path 写成 dict/list 等结构化
+    metadata；这些值不能直接传给 Path()，否则会导致导入接口 400。
+    """
+    if not isinstance(value, (str, os.PathLike)):
+        return None
+
+    raw = os.fspath(value).strip()
+    if not raw:
+        return None
+
+    try:
+        return Path(raw).resolve()
+    except (OSError, TypeError, ValueError):
+        return None
+
+
 class IndexManager:
     """
     功能：
@@ -221,12 +240,10 @@ class IndexManager:
                 if hasattr(document, "metadata") and isinstance(getattr(document, "metadata"), dict):
                     metadata = sanitize_for_json(document.metadata)
                     raw_path = metadata.get("file_path")
-                    resolved_path = None
-                    if raw_path:
-                        try:
-                            resolved_path = Path(raw_path).resolve()
-                        except OSError:
-                            resolved_path = None
+                    resolved_path = _resolve_path_metadata(raw_path)
+                    if resolved_path is None:
+                        file_name = metadata.get("file_name")
+                        resolved_path = file_by_name.get(file_name) if isinstance(file_name, str) else None
                     if resolved_path is None and len(files) == 1:
                         resolved_path = files[0]
                     if resolved_path is not None:
@@ -241,15 +258,10 @@ class IndexManager:
                     n.metadata = {}
                 n.metadata = sanitize_for_json(n.metadata)
                 raw_path = n.metadata.get("file_path")
-                resolved_path = None
-                if raw_path:
-                    try:
-                        resolved_path = Path(raw_path).resolve()
-                    except OSError:
-                        resolved_path = None
+                resolved_path = _resolve_path_metadata(raw_path)
                 if resolved_path is None:
                     file_name = n.metadata.get("file_name")
-                    resolved_path = file_by_name.get(file_name) if file_name else None
+                    resolved_path = file_by_name.get(file_name) if isinstance(file_name, str) else None
                 if resolved_path is None and len(files) == 1:
                     resolved_path = files[0]
                 if resolved_path is not None:

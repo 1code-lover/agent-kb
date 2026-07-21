@@ -23,7 +23,7 @@ export default function AgentApprovalPanel({ pendingActions, approvalMessage, di
               <span>{action.risk_level}</span>
             </div>
             <p className="stack-subtle">
-              action_id: {action.action_id} / created_at: {action.created_at}
+              {"action_id: " + action.action_id + " / created_at: " + (action.created_at || "-")}
             </p>
             <div className="action-row">
               <button
@@ -55,4 +55,3 @@ export default function AgentApprovalPanel({ pendingActions, approvalMessage, di
     </section>
   );
 }
-

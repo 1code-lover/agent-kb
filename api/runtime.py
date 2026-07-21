@@ -72,7 +72,9 @@ class RuntimeState:
                 llm_settings.get("temperature", config.TEMPERATURE),
                 llm_settings.get("system_prompt", config.SYSTEM_PROMPT),
             )
-            if getattr(Settings, "llm", None) is not None and self.llm_fingerprint == fingerprint:
+            # 不读取 Settings.llm 属性；LlamaIndex 会在属性访问时自动解析默认 OpenAI，
+            # 未配置 OPENAI_API_KEY 时会在百炼等 OpenAI-compatible 配置生效前抛错。
+            if getattr(Settings, "_llm", None) is not None and self.llm_fingerprint == fingerprint:
                 return True
 
             if provider == "Ollama":
@@ -112,6 +114,9 @@ class RuntimeState:
         Returns:
             是否存在并成功加载索引。
         """
+        # 索引加载前必须先确保 embedding 模型已就位，否则 LlamaIndex
+        # 在 load_index/as_retriever 内部会隐式回退到 OpenAI embedding。
+        self.ensure_models_ready(require_llm=False)
         manager = self.get_index_manager()
         with self.lock:
             if manager.check_index_exists():

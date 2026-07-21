@@ -1,80 +1,5 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AGENT_MODES, buildReadFileTemplate } from "../../store/agentState";
-
-function CompactPicker({ label, value, options, disabled, emptyLabel, onChange }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef(null);
-  const listboxId = useId();
-  const currentOption = options.find((item) => item.value === value);
-
-  useEffect(() => {
-    function handlePointerDown(event) {
-      if (!rootRef.current?.contains(event.target)) {
-        setOpen(false);
-      }
-    }
-
-    function handleEscape(event) {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    }
-
-    window.addEventListener("mousedown", handlePointerDown);
-    window.addEventListener("keydown", handleEscape);
-    return () => {
-      window.removeEventListener("mousedown", handlePointerDown);
-      window.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (disabled || options.length === 0) {
-      setOpen(false);
-    }
-  }, [disabled, options.length]);
-
-  return (
-    <div ref={rootRef} className={open ? "compact-picker open" : "compact-picker"}>
-      <button
-        type="button"
-        className="compact-picker-trigger"
-        disabled={disabled}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listboxId}
-        aria-label={`${label}选择器`}
-        onClick={() => setOpen((current) => !current)}
-      >
-        <span className="compact-picker-label">{label}</span>
-        <span className="compact-picker-value">{currentOption?.label || emptyLabel}</span>
-        <span className="compact-picker-arrow" aria-hidden="true">
-          {open ? "▲" : "▼"}
-        </span>
-      </button>
-
-      {open ? (
-        <div id={listboxId} className="compact-picker-menu" role="listbox" aria-label={label}>
-          {options.map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              role="option"
-              aria-selected={item.value === value}
-              className={item.value === value ? "compact-picker-item active" : "compact-picker-item"}
-              onClick={() => {
-                onChange(item.value);
-                setOpen(false);
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 function formatSkill(skillId) {
   if (skillId === "planner") return "规划";
@@ -84,36 +9,121 @@ function formatSkill(skillId) {
   return skillId;
 }
 
-export default function AgentInputPanel({
-  question,
-  mode,
-  disabled,
-  providerOptions,
-  modelOptions,
-  attachedFiles,
-  enabledSkills,
-  uploadBusy,
-  onQuestionChange,
-  onModeChange,
-  onProviderChange,
-  onModelChange,
-  onSubmit,
-  onPickLocalFiles,
-  onUploadFiles,
-  onRemoveAttachedFile
-}) {
+function ModeSelector({ mode, onModeChange, disabled, showAdvancedModes, onToggleAdvanced }) {
+  const visibleModes = showAdvancedModes
+    ? AGENT_MODES
+    : AGENT_MODES.filter((item) => item.value === "agent" || item.value === "kb_search");
+
+  return (
+    <div className="mode-selector-block">
+      <div className="agent-form-row mode-row-header">
+        <span className="agent-mini-label">运行模式</span>
+        <button type="button" className="secondary-button subtle-button" onClick={onToggleAdvanced}>
+          {showAdvancedModes ? "收起高级模式" : "展开更多模式"}
+        </button>
+      </div>
+      <div className="mode-switcher">
+        {visibleModes.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            disabled={disabled}
+            className={mode === item.value ? "mode-chip active" : "mode-chip"}
+            onClick={() => onModeChange(item.value)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function AgentInputPanel(props) {
+  const {
+    question,
+    mode,
+    disabled,
+    providerOptions,
+    modelOptions,
+    attachedFiles,
+    enabledSkills,
+    uploadBusy,
+    onQuestionChange,
+    onModeChange,
+    onProviderChange,
+    onModelChange,
+    onSubmit,
+    onPickLocalFiles,
+    onUploadFiles,
+    onRemoveAttachedFile,
+  } = props;
+
   const [showAdvancedModes, setShowAdvancedModes] = useState(false);
   const uploadInputRef = useRef(null);
 
   return (
-    <section className="agent-composer-shell">
-      <form className="agent-composer-bar" onSubmit={onSubmit}>
+    <section className="agent-panel composer-panel">
+      <div className="panel-heading">
+        <div>
+          <p className="panel-eyebrow">任务输入</p>
+          <h3>Agent 控制台</h3>
+        </div>
+      </div>
+
+      <form className="agent-form" onSubmit={onSubmit}>
+        <ModeSelector
+          mode={mode}
+          onModeChange={onModeChange}
+          disabled={disabled}
+          showAdvancedModes={showAdvancedModes}
+          onToggleAdvanced={() => setShowAdvancedModes((current) => !current)}
+        />
+
+        <div className="agent-form-grid">
+          <label className="agent-field">
+            <span className="agent-mini-label">模型提供商</span>
+            <select
+              className="compact-select"
+              value={providerOptions.value}
+              disabled={providerOptions.disabled}
+              onChange={(event) => onProviderChange(event.target.value)}
+            >
+              {providerOptions.items.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="agent-field">
+            <span className="agent-mini-label">模型</span>
+            <select
+              className="compact-select"
+              value={modelOptions.value}
+              disabled={modelOptions.disabled}
+              onChange={(event) => onModelChange(event.target.value)}
+            >
+              {modelOptions.items.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         <textarea
           className="agent-chat-input compact"
           value={question}
-          rows={3}
+          rows={5}
           onChange={(event) => onQuestionChange(event.target.value)}
-          placeholder="直接输入任务。例如：帮我梳理这个项目下一步该怎么做。"
+          placeholder={
+            mode === "read_file"
+              ? "例如：" + buildReadFileTemplate()
+              : "直接输入任务。例如：帮我梳理这个知识库里有哪些核心主题。"
+          }
         />
 
         <div className="agent-composer-helper-row">
@@ -128,7 +138,7 @@ export default function AgentInputPanel({
               disabled={uploadBusy}
               onClick={() => uploadInputRef.current?.click()}
             >
-              {uploadBusy ? "上传中" : "上传并导入"}
+              {uploadBusy ? "上传中…" : "上传并导入"}
             </button>
             <input
               ref={uploadInputRef}
@@ -158,77 +168,28 @@ export default function AgentInputPanel({
         </div>
 
         {attachedFiles.length > 0 ? (
-          <div className="agent-attachment-strip">
+          <div className="attached-file-list">
             {attachedFiles.map((file) => (
-              <span key={file.id || file.path || file.name} className="agent-attachment-chip">
-                <span className="agent-attachment-name">{file.name}</span>
-                <span className="agent-attachment-meta">{file.status === "imported" ? "已入库" : "本地文件"}</span>
-                <button type="button" className="agent-attachment-remove" onClick={() => onRemoveAttachedFile(file.id)}>
-                  ×
+              <article key={file.id} className="attached-file-card">
+                <div>
+                  <strong>{file.name}</strong>
+                  <p className="stack-subtle">{file.path || file.source}</p>
+                </div>
+                <button type="button" className="secondary-button subtle-button" onClick={() => onRemoveAttachedFile(file.id)}>
+                  移除
                 </button>
-              </span>
+              </article>
             ))}
           </div>
         ) : null}
 
-        <div className="agent-composer-bottom">
-          <div className="agent-composer-left">
-            <button
-              type="button"
-              className="secondary-button subtle-button"
-              aria-expanded={showAdvancedModes}
-              aria-label="切换工具模式"
-              onClick={() => setShowAdvancedModes((current) => !current)}
-            >
-              工具
-            </button>
-            {showAdvancedModes ? (
-              <div className="mode-switcher inline-mode-switcher">
-                {AGENT_MODES.map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    className={item.value === mode ? "mode-chip active" : "mode-chip"}
-                    onClick={() => {
-                      onModeChange(item.value);
-                      if (item.value === "read_file" && !question.trim()) {
-                        onQuestionChange(buildReadFileTemplate());
-                      }
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="agent-composer-right agent-composer-right-stacked">
-            <CompactPicker
-              label="供应商"
-              value={providerOptions.value}
-              options={providerOptions.items}
-              disabled={providerOptions.disabled}
-              emptyLabel="未配置"
-              onChange={onProviderChange}
-            />
-
-            <CompactPicker
-              label="模型"
-              value={modelOptions.value}
-              options={modelOptions.items}
-              disabled={modelOptions.disabled}
-              emptyLabel="未配置"
-              onChange={onModelChange}
-            />
-
-            <button type="submit" className="primary-button agent-send-button" disabled={disabled}>
-              {disabled ? "处理中" : "发送"}
-            </button>
-          </div>
+        <div className="agent-form-row submit-row">
+          <span className="simple-note">Agent 模式支持工具、审批与回执；知识检索模式更适合受控问答。</span>
+          <button type="submit" className="primary-button" disabled={disabled || !question.trim()}>
+            提交任务
+          </button>
         </div>
       </form>
     </section>
   );
 }
-

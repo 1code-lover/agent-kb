@@ -8,23 +8,22 @@ export default function AgentEvidencePanel({ evidence }) {
         </div>
       </div>
 
-      {evidence.length === 0 ? <div className="empty-block">这一轮没有返回知识证据。</div> : null}
+      {evidence.length === 0 ? <div className="empty-block">这一轮还没有返回知识证据。</div> : null}
       <div className="stack-list">
         {evidence.map((item) => (
           <article key={item.id} className="stack-card">
             <div className="stack-title-row">
               <strong>{item.title || item.id}</strong>
-              <span>{item.score != null ? `score ${item.score}` : item.kb_id}</span>
+              <span>{item.score != null ? "score " + item.score : item.kb_id}</span>
             </div>
             <p className="stack-subtle">
               {item.source}
-              {item.page && item.page !== "N/A" ? ` / p.${item.page}` : ""}
+              {item.page && item.page !== "N/A" ? " / p." + item.page : ""}
             </p>
-            <p>{item.excerpt || "无摘要"}</p>
+            <p>{item.excerpt || "无摘要。"}</p>
           </article>
         ))}
       </div>
     </section>
   );
 }
-
