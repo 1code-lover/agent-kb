@@ -16,6 +16,4 @@
 - 已新增阶段 4 测试方案 `docs/20260714-kb-directory-storage/20260714-kb-directory-storage-test-plan.md`，并同步 `docs/project.md`、`DOCS_INDEX.md`、多知识库设计文档；下一步等待测试方案评审，通过后再生成正式测试报告。
 - 测试方案首轮评审暂不通过：P1 为缺少覆盖率门禁、遗漏文档/格式自检；已覆盖更新 `评审建议.txt`，并修订 `20260714-kb-directory-storage-test-plan.md`，补齐覆盖率目标 >= 80%、pytest-cov/coverage 依赖、覆盖率命令、`git diff --check`、占位词检查、URL/web import 用例、404/400 异常口径、预跑上下文和重复命令目的说明；同时修复实施计划中 `评审建议.txt` 路径被乱码写成问号导致占位词门禁误命中的问题。
 
-- 2026-07-15 ?? 5 ??????????? `tests/api/test_index_manager_coverage.py` ????????? 70% ??? 84%???????? `90 passed in 9.36s`?KB/? KB/Agent ?? `45 passed, 2 warnings in 3.70s`????? `164 passed, 2 warnings in 5.18s`?? slow ?? `168 passed, 1 deselected, 2 warnings in 5.74s`???? `docs/20260714-kb-directory-storage/20260714-kb-directory-storage-test-report.md`???????????????? dev story?commit?push?
-
 - 2026-07-15 阶段 5 正式测试执行已完成：覆盖率首次 70% 未过，补充 tests/api/test_index_manager_coverage.py 后最终达到 84%；核心目录化 90 passed，扩展回归 164 passed，非 slow 全量 168 passed；已生成测试报告，下一步等待测试报告评审。
