@@ -3,7 +3,7 @@
 > 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构和已知问题。
 > **维护规则**：每次有意义的提交后更新本文的「最近提交」与「当前进度」「已知问题」三节；重大架构变化更新「架构」节。日期使用绝对日期。
 
-最近更新：2026-07-16
+最近更新：2026-07-17
 
 ---
 
@@ -83,6 +83,9 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - **导入功能独立 smoke 已通过**（2026-07-15）：为避免污染正式粮仓知识库，新增临时 KB `import-smoke-20260715-192353` 验证创建 KB、`POST /api/kb/file/import`、`data/{kb_id}/` 落盘、文档列表、问答召回和跨 KB 负向隔离；测试问题“导入功能烟测代号是什么？”在临时 KB 回答“蓝麦”，在 `grain-knowledge-base` 不泄漏该答案。报告位于 `data/grain-knowledge-base/qa/import-function-smoke-20260715-192353.json`。
 - **上传目标知识库显式选择 P1 已修复**（2026-07-16）：`/knowledge` 初始不再静默选中 `default`；只有用户显式选择已登记且 active 的 KB 后，文档列表、文件上传和网页导入才可用。知识库列表支持创建、重命名、删除，新建成功后自动选择；导入区显示目标名称、`kb_id` 和 `data/{kb_id}/`。同时修复 Axios 统一响应体二次解包导致列表误显示为空的问题，并补充上传 API 回归测试。Node 回归 18/18、前端 API/规则覆盖率 80.92%、后端定向回归 29/29、Vite 构建和浏览器 smoke 均通过。
 - **上传 400 根因已修复**（2026-07-16）：定位到 `webapp/src/api/kb.js` 与 `webapp/src/api/agent.js` 手动设置了 `Content-Type: multipart/form-data`，导致浏览器未自动补齐 multipart boundary，请求到 FastAPI 时返回 `Missing boundary in multipart.` 并报 400。现已移除该请求头，并新增 `webapp/src/api/kb.test.js` 回归验证上传调用仅传 `FormData` 与 `kb_id`，不再显式覆盖 multipart 头；定向 Node 回归、覆盖率与 `npm run build` 已通过。
+- **多知识库目录化存储已实现（`data/{kb_id}/`）**（2026-07-15，改动待提交）：导入文件/URL 前校验目标 KB 为 active；上传文件按 `kb_id` 落盘到 `data/{kb_id}/` 并传显式路径给 `IndexManager`；list/delete 对旧无 `kb_id` 节点与新节点做了隔离；新增 registry 原子写、迁移脚本 `scripts/migrate_kb_directory_storage.py`、RAG 质量 fixture 校验脚本 `scripts/validate_rag_quality_fixtures.py` 及配套测试。
+- **`/agent` 页面已重构为问题优先的单页工作区**（2026-07-17，改动待提交）：`webapp/src/pages/AgentPage.jsx` 整合出三种可用模式——基础聊天、限定知识库聊天、Agent 高级模式；同页可见对话线程、当前知识范围、模型状态和最新引用来源；KB 聊天强制要求显式选中 active 知识库。同时修复了后端阻塞性回归：历史坏维度向量和空 Markdown 节点会导致 `/api/chat/query` 返回 400，现已在 `server/retriever.py` 中于向量检索前剔除坏向量、BM25 建索引前跳过空/不可序列化节点。Node 规则测试 14/14、`pytest tests/api/test_retriever_stale_vectors.py -q` 7 passed、`npm run build` 通过，浏览器 `/agent` 实测正常返回答案和来源。详见 `docs/20260717-agent-qa-page-refactor/`。
+- **粮仓知识库批量导入脚本已新增**（2026-07-15，改动待提交）：`scripts/import_grain_kb_batches.py` 支持 dry-run 计划、DOCX/PDF 分批 apply 和 JSON 报告，配套 `tests/scripts/test_import_grain_kb_batches.py`。
 - **Agent runtime + 审批流已可用**：命令解析、风险分级 L0-L3、硬拒绝过滤、pending action 审批（approve/reject）、回执存储、session 快照持久化已接通。
 - **PDF OCR 回退已落地**（`4a10f54`）：`PDFOCRReader` 先用 PyMuPDF 读文字层，无有效文字层时回退 PaddleOCR 逐页识别；`server/index.py` 统一走 `_load_documents()`。
 - **OCR 质量评估已补齐**（`4a10f54`）：`scripts/pdf_ocr_quality.py` 可做关键词召回率评估，并有配套测试。
@@ -92,9 +95,10 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 项目已经不是“只有想法或 Demo”的阶段，而是进入了 **主干功能可运行、近期重点在稳定性收口与架构继续演进** 的阶段：
 
 1. 主产品骨架已经具备；
-2. 最近一轮重点成果是 PDF OCR、Windows 环境修复、多知识库最小闭环补齐，以及本地 API/Web 联调链路修复；
-3. 当前主要矛盾已经从“接口是否打通”转为“共享单索引方案是否继续收紧与升级”；原始文件从 `data/` 根目录平铺改为 `data/{kb_id}/` 的编码、阶段 5 正式测试与测试报告评审均已完成，下一步进入 commit 与 push。
-4. 粮仓知识库的本地资料分类、索引和 QA 骨架已经具备，上传前显式选择目标 KB 的 P1 已解除；下一步先在专用 smoke KB 完成一次用户真实上传复验，再补齐粮仓主资料导入、阿里云/百炼配置下的嵌入质量评测，以及基于 verified QA 的问答效果报告。
+2. 最近一轮重点成果是 PDF OCR、Windows 环境修复、多知识库最小闭环补齐、多知识库目录化存储、`/agent` 页面重构与 retriever 历史坏数据加固；
+3. 当前主要矛盾已经从“接口是否打通”转为“共享单索引方案是否继续收紧与升级”；原始文件从 `data/` 根目录平铺改为 `data/{kb_id}/` 已实现并测试通过；
+4. 粮仓知识库的本地资料分类、索引和 QA 骨架已经具备，上传前显式选择目标 KB 的 P1 已解除；下一步先在专用 smoke KB 完成一次用户真实上传复验，再补齐粮仓主资料导入、阿里云/百炼配置下的嵌入质量评测，以及基于 verified QA 的问答效果报告；
+5. **当前工作树有一大批改动已 `git add` 但尚未 commit**（多知识库目录化存储、`/agent` 页面重构、retriever 加固、粮仓批量导入脚本、开发故事与规划文档），下一步是分批 commit 并 push，避免继续在未提交状态上叠加新改动。
 
 ### 测试
 - 快测（默认）：`python -m pytest tests/ -q -m "not slow"`
@@ -106,7 +110,8 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - 2026-07-16 粮仓知识库 UI 基线：`/api/kb` 可见 `grain-knowledge-base`，浏览器文档列表当前显示 14 个已索引文档，路径和 `kb_id` 均限定在粮仓库；上传目标显式选择修复后，初始不选库，选择粮仓库后文件与网页导入目标提示一致。人工真实上传步骤见 `docs/20260715-grain-kb-evaluation/20260715-grain-kb-evaluation-test-guide.md`。
 - 2026-07-16 本地浏览器 smoke：`/knowledge` 初始显示“请选择知识库”，三个功能标签禁用；侧边栏展示 4 个真实 KB；选中 `grain-knowledge-base` 后显示 14 个文档以及明确的文件/网页导入目标，console error/warn 为空。服务启动与 CORS 基线仍沿用 2026-07-14 已通过结果。
 - 2026-07-14 嵌入与导入烟测：`bge-small-zh-v1.5` 可输出 512 维向量；20 组 UTF-8 中文检索 Recall@1=50%、Recall@3=95%、Recall@5=100%、MRR=0.71；测试库 `embedding-quality-smoke-20260714` 导入 1 个文件并生成 1 个分块，限定 KB 检索命中；未配置 LLM 时问答接口按设计返回 503。详见 `docs/20260714-embedding-rag-quality-evaluation/`。
-- 当前快测已覆盖：PDF OCR 功能 + 质量、KBRegistry、KB 路由、M2 多 KB、agent runtime、CORS 预检、command filter/parser、tool registry、receipt persistence 等主线能力。
+- 2026-07-17 `/agent` 页面重构与 retriever 加固验证（改动待提交）：Node 规则测试 `node --test webapp/src/domain/agentExperience.test.js webapp/src/api/response.test.js webapp/src/domain/kbSelection.test.js` -> 14/14 passed；`pytest tests/api/test_retriever_stale_vectors.py -q` -> 7 passed；`npm run build` 通过；`git diff --check` 退出码 0；直连 `POST /api/chat/query` 返回 200 且不再复现历史 400；浏览器 `http://127.0.0.1:5173/agent` smoke 通过。详见 `docs/20260717-agent-qa-page-refactor/20260717-agent-qa-page-refactor-test-report.md`。
+- 当前快测已覆盖：PDF OCR 功能 + 质量、KBRegistry、KB 路由、M2 多 KB、agent runtime、CORS 预检、command filter/parser、tool registry、receipt persistence、多知识库目录化存储、retriever 历史坏数据加固等主线能力。
 - 慢测（真实 PaddleOCR，约 12 分钟 / 样本）：`python -m pytest -q -m slow -s`，默认不跑。
 - 当前 warning 主要来自 FastAPI 的 `@app.on_event("startup")` 弃用提示，后续宜迁移到 lifespan 写法。
 
@@ -122,6 +127,8 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - **OCR 质量口径仍偏基础**：目前只做关键词召回率，未覆盖 CER 字符准确率、表格结构还原、版面顺序等更细指标。
 - **嵌入首位排序质量仍需优化**：20 组项目领域合成语义测试中 Recall@3=95%、Recall@5=100%，但 Recall@1=50%、MRR=0.71，且 10/20 用例的正确段落分数低于最高干扰项；当前 `use_reranker=false`，尚未完成重排模型和 `bge-large-zh-v1.5` 对照测试。
 - **粮仓知识库还未完成全量向量化**：`data/grain-knowledge-base/` 目录已整理并建立索引，但本地 registry 当前 `doc_count=25`，且包含 smoke/手动重复导入副本，仍低于主资料 126 个文件；正式问答验收前需要按 `index.md` 的主资料清单补齐导入或重建索引，并输出检索/问答评测报告。
+- **大批改动已 add 未 commit**：多知识库目录化存储、`/agent` 页面重构、retriever 历史坏数据加固、粮仓批量导入脚本及配套文档/规划/开发故事均已 `git add`，尚未 commit/push；继续开发前应先分批提交，避免与新改动混在一起。
+- **`logs/frontend_err.log` 中的 vite 报错为历史记录，非当前问题**：日志记录的是 `/agent` 页面重构中途出现过的 `agent-page.css` 缺失和 JSX 编码错乱（乱码字符导致 babel 解析失败），均已在本轮重构中修复（`agent-page.css` 已存在，测试报告确认 `npm run build` 通过）；该日志文件本身建议后续清理或加入 `.gitignore`，避免误导后来者。
 - **空知识库下问答仍会明确失败**：默认 `default` KB 启动可见，但未导入文档时真实检索会返回 `Knowledge base is empty. Please import documents first.`；这是当前预期行为，不代表 API/Web 链路异常。
 - **文档需要联动维护**：`docs/project.md`、`docs/guide/DOCS_INDEX.md`、`docs/spec/knowledge_base_visibility_and_multi_kb_design.md` 已持续按当前代码口径同步；后续代码变更时仍需同步更新，避免再次漂移。
 - **Streamlit 仍在并存**：`app.py` / `frontend/` 作为迁移回退保留，功能未与后端 API 完全对等，不能再作为判断当前主线能力的唯一依据。
@@ -168,6 +175,7 @@ python -m pytest tests/ -q -m "not slow"
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储 PRD/FRD/RTM/Plan/Test Plan/Test Report |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入、嵌入检索与问答人工验收测试指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传前显式选择目标知识库的修复说明、计划、测试方案与报告 |
+| `docs/20260717-agent-qa-page-refactor/` | `/agent` 页面重构（问题优先单页工作区）与 retriever 历史坏数据加固的 FRD/PRD/Plan/RTM/Test Plan/Test Report |
 | `docs/interview/dev-stories/` | 开发故事沉淀（面试复盘材料） |
 | `docs/troubleshooting/` | 按时间戳组织的排查记录 |
 | `评审建议.txt` | 最新评审意见（仓库根） |
@@ -178,6 +186,9 @@ python -m pytest tests/ -q -m "not slow"
 
 | hash | 说明 |
 |---|---|
+| `8653d0e` | feat(kb): store uploaded files by knowledge base |
+| `97d5a65` | docs: add local runtime test report |
+| `05733e8` | docs: record local runtime startup fix |
 | `cc80145` | fix: repair local dev runtime startup and cors |
 | `35ff8bf` | fix: close multi-kb agent and web import loop |
 | `b31babe` | docs: add project overview for AI context |
@@ -189,19 +200,9 @@ python -m pytest tests/ -q -m "not slow"
 
 查看完整历史：`git log --oneline -30`
 
+**注意**：上表为已 commit 的历史；`/agent` 页面重构、retriever 加固、多知识库目录化存储、粮仓批量导入脚本等改动目前只 `git add` 未 commit（见「已知问题和限制」），尚未出现在上表中。
 
-## 9. 2026-07-17 incremental update
+### 待提交改动补充说明（2026-07-17）
 
-- Topic folder: `docs/20260717-agent-qa-page-refactor/`
-- Scope: `/agent` page refactor, question-first workflow, and retriever hardening for historical bad index data.
-- Front-end status: `/agent` now supports basic chat, KB-scoped chat, and Agent advanced mode in one page.
-- Backend status: stale wrong-dimension embeddings are pruned before vector retrieval; BM25 build skips empty or unserializable historical nodes, so `/api/chat/query` no longer fails with the previous 400 regression.
-- Validation on 2026-07-17: Node rule tests passed (14/14), `pytest tests/api/test_retriever_stale_vectors.py -q` passed (7 passed), `npm run build` passed, direct HTTP verification returned 200, and browser smoke on `http://127.0.0.1:5173/agent` succeeded.
-- Known data caveat: KB `20260716` is still a smoke dataset and can return noisy sources; use `grain-knowledge-base` for formal QA.
-
-## 10. 2026-07-17 grain KB QA set expansion
-
-- `data/grain-knowledge-base/qa/verified.jsonl` ?? 24 ???? 30 ??????????????????????????????????
-- `data/grain-knowledge-base/qa/draft.jsonl` ?? 20 ???? 26 ?????????????/?????????????????
-- ?? `data/grain-knowledge-base/qa/question-groups.md`?? QA ???? 6 ??????? 12 ? smoke / ?? verified / hard draft ????????
-- ?? Grain QA ???? 56 ?????????????????????????
+- **`/agent` 页面重构 + retriever 加固**：详见「4. 当前进度」与 `docs/20260717-agent-qa-page-refactor/`。
+- **粮仓知识库 QA 集扩充**：`data/grain-knowledge-base/qa/verified.jsonl` 从 24 组扩充到 30 组；新增 `data/grain-knowledge-base/qa/draft.jsonl`（约 20-26 组，未经人工复核的候选/困难问题）；新增 `data/grain-knowledge-base/qa/question-groups.md` 对 QA 集做分组说明（区分 smoke / 已验证 verified / 待复核 hard draft）；粮仓 QA 总量当前约 56 组，尚未做最终统一校验。
