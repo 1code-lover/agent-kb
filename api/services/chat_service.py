@@ -6,6 +6,7 @@ from typing import Any
 
 from api.runtime import runtime_state
 from api.schemas import QueryRequest
+from api.services.query_scope import resolve_chat_query_scope
 from api.services.session_store import append_chat_message, clear_chat_messages, list_chat_messages
 
 
@@ -27,10 +28,12 @@ def _normalize_sources(response: Any) -> list[dict[str, Any]]:
 
 
 def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
+    scope = resolve_chat_query_scope(request.kb_ids)
+
     if not runtime_state.ensure_index_loaded():
         raise ValueError("Knowledge base is empty. Please import documents first.")
 
-    engine = runtime_state.build_query_engine(kb_ids=request.kb_ids)
+    engine = runtime_state.build_query_engine(kb_ids=scope.effective_kb_ids)
     answer = engine.query(request.question)
     answer_text = getattr(answer, "response", str(answer))
 
@@ -38,11 +41,13 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
         append_chat_message(request.session_id, "user", request.question)
         append_chat_message(request.session_id, "assistant", answer_text)
 
-    return {
+    result = {
         "session_id": request.session_id,
         "answer": answer_text,
         "sources": _normalize_sources(answer),
     }
+    result.update(scope.to_dict())
+    return result
 
 
 def get_history(session_id: str) -> list[dict[str, Any]]:

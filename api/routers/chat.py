@@ -14,9 +14,32 @@ from fastapi import APIRouter, HTTPException
 
 from api.schemas import QueryRequest
 from api.services import chat_service
+from server.kb_errors import (
+    KBConflictError,
+    KBConsistencyError,
+    KBNotFoundError,
+    KBServiceError,
+    KBUnavailableError,
+    KBValidationError,
+)
 from utils.api_response import success_response
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
+
+
+def _raise_http_from_kb_error(exc: KBServiceError) -> None:
+    """??? KB ??????? HTTP ????"""
+    if isinstance(exc, (KBValidationError, KBUnavailableError)):
+        status_code = 400
+    elif isinstance(exc, KBNotFoundError):
+        status_code = 404
+    elif isinstance(exc, KBConflictError):
+        status_code = 409
+    elif isinstance(exc, KBConsistencyError):
+        status_code = 500
+    else:
+        status_code = 400
+    raise HTTPException(status_code=status_code, detail=exc.message) from exc
 
 
 @router.post("/query")
@@ -33,6 +56,8 @@ def query(request: QueryRequest) -> dict:
     try:
         result = chat_service.query(request)
         return success_response(result)
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:

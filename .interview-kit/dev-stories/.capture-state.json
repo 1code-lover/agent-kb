@@ -1,8 +1,8 @@
-﻿{
-    "last_generated_hash":  "b3b8bfc873f37a4588b0b57406616c3b20ca3d8d",
-    "last_capture_time":  "2026-07-23T00:00:00+08:00",
-    "last_story_file":  "2026-07-23-refactor-archive-superseded-multi-kb-docs.md",
-    "last_prompt_decision":  "generated",
-    "last_generated_push_hash":  null,
-    "last_prompted_hash":  "b3b8bfc873f37a4588b0b57406616c3b20ca3d8d"
+{
+    "last_generated_hash": "a596050ec2bffb28e8919e2f49b4d9ba7153c193",
+    "last_capture_time": "2026-07-23T22:55:27.9772380+08:00",
+    "last_story_file": "2026-07-23-feature-chat-scope-default-deny.md",
+    "last_prompt_decision": "generated",
+    "last_generated_push_hash": null,
+    "last_prompted_hash": "a596050ec2bffb28e8919e2f49b4d9ba7153c193"
 }

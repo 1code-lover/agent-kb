@@ -321,39 +321,59 @@ class TestM2BootstrapDefaultKb:
 
 
 class TestM2ChatServiceKbIds:
-    """chat_service 查询透传 kb_ids"""
+    """chat_service ???????????"""
 
-    def test_query_passes_kb_ids_to_build_query_engine(self):
-        """query 将 request.kb_ids 传给 build_query_engine"""
+    def test_query_passes_effective_kb_ids_to_build_query_engine(self):
+        """query ?? scope ???????????? build_query_engine"""
         from api.services.chat_service import query
+
         mock_engine = MagicMock()
         mock_answer = MagicMock()
         mock_answer.response = "answer"
         mock_answer.source_nodes = []
         mock_engine.query.return_value = mock_answer
 
+        from api.services.query_scope import ChatQueryScope
+
+        mock_scope = ChatQueryScope(
+            requested_scope_type="single_kb",
+            requested_kb_ids=["kb1"],
+            effective_scope_type="single_kb",
+            effective_kb_ids=["kb1"],
+            is_default_deny_applied=False,
+            isolation_level="logical_filter_only",
+        )
+
         with patch("api.services.chat_service.runtime_state.ensure_index_loaded", return_value=True):
-            with patch("api.services.chat_service.runtime_state.build_query_engine", return_value=mock_engine) as mock_build:
-                from api.schemas import QueryRequest
-                req = QueryRequest(question="test", kb_ids=["kb1", "kb2"])
-                query(req, record_history=False)
-                mock_build.assert_called_once_with(kb_ids=["kb1", "kb2"])
+            with patch("api.services.chat_service.resolve_chat_query_scope", return_value=mock_scope) as mock_resolve:
+                with patch("api.services.chat_service.runtime_state.build_query_engine", return_value=mock_engine) as mock_build:
+                    from api.schemas import QueryRequest
+
+                    req = QueryRequest(question="test", kb_ids=["kb1"])
+                    query(req, record_history=False)
+
+                    mock_resolve.assert_called_once_with(["kb1"])
+                    mock_build.assert_called_once_with(kb_ids=["kb1"])
 
     def test_query_without_kb_ids(self):
-        """不传 kb_ids 时 build_query_engine 不传参"""
+        """??? kb_ids ??????????"""
         from api.services.chat_service import query
-        mock_engine = MagicMock()
-        mock_answer = MagicMock()
-        mock_answer.response = "answer"
-        mock_answer.source_nodes = []
-        mock_engine.query.return_value = mock_answer
+        from server.kb_errors import KBValidationError
 
         with patch("api.services.chat_service.runtime_state.ensure_index_loaded", return_value=True):
-            with patch("api.services.chat_service.runtime_state.build_query_engine", return_value=mock_engine) as mock_build:
-                from api.schemas import QueryRequest
-                req = QueryRequest(question="test")
-                query(req, record_history=False)
-                mock_build.assert_called_once_with(kb_ids=None)
+            with patch(
+                "api.services.chat_service.resolve_chat_query_scope",
+                side_effect=KBValidationError("\u5fc5\u987b\u663e\u5f0f\u58f0\u660e\u5355\u5e93\u8303\u56f4"),
+            ):
+                with patch("api.services.chat_service.runtime_state.build_query_engine") as mock_build:
+                    from api.schemas import QueryRequest
+
+                    req = QueryRequest(question="test")
+                    with pytest.raises(KBValidationError) as exc_info:
+                        query(req, record_history=False)
+
+                    assert "\u663e\u5f0f\u58f0\u660e\u5355\u5e93\u8303\u56f4" in str(exc_info.value)
+                    mock_build.assert_not_called()
 
 
 class TestM2AgentEvidenceKbId:
