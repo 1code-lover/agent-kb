@@ -1,3 +1,4 @@
+﻿> 已归档（2026-07-23）：本文件已被 `docs/20260722-local-multi-kb-assistant/` 下的新一轮 PRD / FRD / RTM / Plan / Test Plan 基线取代，不再作为当前正式基线，仅保留用于历史追溯。
 # ThinkRAG 知识库智能问答 V1 功能设计（FRD）
 
 ## 1. 文档目的

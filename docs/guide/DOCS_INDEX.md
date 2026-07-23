@@ -44,19 +44,19 @@
 
 ### 3.1 项目与协作总览
 - `docs/project.md`：最新项目状态、架构、风险、测试现状。
-- `docs/spec/knowledge_base_visibility_and_multi_kb_design.md`：多知识库最小设计及当前实现边界。
+- `docs/20260722-local-multi-kb-assistant/`：本地多知识库知识助手当前正式基线（PRD / FRD / RTM / Plan / Test Plan）。
 - `docs/spec/desktop_api_contract.md`：桌面 / Web 页面到 API 的契约映射。
 - `docs/spec/desktop_project_design.md`：桌面端整体设计。
 
-### 3.2 基线需求文档
-这组文档描述“知识库智能问答 / agent 化”主线的原始基线：
-- `docs/spec/agent_v1_prd.md`
-- `docs/spec/agent_v1_frd.md`
-- `docs/spec/agent_v1_rtm.md`
-- `docs/spec/knowledge_agent_product_plan.md`
-- `docs/plan/agent_v1_execution_plan.md`
-- `docs/test/knowledge_qa_test_plan.md`
-- `docs/test_report/knowledge_qa_test_report_2026-06-29.md`
+### 3.2 当前正式基线
+这组文档描述“本地多知识库知识助手”主线的当前正式基线：
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-prd.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-frd.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-rtm.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-plan.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-test-plan.md`
+
+已被替代的 `agent_v1 / knowledge_agent / knowledge_base_visibility` 系列文档已归档到 `docs/archive/superseded-20260722-local-multi-kb-assistant/`，仅供历史追溯。
 
 ### 3.3 当前活跃专题
 - `docs/20260706-multi-kb-frontend-refactor/`：多知识库前端交互重构专题，已按新命名规范组织。
@@ -85,13 +85,10 @@
 当前 `docs/` 根目录仍保留一批历史入口文件。它们并非都应继续作为“主入口”使用，建议按下面规则理解：
 
 ### 4.1 已有分类目录版本，阅读时优先看分类目录
+> 说明：`agent_v1 / knowledge_agent` 系列旧入口已被 `docs/20260722-local-multi-kb-assistant/` 当前基线替代；如需历史版本，请到 `docs/archive/superseded-20260722-local-multi-kb-assistant/` 查看。
+
 | docs 根目录旧文件 | 优先阅读版本 |
 |---|---|
-| `docs/agent_v1_prd.md` | `docs/spec/agent_v1_prd.md` |
-| `docs/agent_v1_frd.md` | `docs/spec/agent_v1_frd.md` |
-| `docs/agent_v1_rtm.md` | `docs/spec/agent_v1_rtm.md` |
-| `docs/agent_v1_execution_plan.md` | `docs/plan/agent_v1_execution_plan.md` |
-| `docs/knowledge_agent_product_plan.md` | `docs/spec/knowledge_agent_product_plan.md` |
 | `docs/desktop_api_contract.md` | `docs/spec/desktop_api_contract.md` |
 | `docs/desktop_project_design.md` | `docs/spec/desktop_project_design.md` |
 | `docs/desktop_regression_checklist.md` | `docs/test/desktop_regression_checklist.md` |
@@ -115,7 +112,7 @@
 1. **先看 `docs/project.md` 再深入专题**：先掌握当前项目状态，再进入具体设计或排障文档。
 2. **多知识库相关问题优先看两份文档**：
    - 项目状态看 `docs/project.md`
-   - 设计边界看 `docs/spec/knowledge_base_visibility_and_multi_kb_design.md`
+   - 当前基线看 `docs/20260722-local-multi-kb-assistant/`
 3. **遇到代码与文档不一致时，以代码和最新测试为准**，并同步更新：
    - `docs/project.md`
    - `docs/guide/DOCS_INDEX.md`
@@ -130,3 +127,4 @@
 - Focus: `/agent` question-first workspace refactor, retriever 400 root-cause fix, and smoke test evidence.
 - Key outputs: PRD / FRD / RTM / plan / test plan / test report in the same topic directory.
 - Recommended use: when the current question is about `/agent` page UX, KB-scoped chat, stale embeddings, or empty Markdown causing 400, read this folder together with `docs/project.md`.
+

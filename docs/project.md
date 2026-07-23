@@ -130,7 +130,7 @@ frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
 - **大批改动已 add 未 commit**：多知识库目录化存储、`/agent` 页面重构、retriever 历史坏数据加固、粮仓批量导入脚本及配套文档/规划/开发故事均已 `git add`，尚未 commit/push；继续开发前应先分批提交，避免与新改动混在一起。
 - **`logs/frontend_err.log` 中的 vite 报错为历史记录，非当前问题**：日志记录的是 `/agent` 页面重构中途出现过的 `agent-page.css` 缺失和 JSX 编码错乱（乱码字符导致 babel 解析失败），均已在本轮重构中修复（`agent-page.css` 已存在，测试报告确认 `npm run build` 通过）；该日志文件本身建议后续清理或加入 `.gitignore`，避免误导后来者。
 - **空知识库下问答仍会明确失败**：默认 `default` KB 启动可见，但未导入文档时真实检索会返回 `Knowledge base is empty. Please import documents first.`；这是当前预期行为，不代表 API/Web 链路异常。
-- **文档需要联动维护**：`docs/project.md`、`docs/guide/DOCS_INDEX.md`、`docs/spec/knowledge_base_visibility_and_multi_kb_design.md` 已持续按当前代码口径同步；后续代码变更时仍需同步更新，避免再次漂移。
+- **文档需要联动维护**：`docs/project.md`、`docs/guide/DOCS_INDEX.md`、`docs/20260722-local-multi-kb-assistant/` 下的当前基线文档需要按最新代码口径同步；后续代码变更时仍需同步更新，避免再次漂移。
 - **Streamlit 仍在并存**：`app.py` / `frontend/` 作为迁移回退保留，功能未与后端 API 完全对等，不能再作为判断当前主线能力的唯一依据。
 - **Ollama 版本受限**：当前要求 0.3.3，0.4 与现有 LlamaIndex 组合不兼容。
 
@@ -165,7 +165,7 @@ python -m pytest tests/ -q -m "not slow"
 | `AGENTS.md` | 开发流程规范（PRD→实施→测试→提交）、文档命名、评审流程 |
 | `docs/project.md` | 面向协作者的当前项目总览、进度与问题 |
 | `docs/guide/DOCS_INDEX.md` | 当前 docs 体系总索引与主文档入口 |
-| `docs/spec/knowledge_base_visibility_and_multi_kb_design.md` | 最小多知识库设计与边界 |
+| `docs/20260722-local-multi-kb-assistant/` | 本地多知识库知识助手当前正式基线（PRD/FRD/RTM/Plan/Test Plan） |
 | `docs/spec/desktop_api_contract.md` | 页面到 API 的契约映射 |
 | `docs/spec/desktop_project_design.md` | 桌面端项目设计 |
 | `docs/test/desktop_regression_checklist.md` | 桌面版回归清单 |
@@ -206,3 +206,4 @@ python -m pytest tests/ -q -m "not slow"
 
 - **`/agent` 页面重构 + retriever 加固**：详见「4. 当前进度」与 `docs/20260717-agent-qa-page-refactor/`。
 - **粮仓知识库 QA 集扩充**：`data/grain-knowledge-base/qa/verified.jsonl` 从 24 组扩充到 30 组；新增 `data/grain-knowledge-base/qa/draft.jsonl`（约 20-26 组，未经人工复核的候选/困难问题）；新增 `data/grain-knowledge-base/qa/question-groups.md` 对 QA 集做分组说明（区分 smoke / 已验证 verified / 待复核 hard draft）；粮仓 QA 总量当前约 56 组，尚未做最终统一校验。
+
