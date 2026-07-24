@@ -32,7 +32,7 @@
 5. 当前仓库已有**与本需求无关**的在途改动，后续编码时必须避免误覆盖：
    - `server/index.py`
    - `tests/api/test_index_manager_coverage.py`
-   - `docs/20260722-codebase-scan/`
+   - `docs/archive/20260722-codebase-scan/`
 
 ### 3.2 本阶段必须坚持的诚实边界
 1. P0 只能交付“**契约优先、范围显式、结果回显、默认拒绝**”的范围控制能力。
