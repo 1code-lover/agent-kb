@@ -14,7 +14,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from api.schemas import DeleteDocsRequest, PreviewRequest, UrlImportRequest
 from api.schemas.kb import KBCreateRequest, KBUpdateRequest
-from api.services import folder_service, kb_service
+from api.services import asset_service, folder_service, kb_service
 from server.kb_errors import (
     KBConflictError,
     KBConsistencyError,
@@ -155,6 +155,28 @@ def preview(request: PreviewRequest) -> dict:
 
 
 # 动态 KB CRUD 路由，必须放在静态子路径之后。
+
+
+@router.get("/assets")
+def list_assets(kb_id: str) -> dict:
+    """List assets for the given knowledge base."""
+    try:
+        return success_response({"items": asset_service.list_assets(kb_id)})
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.get("/assets/{asset_id}")
+def get_asset_preview(asset_id: str, kb_id: str) -> dict:
+    """Return the minimal preview payload for one asset."""
+    try:
+        return success_response(asset_service.get_asset_preview(kb_id, asset_id))
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 @router.get("/{kb_id}")
 def get_kb(kb_id: str) -> dict:

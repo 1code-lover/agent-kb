@@ -7,6 +7,7 @@ from typing import Any
 from uuid import uuid4
 
 from api.runtime import runtime_state
+from api.services import asset_service
 from api.services.evidence_service import build_evidence_id, parse_evidence_id
 from api.schemas import DeleteDocsRequest, PreviewRequest
 from server.kb_errors import (
@@ -267,6 +268,7 @@ def delete_kb(kb_id: str) -> bool:
                 f"删除 KB 后恢复 registry 失败: {safe_kb_id}; 原因: {restore_exc}"
             ) from restore_exc
         raise KBConsistencyError(f"删除 KB 目录失败，已恢复 registry: {safe_kb_id}; 原因: {exc}") from exc
+    asset_service.delete_kb_assets(safe_kb_id)
     return True
 
 
@@ -426,6 +428,8 @@ def import_files(
 
     if success_count > 0:
         _safe_add_doc_count(kb_id, success_count)
+    asset_service.register_imported_assets(kb_id, [item for item in file_results if item is not None])
+
 
     return {
         "receipt_id": receipt_id,
