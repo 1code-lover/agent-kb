@@ -1,4 +1,4 @@
-"""Chat ????????????"""
+"""Chat 主链路范围控制契约测试。"""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ client = TestClient(app)
 
 @pytest.fixture
 def isolated_registry(tmp_path, monkeypatch):
-    """?? KB registry????????????"""
+    """隔离 KB registry，并屏蔽会话落盘副作用。"""
     monkeypatch.chdir(tmp_path)
 
     import api.services.chat_service as chat_service
@@ -30,7 +30,7 @@ def isolated_registry(tmp_path, monkeypatch):
 
 
 def _stub_chat_runtime(monkeypatch, answer_text: str = "answer") -> MagicMock:
-    """? chat ??????? runtime ? query engine?"""
+    """为 chat 路由注入可控的 runtime 与 query engine。"""
     import api.services.chat_service as chat_service
 
     mock_engine = MagicMock()
@@ -86,7 +86,7 @@ def test_unspecified_scope_is_rejected(monkeypatch, isolated_registry):
     resp = client.post("/api/chat/query", json={"question": "no scope", "session_id": "scope-none"})
 
     assert 400 <= resp.status_code <= 422
-    assert "????" in resp.json()["message"]
+    assert "显式声明单库" in resp.json()["message"]
     mock_build.assert_not_called()
 
 
@@ -99,7 +99,7 @@ def test_empty_kb_ids_is_rejected(monkeypatch, isolated_registry):
     )
 
     assert 400 <= resp.status_code <= 422
-    assert "????" in resp.json()["message"]
+    assert "范围不能为空" in resp.json()["message"]
     mock_build.assert_not_called()
 
 
@@ -114,7 +114,7 @@ def test_multi_kb_scope_rejected_on_mainline(monkeypatch, isolated_registry):
     )
 
     assert 400 <= resp.status_code <= 422
-    assert "???????" in resp.json()["message"]
+    assert "不支持多知识库查询" in resp.json()["message"]
     mock_build.assert_not_called()
 
 
@@ -127,7 +127,7 @@ def test_nonexistent_kb_rejected(monkeypatch, isolated_registry):
     )
 
     assert resp.status_code == 404
-    assert "\u77e5\u8bc6\u5e93\u4e0d\u5b58\u5728" in resp.json()["message"]
+    assert "知识库不存在" in resp.json()["message"]
     mock_build.assert_not_called()
 
 
@@ -143,5 +143,5 @@ def test_inactive_kb_rejected(monkeypatch, isolated_registry):
     )
 
     assert resp.status_code == 400
-    assert "\u77e5\u8bc6\u5e93\u4e0d\u53ef\u7528" in resp.json()["message"]
+    assert "知识库不可用" in resp.json()["message"]
     mock_build.assert_not_called()

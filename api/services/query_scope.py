@@ -1,4 +1,4 @@
-"""???????????"""
+"""共享查询范围解析逻辑。"""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ _LOGICAL_FILTER_ONLY = "logical_filter_only"
 
 @dataclass(frozen=True, slots=True)
 class ChatQueryScope:
-    """Chat ????????????"""
+    """Chat 主链路可执行的单库范围。"""
 
     requested_scope_type: str
     requested_kb_ids: list[str]
@@ -24,7 +24,7 @@ class ChatQueryScope:
     isolation_level: str = _LOGICAL_FILTER_ONLY
 
     def to_dict(self) -> dict[str, Any]:
-        """???????? API ????????"""
+        """返回可直接回传给 API 的范围回显字段。"""
         return {
             "requested_scope_type": self.requested_scope_type,
             "requested_kb_ids": list(self.requested_kb_ids),
@@ -36,7 +36,7 @@ class ChatQueryScope:
 
 
 def _normalize_requested_kb_ids(kb_ids: Sequence[str]) -> list[str]:
-    """????????? kb_ids????????"""
+    """校验并去重请求中的 kb_ids，保留原始顺序。"""
     normalized: list[str] = []
     seen: set[str] = set()
     for kb_id in kb_ids:
@@ -49,16 +49,16 @@ def _normalize_requested_kb_ids(kb_ids: Sequence[str]) -> list[str]:
 
 
 def resolve_chat_query_scope(kb_ids: Sequence[str] | None) -> ChatQueryScope:
-    """? legacy `kb_ids` ????? P0 ???????????"""
+    """将 legacy `kb_ids` 输入解析为 P0 主链路允许的单库范围。"""
     if kb_ids is None:
-        raise KBValidationError("???????????????? kb_ids")
+        raise KBValidationError("未声明知识库范围，请显式声明单库 kb_ids")
 
     normalized_kb_ids = _normalize_requested_kb_ids(kb_ids)
     if not normalized_kb_ids:
-        raise KBValidationError("????????????????? kb_ids")
+        raise KBValidationError("知识库范围不能为空，请显式声明单库 kb_ids")
 
     if len(normalized_kb_ids) > 1:
-        raise KBValidationError("P0 ?????????????????????")
+        raise KBValidationError("P0 主线暂不支持多知识库查询，请拆分为单库请求")
 
     kb_id = normalized_kb_ids[0]
     _ensure_kb_active(kb_id)
