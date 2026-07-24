@@ -18,11 +18,15 @@ from server.kb_errors import (
 )
 from server.folder_registry import folder_path_from_relative_path, normalize_relative_path, resolve_relative_path_from_metadata
 from server.kb_registry import KBRegistry
+from server.markdown_asset_extractor import extract_markdown_embedded_assets_from_file
 from server.security.filename_sanitizer import FilenameSanitizer
 from server.utils.file import ensure_path_within, get_data_root, get_kb_data_dir, validate_kb_id
 
 # 上传文件大小上限：100MB。
 MAX_FILE_SIZE = 100 * 1024 * 1024
+
+# 需要做内嵌资产解析的 Markdown 后缀。
+MARKDOWN_SUFFIXES = {".md", ".markdown", ".mdown", ".mdx"}
 
 # 延迟初始化 registry，便于测试替换工作目录。
 _registry: KBRegistry | None = None
@@ -94,8 +98,10 @@ def _build_file_result(
     relative_path: str | None = None,
     folder_path: str | None = None,
     message: str | None = None,
+    embedded_assets: list[dict[str, Any]] | None = None,
+    asset_warning_count: int = 0,
 ) -> dict[str, Any]:
-    """构造单文件导入结果，统一补齐路径与统计字段。"""
+    """构造单文件导入结果，统一补齐路径、统计字段与内嵌资产信息。"""
     result = {
         "name": filename,
         "type": content_type,
@@ -106,11 +112,41 @@ def _build_file_result(
         "indexed_chunks": indexed_chunks,
         "relative_path": relative_path,
         "folder_path": folder_path,
+        "embedded_assets": embedded_assets or [],
+        "asset_warning_count": asset_warning_count,
     }
     if message is not None:
         result["message"] = message
     return result
 
+
+def _is_markdown_file(path: Path | None, content_type: str) -> bool:
+    """判断当前文件是否需要做 Markdown 内嵌资产解析。"""
+    if path is not None and path.suffix.lower() in MARKDOWN_SUFFIXES:
+        return True
+    return content_type.lower().startswith("text/markdown")
+
+
+def _extract_embedded_assets_for_file(
+    *,
+    path: Path | None,
+    kb_dir: Path,
+    relative_path: str | None,
+    content_type: str,
+) -> tuple[list[dict[str, Any]], int]:
+    """提取 Markdown 文件中的内嵌本地图片资产；失败时不阻断主导入。"""
+    if path is None or not path.exists() or not _is_markdown_file(path, content_type):
+        return [], 0
+    try:
+        assets = extract_markdown_embedded_assets_from_file(
+            source_doc_path=path,
+            kb_root=kb_dir,
+            source_doc_relative_path=relative_path,
+        )
+    except Exception:
+        return [], 0
+    warning_count = sum(1 for item in assets if item.get("status") != "ready")
+    return assets, warning_count
 
 
 def _validate_import_mode(import_mode: str) -> str:
@@ -252,13 +288,14 @@ def import_files(
 
     receipt_id = _build_import_receipt_id("kb-file-import")
     retained_files: list[dict[str, Any]] = []
-    file_results: list[dict[str, Any]] = []
+    file_results: list[dict[str, Any] | None] = [None] * len(files)
+    pending_items: list[dict[str, Any]] = []
     indexed_chunks = 0
     success_count = 0
     failed_count = 0
     empty_count = 0
 
-    for file, relative_path in zip(files, normalized_relative_paths):
+    for index, (file, relative_path) in enumerate(zip(files, normalized_relative_paths)):
         original_name = getattr(file, "filename", "") or "unnamed"
         content_type = getattr(file, "content_type", "") or ""
         file_size = 0
@@ -285,28 +322,18 @@ def import_files(
             with target_path.open("wb") as buffer:
                 buffer.write(file_content)
 
-            nodes = manager.load_files([target_path.resolve()], chunk_size, chunk_overlap, kb_id=kb_id) or []
-            chunk_count = len(nodes)
-            file_record = _build_file_result(
-                kb_id=kb_id,
-                filename=stored_filename,
-                content_type=content_type,
-                size=file_size,
-                path=target_path,
-                status="indexed" if chunk_count > 0 else "empty",
-                indexed_chunks=chunk_count,
-                relative_path=relative_path,
-                folder_path=folder_path,
+            pending_items.append(
+                {
+                    "index": index,
+                    "kb_id": kb_id,
+                    "filename": stored_filename,
+                    "content_type": content_type,
+                    "size": file_size,
+                    "path": target_path,
+                    "relative_path": relative_path,
+                    "folder_path": folder_path,
+                }
             )
-            retained_files.append(
-                {k: file_record[k] for k in ("name", "type", "size", "path", "kb_id", "relative_path", "folder_path")}
-            )
-            file_results.append(file_record)
-            indexed_chunks += chunk_count
-            if chunk_count > 0:
-                success_count += 1
-            else:
-                empty_count += 1
         except Exception as exc:
             if target_path is not None:
                 try:
@@ -315,20 +342,87 @@ def import_files(
                 except OSError:
                     pass
             failed_count += 1
-            file_results.append(
-                _build_file_result(
-                    kb_id=kb_id,
-                    filename=stored_filename,
-                    content_type=content_type,
-                    size=file_size,
-                    path=target_path,
-                    status="failed",
-                    indexed_chunks=0,
-                    relative_path=relative_path,
-                    folder_path=folder_path,
-                    message=str(exc),
-                )
+            file_results[index] = _build_file_result(
+                kb_id=kb_id,
+                filename=stored_filename,
+                content_type=content_type,
+                size=file_size,
+                path=target_path,
+                status="failed",
+                indexed_chunks=0,
+                relative_path=relative_path,
+                folder_path=folder_path,
+                message=str(exc),
             )
+
+    for item in pending_items:
+        target_path = item["path"]
+        try:
+            nodes = manager.load_files([target_path.resolve()], chunk_size, chunk_overlap, kb_id=kb_id) or []
+            item["indexed_chunks"] = len(nodes)
+            item["status"] = "indexed" if item["indexed_chunks"] > 0 else "empty"
+        except Exception as exc:
+            try:
+                if target_path.exists() and target_path.is_file():
+                    target_path.unlink()
+            except OSError:
+                pass
+            item["status"] = "failed"
+            item["indexed_chunks"] = 0
+            item["message"] = str(exc)
+
+    for item in pending_items:
+        status = item["status"]
+        target_path = item["path"]
+        if status == "failed":
+            failed_count += 1
+            file_results[item["index"]] = _build_file_result(
+                kb_id=kb_id,
+                filename=item["filename"],
+                content_type=item["content_type"],
+                size=item["size"],
+                path=target_path,
+                status="failed",
+                indexed_chunks=0,
+                relative_path=item["relative_path"],
+                folder_path=item["folder_path"],
+                message=item.get("message"),
+            )
+            continue
+
+        embedded_assets, asset_warning_count = _extract_embedded_assets_for_file(
+            path=target_path,
+            kb_dir=kb_dir,
+            relative_path=item["relative_path"],
+            content_type=item["content_type"],
+        )
+        chunk_count = item["indexed_chunks"]
+        indexed_chunks += chunk_count
+        if status == "indexed":
+            success_count += 1
+        else:
+            empty_count += 1
+
+        file_record = _build_file_result(
+            kb_id=kb_id,
+            filename=item["filename"],
+            content_type=item["content_type"],
+            size=item["size"],
+            path=target_path,
+            status=status,
+            indexed_chunks=chunk_count,
+            relative_path=item["relative_path"],
+            folder_path=item["folder_path"],
+            embedded_assets=embedded_assets,
+            asset_warning_count=asset_warning_count,
+        )
+        retained_files.append(
+            {
+                k: file_record[k]
+                for k in ("name", "type", "size", "path", "kb_id", "relative_path", "folder_path")
+            }
+        )
+        file_results[item["index"]] = file_record
 
     if success_count > 0:
         _safe_add_doc_count(kb_id, success_count)
@@ -336,7 +430,7 @@ def import_files(
     return {
         "receipt_id": receipt_id,
         "files": retained_files,
-        "file_results": file_results,
+        "file_results": [item for item in file_results if item is not None],
         "indexed_chunks": indexed_chunks,
         "success_count": success_count,
         "failed_count": failed_count,
