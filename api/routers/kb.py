@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
-from api.schemas import DeleteDocsRequest, UrlImportRequest
+from api.schemas import DeleteDocsRequest, PreviewRequest, UrlImportRequest
 from api.schemas.kb import KBCreateRequest, KBUpdateRequest
 from api.services import kb_service
 from server.kb_errors import (
@@ -115,6 +115,18 @@ def import_web(request: UrlImportRequest) -> dict:
             request.chunk_overlap,
             kb_id=request.kb_id,
         )
+        return success_response(result)
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.post("/preview")
+def preview(request: PreviewRequest) -> dict:
+    """返回最小文档/证据预览对象。"""
+    try:
+        result = kb_service.preview_document(request)
         return success_response(result)
     except KBServiceError as exc:
         _raise_http_from_kb_error(exc)

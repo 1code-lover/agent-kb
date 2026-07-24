@@ -7,7 +7,7 @@
  * 2. 提供会话历史查询接口。
  */
 
-import client from "./client";
+import client from "./client.js";
 
 /**
  * 功能：提交问答请求并获取响应。

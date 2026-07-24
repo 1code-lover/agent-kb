@@ -1,4 +1,4 @@
-"""API request and response models."""
+"""API 请求与响应模型。"""
 
 from __future__ import annotations
 
@@ -29,6 +29,13 @@ class DeleteDocsRequest(BaseModel):
     doc_ids: list[str] = Field(default_factory=list)
     paths: list[str] = Field(default_factory=list)
     kb_id: str = "default"
+
+
+class PreviewRequest(BaseModel):
+    kb_id: str = Field(..., min_length=1)
+    doc_id: str | None = None
+    evidence_id: str | None = None
+    preview_locator: dict[str, Any] | None = None
 
 
 class SettingsUpdateRequest(BaseModel):
@@ -186,6 +193,18 @@ class EvidenceItem(BaseModel):
     excerpt: str = ""
     receipt_id: str | None = None
     kb_id: str = "default"
+    doc_id: str | None = None
+    preview_locator: dict[str, Any] | None = None
+
+
+class PreviewItem(BaseModel):
+    title: str
+    kb_id: str
+    doc_id: str
+    excerpt: str = ""
+    locator: dict[str, Any] | None = None
+    preview_type: str = "text_excerpt"
+    evidence_id: str | None = None
 
 
 class PendingActionItem(BaseModel):

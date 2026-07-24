@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from api.runtime import runtime_state
-from api.schemas import DeleteDocsRequest
+from api.services.evidence_service import build_evidence_id, parse_evidence_id
+from api.schemas import DeleteDocsRequest, PreviewRequest
 from server.kb_errors import (
     KBConflictError,
     KBConsistencyError,
@@ -74,7 +75,7 @@ def _safe_add_doc_count(kb_id: str, delta: int) -> None:
         return
 
 
-# ?? KB CRUD ??
+# ===== 知识库 CRUD =====
 
 def create_kb(kb_id: str, kb_name: str) -> dict:
     """创建知识库，并同步创建 data/{kb_id}/ 目录。"""
@@ -349,3 +350,127 @@ def delete_docs(request: DeleteDocsRequest) -> dict[str, int]:
             _safe_add_doc_count(_normalize_doc_kb_id(metadata), -1)
 
     return {"deleted": deleted, "files_deleted": files_deleted, "files_skipped": files_skipped}
+
+
+def _get_preview_docstore():
+    """获取 preview 所需的 docstore。"""
+    manager = runtime_state.get_index_manager()
+    return manager.storage_context.docstore
+
+
+def _fetch_preview_nodes(doc_store, node_ids: list[str]) -> list[Any]:
+    """按节点 ID 从 docstore 读取节点列表。"""
+    if not node_ids:
+        return []
+    if hasattr(doc_store, "get_nodes"):
+        try:
+            return list(doc_store.get_nodes(node_ids=node_ids, raise_error=False) or [])
+        except TypeError:
+            return list(doc_store.get_nodes(node_ids) or [])
+
+    docs = getattr(doc_store, "docs", {}) or {}
+    return [docs[node_id] for node_id in node_ids if node_id in docs]
+
+
+def _select_preview_node(nodes: list[Any], locator: dict[str, Any] | None) -> Any | None:
+    """根据 locator 选择最匹配的预览节点。"""
+    if not nodes:
+        return None
+    if not locator:
+        return nodes[0]
+
+    target_node_id = locator.get("node_id")
+    if isinstance(target_node_id, str) and target_node_id:
+        for node in nodes:
+            if getattr(node, "node_id", None) == target_node_id:
+                return node
+
+    target_page = locator.get("page")
+    if target_page not in (None, ""):
+        for node in nodes:
+            metadata = getattr(node, "metadata", {}) or {}
+            page = metadata.get("page_label") or metadata.get("page")
+            if page is not None and str(page) == str(target_page):
+                return node
+
+    return nodes[0]
+
+
+def _build_preview_locator_from_node(node: Any | None, locator: dict[str, Any] | None) -> dict[str, Any] | None:
+    """合并 locator 并补齐节点级定位信息。"""
+    merged = dict(locator or {})
+    if node is None:
+        return merged or None
+
+    metadata = getattr(node, "metadata", {}) or {}
+    page = metadata.get("page_label") or metadata.get("page")
+    if page not in (None, "", "N/A"):
+        merged["page"] = str(page)
+
+    node_id = getattr(node, "node_id", None)
+    if isinstance(node_id, str) and node_id:
+        merged["node_id"] = node_id
+
+    return merged or None
+
+
+def preview_document(request: PreviewRequest) -> dict[str, Any]:
+    """按 doc_id / evidence_id 返回最小预览对象。"""
+    safe_kb_id = validate_kb_id(request.kb_id)
+    _ensure_kb_active(safe_kb_id)
+
+    if not request.doc_id and not request.evidence_id:
+        raise KBValidationError("预览请求必须提供 doc_id 或 evidence_id")
+
+    doc_id = request.doc_id
+    locator = dict(request.preview_locator or {}) if request.preview_locator else None
+    evidence_id = request.evidence_id
+
+    if evidence_id:
+        payload = parse_evidence_id(evidence_id)
+        payload_kb_id = payload.get("kb_id")
+        if payload_kb_id and payload_kb_id != safe_kb_id:
+            raise KBValidationError("evidence_id 与请求的 kb_id 不一致")
+        doc_id = doc_id or payload.get("doc_id")
+        if locator is None and isinstance(payload.get("preview_locator"), dict):
+            locator = payload.get("preview_locator")
+
+    if not isinstance(doc_id, str) or not doc_id.strip():
+        raise KBValidationError("预览请求缺少有效 doc_id")
+    doc_id = doc_id.strip()
+
+    runtime_state.ensure_index_loaded()
+    doc_store = _get_preview_docstore()
+    ref_doc = doc_store.get_ref_doc_info(doc_id) if hasattr(doc_store, "get_ref_doc_info") else None
+    if ref_doc is None:
+        raise KBNotFoundError(f"文档不存在或不属于该知识库: {doc_id}")
+
+    ref_metadata = getattr(ref_doc, "metadata", {}) or {}
+    if not _doc_belongs_to_request(ref_metadata, safe_kb_id):
+        raise KBNotFoundError(f"文档不存在或不属于该知识库: {doc_id}")
+
+    node_ids = list(getattr(ref_doc, "node_ids", []) or [])
+    nodes = _fetch_preview_nodes(doc_store, node_ids)
+    preview_node = _select_preview_node(nodes, locator)
+    preview_text = getattr(preview_node, "text", "") if preview_node is not None else ""
+    effective_locator = _build_preview_locator_from_node(preview_node, locator)
+    title = ref_metadata.get("file_name") or ref_metadata.get("title") or doc_id
+    if preview_node is not None:
+        node_metadata = getattr(preview_node, "metadata", {}) or {}
+        title = node_metadata.get("file_name") or node_metadata.get("title") or title
+
+    return {
+        "title": title,
+        "kb_id": safe_kb_id,
+        "doc_id": doc_id,
+        "excerpt": str(preview_text or "")[:600],
+        "locator": effective_locator,
+        "preview_type": "text_excerpt",
+        "evidence_id": evidence_id
+        or build_evidence_id(
+            kb_id=safe_kb_id,
+            doc_id=doc_id,
+            preview_locator=effective_locator,
+            fallback_index=1,
+        ),
+    }

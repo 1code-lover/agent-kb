@@ -1,4 +1,4 @@
-"""Chat service for knowledge-base grounded Q&A."""
+"""聊天服务：处理基于知识库的问答请求。"""
 
 from __future__ import annotations
 
@@ -6,28 +6,18 @@ from typing import Any
 
 from api.runtime import runtime_state
 from api.schemas import QueryRequest
+from api.services.evidence_service import normalize_evidence, normalize_source_nodes
 from api.services.query_scope import resolve_chat_query_scope
 from api.services.session_store import append_chat_message, clear_chat_messages, list_chat_messages
 
 
 def _normalize_sources(response: Any) -> list[dict[str, Any]]:
-    sources: list[dict[str, Any]] = []
-    for node in getattr(response, "source_nodes", []) or []:
-        content_node = getattr(node, "node", None)
-        metadata = getattr(content_node, "metadata", {}) if content_node is not None else {}
-        sources.append(
-            {
-                "file": metadata.get("file_name") or metadata.get("title", "N/A"),
-                "page": metadata.get("page_label", "N/A"),
-                "score": getattr(node, "score", None),
-                "text": getattr(content_node, "text", "") if content_node is not None else "",
-                "kb_id": metadata.get("kb_id", "default"),
-            }
-        )
-    return sources
+    """兼容旧 sources 字段，统一复用 evidence service 的节点映射。"""
+    return normalize_source_nodes(response)
 
 
 def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
+    """执行单轮问答，并返回答案、证据与范围回显。"""
     scope = resolve_chat_query_scope(request.kb_ids)
 
     if not runtime_state.ensure_index_loaded():
@@ -36,6 +26,7 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
     engine = runtime_state.build_query_engine(kb_ids=scope.effective_kb_ids)
     answer = engine.query(request.question)
     answer_text = getattr(answer, "response", str(answer))
+    sources = _normalize_sources(answer)
 
     if record_history:
         append_chat_message(request.session_id, "user", request.question)
@@ -44,7 +35,8 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
     result = {
         "session_id": request.session_id,
         "answer": answer_text,
-        "sources": _normalize_sources(answer),
+        "sources": sources,
+        "evidence": normalize_evidence(sources),
     }
     result.update(scope.to_dict())
     return result
@@ -56,4 +48,3 @@ def get_history(session_id: str) -> list[dict[str, Any]]:
 
 def clear_history(session_id: str) -> None:
     clear_chat_messages(session_id)
-

@@ -1,4 +1,4 @@
-"""Agent tool helpers."""
+"""Agent 工具辅助函数。"""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from api.schemas import QueryRequest
+from api.services.evidence_service import normalize_evidence as build_evidence_items
 from api.services import chat_service
 from api.services.fallback_store import FALLBACK_CONFIG_STORE
 from api.services.tool_receipt_store import append_receipt
@@ -27,21 +28,8 @@ _command_validator = CommandValidator(config.COMMAND_SECURITY, path_validator=_p
 
 
 def normalize_evidence(sources: list[dict[str, Any]], receipt_id: str | None = None) -> list[dict[str, Any]]:
-    evidence = []
-    for idx, source in enumerate(sources or [], start=1):
-        evidence.append(
-            {
-                "id": f"ev-{idx}",
-                "title": source.get("file") or "Knowledge Source",
-                "source": source.get("file") or "N/A",
-                "page": source.get("page") or "N/A",
-                "score": source.get("score"),
-                "excerpt": (source.get("text") or "")[:600],
-                "receipt_id": receipt_id,
-                "kb_id": source.get("kb_id", "default"),
-            }
-        )
-    return evidence
+    """兼容旧入口，内部统一委托给 evidence_service。"""
+    return build_evidence_items(sources, receipt_id=receipt_id)
 
 
 def _get_config_store():

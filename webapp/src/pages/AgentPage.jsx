@@ -23,9 +23,11 @@ import {
   uploadFilesToKnowledge,
 } from "../api/agent";
 import { getHistory, queryChat } from "../api/chat";
+import { previewDoc, previewEvidence } from "../api/evidence";
 import { getModelOptions, selectModel } from "../api/models";
 import { readApiData } from "../api/response";
 import { KbProvider, useKb } from "../components/kb/KbContext";
+import KbEvidencePreview from "../components/kb/KbEvidencePreview";
 import {
   AGENT_EXPERIENCES,
   buildChatPayload,
@@ -196,41 +198,80 @@ function QaConversation({ messages, pendingQuestion, historyLoading, chatBusy })
   );
 }
 
-function SourceList({ sources }) {
+function SourceList({
+  sources,
+  evidence,
+  onPreview,
+  preview,
+  previewLoading,
+  previewError,
+}) {
+  const items =
+    evidence.length > 0
+      ? evidence
+      : sources.map((item, index) => ({
+          id: item.id || (item.file || "source") + "-" + index,
+          title: item.file || "未命名来源",
+          source: item.file || "未命名来源",
+          page: item.page,
+          score: item.score,
+          excerpt: item.excerpt || item.text || "",
+          kb_id: item.kb_id || "default",
+          doc_id: item.doc_id || null,
+          preview_locator: item.preview_locator || null,
+        }));
+
   return (
     <section className="qa-surface-card qa-source-card">
       <div className="qa-section-head">
         <div>
-          <p className="qa-section-eyebrow">引用来源</p>
-          <h2>最近一次召回</h2>
+          <p className="qa-section-eyebrow">证据</p>
+          <h2>命中来源</h2>
         </div>
-        <span className="toolbar-pill subtle">{sources.length} 条</span>
+        <span className="toolbar-pill subtle">{items.length} 条</span>
       </div>
 
-      {sources.length === 0 ? (
+      {items.length === 0 ? (
         <div className="empty-block">
-          暂无来源信息。成功问答后，这里会展示召回文档、页码和分数。
+          当前还没有可展示的证据；发送问题后，命中的文档片段会出现在这里。
         </div>
       ) : (
         <div className="qa-source-list">
-          {sources.map((item, index) => (
-            <article key={(item.file || "source") + "-" + index} className="qa-source-item">
+          {items.map((item, index) => (
+            <article key={(item.id || item.title || "source") + "-" + index} className="qa-source-item">
               <div className="qa-source-title-row">
-                <strong>{item.file || "未命名文档"}</strong>
+                <strong>{item.title || item.source || "未命名来源"}</strong>
                 <span>{"score " + formatScore(item.score)}</span>
               </div>
               <p className="stack-subtle">
                 {"kb_id=" + (item.kb_id || "default")}
                 {item.page && item.page !== "N/A" ? " / 页码 " + item.page : ""}
               </p>
-              <p className="qa-source-excerpt">{item.text || "未返回片段内容。"}</p>
+              <p className="qa-source-excerpt">{item.excerpt || "未返回摘录"}</p>
+              {item.doc_id || item.id ? (
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => onPreview(item)}
+                  disabled={previewLoading}
+                >
+                  {previewLoading ? "加载中" : "预览"}
+                </button>
+              ) : null}
             </article>
           ))}
         </div>
       )}
+
+      <KbEvidencePreview
+        preview={preview}
+        loading={previewLoading}
+        error={previewError}
+      />
     </section>
   );
 }
+
 
 function KnowledgeScopeSelector({ selectedKbId, selectedKb, kbList, kbLoading, onSelectKb }) {
   return (
@@ -286,10 +327,15 @@ function QaWorkbench(props) {
     onSubmit,
     messages,
     sources,
+    evidence,
     pendingQuestion,
     error,
     historyLoading,
     chatBusy,
+    preview,
+    previewLoading,
+    previewError,
+    onPreviewEvidence,
   } = props;
 
   const summary = buildExperienceSummary({ experience, selectedKb });
@@ -411,7 +457,14 @@ function QaWorkbench(props) {
             </div>
           </section>
 
-          <SourceList sources={sources} />
+          <SourceList
+            sources={sources}
+            evidence={evidence}
+            onPreview={onPreviewEvidence}
+            preview={preview}
+            previewLoading={previewLoading}
+            previewError={previewError}
+          />
         </aside>
       </div>
     </div>
@@ -979,6 +1032,9 @@ function AgentPageContent() {
   const [chatQuestion, setChatQuestion] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatSources, setChatSources] = useState([]);
+  const [chatEvidence, setChatEvidence] = useState([]);
+  const [chatPreview, setChatPreview] = useState(null);
+  const [chatPreviewError, setChatPreviewError] = useState("");
   const [chatError, setChatError] = useState("");
   const [pendingQuestion, setPendingQuestion] = useState("");
 
@@ -1040,6 +1096,9 @@ function AgentPageContent() {
     setChatError("");
     setPendingQuestion("");
     setChatSources([]);
+    setChatEvidence([]);
+    setChatPreview(null);
+    setChatPreviewError("");
   }, [chatSessionId, experience]);
 
   const chatMutation = useMutation({
@@ -1056,11 +1115,14 @@ function AgentPageContent() {
     onMutate: (payload) => {
       setChatError("");
       setPendingQuestion(payload.question);
+      setChatPreview(null);
+      setChatPreviewError("");
     },
     onSuccess: (result) => {
       setPendingQuestion("");
       setChatQuestion("");
       setChatSources(result.sources || []);
+      setChatEvidence(result.evidence || []);
       setChatMessages(result.messages || []);
       historyQuery.refetch();
     },
@@ -1069,6 +1131,42 @@ function AgentPageContent() {
       setChatError(error.message || "问答请求失败，请稍后重试。");
     },
   });
+
+  const previewMutation = useMutation({
+    mutationFn: async (item) => {
+      const targetKbId = item?.kb_id || selectedKbId;
+      if (!targetKbId) {
+        throw new Error("当前证据缺少知识库范围，无法预览。");
+      }
+
+      const locator = item?.preview_locator || undefined;
+      const response = item?.doc_id
+        ? await previewDoc(targetKbId, item.doc_id, locator)
+        : await previewEvidence({
+            kb_id: targetKbId,
+            evidence_id: item?.id,
+            preview_locator: locator,
+          });
+      return readApiData(response) || null;
+    },
+    onMutate: () => {
+      setChatPreviewError("");
+    },
+    onSuccess: (preview) => {
+      setChatPreview(preview);
+    },
+    onError: (error) => {
+      setChatPreview(null);
+      setChatPreviewError(error.message || "证据预览失败，请稍后重试。");
+    },
+  });
+
+  const handlePreviewEvidence = useCallback(
+    (item) => {
+      previewMutation.mutate(item);
+    },
+    [previewMutation],
+  );
 
   const handleExperienceChange = useCallback((nextExperience) => {
     setExperience(nextExperience);
@@ -1125,10 +1223,15 @@ function AgentPageContent() {
         onSubmit={handleChatSubmit}
         messages={chatMessages}
         sources={chatSources}
+        evidence={chatEvidence}
         pendingQuestion={pendingQuestion}
         error={chatError}
         historyLoading={historyQuery.isLoading || historyQuery.isFetching}
         chatBusy={chatMutation.isPending}
+        preview={chatPreview}
+        previewLoading={previewMutation.isPending}
+        previewError={chatPreviewError}
+        onPreviewEvidence={handlePreviewEvidence}
       />
     </div>
   );
