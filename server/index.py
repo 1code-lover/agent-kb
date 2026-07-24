@@ -376,9 +376,26 @@ class IndexManager:
         输入：
         - ref_doc_id(str): 参考文档 ID。
 
+        背景：
+        - 历史脏数据可能导致某些 node_id 存在于 docstore 的 ref_doc_info 中，
+          但已不在 index_struct.nodes_dict 里；LlamaIndex 原生
+          delete_ref_doc 遇到这类 node_id 会执行 `del nodes_dict[node_id]`
+          直接抛 KeyError，导致整次删除请求失败。这里提前把陈旧 node_id
+          从 docstore 关联信息中摘掉，避免原生删除逻辑再次触碰它们。
+
         输出：
         - 无返回值。
         """
+        docstore = self.storage_context.docstore
+        ref_doc_info = docstore.get_ref_doc_info(ref_doc_id)
+        nodes_dict = getattr(self.index.index_struct, "nodes_dict", {}) or {}
+        if ref_doc_info is not None:
+            stale_node_ids = [
+                node_id for node_id in ref_doc_info.node_ids if node_id not in nodes_dict
+            ]
+            for node_id in stale_node_ids:
+                docstore.delete_document(node_id, raise_error=False)
+
         self.index.delete_ref_doc(ref_doc_id=ref_doc_id, delete_from_docstore=True)
         self.storage_context.persist()
         print("Deleted document", ref_doc_id)

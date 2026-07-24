@@ -155,6 +155,51 @@ def test_same_filename_in_different_kbs_does_not_conflict(monkeypatch: pytest.Mo
     assert (tmp_path / "data" / "kb-b" / "same.txt").read_bytes() == b"b"
 
 
+def test_import_files_marks_empty_results_without_incrementing_doc_count(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_files.return_value = []
+    monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: "a.txt"))
+
+    result = kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
+
+    assert result["indexed_chunks"] == 0
+    assert result["success_count"] == 0
+    assert result["failed_count"] == 0
+    assert result["empty_count"] == 1
+    assert result["file_results"][0]["status"] == "empty"
+    assert registry.get_kb("kb-a")["doc_count"] == 0
+    assert (tmp_path / "data" / "kb-a" / "a.txt").read_bytes() == b"alpha"
+
+
+def test_import_files_partial_failure_only_counts_indexed_items(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_files.side_effect = [[SimpleNamespace(metadata={})], RuntimeError("index failed")]
+    monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: name))
+
+    result = kb_service.import_files(
+        [FakeUploadFile("ok.txt", b"alpha"), FakeUploadFile("bad.txt", b"bravo")],
+        128,
+        16,
+        kb_id="kb-a",
+    )
+
+    assert result["success_count"] == 1
+    assert result["failed_count"] == 1
+    assert result["empty_count"] == 0
+    assert result["indexed_chunks"] == 1
+    assert [item["status"] for item in result["file_results"]] == ["indexed", "failed"]
+    assert "index failed" in result["file_results"][1]["message"]
+    assert registry.get_kb("kb-a")["doc_count"] == 1
+    assert (tmp_path / "data" / "kb-a" / "ok.txt").read_bytes() == b"alpha"
+    assert not (tmp_path / "data" / "kb-a" / "bad.txt").exists()
+
+
 def test_import_files_cleans_up_when_indexing_fails(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(tmp_path)
     registry = _patch_registry(monkeypatch, tmp_path)
@@ -163,9 +208,13 @@ def test_import_files_cleans_up_when_indexing_fails(monkeypatch: pytest.MonkeyPa
     manager.load_files.side_effect = RuntimeError("index failed")
     monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: "a.txt"))
 
-    with pytest.raises(RuntimeError, match="index failed"):
-        kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
+    result = kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
 
+    assert result["success_count"] == 0
+    assert result["failed_count"] == 1
+    assert result["empty_count"] == 0
+    assert result["file_results"][0]["status"] == "failed"
+    assert "index failed" in result["file_results"][0]["message"]
     assert not (tmp_path / "data" / "kb-a" / "a.txt").exists()
     assert registry.get_kb("kb-a")["doc_count"] == 0
 
@@ -188,6 +237,45 @@ def test_import_urls_validates_kb_before_counting(monkeypatch: pytest.MonkeyPatc
     registry.create_kb("kb-a", "KB A")
     result = kb_service.import_urls(["https://example.com"], 128, 16, kb_id="kb-a")
     assert result["indexed_chunks"] == 1
+    assert result["success_count"] == 1
+    assert result["failed_count"] == 0
+    assert result["empty_count"] == 0
+    assert result["url_results"][0]["status"] == "indexed"
+    assert registry.get_kb("kb-a")["doc_count"] == 1
+
+
+def test_import_urls_marks_empty_without_incrementing_doc_count(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_websites.return_value = []
+
+    result = kb_service.import_urls(["https://example.com"], 128, 16, kb_id="kb-a")
+
+    assert result["indexed_chunks"] == 0
+    assert result["success_count"] == 0
+    assert result["failed_count"] == 0
+    assert result["empty_count"] == 1
+    assert result["url_results"][0]["status"] == "empty"
+    assert registry.get_kb("kb-a")["doc_count"] == 0
+
+
+def test_import_urls_partial_failure_only_counts_indexed_items(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_websites.side_effect = [[SimpleNamespace(metadata={})], RuntimeError("fetch failed")]
+
+    result = kb_service.import_urls(["https://ok.example.com", "https://bad.example.com"], 128, 16, kb_id="kb-a")
+
+    assert result["success_count"] == 1
+    assert result["failed_count"] == 1
+    assert result["empty_count"] == 0
+    assert result["indexed_chunks"] == 1
+    assert [item["status"] for item in result["url_results"]] == ["indexed", "failed"]
+    assert "fetch failed" in result["url_results"][1]["message"]
     assert registry.get_kb("kb-a")["doc_count"] == 1
 
 

@@ -1,9 +1,10 @@
-"""知识库服务：处理 KB CRUD、文件/网页导入和文档管理。"""
+"""知识库服务：处理 KB CRUD、文件/URL 导入与文档管理。"""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from api.runtime import runtime_state
 from api.services.evidence_service import build_evidence_id, parse_evidence_id
@@ -15,6 +16,7 @@ from server.kb_errors import (
     KBUnavailableError,
     KBValidationError,
 )
+from server.folder_registry import folder_path_from_relative_path, normalize_relative_path, resolve_relative_path_from_metadata
 from server.kb_registry import KBRegistry
 from server.security.filename_sanitizer import FilenameSanitizer
 from server.utils.file import ensure_path_within, get_data_root, get_kb_data_dir, validate_kb_id
@@ -73,6 +75,73 @@ def _safe_add_doc_count(kb_id: str, delta: int) -> None:
         _get_registry().add_doc_count(kb_id, delta)
     except ValueError:
         return
+
+
+def _build_import_receipt_id(prefix: str) -> str:
+    """生成导入回执 ID，便于前后端串联一次导入批次。"""
+    return f"{prefix}-{uuid4().hex}"
+
+
+def _build_file_result(
+    *,
+    kb_id: str,
+    filename: str,
+    content_type: str,
+    size: int,
+    path: Path | None,
+    status: str,
+    indexed_chunks: int,
+    relative_path: str | None = None,
+    folder_path: str | None = None,
+    message: str | None = None,
+) -> dict[str, Any]:
+    """构造单文件导入结果，统一补齐路径与统计字段。"""
+    result = {
+        "name": filename,
+        "type": content_type,
+        "size": size,
+        "path": str(path.resolve()) if path is not None else None,
+        "kb_id": kb_id,
+        "status": status,
+        "indexed_chunks": indexed_chunks,
+        "relative_path": relative_path,
+        "folder_path": folder_path,
+    }
+    if message is not None:
+        result["message"] = message
+    return result
+
+
+
+def _validate_import_mode(import_mode: str) -> str:
+    """校验导入模式，仅允许 preserve_tree 或 flatten。"""
+    value = (import_mode or "preserve_tree").strip()
+    if value not in {"preserve_tree", "flatten"}:
+        raise KBValidationError(f"不支持的导入模式: {import_mode}")
+    return value
+
+
+
+def _normalize_import_relative_paths(files: list[Any], relative_paths: list[str] | None) -> list[str | None]:
+    """标准化 relative_paths，并确保数量与上传文件一一对应。"""
+    if relative_paths is None:
+        return [None] * len(files)
+    if len(relative_paths) != len(files):
+        raise KBValidationError("relative_paths 数量必须与 files 数量一致")
+    return [normalize_relative_path(path) for path in relative_paths]
+
+
+def _build_url_result(*, kb_id: str, url: str, status: str, indexed_chunks: int, message: str | None = None) -> dict[str, Any]:
+    """构造单 URL 导入结果。"""
+    result = {
+        "url": url,
+        "kb_id": kb_id,
+        "status": status,
+        "indexed_chunks": indexed_chunks,
+    }
+    if message is not None:
+        result["message"] = message
+    return result
 
 
 # ===== 知识库 CRUD =====
@@ -165,62 +234,174 @@ def delete_kb(kb_id: str) -> bool:
     return True
 
 
-def import_files(files: list[Any], chunk_size: int, chunk_overlap: int, kb_id: str = "default") -> dict[str, Any]:
-    """导入本地文件，先校验 KB，再落盘到 data/{kb_id}/。"""
+def import_files(
+    files: list[Any],
+    chunk_size: int,
+    chunk_overlap: int,
+    kb_id: str = "default",
+    relative_paths: list[str] | None = None,
+    import_mode: str = "preserve_tree",
+) -> dict[str, Any]:
+    """导入本地文件到知识库，并根据模式决定是否保留目录树。"""
     _ensure_kb_active(kb_id)
     runtime_state.ensure_models_ready(require_llm=False)
     manager = runtime_state.get_index_manager()
     kb_dir = get_kb_data_dir(kb_id, create=True)
+    safe_import_mode = _validate_import_mode(import_mode)
+    normalized_relative_paths = _normalize_import_relative_paths(files, relative_paths)
 
-    uploaded_files: list[dict[str, Any]] = []
-    file_paths: list[Path] = []
-    try:
-        for file in files:
+    receipt_id = _build_import_receipt_id("kb-file-import")
+    retained_files: list[dict[str, Any]] = []
+    file_results: list[dict[str, Any]] = []
+    indexed_chunks = 0
+    success_count = 0
+    failed_count = 0
+    empty_count = 0
+
+    for file, relative_path in zip(files, normalized_relative_paths):
+        original_name = getattr(file, "filename", "") or "unnamed"
+        content_type = getattr(file, "content_type", "") or ""
+        file_size = 0
+        target_path: Path | None = None
+        stored_filename = FilenameSanitizer.sanitize(original_name)
+        folder_path = folder_path_from_relative_path(relative_path) if relative_path is not None else None
+
+        try:
             file_content = file.file.read()
-            if len(file_content) > MAX_FILE_SIZE:
-                raise KBValidationError(f"File too large: {len(file_content)} bytes (max: {MAX_FILE_SIZE})")
-            file.file.seek(0)
+            file_size = len(file_content)
+            if file_size > MAX_FILE_SIZE:
+                raise KBValidationError(f"File too large: {file_size} bytes (max: {MAX_FILE_SIZE})")
+            if hasattr(file.file, "seek"):
+                file.file.seek(0)
 
-            safe_filename = FilenameSanitizer.sanitize(file.filename)
-            unique_filename = FilenameSanitizer.generate_unique_filename(safe_filename)
-            target_path = ensure_path_within(kb_dir, kb_dir / unique_filename)
+            if safe_import_mode == "preserve_tree" and relative_path is not None:
+                target_path = ensure_path_within(kb_dir, kb_dir / relative_path)
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                stored_filename = target_path.name
+            else:
+                stored_filename = FilenameSanitizer.generate_unique_filename(stored_filename)
+                target_path = ensure_path_within(kb_dir, kb_dir / stored_filename)
 
             with target_path.open("wb") as buffer:
                 buffer.write(file_content)
 
-            file_paths.append(target_path)
-            uploaded_files.append(
-                {
-                    "name": unique_filename,
-                    "type": getattr(file, "content_type", ""),
-                    "size": len(file_content),
-                    "path": str(target_path.resolve()),
-                    "kb_id": kb_id,
-                }
+            nodes = manager.load_files([target_path.resolve()], chunk_size, chunk_overlap, kb_id=kb_id) or []
+            chunk_count = len(nodes)
+            file_record = _build_file_result(
+                kb_id=kb_id,
+                filename=stored_filename,
+                content_type=content_type,
+                size=file_size,
+                path=target_path,
+                status="indexed" if chunk_count > 0 else "empty",
+                indexed_chunks=chunk_count,
+                relative_path=relative_path,
+                folder_path=folder_path,
+            )
+            retained_files.append(
+                {k: file_record[k] for k in ("name", "type", "size", "path", "kb_id", "relative_path", "folder_path")}
+            )
+            file_results.append(file_record)
+            indexed_chunks += chunk_count
+            if chunk_count > 0:
+                success_count += 1
+            else:
+                empty_count += 1
+        except Exception as exc:
+            if target_path is not None:
+                try:
+                    if target_path.exists() and target_path.is_file():
+                        target_path.unlink()
+                except OSError:
+                    pass
+            failed_count += 1
+            file_results.append(
+                _build_file_result(
+                    kb_id=kb_id,
+                    filename=stored_filename,
+                    content_type=content_type,
+                    size=file_size,
+                    path=target_path,
+                    status="failed",
+                    indexed_chunks=0,
+                    relative_path=relative_path,
+                    folder_path=folder_path,
+                    message=str(exc),
+                )
             )
 
-        nodes = manager.load_files(file_paths, chunk_size, chunk_overlap, kb_id=kb_id)
-    except Exception:
-        for path in file_paths:
-            try:
-                if path.exists() and path.is_file():
-                    path.unlink()
-            except OSError:
-                pass
-        raise
+    if success_count > 0:
+        _safe_add_doc_count(kb_id, success_count)
 
-    _get_registry().add_doc_count(kb_id, len(uploaded_files))
-    return {"files": uploaded_files, "indexed_chunks": len(nodes or []), "kb_id": kb_id}
+    return {
+        "receipt_id": receipt_id,
+        "files": retained_files,
+        "file_results": file_results,
+        "indexed_chunks": indexed_chunks,
+        "success_count": success_count,
+        "failed_count": failed_count,
+        "empty_count": empty_count,
+        "kb_id": kb_id,
+        "import_mode": safe_import_mode,
+    }
+
 
 
 def import_urls(urls: list[str], chunk_size: int, chunk_overlap: int, kb_id: str = "default") -> dict[str, Any]:
-    """导入网页 URL。"""
+    """逐项导入 URL，区分 indexed / empty / failed 三种结果。"""
     _ensure_kb_active(kb_id)
     runtime_state.ensure_models_ready(require_llm=False)
     manager = runtime_state.get_index_manager()
-    nodes = manager.load_websites(urls, chunk_size, chunk_overlap, kb_id=kb_id)
-    _get_registry().add_doc_count(kb_id, len(urls))
-    return {"urls": urls, "indexed_chunks": len(nodes or []), "kb_id": kb_id}
+
+    receipt_id = _build_import_receipt_id("kb-url-import")
+    url_results: list[dict[str, Any]] = []
+    indexed_chunks = 0
+    success_count = 0
+    failed_count = 0
+    empty_count = 0
+
+    for url in urls:
+        try:
+            nodes = manager.load_websites([url], chunk_size, chunk_overlap, kb_id=kb_id) or []
+            chunk_count = len(nodes)
+            url_results.append(
+                _build_url_result(
+                    kb_id=kb_id,
+                    url=url,
+                    status="indexed" if chunk_count > 0 else "empty",
+                    indexed_chunks=chunk_count,
+                )
+            )
+            indexed_chunks += chunk_count
+            if chunk_count > 0:
+                success_count += 1
+            else:
+                empty_count += 1
+        except Exception as exc:
+            failed_count += 1
+            url_results.append(
+                _build_url_result(
+                    kb_id=kb_id,
+                    url=url,
+                    status="failed",
+                    indexed_chunks=0,
+                    message=str(exc),
+                )
+            )
+
+    if success_count > 0:
+        _safe_add_doc_count(kb_id, success_count)
+
+    return {
+        "receipt_id": receipt_id,
+        "urls": urls,
+        "url_results": url_results,
+        "indexed_chunks": indexed_chunks,
+        "success_count": success_count,
+        "failed_count": failed_count,
+        "empty_count": empty_count,
+        "kb_id": kb_id,
+    }
 
 
 def list_docs(kb_id: str | None = None) -> list[dict[str, Any]]:
@@ -245,6 +426,8 @@ def list_docs(kb_id: str | None = None) -> list[dict[str, Any]]:
         if file_path and file_path in seen_paths:
             continue
         path_or_url = file_path or metadata.get("url_source", "")
+        relative_path = resolve_relative_path_from_metadata(metadata, doc_kb_id) if file_path else None
+        folder_path = folder_path_from_relative_path(relative_path) if relative_path is not None else None
         docs.append(
             {
                 "id": ref_doc_id,
@@ -253,6 +436,8 @@ def list_docs(kb_id: str | None = None) -> list[dict[str, Any]]:
                 "type": "file" if file_path else "url",
                 "date": metadata.get("creation_date", ""),
                 "kb_id": doc_kb_id,
+                "relative_path": relative_path,
+                "folder_path": folder_path,
             }
         )
         if file_path:

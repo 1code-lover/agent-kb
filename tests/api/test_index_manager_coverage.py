@@ -19,11 +19,12 @@ from server import index as index_module
 class FakeIndex:
     """用于替代真实 VectorStoreIndex 的轻量索引对象。"""
 
-    def __init__(self, index_id: str = "idx") -> None:
+    def __init__(self, index_id: str = "idx", nodes_dict: dict[str, str] | None = None) -> None:
         self.index_id = index_id
         self.inserted_nodes = None
         self.deleted = None
         self._store_nodes_override = False
+        self.index_struct = SimpleNamespace(nodes_dict=nodes_dict if nodes_dict is not None else {})
 
     def insert_nodes(self, nodes):
         self.inserted_nodes = nodes
@@ -32,11 +33,33 @@ class FakeIndex:
         self.deleted = (ref_doc_id, delete_from_docstore)
 
 
+class FakeRefDocInfo:
+    """轻量 RefDocInfo 替代品，仅携带测试需要的 node_ids。"""
+
+    def __init__(self, node_ids: list[str]) -> None:
+        self.node_ids = node_ids
+
+
+class FakeDocStore:
+    """记录 get_ref_doc_info / delete_document 调用的轻量 docstore。"""
+
+    def __init__(self, ref_doc_info: FakeRefDocInfo | None = None) -> None:
+        self._ref_doc_info = ref_doc_info
+        self.deleted_documents: list[str] = []
+
+    def get_ref_doc_info(self, ref_doc_id):
+        return self._ref_doc_info
+
+    def delete_document(self, node_id, raise_error=True):
+        self.deleted_documents.append(node_id)
+
+
 class FakeStorage:
     """记录 persist 调用次数的轻量存储上下文。"""
 
-    def __init__(self) -> None:
+    def __init__(self, docstore: FakeDocStore | None = None) -> None:
         self.persist_calls = 0
+        self.docstore = docstore if docstore is not None else FakeDocStore()
 
     def persist(self) -> None:
         self.persist_calls += 1
@@ -379,3 +402,32 @@ def test_delete_ref_doc_deletes_from_docstore_and_persists() -> None:
 
     assert manager.index.deleted == ("doc-1", True)
     assert manager.storage_context.persist_calls == 1
+
+
+def test_delete_ref_doc_prunes_stale_node_ids_not_in_index_struct() -> None:
+    """历史脏数据下 ref_doc_info 里的 node_id 可能已不在 index_struct.nodes_dict：
+    LlamaIndex 原生 delete_ref_doc 遇到这类陈旧 id 会执行 `del nodes_dict[node_id]`
+    直接抛 KeyError；这里验证陈旧 id 会被提前从 docstore 摘掉，不再传给原生删除逻辑。
+    """
+    docstore = FakeDocStore(FakeRefDocInfo(node_ids=["stale-node", "valid-node"]))
+    manager = _manager()
+    manager.storage_context = FakeStorage(docstore=docstore)
+    manager.index = FakeIndex("idx", nodes_dict={"valid-node": "doc-1"})
+
+    manager.delete_ref_doc("doc-1")
+
+    assert docstore.deleted_documents == ["stale-node"]
+    assert manager.index.deleted == ("doc-1", True)
+    assert manager.storage_context.persist_calls == 1
+
+
+def test_delete_ref_doc_skips_pruning_when_no_stale_node_ids() -> None:
+    docstore = FakeDocStore(FakeRefDocInfo(node_ids=["valid-node"]))
+    manager = _manager()
+    manager.storage_context = FakeStorage(docstore=docstore)
+    manager.index = FakeIndex("idx", nodes_dict={"valid-node": "doc-1"})
+
+    manager.delete_ref_doc("doc-1")
+
+    assert docstore.deleted_documents == []
+    assert manager.index.deleted == ("doc-1", True)

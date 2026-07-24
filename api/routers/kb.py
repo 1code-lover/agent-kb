@@ -14,7 +14,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from api.schemas import DeleteDocsRequest, PreviewRequest, UrlImportRequest
 from api.schemas.kb import KBCreateRequest, KBUpdateRequest
-from api.services import kb_service
+from api.services import folder_service, kb_service
 from server.kb_errors import (
     KBConflictError,
     KBConsistencyError,
@@ -74,6 +74,17 @@ def list_docs(kb_id: str | None = None) -> dict:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+@router.get("/folders")
+def list_folders(kb_id: str) -> dict:
+    """列出指定知识库的 folder 节点。"""
+    try:
+        return success_response({"folders": folder_service.list_folders(kb_id)})
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
 @router.delete("/docs")
 def delete_docs(request: DeleteDocsRequest) -> dict:
     """删除知识库内文档。"""
@@ -94,10 +105,19 @@ def import_files(
     chunk_size: int = Form(2048),
     chunk_overlap: int = Form(512),
     kb_id: str = Form("default"),
+    relative_paths: list[str] | None = Form(None),
+    import_mode: str = Form("preserve_tree"),
 ) -> dict:
-    """导入本地文件并写入指定知识库目录。"""
+    """导入本地文件，并支持保留目录树或拍平写入。"""
     try:
-        result = kb_service.import_files(files, chunk_size, chunk_overlap, kb_id=kb_id)
+        result = kb_service.import_files(
+            files,
+            chunk_size,
+            chunk_overlap,
+            kb_id=kb_id,
+            relative_paths=relative_paths,
+            import_mode=import_mode,
+        )
         return success_response(result)
     except KBServiceError as exc:
         _raise_http_from_kb_error(exc)
