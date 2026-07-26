@@ -1,4 +1,4 @@
-﻿# 本地多知识库知识助手平台 v0.1 测试方案（Stage 2 配套）
+# 本地多知识库知识助手平台 v0.1 测试方案（Stage 2 配套）
 
 ## 1. 文档信息
 - 文档版本：v0.1
@@ -230,7 +230,7 @@ python -m pytest tests/api/test_agent_kb_scope_contract.py -q
 
 ### 4.6.1 人工检查清单
 1. `docs/20260722-local-multi-kb-assistant/` 下 PRD/FRD/RTM/plan/test-plan 均为最新版本，无内部矛盾（本次核实已确认 plan.md 无矛盾，见开头）。
-2. 根目录旧文档（`agent_v1_prd.md` 等）未被物理删除，且未被新代码引用。
+2. 旧主线文档（`agent_v1_prd.md` 等）已迁入 `docs/archive/root-legacy-20260724/`，且未被新代码引用。
 3. `app.py`/`frontend/*.py`（Streamlit）未新增任何本次 P0-1~P0-5 的新功能代码。
 4. `KbManagePage.jsx`/`KbFilePage.jsx`/`KbWebPage.jsx` 未新增功能代码，仅允许缺陷修复级改动。
 

@@ -1,7 +1,7 @@
-﻿# ThinkRAG 文档总索引
+# ThinkRAG 文档总索引
 
 > 定位：`docs/project.md` 负责“项目当前状态”，本文负责“文档怎么找”。如果两者与代码不一致，应优先修正文档，而不是继续沿用过期口径。
-> 最近更新：2026-07-16
+> 最近更新：2026-07-24（docs 根目录治理已更新）
 
 ## 1. 协作快速入口
 
@@ -54,7 +54,16 @@
 - `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-frd.md`
 - `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-rtm.md`
 - `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-plan.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-plan-knowledge-workspace.md`：Knowledge Workspace 前端重构实施方案。
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-ingestion-object-model.md`：导入与嵌入对象模型专项说明。
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-image-ocr.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-folder-model.md`：知识库内部文件夹模型专项说明。
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-evidence-preview-contract.md`：证据与预览契约专项说明。
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-frontend-ia.md`：前端信息架构与主交互流专项说明。
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-knowledge-workspace.md`：Knowledge 页面结构、模块拆分与编码顺序专项说明。
 - `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-test-plan.md`
+- `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-test-plan-knowledge-workspace.md`：Knowledge Workspace 前端重构测试方案。
 
 已被替代的 `agent_v1 / knowledge_agent / knowledge_base_visibility` 系列文档已归档到 `docs/archive/superseded-20260722-local-multi-kb-assistant/`，仅供历史追溯。
 
@@ -77,36 +86,36 @@
 
 ### 3.5 复盘与沉淀
 - `docs/interview/dev-stories/`：开发故事沉淀，供复盘 / 面试表达复用。
-- `docs/interview/ThinkRAG_面试全集_合并版.md`：项目表达材料。
+- `docs/interview/ThinkRAG_面试全集_合并版.md`：项目表达材料（整合版）。
+- `docs/interview/ThinkRAG_面试问答.md`：面试问答素材，已从 `docs/` 根目录迁入。
 - `docs/archive/`：早期方案回溯资料。
 
-## 4. docs 根目录旧入口文件说明
+## 4. docs 根目录与历史入口说明
 
-当前 `docs/` 根目录仍保留一批历史入口文件。它们并非都应继续作为“主入口”使用，建议按下面规则理解：
+当前 `docs/` 根目录已经完成一轮去重、旧主线迁出，以及桌面公共文档 canonical 收敛。阅读时建议按下面规则理解：
 
-### 4.1 已有分类目录版本，阅读时优先看分类目录
-> 说明：`agent_v1 / knowledge_agent` 系列旧入口已被 `docs/20260722-local-multi-kb-assistant/` 当前基线替代；如需历史版本，请到 `docs/archive/superseded-20260722-local-multi-kb-assistant/` 查看。
+### 4.1 当前仍保留在 docs 根目录的文件
+当前 `docs/` 根目录已只保留项目级入口文件：
+- `docs/project.md`：项目级总览入口，建议继续保留在根目录。
 
-| docs 根目录旧文件 | 优先阅读版本 |
+### 4.2 已从根目录迁出或已收敛到分类目录的资料
+以下资料已经不再保留在 `docs/` 根目录，或已明确只能以分类目录版本作为 canonical：
+
+| 资料类型 | 当前阅读入口 |
 |---|---|
-| `docs/desktop_api_contract.md` | `docs/spec/desktop_api_contract.md` |
-| `docs/desktop_project_design.md` | `docs/spec/desktop_project_design.md` |
-| `docs/desktop_regression_checklist.md` | `docs/test/desktop_regression_checklist.md` |
-| `docs/desktop_runbook.md` | `docs/guide/desktop_runbook.md` |
-| `docs/HowToDownloadModels.md` | `docs/guide/HowToDownloadModels.md` |
-| `docs/HowToUsePythonVirtualEnv.md` | `docs/guide/HowToUsePythonVirtualEnv.md` |
-| `docs/Code_of_Conduct.md` | `docs/guide/Code_of_Conduct.md` |
+| `agent_v1 / knowledge_agent` 根目录旧主线原件 | `docs/archive/root-legacy-20260724/` |
+| 被 `20260722-local-multi-kb-assistant` 替代后的整理归档版 | `docs/archive/superseded-20260722-local-multi-kb-assistant/` |
+| `agent_kb_design.md` | `docs/archive/agent_kb_design.md` |
+| `code_commenting_requirement.md` | `docs/dev/standards/code_commenting_requirement.md` |
+| `desktop_project_design.md` | `docs/spec/desktop_project_design.md` |
+| `desktop_runbook.md` | `docs/guide/desktop_runbook.md` |
+| `desktop_api_contract.md` | `docs/spec/desktop_api_contract.md` |
+| `desktop_regression_checklist.md` | `docs/test/desktop_regression_checklist.md` |
+| `HowToDownloadModels.md` | `docs/guide/HowToDownloadModels.md` |
+| `HowToUsePythonVirtualEnv.md` | `docs/guide/HowToUsePythonVirtualEnv.md` |
+| `Code_of_Conduct.md` | `docs/guide/Code_of_Conduct.md` |
 
-### 4.2 仍主要保留在 docs 根目录的文件
-这批文件暂时没有更合适的分类副本，阅读时直接使用根目录版本：
-- `docs/project.md`
-- `docs/agent_kb_design.md`
-- `docs/agent_v1_dev_readiness_checklist.md`
-- `docs/code_commenting_requirement.md`
-- `docs/ThinkRAG_面试问答.md`
-
-> 说明：这些根目录文件是否要后续迁移，应单独作为文档治理任务处理，不建议在普通功能改动中顺手挪动，以免继续制造链接漂移。
-
+> 说明：`agent_v1 / knowledge_agent / knowledge_base_visibility` 系列旧入口已被 `docs/20260722-local-multi-kb-assistant/` 当前基线替代；桌面公共文档与面试表达材料也已从根目录收敛到各自分类目录中的 canonical 位置。
 ## 5. 使用建议
 
 1. **先看 `docs/project.md` 再深入专题**：先掌握当前项目状态，再进入具体设计或排障文档。

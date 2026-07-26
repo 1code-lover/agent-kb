@@ -240,6 +240,79 @@ class TestM2KbServiceImport:
             assert len(docs) == 1
             assert docs[0]["id"] == "doc2"
 
+    def test_list_docs_hides_embedded_asset_shadow_docs(self):
+        """docs 视图不应把 Markdown 内嵌资产的 OCR 影子节点当作文档列出。"""
+        from api.services.kb_service import list_docs
+
+        mock_manager = MagicMock()
+        mock_docstore = MagicMock()
+
+        class FakeRefDocInfo:
+            def __init__(self, metadata):
+                self.metadata = metadata
+
+        doc_info = {
+            "doc1": FakeRefDocInfo(
+                metadata={
+                    "file_path": "/kb/docs/guide.md",
+                    "file_name": "guide.md",
+                    "kb_id": "my-kb",
+                }
+            ),
+            "doc2": FakeRefDocInfo(
+                metadata={
+                    "file_path": "/kb/docs/images/flow.png",
+                    "file_name": "flow.png",
+                    "kb_id": "my-kb",
+                    "asset_id": "embedded-1",
+                    "source_type": "image_ocr",
+                    "source_doc_relative_path": "docs/guide.md",
+                    "referenced_path": "./images/flow.png",
+                }
+            ),
+        }
+        mock_docstore.get_all_ref_doc_info.return_value = doc_info
+        mock_docstore.docs = doc_info
+        mock_manager.storage_context.docstore = mock_docstore
+
+        with patch("api.services.kb_service.runtime_state.get_index_manager", return_value=mock_manager):
+            docs = list_docs(kb_id="my-kb")
+            assert len(docs) == 1
+            assert docs[0]["id"] == "doc1"
+            assert docs[0]["name"] == "guide.md"
+
+    def test_list_docs_keeps_standalone_image_docs(self):
+        """standalone 图片 OCR 文档仍属于 docs 视图的普通顶层对象。"""
+        from api.services.kb_service import list_docs
+
+        mock_manager = MagicMock()
+        mock_docstore = MagicMock()
+
+        class FakeRefDocInfo:
+            def __init__(self, metadata):
+                self.metadata = metadata
+
+        doc_info = {
+            "doc1": FakeRefDocInfo(
+                metadata={
+                    "file_path": "/kb/docs/flow.png",
+                    "file_name": "flow.png",
+                    "kb_id": "my-kb",
+                    "asset_id": "asset-standalone-1",
+                    "source_type": "image_ocr",
+                }
+            )
+        }
+        mock_docstore.get_all_ref_doc_info.return_value = doc_info
+        mock_docstore.docs = doc_info
+        mock_manager.storage_context.docstore = mock_docstore
+
+        with patch("api.services.kb_service.runtime_state.get_index_manager", return_value=mock_manager):
+            docs = list_docs(kb_id="my-kb")
+            assert len(docs) == 1
+            assert docs[0]["id"] == "doc1"
+            assert docs[0]["name"] == "flow.png"
+
     def test_delete_docs_with_kb_id(self):
         """delete_docs 支持在指定 kb_id 内删除"""
         from api.services.kb_service import delete_docs

@@ -142,6 +142,17 @@ def import_web(request: UrlImportRequest) -> dict:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+@router.get("/import-receipt/latest")
+def get_latest_import_receipt(kb_id: str) -> dict:
+    """返回指定知识库最近一次导入回执。"""
+    try:
+        return success_response({"receipt": kb_service.get_latest_import_receipt(kb_id)})
+    except KBServiceError as exc:
+        _raise_http_from_kb_error(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
 @router.post("/preview")
 def preview(request: PreviewRequest) -> dict:
     """返回最小文档/证据预览对象。"""

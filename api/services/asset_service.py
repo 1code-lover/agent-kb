@@ -14,21 +14,34 @@ from server.utils.file import get_kb_data_dir, validate_kb_id
 _IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".svg"}
 _MARKDOWN_SUFFIXES = {".md", ".markdown", ".mdown", ".mdx"}
 
+_OCR_TIMING_FIELDS = (
+    "ocr_init_ms",
+    "ocr_load_image_ms",
+    "ocr_predict_ms",
+    "ocr_postprocess_ms",
+    "ocr_total_ms",
+)
+
 _registry: KBAssetRegistry | None = None
 
 
 def _get_registry() -> KBAssetRegistry:
+    """返回资产注册表单例。"""
     global _registry
     if _registry is None:
         _registry = KBAssetRegistry()
     return _registry
 
 
+
 def _get_kb_registry() -> KBRegistry:
+    """返回知识库注册表实例。"""
     return KBRegistry(storage_path=Path("storage") / "kb_registry.json")
 
 
+
 def _ensure_kb_active(kb_id: str) -> str:
+    """确保知识库存在且处于 active 状态。"""
     safe_kb_id = validate_kb_id(kb_id)
     kb = _get_kb_registry().get_kb(safe_kb_id)
     if kb is None:
@@ -38,7 +51,9 @@ def _ensure_kb_active(kb_id: str) -> str:
     return safe_kb_id
 
 
+
 def _is_markdown_result(file_result: dict[str, Any]) -> bool:
+    """判断导入结果是否表示 Markdown 文件。"""
     relative_path = file_result.get("relative_path")
     if isinstance(relative_path, str) and Path(relative_path).suffix.lower() in _MARKDOWN_SUFFIXES:
         return True
@@ -46,7 +61,9 @@ def _is_markdown_result(file_result: dict[str, Any]) -> bool:
     return content_type.startswith("text/markdown")
 
 
+
 def _is_image_result(file_result: dict[str, Any]) -> bool:
+    """判断导入结果是否表示图片文件。"""
     relative_path = file_result.get("relative_path")
     if isinstance(relative_path, str) and Path(relative_path).suffix.lower() in _IMAGE_SUFFIXES:
         return True
@@ -54,13 +71,82 @@ def _is_image_result(file_result: dict[str, Any]) -> bool:
     return content_type.startswith("image/")
 
 
+
+def _to_int(value: Any) -> int:
+    """把任意输入尽量稳定转换为 int。"""
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+
+def _to_float(value: Any) -> float:
+    """把任意输入尽量稳定转换为 float。"""
+    try:
+        return float(value or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+
+def _normalize_ocr_diagnostics(diagnostics: dict[str, Any] | None) -> dict[str, Any]:
+    """标准化 OCR 诊断字段，保证资产对象结构稳定。"""
+    source = diagnostics if isinstance(diagnostics, dict) else {}
+    normalized = {
+        "ocr_attempted": bool(source.get("ocr_attempted", False)),
+        "ocr_status": source.get("ocr_status"),
+        "ocr_text_length": _to_int(source.get("ocr_text_length")),
+        "ocr_error": source.get("ocr_error"),
+        "indexed_from_ocr": bool(source.get("indexed_from_ocr", False)),
+        "ocr_instance_reused": bool(source.get("ocr_instance_reused", False)),
+    }
+    for key in _OCR_TIMING_FIELDS:
+        normalized[key] = _to_float(source.get(key))
+    ocr_engine = source.get("ocr_engine")
+    if ocr_engine:
+        normalized["ocr_engine"] = ocr_engine
+    return normalized
+
+
+
+def _build_asset_runtime_fields(
+    *,
+    diagnostics: dict[str, Any] | None,
+    indexed_chunks: Any = 0,
+    asset_registered: bool = True,
+) -> dict[str, Any]:
+    """构造资产对象上的 OCR 与索引运行态字段。"""
+    normalized_ocr = _normalize_ocr_diagnostics(diagnostics)
+    payload = {
+        "indexed_chunks": _to_int(indexed_chunks),
+        "ocr_attempted": normalized_ocr["ocr_attempted"],
+        "ocr_status": normalized_ocr["ocr_status"],
+        "ocr_text_length": normalized_ocr["ocr_text_length"],
+        "ocr_error": normalized_ocr["ocr_error"],
+        "indexed_from_ocr": normalized_ocr["indexed_from_ocr"],
+        "asset_registered": bool(asset_registered),
+        "ocr_instance_reused": normalized_ocr["ocr_instance_reused"],
+        "ocr_diagnostics": normalized_ocr,
+    }
+    for key in _OCR_TIMING_FIELDS:
+        payload[key] = normalized_ocr[key]
+    if "ocr_engine" in normalized_ocr:
+        payload["ocr_engine"] = normalized_ocr["ocr_engine"]
+    return payload
+
+
+
 def _build_standalone_asset_id(kb_id: str, relative_path: str | None, path: str | None, filename: str | None) -> str:
+    """为独立图片资产生成稳定 asset_id。"""
     raw = relative_path or path or filename or "standalone"
     digest = hashlib.sha1(f"{kb_id}:standalone:{raw}".encode("utf-8")).hexdigest()[:16]
     return f"asset-standalone-{digest}"
 
 
+
 def _build_standalone_asset(kb_id: str, file_result: dict[str, Any]) -> dict[str, Any] | None:
+    """把图片导入结果转换为独立资产对象。"""
     if not _is_image_result(file_result):
         return None
 
@@ -70,7 +156,8 @@ def _build_standalone_asset(kb_id: str, file_result: dict[str, Any]) -> dict[str
     if not isinstance(path, str) or not path:
         return None
 
-    return {
+    diagnostics = file_result.get("diagnostics") if isinstance(file_result.get("diagnostics"), dict) else {}
+    asset = {
         "asset_id": _build_standalone_asset_id(kb_id, relative_path, path, filename),
         "kb_id": kb_id,
         "source_doc_id": None,
@@ -85,9 +172,19 @@ def _build_standalone_asset(kb_id: str, file_result: dict[str, Any]) -> dict[str
         "locator": None,
         "status": "active",
     }
+    asset.update(
+        _build_asset_runtime_fields(
+            diagnostics=diagnostics,
+            indexed_chunks=file_result.get("indexed_chunks"),
+            asset_registered=bool(diagnostics.get("asset_registered", True)),
+        )
+    )
+    return asset
+
 
 
 def _build_embedded_asset(kb_id: str, source_file: dict[str, Any], embedded_item: dict[str, Any]) -> dict[str, Any] | None:
+    """把 Markdown 内嵌资产结果转换为资产对象。"""
     if embedded_item.get("status") == "invalid":
         return None
 
@@ -104,7 +201,7 @@ def _build_embedded_asset(kb_id: str, source_file: dict[str, Any], embedded_item
     asset_path = str((get_kb_data_dir(kb_id, create=True) / resolved_relative_path).resolve())
     referenced_path = embedded_item.get("referenced_path")
     title_seed = resolved_relative_path or referenced_path or embedded_item.get("asset_id") or "embedded-asset"
-    return {
+    asset = {
         "asset_id": embedded_item.get("asset_id"),
         "kb_id": kb_id,
         "source_doc_id": None,
@@ -123,9 +220,19 @@ def _build_embedded_asset(kb_id: str, source_file: dict[str, Any], embedded_item
         },
         "status": "active" if embedded_item.get("status") == "ready" else "missing",
     }
+    asset.update(
+        _build_asset_runtime_fields(
+            diagnostics=embedded_item.get("ocr_diagnostics"),
+            indexed_chunks=embedded_item.get("indexed_chunks"),
+            asset_registered=True,
+        )
+    )
+    return asset
+
 
 
 def _resolve_asset_status(asset: dict[str, Any]) -> str:
+    """根据文件存在性刷新资产运行时状态。"""
     asset_path = asset.get("path")
     source_doc_path = asset.get("source_doc_path")
     role = asset.get("asset_role")
@@ -142,7 +249,9 @@ def _resolve_asset_status(asset: dict[str, Any]) -> str:
     return "active"
 
 
+
 def _refresh_runtime_statuses(kb_id: str) -> list[dict[str, Any]]:
+    """刷新资产状态字段，并在状态变化时写回注册表。"""
     safe_kb_id = _ensure_kb_active(kb_id)
     registry = _get_registry()
     items = registry.list_assets(safe_kb_id)
@@ -163,24 +272,55 @@ def _refresh_runtime_statuses(kb_id: str) -> list[dict[str, Any]]:
     return refreshed
 
 
+
+def _collect_ready_embedded_image_paths(file_results: list[dict[str, Any]]) -> set[str]:
+    """收集本批导入中 ready 的 embedded 图片路径，用于跳过 standalone 注册。"""
+    ready_paths: set[str] = set()
+    for file_result in file_results:
+        if not _is_markdown_result(file_result):
+            continue
+        for embedded_item in file_result.get("embedded_assets") or []:
+            if embedded_item.get("status") != "ready":
+                continue
+            asset_type = embedded_item.get("asset_type") or "image"
+            if asset_type != "image":
+                continue
+            resolved_relative_path = embedded_item.get("resolved_relative_path")
+            if isinstance(resolved_relative_path, str) and resolved_relative_path:
+                ready_paths.add(resolved_relative_path)
+    return ready_paths
+
+
+
+def _should_skip_standalone_asset(
+    file_result: dict[str, Any],
+    *,
+    embedded_ready_paths: set[str],
+) -> bool:
+    """判断 standalone 资产是否应被 embedded 资产覆盖。"""
+    diagnostics = file_result.get("diagnostics") if isinstance(file_result.get("diagnostics"), dict) else {}
+    if diagnostics.get("skip_standalone_asset"):
+        return True
+    relative_path = file_result.get("relative_path")
+    return isinstance(relative_path, str) and relative_path in embedded_ready_paths
+
+
+
 def register_imported_assets(kb_id: str, file_results: list[dict[str, Any]]) -> dict[str, int]:
-    """把导入回执中的独立图片与 embedded 图片注册为资产对象。"""
+    """注册导入资产，并在 embedded 优先时跳过 standalone 资产。"""
     safe_kb_id = validate_kb_id(kb_id)
     registry = _get_registry()
 
     standalone_assets: list[dict[str, Any]] = []
     embedded_assets: list[dict[str, Any]] = []
     embedded_source_docs: set[str] = set()
+    skipped_standalone_paths: set[str] = set()
+    embedded_ready_paths = _collect_ready_embedded_image_paths(file_results)
 
     for file_result in file_results:
         status = file_result.get("status")
         if status not in {"indexed", "empty"}:
             continue
-
-        if _is_image_result(file_result):
-            standalone_asset = _build_standalone_asset(safe_kb_id, file_result)
-            if standalone_asset is not None:
-                standalone_assets.append(standalone_asset)
 
         if _is_markdown_result(file_result):
             source_relative_path = file_result.get("relative_path")
@@ -191,20 +331,34 @@ def register_imported_assets(kb_id: str, file_results: list[dict[str, Any]]) -> 
                 if embedded_asset is not None:
                     embedded_assets.append(embedded_asset)
 
+        if _is_image_result(file_result):
+            relative_path = file_result.get("relative_path")
+            if _should_skip_standalone_asset(file_result, embedded_ready_paths=embedded_ready_paths):
+                if isinstance(relative_path, str) and relative_path:
+                    skipped_standalone_paths.add(relative_path)
+                continue
+
+            standalone_asset = _build_standalone_asset(safe_kb_id, file_result)
+            if standalone_asset is not None:
+                standalone_assets.append(standalone_asset)
+
     if embedded_source_docs:
         registry.replace_embedded_assets(safe_kb_id, embedded_source_docs, embedded_assets)
+    if skipped_standalone_paths:
+        registry.prune_standalone_assets(safe_kb_id, skipped_standalone_paths)
     if standalone_assets:
         registry.upsert_assets(safe_kb_id, standalone_assets)
 
     return {
         "standalone_count": len(standalone_assets),
         "embedded_count": len(embedded_assets),
+        "skipped_standalone_count": len(skipped_standalone_paths),
     }
-
 
 def list_assets(kb_id: str) -> list[dict[str, Any]]:
     """列出指定知识库的全部资产。"""
     return _refresh_runtime_statuses(kb_id)
+
 
 
 def get_asset_preview(kb_id: str, asset_id: str) -> dict[str, Any]:
@@ -217,6 +371,7 @@ def get_asset_preview(kb_id: str, asset_id: str) -> dict[str, Any]:
         if item.get("asset_id") == asset_id:
             return dict(item)
     raise KBNotFoundError(f"资产不存在: {asset_id}")
+
 
 
 def delete_kb_assets(kb_id: str) -> None:

@@ -38,10 +38,46 @@ def _patch_registry(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> KBRegist
 def _patch_runtime(monkeypatch: pytest.MonkeyPatch, manager: MagicMock | None = None) -> MagicMock:
     manager = manager or MagicMock()
     manager.load_files.return_value = [SimpleNamespace(metadata={})]
+    manager.load_documents.return_value = [SimpleNamespace(metadata={})]
     manager.load_websites.return_value = [SimpleNamespace(metadata={})]
+    manager.consume_last_ingestion_diagnostics.return_value = None
     monkeypatch.setattr(kb_service.runtime_state, "ensure_models_ready", MagicMock())
     monkeypatch.setattr(kb_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))
     return manager
+
+
+def _build_ingestion_diagnostics(
+    *,
+    document_count: int = 1,
+    empty_document_count: int = 0,
+    input_text_chars: int = 5,
+    node_count: int = 1,
+    nodes_with_embedding_count: int | None = None,
+    nodes_without_embedding_count: int | None = None,
+    stage_timings: dict[str, float] | None = None,
+) -> dict:
+    """???? ingestion diagnostics ???????????????"""
+    with_embeddings = node_count if nodes_with_embedding_count is None else nodes_with_embedding_count
+    without_embeddings = max(node_count - with_embeddings, 0) if nodes_without_embedding_count is None else nodes_without_embedding_count
+    return {
+        "document_count": document_count,
+        "empty_document_count": empty_document_count,
+        "input_text_chars": input_text_chars,
+        "node_count": node_count,
+        "nodes_with_embedding_count": with_embeddings,
+        "nodes_without_embedding_count": without_embeddings,
+        "stage_timings": {
+            "document_load_ms": 1.0,
+            "chunking_ms": 2.0,
+            "embedding_ms": 3.0,
+            "title_extract_ms": 4.0,
+            "vector_store_ms": 5.0,
+            "docstore_ms": 6.0,
+            "index_insert_ms": 7.0,
+            "total_ms": 28.0,
+            **(stage_timings or {}),
+        },
+    }
 
 
 def test_create_kb_creates_data_directory(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -279,6 +315,233 @@ def test_import_urls_partial_failure_only_counts_indexed_items(monkeypatch: pyte
     assert registry.get_kb("kb-a")["doc_count"] == 1
 
 
+def test_import_files_emits_stage_timings_for_batch_and_file_diagnostics(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    _patch_runtime(monkeypatch)
+    monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: name))
+
+    result = kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
+
+    batch_timings = result["diagnostics"]["stage_timings"]
+    assert set(batch_timings) == {
+        "ensure_models_ready_ms",
+        "get_index_manager_ms",
+        "persist_ms",
+        "standalone_ocr_ms",
+        "primary_index_ms",
+        "embedded_asset_extract_ms",
+        "embedded_asset_ocr_ms",
+        "embedded_asset_index_ms",
+        "register_assets_ms",
+        "total_ms",
+    }
+    assert all(value >= 0 for value in batch_timings.values())
+    assert batch_timings["persist_ms"] >= 0
+    assert batch_timings["primary_index_ms"] >= 0
+
+    file_timings = result["file_results"][0]["diagnostics"]["stage_timings"]
+    assert set(file_timings) == {
+        "persist_ms",
+        "standalone_ocr_ms",
+        "primary_index_ms",
+        "embedded_asset_extract_ms",
+        "embedded_asset_ocr_ms",
+        "embedded_asset_index_ms",
+        "total_ms",
+    }
+    assert all(value >= 0 for value in file_timings.values())
+    assert file_timings["standalone_ocr_ms"] == 0
+    assert file_timings["embedded_asset_ocr_ms"] == 0
+    assert file_timings["embedded_asset_index_ms"] == 0
+
+
+def test_import_files_merges_primary_ingestion_breakdown_into_file_and_batch_diagnostics(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_files.return_value = [SimpleNamespace(metadata={}), SimpleNamespace(metadata={})]
+    manager.consume_last_ingestion_diagnostics.return_value = _build_ingestion_diagnostics(
+        document_count=1,
+        empty_document_count=0,
+        input_text_chars=128,
+        node_count=2,
+        nodes_with_embedding_count=2,
+        nodes_without_embedding_count=0,
+    )
+    monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: name))
+
+    result = kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
+
+    file_diagnostics = result["file_results"][0]["diagnostics"]
+    batch_diagnostics = result["diagnostics"]
+
+    assert file_diagnostics["document_count"] == 1
+    assert file_diagnostics["empty_document_count"] == 0
+    assert file_diagnostics["input_text_chars"] == 128
+    assert file_diagnostics["node_count"] == 2
+    assert file_diagnostics["nodes_with_embedding_count"] == 2
+    assert file_diagnostics["nodes_without_embedding_count"] == 0
+    assert file_diagnostics["index_stage_timings"] == {
+        "document_load_ms": 1.0,
+        "chunking_ms": 2.0,
+        "embedding_ms": 3.0,
+        "title_extract_ms": 4.0,
+        "vector_store_ms": 5.0,
+        "docstore_ms": 6.0,
+        "index_insert_ms": 7.0,
+        "total_ms": 28.0,
+    }
+
+    assert batch_diagnostics["document_count"] == 1
+    assert batch_diagnostics["empty_document_count"] == 0
+    assert batch_diagnostics["input_text_chars"] == 128
+    assert batch_diagnostics["node_count"] == 2
+    assert batch_diagnostics["nodes_with_embedding_count"] == 2
+    assert batch_diagnostics["nodes_without_embedding_count"] == 0
+    assert batch_diagnostics["index_stage_timings"]["embedding_ms"] == 3.0
+    assert batch_diagnostics["index_stage_timings"]["index_insert_ms"] == 7.0
+
+
+
+def test_import_files_aggregates_embedded_asset_ingestion_breakdown(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_files.return_value = [SimpleNamespace(metadata={})]
+    manager.load_documents.return_value = [SimpleNamespace(metadata={}), SimpleNamespace(metadata={})]
+    manager.consume_last_ingestion_diagnostics.side_effect = [
+        _build_ingestion_diagnostics(
+            document_count=1,
+            empty_document_count=0,
+            input_text_chars=32,
+            node_count=1,
+            nodes_with_embedding_count=1,
+            nodes_without_embedding_count=0,
+            stage_timings={"embedding_ms": 11.0, "total_ms": 21.0},
+        ),
+        _build_ingestion_diagnostics(
+            document_count=1,
+            empty_document_count=0,
+            input_text_chars=18,
+            node_count=2,
+            nodes_with_embedding_count=2,
+            nodes_without_embedding_count=0,
+            stage_timings={"embedding_ms": 13.0, "total_ms": 23.0},
+        ),
+    ]
+    monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: name))
+    monkeypatch.setattr(
+        kb_service,
+        "extract_markdown_embedded_assets_from_file",
+        lambda **_: [
+            {
+                "asset_id": "asset-1",
+                "asset_type": "image",
+                "status": "ready",
+                "path": str((tmp_path / "data" / "kb-a" / "diagram.png").resolve()),
+                "mime_type": "image/png",
+                "resolved_relative_path": "diagram.png",
+                "source_doc_relative_path": "note.md",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        kb_service,
+        "_extract_image_ocr_result",
+        lambda path, content_type: {
+            "attempted": True,
+            "status": "success",
+            "text": "diagram text",
+            "error": None,
+            "engine": "mock-ocr",
+        },
+    )
+
+    result = kb_service.import_files(
+        [FakeUploadFile("note.md", b"![diagram](diagram.png)", content_type="text/markdown")],
+        128,
+        16,
+        kb_id="kb-a",
+    )
+
+    file_diagnostics = result["file_results"][0]["diagnostics"]
+    batch_diagnostics = result["diagnostics"]
+
+    assert file_diagnostics["document_count"] == 2
+    assert file_diagnostics["input_text_chars"] == 50
+    assert file_diagnostics["node_count"] == 3
+    assert file_diagnostics["nodes_with_embedding_count"] == 3
+    assert file_diagnostics["nodes_without_embedding_count"] == 0
+    assert file_diagnostics["index_stage_timings"]["embedding_ms"] == 24.0
+    assert file_diagnostics["index_stage_timings"]["total_ms"] == 44.0
+
+    assert batch_diagnostics["document_count"] == 2
+    assert batch_diagnostics["input_text_chars"] == 50
+    assert batch_diagnostics["node_count"] == 3
+    assert batch_diagnostics["index_stage_timings"]["embedding_ms"] == 24.0
+    assert batch_diagnostics["index_stage_timings"]["total_ms"] == 44.0
+
+
+def test_import_files_records_embedded_asset_stage_timings_for_markdown(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_files.return_value = [SimpleNamespace(metadata={})]
+    manager.load_documents.return_value = [SimpleNamespace(metadata={})]
+    monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: name))
+    monkeypatch.setattr(
+        kb_service,
+        "extract_markdown_embedded_assets_from_file",
+        lambda **_: [
+            {
+                "asset_id": "asset-1",
+                "asset_type": "image",
+                "status": "ready",
+                "path": str((tmp_path / "data" / "kb-a" / "diagram.png").resolve()),
+                "mime_type": "image/png",
+                "resolved_relative_path": "diagram.png",
+                "source_doc_relative_path": "note.md",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        kb_service,
+        "_extract_image_ocr_result",
+        lambda path, content_type: {
+            "attempted": True,
+            "status": "success",
+            "text": "diagram text",
+            "error": None,
+            "engine": "mock-ocr",
+        },
+    )
+
+    result = kb_service.import_files(
+        [FakeUploadFile("note.md", b"![diagram](diagram.png)", content_type="text/markdown")],
+        128,
+        16,
+        kb_id="kb-a",
+    )
+
+    file_result = result["file_results"][0]
+    file_timings = file_result["diagnostics"]["stage_timings"]
+    batch_timings = result["diagnostics"]["stage_timings"]
+
+    assert file_result["status"] == "indexed"
+    assert file_result["indexed_chunks"] == 2
+    assert file_timings["embedded_asset_extract_ms"] >= 0
+    assert file_timings["embedded_asset_ocr_ms"] >= 0
+    assert file_timings["embedded_asset_index_ms"] >= 0
+    assert batch_timings["embedded_asset_extract_ms"] >= file_timings["embedded_asset_extract_ms"]
+    assert batch_timings["embedded_asset_ocr_ms"] >= file_timings["embedded_asset_ocr_ms"]
+    assert batch_timings["embedded_asset_index_ms"] >= file_timings["embedded_asset_index_ms"]
+
+
 def test_delete_non_empty_kb_raises_conflict(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(tmp_path)
     registry = _patch_registry(monkeypatch, tmp_path)
@@ -340,3 +603,68 @@ def test_index_manager_load_files_uses_explicit_paths_and_writes_metadata(monkey
     assert nodes[0].metadata["file_path"] == str(source.resolve())
     assert nodes[0].metadata["file_name"] == "a.txt"
     manager._load_documents.assert_called_once_with([str(source.resolve())])
+
+
+def test_import_files_persists_latest_receipt_per_kb(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    registry.create_kb("kb-b", "KB B")
+    _patch_runtime(monkeypatch)
+
+    result_a = kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
+    result_b = kb_service.import_files([FakeUploadFile("b.txt", b"beta")], 128, 16, kb_id="kb-b")
+
+    receipt_a = kb_service.get_latest_import_receipt("kb-a")
+    receipt_b = kb_service.get_latest_import_receipt("kb-b")
+
+    assert receipt_a is not None
+    assert receipt_b is not None
+    assert receipt_a["kb_id"] == "kb-a"
+    assert receipt_b["kb_id"] == "kb-b"
+    assert receipt_a["source_label"] == "文件上传"
+    assert receipt_b["source_label"] == "文件上传"
+    assert receipt_a["result"]["receipt_id"] == result_a["receipt_id"]
+    assert receipt_b["result"]["receipt_id"] == result_b["receipt_id"]
+    assert receipt_a["result"]["file_results"][0]["name"] == result_a["file_results"][0]["name"]
+    assert receipt_b["result"]["file_results"][0]["name"] == result_b["file_results"][0]["name"]
+
+
+def test_import_urls_persists_latest_receipt(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+    manager.load_websites.return_value = [SimpleNamespace(metadata={})]
+
+    result = kb_service.import_urls(["https://example.com/a"], 128, 16, kb_id="kb-a")
+    receipt = kb_service.get_latest_import_receipt("kb-a")
+
+    assert receipt is not None
+    assert receipt["kb_id"] == "kb-a"
+    assert receipt["source_label"] == "网页导入"
+    assert receipt["result"]["receipt_id"] == result["receipt_id"]
+    assert receipt["result"]["url_results"][0]["url"] == "https://example.com/a"
+
+
+def test_delete_kb_cleans_latest_import_receipt(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    _patch_runtime(monkeypatch)
+
+    result = kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
+
+    receipt_path = tmp_path / "storage" / "kb_import_receipts" / "kb-a.json"
+    assert receipt_path.exists()
+
+    file_path = Path(result["files"][0]["path"])
+    file_path.unlink()
+
+    registry_items = registry.list_kbs()
+    registry_items[0]["doc_count"] = 0
+    registry.replace_all(registry_items)
+    monkeypatch.setattr(kb_service, "list_docs", MagicMock(return_value=[]))
+
+    assert kb_service.delete_kb("kb-a") is True
+    assert not receipt_path.exists()

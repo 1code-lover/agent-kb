@@ -1,23 +1,45 @@
 """
-模块功能：
-- 封装文档摄取（ingestion）流程，统一文本切分、向量化和中文标题增强。
+?????
+- ???????ingestion??????????????????????
 
-执行逻辑：
-1. 从全局 Settings 中读取 embedding 与 text splitter。
-2. 组装 AdvancedIngestionPipeline 的 transformations。
-3. 在 run 时执行父类管线并返回节点集合。
+?????
+1. ??? Settings ??? embedding ? text splitter?
+2. ?? AdvancedIngestionPipeline ? transformations?
+3. ? run ???????????????
 
-关键依赖：
+?????
 - llama_index.core.ingestion.IngestionPipeline
 - server.splitters.ChineseTitleExtractor
 - server.stores.strage_context / ingestion_cache
 """
 
+from __future__ import annotations
+
+import time
+import warnings
+from typing import Any
+
 from llama_index.core import Settings
 from llama_index.core.ingestion import IngestionPipeline, DocstoreStrategy
+from llama_index.core.ingestion.pipeline import get_transformation_hash, get_tqdm_iterable
+
 from server.splitters import ChineseTitleExtractor
 from server.stores.strage_context import STORAGE_CONTEXT
 from server.stores.ingestion_cache import INGESTION_CACHE
+
+
+def _new_ingestion_stage_timings() -> dict[str, float]:
+    """?????? ingestion ??????????"""
+    return {
+        "document_load_ms": 0.0,
+        "chunking_ms": 0.0,
+        "embedding_ms": 0.0,
+        "title_extract_ms": 0.0,
+        "vector_store_ms": 0.0,
+        "docstore_ms": 0.0,
+        "index_insert_ms": 0.0,
+        "total_ms": 0.0,
+    }
 
 
 class AdvancedIngestionPipeline(IngestionPipeline):
@@ -25,19 +47,19 @@ class AdvancedIngestionPipeline(IngestionPipeline):
         self,
     ):
         """
-        功能：
-        - 初始化高级摄取管线，绑定统一的转换链和存储策略。
+        ???
+        - ????????????????????????
 
-        输入：
-        - 无显式参数，依赖全局 Settings 与存储上下文。
+        ???
+        - ?????????? Settings ???????
 
-        执行逻辑：
-        1. 读取全局 embedding model 与 text splitter。
-        2. 注入中文标题增强转换器。
-        3. 绑定 docstore、vector_store、cache 与 upsert 策略。
+        ?????
+        1. ???? embedding model ? text splitter?
+        2. ????????????
+        3. ?? docstore?vector_store?cache ? upsert ???
 
-        输出：
-        - 完成初始化的 AdvancedIngestionPipeline 实例。
+        ???
+        - ?????? AdvancedIngestionPipeline ???
         """
         embed_model = Settings.embed_model
         text_splitter = Settings.text_splitter
@@ -46,7 +68,7 @@ class AdvancedIngestionPipeline(IngestionPipeline):
             transformations=[
                 text_splitter,
                 embed_model,
-                ChineseTitleExtractor(),  # 中文标题增强，提升分块语义质量。
+                ChineseTitleExtractor(),  # ????????????????
             ],
             docstore=STORAGE_CONTEXT.docstore,
             vector_store=STORAGE_CONTEXT.vector_store,
@@ -54,23 +76,139 @@ class AdvancedIngestionPipeline(IngestionPipeline):
             docstore_strategy=DocstoreStrategy.UPSERTS,
         )
 
-    def run(self, documents):
+    def _resolve_transform_stage_key(self, transform: Any, index: int) -> str:
+        """? transform ???????? diagnostics ???"""
+        if index == 0:
+            return "chunking_ms"
+        if index == 1:
+            return "embedding_ms"
+        if index == 2:
+            return "title_extract_ms"
+        return f"transform_{type(transform).__name__.lower()}_{index}_ms"
+
+    def run(
+        self,
+        show_progress: bool = False,
+        documents=None,
+        nodes=None,
+        cache_collection: str | None = None,
+        in_place: bool = True,
+        store_doc_text: bool = True,
+        num_workers: int | None = None,
+        diagnostics: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ):
         """
-        功能：
-        - 执行文档摄取并返回可入库节点。
+        ???
+        - ???????????????
 
-        输入：
-        - documents(list): 文档对象列表。
-
-        执行逻辑：
-        1. 输出输入文档数量用于调试。
-        2. 调用父类 run 执行转换、向量化、缓存处理。
-        3. 输出生成节点数量并返回。
-
-        输出：
-        - list: 处理后的节点集合。
+        ???
+        - ?????? diagnostics ?????????Embedding??????????????
+        - ??? diagnostics ?????????????????????
         """
-        print(f"Load {len(documents)} Documents")
-        nodes = super().run(documents=documents)
-        print(f"Ingested {len(nodes)} Nodes")
-        return nodes
+        input_documents = documents or []
+        print(f"Load {len(input_documents)} Documents")
+
+        if diagnostics is None or (num_workers is not None and num_workers > 1):
+            nodes_result = super().run(
+                show_progress=show_progress,
+                documents=documents,
+                nodes=nodes,
+                cache_collection=cache_collection,
+                in_place=in_place,
+                store_doc_text=store_doc_text,
+                num_workers=num_workers,
+                **kwargs,
+            )
+            print(f"Ingested {len(nodes_result)} Nodes")
+            return nodes_result
+
+        started_at = time.perf_counter()
+        stage_timings = diagnostics.setdefault("stage_timings", _new_ingestion_stage_timings())
+        for key, value in _new_ingestion_stage_timings().items():
+            stage_timings.setdefault(key, value)
+
+        input_nodes = self._prepare_inputs(documents, nodes)
+
+        effective_strategy = self.docstore_strategy
+        if (
+            self.docstore is not None
+            and self.vector_store is None
+            and self.docstore_strategy in (DocstoreStrategy.UPSERTS, DocstoreStrategy.UPSERTS_AND_DELETE)
+        ):
+            warnings.warn(
+                f"docstore_strategy='{self.docstore_strategy.value}' requires a vector store "
+                "to apply upsert/delete semantics; falling back to 'duplicates_only' for this run. "
+                "pipeline.docstore_strategy is unchanged.",
+                UserWarning,
+                stacklevel=3,
+            )
+            effective_strategy = DocstoreStrategy.DUPLICATES_ONLY
+
+        if self.docstore is not None and self.vector_store is not None:
+            if effective_strategy in (DocstoreStrategy.UPSERTS, DocstoreStrategy.UPSERTS_AND_DELETE):
+                nodes_to_run = self._handle_upserts(input_nodes)
+            elif effective_strategy == DocstoreStrategy.DUPLICATES_ONLY:
+                nodes_to_run = self._handle_duplicates(input_nodes)
+            else:
+                raise ValueError(f"Invalid docstore strategy: {effective_strategy}")
+        elif self.docstore is not None and self.vector_store is None:
+            nodes_to_run = self._handle_duplicates(input_nodes)
+        else:
+            nodes_to_run = input_nodes
+
+        if not in_place:
+            transformed_nodes = list(nodes_to_run)
+        else:
+            transformed_nodes = nodes_to_run
+
+        for index, transform in enumerate(get_tqdm_iterable(self.transformations, show_progress, "Applying transformations")):
+            stage_key = self._resolve_transform_stage_key(transform, index)
+            transform_started_at = time.perf_counter()
+            if self.cache is not None and not self.disable_cache:
+                cache_key = get_transformation_hash(transformed_nodes, transform)
+                cached_nodes = self.cache.get(cache_key, collection=cache_collection)
+                if cached_nodes is not None:
+                    transformed_nodes = cached_nodes
+                else:
+                    transformed_nodes = transform(transformed_nodes, **kwargs)
+                    self.cache.put(cache_key, transformed_nodes, collection=cache_collection)
+            else:
+                transformed_nodes = transform(transformed_nodes, **kwargs)
+            stage_timings[stage_key] = round(
+                float(stage_timings.get(stage_key, 0.0))
+                + max(time.perf_counter() - transform_started_at, 0.0) * 1000,
+                3,
+            )
+
+        output_nodes = list(transformed_nodes or [])
+        nodes_with_embeddings = [node for node in output_nodes if getattr(node, "embedding", None) is not None]
+
+        if self.vector_store is not None and nodes_with_embeddings:
+            vector_started_at = time.perf_counter()
+            self.vector_store.add(nodes_with_embeddings)
+            stage_timings["vector_store_ms"] = round(
+                float(stage_timings.get("vector_store_ms", 0.0))
+                + max(time.perf_counter() - vector_started_at, 0.0) * 1000,
+                3,
+            )
+
+        if self.docstore is not None:
+            docstore_started_at = time.perf_counter()
+            self._update_docstore(
+                nodes_to_run,
+                effective_strategy=effective_strategy,
+                store_doc_text=store_doc_text,
+            )
+            stage_timings["docstore_ms"] = round(
+                float(stage_timings.get("docstore_ms", 0.0))
+                + max(time.perf_counter() - docstore_started_at, 0.0) * 1000,
+                3,
+            )
+
+        diagnostics["node_count"] = len(output_nodes)
+        diagnostics["nodes_with_embedding_count"] = len(nodes_with_embeddings)
+        diagnostics["nodes_without_embedding_count"] = max(len(output_nodes) - len(nodes_with_embeddings), 0)
+        stage_timings["total_ms"] = round(max(time.perf_counter() - started_at, 0.0) * 1000, 3)
+        print(f"Ingested {len(output_nodes)} Nodes")
+        return output_nodes

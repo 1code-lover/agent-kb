@@ -137,3 +137,35 @@ class TestKbWebImport:
             )
 
         assert resp.status_code == expected_status
+
+
+class TestKbLatestImportReceiptRoute:
+    """最近导入回执路由测试。"""
+
+    def test_latest_import_receipt_returns_service_payload(self):
+        payload = {
+            "kb_id": "my-kb",
+            "source_label": "文件上传",
+            "created_at": "2026-07-26T08:00:00+00:00",
+            "result": {"receipt_id": "r-1", "kb_id": "my-kb"},
+        }
+        with patch("api.routers.kb.kb_service.get_latest_import_receipt", return_value=payload) as mock_get:
+            resp = client.get("/api/kb/import-receipt/latest", params={"kb_id": "my-kb"})
+
+        assert resp.status_code == 200
+        assert resp.json()["data"]["receipt"] == payload
+        mock_get.assert_called_once_with("my-kb")
+
+    @pytest.mark.parametrize(
+        ("exc", "expected_status"),
+        [
+            (KBNotFoundError("知识库不存在: missing"), 404),
+            (KBValidationError("非法知识库 ID"), 400),
+            (KBUnavailableError("知识库不可用: inactive-kb"), 400),
+        ],
+    )
+    def test_latest_import_receipt_maps_kb_errors(self, exc, expected_status):
+        with patch("api.routers.kb.kb_service.get_latest_import_receipt", side_effect=exc):
+            resp = client.get("/api/kb/import-receipt/latest", params={"kb_id": "missing"})
+
+        assert resp.status_code == expected_status

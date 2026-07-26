@@ -7,19 +7,9 @@
  * 2. 在两者完成后统一渲染运行状态摘要。
  */
 
-import { useQuery } from "@tanstack/react-query";
-import { getStorageInfo } from "../api/settings";
-import client from "../api/client";
-
-/**
- * 获取服务健康状态。
- *
- * 输出：
- * - Promise<object>: 健康检查结果。
- */
-async function getHealth() {
-  return client.get("/api/health");
-}
+import { useQuery } from '@tanstack/react-query';
+import { getHealthStatus } from '../api/health';
+import { getStorageInfo } from '../api/settings';
 
 /**
  * 存储状态页面组件。
@@ -28,15 +18,15 @@ async function getHealth() {
  * - JSX.Element: Storage 页面 UI。
  */
 export default function StoragePage() {
-  const storageQuery = useQuery({ queryKey: ["storage-info"], queryFn: getStorageInfo });
-  const healthQuery = useQuery({ queryKey: ["health"], queryFn: getHealth });
+  const storageQuery = useQuery({ queryKey: ['storage-info'], queryFn: getStorageInfo });
+  const healthQuery = useQuery({ queryKey: ['health'], queryFn: getHealthStatus });
 
   if (storageQuery.isLoading || healthQuery.isLoading) {
     return <p>Loading...</p>;
   }
 
   if (storageQuery.error) {
-    return <p className="error">{storageQuery.error.message}</p>;
+    return <p className='error'>{storageQuery.error.message}</p>;
   }
 
   const info = storageQuery.data?.data;
@@ -50,7 +40,7 @@ export default function StoragePage() {
       <p>Vector Store: {info.default_vector_store}</p>
       <p>Chat Store: {info.default_chat_store}</p>
       <p>
-        Redis: {info.redis.host}:{info.redis.port} / {info.redis.reachable ? "reachable" : "unreachable"}
+        Redis: {info.redis.host}:{info.redis.port} / {info.redis.reachable ? 'reachable' : 'unreachable'}
       </p>
     </section>
   );

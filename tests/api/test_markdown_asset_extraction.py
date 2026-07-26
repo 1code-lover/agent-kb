@@ -9,7 +9,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from api.services import kb_service
+from api.services import asset_service, kb_service
+from server.asset_registry import KBAssetRegistry
 from server.kb_registry import KBRegistry
 from server.markdown_asset_extractor import extract_markdown_embedded_assets
 
@@ -29,18 +30,59 @@ def _patch_registry(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> KBRegist
     return registry
 
 
+def _patch_asset_registry(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> KBAssetRegistry:
+    registry = KBAssetRegistry(base_dir=tmp_path / "storage" / "kb_assets")
+    monkeypatch.setattr(asset_service, "_registry", registry)
+    return registry
+
+
 def _patch_runtime(monkeypatch: pytest.MonkeyPatch, manager: MagicMock | None = None) -> MagicMock:
     manager = manager or MagicMock()
     manager.load_files.return_value = [SimpleNamespace(metadata={})]
+
+    def _load_documents(documents, chunk_size, chunk_overlap, kb_id=None):
+        nodes = []
+        for document in documents:
+            metadata = dict(getattr(document, "metadata", {}) or {})
+            if kb_id is not None:
+                metadata["kb_id"] = kb_id
+            nodes.append(SimpleNamespace(metadata=metadata, text=getattr(document, "text", "")))
+        return nodes
+
+    manager.load_documents.side_effect = _load_documents
     monkeypatch.setattr(kb_service.runtime_state, "ensure_models_ready", MagicMock())
     monkeypatch.setattr(kb_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))
     return manager
+
+
+def _patch_image_ocr(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    status: str,
+    text: str = "",
+    error: str | None = None,
+    attempted: bool | None = None,
+    engine: str = "mock-paddleocr",
+) -> None:
+    """替换图片 OCR 依赖，便于稳定验证导入链路。"""
+
+    def _fake_extract_image_ocr_result(path: Path, content_type: str) -> dict[str, object]:
+        return {
+            "status": status,
+            "text": text,
+            "error": error,
+            "attempted": attempted if attempted is not None else status != "skipped",
+            "engine": engine,
+        }
+
+    monkeypatch.setattr(kb_service, "_extract_image_ocr_result", _fake_extract_image_ocr_result)
 
 
 @pytest.fixture(autouse=True)
 def _reset_registry_state():
     yield
     kb_service._registry = None
+    asset_service._registry = None
 
 
 def test_extract_markdown_assets_resolves_local_and_parent_relative_refs(tmp_path: Path) -> None:
@@ -103,60 +145,68 @@ def test_extract_markdown_assets_ignores_remote_and_data_uri_but_marks_invalid_o
     assert assets[2]["resolved_relative_path"] == "docs/missing.png"
 
 
-def test_import_files_returns_embedded_assets_for_markdown_with_sibling_image_in_same_batch(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    """Markdown 先上传、图片后上传时，也应基于最终落盘结果解析到 ready 资产。"""
-    monkeypatch.chdir(tmp_path)
-    registry = _patch_registry(monkeypatch, tmp_path)
-    registry.create_kb("kb-a", "KB A")
-    manager = _patch_runtime(monkeypatch)
+def test_extract_markdown_assets_from_gb18030_file_preserves_non_utf8_image_path(tmp_path: Path) -> None:
+    """GB18030 Markdown 文件中的中文图片路径不应被 utf-8 ignore 吞字。"""
+    kb_root = tmp_path / "data" / "kb-a"
+    doc_path = kb_root / "docs" / "readme.md"
+    image_name = "流程图.png"
+    image_path = kb_root / "docs" / "images" / image_name
+    image_path.parent.mkdir(parents=True)
+    doc_path.parent.mkdir(parents=True, exist_ok=True)
+    image_path.write_bytes(b"png")
+    markdown_text = "产品说明\n![流程图](./images/流程图.png)\n"
+    doc_path.write_bytes(markdown_text.encode("gb18030"))
 
-    result = kb_service.import_files(
-        [
-            FakeUploadFile("readme.md", "![流程图](./images/flow.png)".encode("utf-8")),
-            FakeUploadFile("flow.png", b"png", content_type="image/png"),
-        ],
-        128,
-        16,
-        kb_id="kb-a",
-        relative_paths=["docs/readme.md", "docs/images/flow.png"],
-        import_mode="preserve_tree",
+    assets = kb_service.extract_markdown_embedded_assets_from_file(doc_path, kb_root, "docs/readme.md")
+
+    assert len(assets) == 1
+    assert assets[0]["referenced_path"] == "./images/流程图.png"
+    assert assets[0]["status"] == "ready"
+    assert assets[0]["resolved_relative_path"] == "docs/images/流程图.png"
+
+
+def test_extract_markdown_assets_from_utf16_file_preserves_non_utf8_image_path(tmp_path: Path) -> None:
+    """UTF-16 Markdown 文件中的中文图片路径也应保持原样。"""
+    kb_root = tmp_path / "data" / "kb-a"
+    doc_path = kb_root / "docs" / "readme.md"
+    image_name = "流程图.png"
+    image_path = kb_root / "docs" / "images" / image_name
+    image_path.parent.mkdir(parents=True)
+    doc_path.parent.mkdir(parents=True, exist_ok=True)
+    image_path.write_bytes(b"png")
+    markdown_text = "产品说明\n![流程图](./images/流程图.png)\n"
+    doc_path.write_bytes(markdown_text.encode("utf-16"))
+
+    assets = kb_service.extract_markdown_embedded_assets_from_file(doc_path, kb_root, "docs/readme.md")
+
+    assert len(assets) == 1
+    assert assets[0]["referenced_path"] == "./images/流程图.png"
+    assert assets[0]["status"] == "ready"
+    assert assets[0]["resolved_relative_path"] == "docs/images/流程图.png"
+
+
+def test_extract_markdown_assets_prefers_logical_relative_path_and_batch_alias_when_files_are_flattened(
+    tmp_path: Path,
+) -> None:
+    """flatten 落盘时，Markdown 仍应按逻辑相对路径解析，再映射到实际改名文件。"""
+    kb_root = tmp_path / "data" / "kb-a"
+    doc_path = kb_root / "readme_flat.md"
+    asset_path = kb_root / "flow_flat.png"
+    kb_root.mkdir(parents=True)
+    doc_path.write_text("![流程图](./images/flow.png)\n", encoding="utf-8")
+    asset_path.write_bytes(b"png")
+
+    assets = extract_markdown_embedded_assets(
+        markdown_text=doc_path.read_text(encoding="utf-8"),
+        source_doc_path=doc_path,
+        kb_root=kb_root,
+        source_doc_relative_path="docs/readme.md",
+        path_aliases={"docs/images/flow.png": "flow_flat.png"},
     )
 
-    assert manager.load_files.call_count == 2
-    markdown_result = result["file_results"][0]
-    image_result = result["file_results"][1]
-
-    assert markdown_result["status"] == "indexed"
-    assert markdown_result["asset_warning_count"] == 0
-    assert len(markdown_result["embedded_assets"]) == 1
-    assert markdown_result["embedded_assets"][0]["status"] == "ready"
-    assert markdown_result["embedded_assets"][0]["resolved_relative_path"] == "docs/images/flow.png"
-    assert image_result["embedded_assets"] == []
-
-
-def test_import_files_missing_markdown_asset_becomes_warning_not_failure(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    """缺失图片不应阻断 Markdown 导入，只应体现在回执 warning。"""
-    monkeypatch.chdir(tmp_path)
-    registry = _patch_registry(monkeypatch, tmp_path)
-    registry.create_kb("kb-a", "KB A")
-    _patch_runtime(monkeypatch)
-
-    result = kb_service.import_files(
-        [FakeUploadFile("readme.md", "![缺图](./images/missing.png)".encode("utf-8"))],
-        128,
-        16,
-        kb_id="kb-a",
-        relative_paths=["docs/readme.md"],
-        import_mode="preserve_tree",
-    )
-
-    assert result["success_count"] == 1
-    assert result["failed_count"] == 0
-    assert result["file_results"][0]["status"] == "indexed"
-    assert result["file_results"][0]["asset_warning_count"] == 1
-    assert result["file_results"][0]["embedded_assets"][0]["status"] == "missing"
-    assert result["file_results"][0]["embedded_assets"][0]["resolved_relative_path"] == "docs/images/missing.png"
+    assert len(assets) == 1
+    assert assets[0]["referenced_path"] == "./images/flow.png"
+    assert assets[0]["logical_relative_path"] == "docs/images/flow.png"
+    assert assets[0]["resolved_relative_path"] == "flow_flat.png"
+    assert assets[0]["status"] == "ready"
+    assert Path(assets[0]["path"]).name == "flow_flat.png"

@@ -18,6 +18,7 @@ export default function AgentEvidencePanel({ evidence }) {
             </div>
             <p className="stack-subtle">
               {item.source}
+              {item.asset_id ? " / asset_id=" + item.asset_id : ""}
               {item.page && item.page !== "N/A" ? " / p." + item.page : ""}
             </p>
             <p>{item.excerpt || "无摘要。"}</p>

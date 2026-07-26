@@ -1,4 +1,4 @@
-﻿# 本地多知识库知识助手平台完整设计文档（Spec）
+# 本地多知识库知识助手平台完整设计文档（Spec）
 
 ## 1. 文档信息
 - 文档版本：v0.2
@@ -9,6 +9,12 @@
 - 对应 FRD：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-frd.md`
 - 对应 Plan：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-plan.md`
 - 对应导入加固计划：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-plan-ingestion-hardening.md`
+- 对应导入对象模型专项 Spec：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-ingestion-object-model.md`
+- 对应图片 OCR 增量 Spec：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-image-ocr.md`
+- 对应文件夹模型专项 Spec：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-folder-model.md`
+- 对应证据与预览契约专项 Spec：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-evidence-preview-contract.md`
+- 对应前端信息架构专项 Spec：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-frontend-ia.md`
+- 对应 Knowledge Workspace 页面专项 Spec：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-spec-knowledge-workspace.md`
 - 对应 Test Plan：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-test-plan.md`
 
 ---

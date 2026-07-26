@@ -195,6 +195,7 @@ class EvidenceItem(BaseModel):
     kb_id: str = "default"
     doc_id: str | None = None
     preview_locator: dict[str, Any] | None = None
+    asset_id: str | None = None
 
 
 class PreviewItem(BaseModel):

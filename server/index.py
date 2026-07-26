@@ -13,16 +13,118 @@
 - server.utils_json.sanitize_for_json
 """
 
+import copy
+import inspect
+import mimetypes
 import os
+import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-from llama_index.core import Settings, StorageContext, VectorStoreIndex
+
+from llama_index.core import Document, Settings, SimpleDirectoryReader, StorageContext, VectorStoreIndex
 from llama_index.core import load_index_from_storage, load_indices_from_storage
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from server.stores.strage_context import STORAGE_CONTEXT
 from server.ingestion import AdvancedIngestionPipeline
 from config import DEV_MODE
+from server.text_file_loader import read_text_file_with_fallback
 from server.utils_json import sanitize_for_json  # metadata 清洗，避免 Tag 不可序列化
+
+_TEXT_FILE_SUFFIXES = {".md", ".markdown", ".mdown", ".mdx", ".txt", ".text", ".rst", ".log"}
+
+_INGESTION_STAGE_KEYS = (
+    "document_load_ms",
+    "chunking_ms",
+    "embedding_ms",
+    "title_extract_ms",
+    "vector_store_ms",
+    "docstore_ms",
+    "index_insert_ms",
+    "total_ms",
+)
+
+
+def _new_ingestion_stage_timings() -> dict[str, float]:
+    """?? ingestion ??????????"""
+    return {key: 0.0 for key in _INGESTION_STAGE_KEYS}
+
+
+
+def _new_ingestion_diagnostics(source: str, input_file_count: int = 0) -> dict[str, Any]:
+    """???? ingestion ??? diagnostics ???"""
+    return {
+        "source": source,
+        "input_file_count": int(input_file_count or 0),
+        "document_count": 0,
+        "empty_document_count": 0,
+        "input_text_chars": 0,
+        "node_count": 0,
+        "nodes_with_embedding_count": 0,
+        "nodes_without_embedding_count": 0,
+        "stage_timings": _new_ingestion_stage_timings(),
+    }
+
+
+def _read_document_text(document: Any) -> str:
+    """???? Document ?? Document ????????"""
+    if document is None:
+        return ""
+
+    text = getattr(document, "text", None)
+    if text is None and hasattr(document, "get_content"):
+        try:
+            text = document.get_content()
+        except Exception:
+            text = None
+    return "" if text is None else str(text)
+
+
+def _summarize_documents(documents: list[Any]) -> dict[str, int]:
+    """???????????????????"""
+    summary = {
+        "document_count": len(documents or []),
+        "empty_document_count": 0,
+        "input_text_chars": 0,
+    }
+    for document in documents or []:
+        text = _read_document_text(document).strip()
+        if not text:
+            summary["empty_document_count"] += 1
+            continue
+        summary["input_text_chars"] += len(text)
+    return summary
+
+
+def _count_nodes_with_embeddings(nodes: list[Any]) -> tuple[int, int]:
+    """??? embedding ??? embedding ?????"""
+    node_list = list(nodes or [])
+    with_embeddings = sum(1 for node in node_list if getattr(node, "embedding", None) is not None)
+    return with_embeddings, max(len(node_list) - with_embeddings, 0)
+
+
+def _elapsed_ms(started_at: float) -> float:
+    """?? monotonic ?????????"""
+    return round(max(time.perf_counter() - started_at, 0.0) * 1000, 3)
+
+
+def _finalize_ingestion_total(stage_timings: dict[str, Any], started_at: float) -> float:
+    """?? total_ms???? mock ?????????????"""
+    component_max = 0.0
+    for key, value in (stage_timings or {}).items():
+        if key == 'total_ms':
+            continue
+        try:
+            component_max = max(component_max, float(value or 0.0))
+        except (TypeError, ValueError):
+            continue
+    current_total = 0.0
+    try:
+        current_total = float((stage_timings or {}).get('total_ms') or 0.0)
+    except (TypeError, ValueError):
+        current_total = 0.0
+    total_ms = round(max(current_total, _elapsed_ms(started_at), component_max), 3)
+    stage_timings['total_ms'] = total_ms
+    return total_ms
 
 
 def _resolve_path_metadata(value: Any) -> Path | None:
@@ -42,6 +144,35 @@ def _resolve_path_metadata(value: Any) -> Path | None:
         return Path(raw).resolve()
     except (OSError, TypeError, ValueError):
         return None
+
+
+def _format_file_date(timestamp: float | None) -> str | None:
+    """把文件时间戳格式化为 YYYY-MM-DD，保持现有 metadata 风格。"""
+    if timestamp is None:
+        return None
+    try:
+        return datetime.fromtimestamp(timestamp).date().isoformat()
+    except (OSError, OverflowError, ValueError):
+        return None
+
+
+def _build_text_document(file_path: str | Path) -> Document:
+    """为 Markdown/TXT 等纯文本文件构造稳定的 Document。"""
+    resolved_path = Path(file_path).resolve()
+    decoded = read_text_file_with_fallback(resolved_path)
+    stat = resolved_path.stat()
+    file_type, _ = mimetypes.guess_type(resolved_path.name)
+    metadata = {
+        "file_path": str(resolved_path),
+        "file_name": resolved_path.name,
+        "file_type": file_type or "text/plain",
+        "file_size": stat.st_size,
+        "creation_date": _format_file_date(getattr(stat, "st_ctime", None)),
+        "last_modified_date": _format_file_date(getattr(stat, "st_mtime", None)),
+        "source_encoding": decoded.encoding,
+    }
+    metadata = {key: value for key, value in metadata.items() if value is not None}
+    return Document(text=decoded.text, metadata=metadata)
 
 
 class IndexManager:
@@ -65,6 +196,49 @@ class IndexManager:
         self.storage_context: StorageContext = STORAGE_CONTEXT
         self.index_id: str = None
         self.index: VectorStoreIndex = None
+        self._last_ingestion_diagnostics: dict[str, Any] | None = None
+
+    def _set_last_ingestion_diagnostics(self, diagnostics: dict[str, Any] | None) -> None:
+        """?????? ingestion diagnostics???????????"""
+        self._last_ingestion_diagnostics = copy.deepcopy(diagnostics) if isinstance(diagnostics, dict) else None
+
+    def consume_last_ingestion_diagnostics(self) -> dict[str, Any] | None:
+        """????????? ingestion diagnostics?"""
+        diagnostics = copy.deepcopy(self._last_ingestion_diagnostics) if isinstance(self._last_ingestion_diagnostics, dict) else None
+        self._last_ingestion_diagnostics = None
+        return diagnostics
+
+    def _run_pipeline_with_diagnostics(self, *, documents: list[Any], diagnostics: dict[str, Any]) -> list[Any]:
+        """?? ingestion pipeline?????????? diagnostics?"""
+        diagnostics.update(_summarize_documents(documents))
+        stage_timings = diagnostics.setdefault("stage_timings", _new_ingestion_stage_timings())
+        for key, value in _new_ingestion_stage_timings().items():
+            stage_timings.setdefault(key, value)
+
+        pipeline = AdvancedIngestionPipeline()
+        run_method = getattr(pipeline, "run")
+        supports_diagnostics = True
+        try:
+            signature = inspect.signature(run_method)
+        except (TypeError, ValueError):
+            supports_diagnostics = True
+        else:
+            supports_diagnostics = (
+                "diagnostics" in signature.parameters
+                or any(parameter.kind == inspect.Parameter.VAR_KEYWORD for parameter in signature.parameters.values())
+            )
+
+        if supports_diagnostics:
+            nodes = run_method(documents=documents, diagnostics=diagnostics) or []
+        else:
+            nodes = run_method(documents=documents) or []
+
+        if int(diagnostics.get("node_count") or 0) == 0 and nodes:
+            with_embeddings, without_embeddings = _count_nodes_with_embeddings(nodes)
+            diagnostics["node_count"] = len(nodes)
+            diagnostics["nodes_with_embedding_count"] = with_embeddings
+            diagnostics["nodes_without_embedding_count"] = without_embeddings
+        return nodes
 
     def check_index_exists(self):
         """
@@ -195,8 +369,9 @@ class IndexManager:
         """
         功能：
         - 从文件路径列表读取 Document，PDF 自动走 OCR 回退。
+        - Markdown/TXT 等纯文本文件使用本地回退解码，避免 utf-8 ignore 静默吞字。
         """
-        non_pdf, pdf_docs = [], []
+        non_pdf, pdf_docs, text_docs = [], [], []
         for fp in file_paths:
             ext = os.path.splitext(fp)[1].lower()
             if ext == '.pdf':
@@ -207,13 +382,76 @@ class IndexManager:
                     pdf_docs.extend(docs)
                 else:
                     print(f'  跳过空 PDF: {fp}')
+            elif ext in _TEXT_FILE_SUFFIXES:
+                text_docs.append(_build_text_document(fp))
             else:
                 non_pdf.append(fp)
         if non_pdf:
             from_dirs = SimpleDirectoryReader(input_files=non_pdf).load_data()
         else:
             from_dirs = []
-        return from_dirs + pdf_docs
+        return text_docs + from_dirs + pdf_docs
+
+    def load_documents(
+        self,
+        documents: list[Document],
+        chunk_size: int,
+        chunk_overlap: int,
+        kb_id: str | None = None,
+    ) -> list[Any]:
+        """?????? Document ????? metadata ??????"""
+        started_at = time.perf_counter()
+        diagnostics = _new_ingestion_diagnostics(source="documents")
+
+        Settings.chunk_size = chunk_size
+        Settings.chunk_overlap = chunk_overlap
+        from server.text_splitter import create_text_splitter
+        Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+
+        if not documents:
+            print("No documents found")
+            _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
+            self._set_last_ingestion_diagnostics(diagnostics)
+            return []
+
+        files: list[Path] = []
+        file_by_name: dict[str, Path] = {}
+        for document in documents:
+            if hasattr(document, "metadata") and isinstance(getattr(document, "metadata"), dict):
+                metadata = sanitize_for_json(document.metadata)
+                resolved_path = _resolve_path_metadata(metadata.get("file_path"))
+                if resolved_path is not None:
+                    files.append(resolved_path)
+                    file_by_name[resolved_path.name] = resolved_path
+                    metadata["file_path"] = str(resolved_path)
+                    metadata["file_name"] = metadata.get("file_name") or resolved_path.name
+                document.metadata = metadata
+
+        diagnostics["input_file_count"] = len(files)
+        nodes = self._run_pipeline_with_diagnostics(documents=documents, diagnostics=diagnostics)
+        for n in nodes:
+            if not hasattr(n, "metadata") or not isinstance(getattr(n, "metadata"), dict):
+                n.metadata = {}
+            n.metadata = sanitize_for_json(n.metadata)
+            raw_path = n.metadata.get("file_path")
+            resolved_path = _resolve_path_metadata(raw_path)
+            if resolved_path is None:
+                file_name = n.metadata.get("file_name")
+                resolved_path = file_by_name.get(file_name) if isinstance(file_name, str) else None
+            if resolved_path is None and len(files) == 1:
+                resolved_path = files[0]
+            if resolved_path is not None:
+                n.metadata["file_path"] = str(resolved_path)
+                n.metadata["file_name"] = Path(resolved_path).name
+            if kb_id is not None:
+                n.metadata["kb_id"] = kb_id
+
+        insert_started_at = time.perf_counter()
+        self.insert_nodes(nodes)
+        diagnostics["stage_timings"]["index_insert_ms"] = _elapsed_ms(insert_started_at)
+        _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
+        self._set_last_ingestion_diagnostics(diagnostics)
+        return nodes
 
     def load_files(
         self,
@@ -222,18 +460,22 @@ class IndexManager:
         chunk_overlap: int,
         kb_id: str | None = None,
     ) -> list[Any]:
-        """
-        说明：
-        - 文件真实路径由服务层确认；这里不再二次拼接全局保存目录，只补充 kb_id。
-        """
+        """???????????? diagnostics ??????"""
+        started_at = time.perf_counter()
+        diagnostics = _new_ingestion_diagnostics(source="files")
+
         Settings.chunk_size = chunk_size
         Settings.chunk_overlap = chunk_overlap
         from server.text_splitter import create_text_splitter
         Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
         files = [Path(file_path).resolve() for file_path in file_paths]
+        diagnostics["input_file_count"] = len(files)
         print([str(file_path) for file_path in files])
+
+        load_started_at = time.perf_counter()
         documents = self._load_documents([str(file_path) for file_path in files])
+        diagnostics["stage_timings"]["document_load_ms"] = _elapsed_ms(load_started_at)
         file_by_name = {file_path.name: file_path for file_path in files}
         if len(documents) > 0:
             for document in documents:
@@ -251,8 +493,7 @@ class IndexManager:
                         metadata["file_name"] = metadata.get("file_name") or resolved_path.name
                     document.metadata = metadata
 
-            pipeline = AdvancedIngestionPipeline()
-            nodes = pipeline.run(documents=documents)
+            nodes = self._run_pipeline_with_diagnostics(documents=documents, diagnostics=diagnostics)
             for n in nodes:
                 if not hasattr(n, "metadata") or not isinstance(getattr(n, "metadata"), dict):
                     n.metadata = {}
@@ -269,12 +510,19 @@ class IndexManager:
                     n.metadata["file_name"] = Path(resolved_path).name
                 if kb_id is not None:
                     n.metadata["kb_id"] = kb_id
+            insert_started_at = time.perf_counter()
             self.insert_nodes(nodes)
+            diagnostics["stage_timings"]["index_insert_ms"] = _elapsed_ms(insert_started_at)
+            _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
+            self._set_last_ingestion_diagnostics(diagnostics)
             return nodes
-        else:         
+        else:
             print("No documents found")
+            diagnostics.update(_summarize_documents(documents))
+            _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
+            self._set_last_ingestion_diagnostics(diagnostics)
             return []
-        
+
     def load_websites(self, websites, chunk_size, chunk_overlap, kb_id: str | None = None):
         """
         功能：

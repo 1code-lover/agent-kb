@@ -117,11 +117,35 @@ class KBAssetRegistry:
         return None
 
     def upsert_assets(self, kb_id: str, assets: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
-        """按 asset_id upsert 资产记录。"""
+        """按 asset_id upsert 资产列表。"""
         with self._lock:
             merged = self._merge_assets(kb_id=kb_id, existing_items=self._read_unlocked(kb_id), incoming_items=assets)
             self._write_unlocked(kb_id, merged)
             return merged
+
+    def prune_standalone_assets(self, kb_id: str, relative_paths: Iterable[str]) -> list[dict[str, Any]]:
+        """按 relative_path 清理 standalone 资产，避免 embedded 接管后残留。"""
+        path_set = {
+            path.strip()
+            for path in relative_paths
+            if isinstance(path, str) and path.strip()
+        }
+        if not path_set:
+            return self.list_assets(kb_id)
+
+        with self._lock:
+            existing = self._read_unlocked(kb_id)
+            retained = [
+                item
+                for item in existing
+                if not (
+                    item.get("asset_role") == "standalone"
+                    and item.get("relative_path") in path_set
+                )
+            ]
+            if len(retained) != len(existing):
+                self._write_unlocked(kb_id, retained)
+            return retained
 
     def replace_embedded_assets(
         self,

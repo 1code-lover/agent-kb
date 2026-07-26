@@ -88,3 +88,23 @@ def test_scanned_pdf_falls_back_to_ocr_and_recalls_key_terms() -> None:
     expected_terms = ["稻谷", "出糙率", "整精米率"]
     recalled_terms = [term for term in expected_terms if term in text]
     assert len(recalled_terms) >= 2, f"召回关键词不足: {recalled_terms}; 文本前200字: {text[:200]!r}"
+
+
+def test_short_english_text_layer_pdf_uses_pymupdf_without_ocr(tmp_path: Path) -> None:
+    """短英文文本层 PDF 也应保留文字层，不应因中文占比过低而误触发 OCR。"""
+    expected_text = "Product Overview\nThis PDF keeps a clean text layer for local knowledge base import."
+    pdf_path = tmp_path / "english-short.pdf"
+    _create_text_pdf(pdf_path, expected_text)
+
+    reader = PDFOCRReader()
+
+    def fail_if_ocr_called(_file_path: str) -> str:
+        raise AssertionError("短英文文本层 PDF 不应该触发 OCR")
+
+    reader._ocr_pdf = fail_if_ocr_called  # type: ignore[method-assign]
+
+    docs = reader.load_data(str(pdf_path))
+
+    assert len(docs) == 1
+    assert "Product Overview" in docs[0].text
+    assert "clean text layer" in docs[0].text

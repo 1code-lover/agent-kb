@@ -1,4 +1,4 @@
-﻿# 本地多知识库知识助手平台需求追踪矩阵（RTM）
+# 本地多知识库知识助手平台需求追踪矩阵（RTM）
 
 ## 1. 文档信息
 - 文档版本：v0.1
@@ -105,13 +105,11 @@ RTM 用于把本需求从“产品目标”追踪到“功能设计”和“后�
 3. P1 / P2 的核心意义不是堆更多功能，而是把开放能力和隔离能力逐步做实。
 
 ## 10. 对旧文档 / 原有方案的处置建议
-当前仓库里除本轮正式文档外，仍存在一批更早期的产品 / 方案类文档，例如：
-- 根目录下的 `agent_v1_prd.md`
-- 根目录下的 `agent_v1_frd.md`
-- 根目录下的 `agent_v1_rtm.md`
-- 根目录下的 `knowledge_agent_product_plan.md`
-- 根目录下的 `agent_kb_design.md`
-- 以及若干偏桌面壳 / 旧叙事的设计文档
+当前仓库里除本轮正式文档外，仍保留一批更早期的产品 / 方案类文档，但已不再继续停留在 `docs/` 根目录主入口位置，而是分层处理为：
+- `docs/archive/root-legacy-20260724/`：从 `docs/` 根目录迁出的历史原件快照（如 `agent_v1_prd.md`、`agent_v1_frd.md`、`agent_v1_rtm.md`、`agent_v1_execution_plan.md`、`agent_v1_dev_readiness_checklist.md`、`knowledge_agent_product_plan.md`）；
+- `docs/archive/superseded-20260722-local-multi-kb-assistant/`：补充了“已被替代 / 已归档”语义说明的整理归档版本；
+- `docs/archive/agent_kb_design.md`：更早期的设计材料；
+- 以及若干仍待后续治理的偏桌面壳 / 旧叙事设计文档。
 
 建议按以下原则处理，而不是立即直接删除：
 
@@ -120,25 +118,25 @@ RTM 用于把本需求从“产品目标”追踪到“功能设计”和“后�
 2. 不建议为同一需求再额外新建 `-v2`、`-final`、`-new` 等并行文件名，避免形成多套基线。
 
 ### 10.2 什么不建议现在直接删除
-1. 根目录下的历史产品文档、旧 PRD / FRD / RTM，不建议在当前轮直接物理删除。
+1. 已迁入 `docs/archive/` 的历史产品文档、旧 PRD / FRD / RTM，不建议在当前轮继续物理删除。
 2. 原因不是它们还正确，而是：
    - 可能仍被历史讨论或 README 引用；
    - 可能还保留上下文价值；
-   - 当前我们还没做完整的“被新文档取代关系”声明。
+   - 我们需要保留“正式基线 / 历史原件 / 整理归档版”之间的追溯关系。
 
 ### 10.3 推荐的处理顺序
 推荐顺序是：
 1. **当前需求目录内的 PRD / FRD / RTM 成为唯一正式基线**；
 2. 对旧文档先做“已被替代 / 历史归档”标记或移入 `docs/archive/`；
-3. 等后续确认没有引用依赖后，再决定是否物理删除。
+3. 等后续确认没有引用依赖后，再决定是否进一步精简 archive 内的重复版本。
 
 ### 10.4 当前结论
-**现在适合“覆盖当前这套正式文档”，不适合“立刻删除所有旧方案文档”。**
+**现在适合“覆盖当前这套正式文档”，也适合“把根目录旧方案迁出到 archive”，但不适合“彻底删除所有历史方案文档”。**
 
 更准确地说：
 - 新基线：应覆盖并收敛到 `docs/20260722-local-multi-kb-assistant/`；
-- 旧文档：应先归档或标记 superseded，再视引用情况删除。
-
+- 历史原件：应迁入 `docs/archive/root-legacy-20260724/` 保留追溯；
+- 整理归档版：应保留在 `docs/archive/superseded-20260722-local-multi-kb-assistant/` 作为 superseded 说明层。
 ## 11. 下一步建议
 在本 RTM 确认后，Stage 1 的主文档链可视为形成：
 1. `20260722-local-multi-kb-assistant-prd.md`
@@ -149,5 +147,6 @@ RTM 用于把本需求从“产品目标”追踪到“功能设计”和“后�
 1. 实施方案（plan / spec）
 2. 测试方案（test-plan）
 
-但在进入下一阶段前，建议先做一个文档层决策：
-- 是否把根目录下旧的 `agent_v1_*` / `knowledge_agent_*` / `desktop_*` 等历史产品文档统一归档并标记为 superseded。
+在进入下一阶段前，本轮遗留的 docs 根目录治理已进一步收口：
+- `ThinkRAG_面试问答.md` 已迁入 `docs/interview/ThinkRAG_面试问答.md`；
+- 当前 `docs/` 根目录仅保留 `docs/project.md` 作为项目级入口。

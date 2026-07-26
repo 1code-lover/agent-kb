@@ -1,7 +1,8 @@
-"""本地 API 启动脚本（带轮转日志）。"""
+"""?? API ????????? uvicorn ??????????"""
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import uvicorn
@@ -9,7 +10,7 @@ import uvicorn
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 
-# uvicorn 日志配置：1MB 轮转 + 时间戳
+# uvicorn ????????????????
 LOG_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -56,5 +57,28 @@ LOG_CONFIG = {
     },
 }
 
+
+def _is_reload_enabled() -> bool:
+    """?????????? KB_API_RELOAD=1 ???"""
+    return os.getenv("KB_API_RELOAD", "0").strip() == "1"
+
+
+def _get_port() -> int:
+    """?? API ????? 18080??? KB_API_PORT ???"""
+    raw_port = os.getenv("KB_API_PORT", "18080").strip() or "18080"
+    try:
+        return int(raw_port)
+    except ValueError as exc:
+        raise ValueError(f"KB_API_PORT ??????: {raw_port!r}") from exc
+
+
 if __name__ == "__main__":
-    uvicorn.run("api.app:app", host="127.0.0.1", port=18080, reload=True, log_config=LOG_CONFIG)
+    # ??????? API ????? OCR ??????? api.app ?????????
+    os.environ.setdefault("THINKRAG_OCR_PREWARM", "1")
+    uvicorn.run(
+        "api.app:app",
+        host="127.0.0.1",
+        port=_get_port(),
+        reload=_is_reload_enabled(),
+        log_config=LOG_CONFIG,
+    )

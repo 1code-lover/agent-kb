@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AgentApprovalPanel from "../components/agent/AgentApprovalPanel";
 import AgentEvidencePanel from "../components/agent/AgentEvidencePanel";
 import AgentInputPanel from "../components/agent/AgentInputPanel";
@@ -23,10 +23,16 @@ import {
   uploadFilesToKnowledge,
 } from "../api/agent";
 import { getHistory, queryChat } from "../api/chat";
-import { previewDoc, previewEvidence } from "../api/evidence";
+import { previewItem } from "../api/evidence";
 import { getModelOptions, selectModel } from "../api/models";
 import { readApiData } from "../api/response";
 import { KbProvider, useKb } from "../components/kb/KbContext";
+import { canUseKbTarget } from "../domain/kbSelection";
+import {
+  buildKnowledgeAgentLink,
+  buildKnowledgeWorkspaceLink,
+  parseKnowledgeAgentEntry,
+} from "../domain/kbNavigation";
 import KbEvidencePreview from "../components/kb/KbEvidencePreview";
 import {
   AGENT_EXPERIENCES,
@@ -219,6 +225,7 @@ function SourceList({
           kb_id: item.kb_id || "default",
           doc_id: item.doc_id || null,
           preview_locator: item.preview_locator || null,
+          asset_id: item.asset_id || null,
         }));
 
   return (
@@ -247,8 +254,9 @@ function SourceList({
                 {"kb_id=" + (item.kb_id || "default")}
                 {item.page && item.page !== "N/A" ? " / 页码 " + item.page : ""}
               </p>
+              {item.asset_id ? <p className="stack-subtle">{"关联资产：" + item.asset_id}</p> : null}
               <p className="qa-source-excerpt">{item.excerpt || "未返回摘录"}</p>
-              {item.doc_id || item.id ? (
+              {item.asset_id || item.doc_id || item.id ? (
                 <button
                   type="button"
                   className="secondary-button"
@@ -363,7 +371,7 @@ function QaWorkbench(props) {
           </div>
         </div>
         <div className="qa-hero-actions">
-          <Link className="secondary-button link-button" to="/knowledge">
+          <Link className="secondary-button link-button" to={buildKnowledgeWorkspaceLink(selectedKbId)}>
             管理知识库
           </Link>
           <Link className="secondary-button link-button" to="/models">
@@ -914,7 +922,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
           </div>
         </div>
         <div className="qa-hero-actions">
-          <Link className="secondary-button link-button" to="/knowledge">
+          <Link className="secondary-button link-button" to={buildKnowledgeWorkspaceLink(selectedKbId)}>
             管理知识库
           </Link>
           <Link className="secondary-button link-button" to="/models">
@@ -1026,9 +1034,14 @@ function AgentPageContent() {
   const knowledgeScope = useAppStore((state) => state.knowledgeScope);
   const setKnowledgeScope = useAppStore((state) => state.setKnowledgeScope);
 
+  const location = useLocation();
+  const navigate = useNavigate();
   const { kbList, selectedKbId, selectedKb, loading: kbLoading, selectKb } = useKb();
+  const routeIntentAppliedRef = useRef("");
+  const routeIntent = useMemo(() => parseKnowledgeAgentEntry(location.search), [location.search]);
+  const isRouteIntentPending = Boolean(location.search) && routeIntentAppliedRef.current !== location.search;
 
-  const [experience, setExperience] = useState("basic");
+  const [experience, setExperience] = useState(routeIntent.requestedExperience || "basic");
   const [chatQuestion, setChatQuestion] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatSources, setChatSources] = useState([]);
@@ -1050,6 +1063,40 @@ function AgentPageContent() {
     () => (kbList || []).filter((kb) => kb.status === "active"),
     [kbList],
   );
+
+  useEffect(() => {
+    if (!isRouteIntentPending) {
+      return;
+    }
+
+    if (routeIntent.requestedExperience) {
+      setExperience(routeIntent.requestedExperience);
+    }
+
+    if (kbLoading) {
+      return;
+    }
+
+    if (routeIntent.requestedKbId && canUseKbTarget(kbList, routeIntent.requestedKbId)) {
+      selectKb(routeIntent.requestedKbId);
+    }
+
+    routeIntentAppliedRef.current = location.search;
+  }, [isRouteIntentPending, kbList, kbLoading, location.search, routeIntent, selectKb]);
+
+  useEffect(() => {
+    if (isRouteIntentPending) {
+      return;
+    }
+
+    const target = experience === "knowledge"
+      ? buildKnowledgeAgentLink(selectedKbId)
+      : "/agent";
+    const current = location.pathname + location.search;
+    if (target !== current) {
+      navigate(target, { replace: true });
+    }
+  }, [experience, isRouteIntentPending, location.pathname, location.search, navigate, selectedKbId]);
 
   const currentModel = modelOptionsQuery.data?.current_llm_info || null;
   const currentModelLabel =
@@ -1139,14 +1186,7 @@ function AgentPageContent() {
         throw new Error("当前证据缺少知识库范围，无法预览。");
       }
 
-      const locator = item?.preview_locator || undefined;
-      const response = item?.doc_id
-        ? await previewDoc(targetKbId, item.doc_id, locator)
-        : await previewEvidence({
-            kb_id: targetKbId,
-            evidence_id: item?.id,
-            preview_locator: locator,
-          });
+      const response = await previewItem(item, selectedKbId);
       return readApiData(response) || null;
     },
     onMutate: () => {

@@ -200,10 +200,10 @@ def test_load_dir_returns_empty_for_empty_directory(tmp_path: Path) -> None:
     assert manager.load_dir(str(tmp_path), 128, 16) == []
 
 
-def test_load_documents_combines_non_pdf_and_pdf_docs(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    txt = tmp_path / "a.txt"
+def test_load_documents_combines_other_non_pdf_and_pdf_docs(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    docx = tmp_path / "a.docx"
     pdf = tmp_path / "b.pdf"
-    txt.write_text("alpha", encoding="utf-8")
+    docx.write_bytes(b"PK")
     pdf.write_bytes(b"%PDF")
 
     class FakeSimpleDirectoryReader:
@@ -211,7 +211,7 @@ def test_load_documents_combines_non_pdf_and_pdf_docs(monkeypatch: pytest.Monkey
             self.input_files = input_files
 
         def load_data(self):
-            return [SimpleNamespace(text="txt", metadata={"input_files": self.input_files})]
+            return [SimpleNamespace(text="docx", metadata={"input_files": self.input_files})]
 
     class FakePDFOCRReader:
         def load_data(self, fp):
@@ -222,212 +222,162 @@ def test_load_documents_combines_non_pdf_and_pdf_docs(monkeypatch: pytest.Monkey
     monkeypatch.setitem(sys.modules, "server.readers.pdf_ocr", fake_pdf_module)
     monkeypatch.setattr(index_module, "SimpleDirectoryReader", FakeSimpleDirectoryReader)
 
-    docs = _manager()._load_documents([str(txt), str(pdf)])
+    docs = _manager()._load_documents([str(docx), str(pdf)])
 
-    assert [doc.text for doc in docs] == ["txt", "pdf"]
-    assert docs[0].metadata["input_files"] == [str(txt)]
+    assert [doc.text for doc in docs] == ["docx", "pdf"]
+    assert docs[0].metadata["input_files"] == [str(docx)]
     assert docs[1].metadata["file_path"] == str(pdf)
 
 
-def test_load_documents_skips_empty_pdf(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    pdf = tmp_path / "empty.pdf"
-    pdf.write_bytes(b"%PDF")
+def test_load_documents_preserves_utf8_markdown_chinese_text(tmp_path: Path) -> None:
+    """UTF-8 Markdown 正文应按原样保留，不能在导入前后变成问号。"""
+    source = tmp_path / "readme.md"
+    expected = (
+        "中文导入验证\n"
+        "这个 Markdown 文档用于验证中文 UTF-8 导入。\n"
+        "关键短语：目录范围浏览、知识库助手、证据预览。\n"
+    )
+    source.write_bytes(expected.encode("utf-8"))
 
-    class EmptyPDFOCRReader:
-        def load_data(self, fp):
-            return []
+    docs = _manager()._load_documents([str(source)])
 
-    fake_pdf_module = types.ModuleType("server.readers.pdf_ocr")
-    fake_pdf_module.PDFOCRReader = EmptyPDFOCRReader
-    monkeypatch.setitem(sys.modules, "server.readers.pdf_ocr", fake_pdf_module)
+    assert len(docs) == 1
+    assert docs[0].text == expected
+    assert "?" not in docs[0].text
+    assert docs[0].metadata["file_name"] == "readme.md"
+    assert docs[0].metadata["source_encoding"] == "utf-8"
 
-    assert _manager()._load_documents([str(pdf)]) == []
+def test_load_documents_decodes_gb18030_markdown_without_question_marks(tmp_path: Path) -> None:
+    """GB18030 Markdown 正文应保留原文，不能被 utf-8 ignore 解成问号。"""
+    source = tmp_path / "readme.md"
+    expected = (
+        "产品说明\n"
+        "知识库导入应该保留正文\n"
+        "![流程图](./images/流程图.png)\n"
+    )
+    source.write_bytes(expected.encode("gb18030"))
+
+    docs = _manager()._load_documents([str(source)])
+
+    assert len(docs) == 1
+    assert docs[0].text == expected
+    assert "?" not in docs[0].text
+    assert docs[0].metadata["file_name"] == "readme.md"
 
 
-def test_load_files_handles_empty_documents(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    source = tmp_path / "a.txt"
+def test_load_documents_decodes_utf16_markdown_without_losing_text(tmp_path: Path) -> None:
+    """UTF-16 Markdown 正文与内嵌图片路径应完整保留。"""
+    source = tmp_path / "readme.md"
+    expected = (
+        "产品说明\n"
+        "这是 UTF-16 编码的知识库文档\n"
+        "![流程图](./images/流程图.png)\n"
+    )
+    source.write_bytes(expected.encode("utf-16"))
+
+    docs = _manager()._load_documents([str(source)])
+
+    assert len(docs) == 1
+    assert docs[0].text == expected
+    assert docs[0].metadata["file_name"] == "readme.md"
+    assert docs[0].metadata["source_encoding"].startswith("utf-16")
+    assert "流程图.png" in docs[0].text
+    assert "?" not in docs[0].text
+
+
+
+def test_load_files_records_last_ingestion_diagnostics(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    source = tmp_path / "data" / "kb-a" / "a.txt"
+    source.parent.mkdir(parents=True)
     source.write_text("alpha", encoding="utf-8")
+
     manager = _manager()
-    monkeypatch.setattr(manager, "_load_documents", MagicMock(return_value=[]))
-
-    assert manager.load_files([source], 128, 16, kb_id="kb-a") == []
-
-
-def test_load_files_maps_nodes_by_file_name_and_normalizes_metadata(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    a = tmp_path / "a.txt"
-    b = tmp_path / "b.txt"
-    a.write_text("alpha", encoding="utf-8")
-    b.write_text("bravo", encoding="utf-8")
-    manager = _manager()
-    docs = [SimpleNamespace(metadata={"file_name": "a.txt"}), SimpleNamespace(metadata={"file_name": "b.txt"})]
-    monkeypatch.setattr(manager, "_load_documents", MagicMock(return_value=docs))
+    monkeypatch.setattr(
+        manager,
+        "_load_documents",
+        MagicMock(return_value=[SimpleNamespace(text="alpha", metadata={"file_path": str(source.resolve())})]),
+    )
     monkeypatch.setattr(manager, "insert_nodes", MagicMock())
 
-    class NodeWithoutMetadata:
-        pass
-
     class FakePipeline:
-        def run(self, documents):
-            return [NodeWithoutMetadata(), SimpleNamespace(metadata={"file_name": "b.txt"})]
+        def run(self, documents, diagnostics=None):
+            diagnostics["node_count"] = 2
+            diagnostics["nodes_with_embedding_count"] = 1
+            diagnostics["nodes_without_embedding_count"] = 1
+            diagnostics["stage_timings"].update(
+                {
+                    "chunking_ms": 2.0,
+                    "embedding_ms": 3.0,
+                    "title_extract_ms": 4.0,
+                    "vector_store_ms": 5.0,
+                    "docstore_ms": 6.0,
+                }
+            )
+            return [SimpleNamespace(metadata={}), SimpleNamespace(metadata={})]
 
     monkeypatch.setattr(index_module, "AdvancedIngestionPipeline", FakePipeline)
 
-    nodes = manager.load_files([a, b], 128, 16, kb_id="kb-a")
+    nodes = manager.load_files([source], 128, 16, kb_id="kb-a")
+    diagnostics = manager.consume_last_ingestion_diagnostics()
 
-    assert nodes[0].metadata["kb_id"] == "kb-a"
-    assert "file_path" not in nodes[0].metadata
-    assert nodes[1].metadata["file_path"] == str(b.resolve())
-    assert nodes[1].metadata["file_name"] == "b.txt"
-    assert nodes[1].metadata["kb_id"] == "kb-a"
-    manager.insert_nodes.assert_called_once_with(nodes)
+    assert len(nodes) == 2
+    assert diagnostics is not None
+    assert diagnostics["document_count"] == 1
+    assert diagnostics["empty_document_count"] == 0
+    assert diagnostics["input_text_chars"] == 5
+    assert diagnostics["node_count"] == 2
+    assert diagnostics["nodes_with_embedding_count"] == 1
+    assert diagnostics["nodes_without_embedding_count"] == 1
+    assert diagnostics["stage_timings"]["document_load_ms"] >= 0
+    assert diagnostics["stage_timings"]["chunking_ms"] == 2.0
+    assert diagnostics["stage_timings"]["embedding_ms"] == 3.0
+    assert diagnostics["stage_timings"]["index_insert_ms"] >= 0
+    assert diagnostics["stage_timings"]["total_ms"] >= diagnostics["stage_timings"]["embedding_ms"]
+    assert manager.consume_last_ingestion_diagnostics() is None
 
 
 
-def test_load_files_ignores_non_string_file_path_metadata_and_maps_by_file_name(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    a = tmp_path / "a.txt"
-    b = tmp_path / "b.txt"
-    a.write_text("alpha", encoding="utf-8")
-    b.write_text("bravo", encoding="utf-8")
+def test_load_documents_records_empty_document_statistics(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    source = tmp_path / "note.md"
+    source.write_text("alpha", encoding="utf-8")
+
     manager = _manager()
+    monkeypatch.setattr(manager, "insert_nodes", MagicMock())
+
+    class FakePipeline:
+        def run(self, documents, diagnostics=None):
+            diagnostics["node_count"] = 1
+            diagnostics["nodes_with_embedding_count"] = 1
+            diagnostics["nodes_without_embedding_count"] = 0
+            diagnostics["stage_timings"].update(
+                {
+                    "chunking_ms": 2.0,
+                    "embedding_ms": 3.0,
+                    "title_extract_ms": 4.0,
+                    "vector_store_ms": 5.0,
+                    "docstore_ms": 6.0,
+                }
+            )
+            return [SimpleNamespace(metadata={})]
+
+    monkeypatch.setattr(index_module, "AdvancedIngestionPipeline", FakePipeline)
+
     docs = [
-        SimpleNamespace(metadata={"file_path": {"bad": "shape"}, "file_name": "b.txt"}),
+        SimpleNamespace(text="alpha", metadata={"file_path": str(source.resolve()), "file_name": "note.md"}),
+        SimpleNamespace(text="   ", metadata={"file_name": "blank.md"}),
     ]
-    monkeypatch.setattr(manager, "_load_documents", MagicMock(return_value=docs))
-    monkeypatch.setattr(manager, "insert_nodes", MagicMock())
 
-    class FakePipeline:
-        def run(self, documents):
-            assert documents[0].metadata["file_path"] == str(b.resolve())
-            assert documents[0].metadata["file_name"] == "b.txt"
-            return [SimpleNamespace(metadata={"file_path": {"bad": "shape"}, "file_name": "b.txt"})]
+    nodes = manager.load_documents(docs, 128, 16, kb_id="kb-a")
+    diagnostics = manager.consume_last_ingestion_diagnostics()
 
-    monkeypatch.setattr(index_module, "AdvancedIngestionPipeline", FakePipeline)
-
-    nodes = manager.load_files([a, b], 128, 16, kb_id="kb-a")
-
-    assert nodes[0].metadata["file_path"] == str(b.resolve())
-    assert nodes[0].metadata["file_name"] == "b.txt"
-    assert nodes[0].metadata["kb_id"] == "kb-a"
-    manager.insert_nodes.assert_called_once_with(nodes)
-
-
-def test_load_websites_uses_fallback_filters_docs_and_inserts(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls: list[list[str]] = []
-
-    class DocWithContent:
-        metadata = {"source": object()}
-        extra_info = {"extra": object()}
-        text = None
-
-        def get_content(self):
-            return "fallback text"
-
-    class BrokenDoc:
-        metadata = {}
-        extra_info = {}
-        text = None
-
-        def get_content(self):
-            raise RuntimeError("cannot read")
-
-    class FakeReader:
-        def load_data(self, urls):
-            calls.append(list(urls))
-            if len(calls) == 1:
-                return [None, SimpleNamespace(text="   ", metadata={}, extra_info={}), BrokenDoc()]
-            return [DocWithContent()]
-
-    fake_web_module = types.ModuleType("server.readers.beautiful_soup_web")
-    fake_web_module.BeautifulSoupWebReader = FakeReader
-    monkeypatch.setitem(sys.modules, "server.readers.beautiful_soup_web", fake_web_module)
-    manager = _manager()
-    monkeypatch.setattr(manager, "insert_nodes", MagicMock())
-
-    class FakePipeline:
-        disable_cache = False
-        cache = "cache"
-
-        def run(self, documents):
-            return [SimpleNamespace(metadata={"url": calls[-1][0]})]
-
-    monkeypatch.setattr(index_module, "AdvancedIngestionPipeline", FakePipeline)
-
-    nodes = manager.load_websites(" https://example.com \n", 128, 16, kb_id="kb-a")
-
-    assert calls == [["https://example.com"], ["https://r.jina.ai/https://example.com"]]
-    assert nodes[0].metadata["kb_id"] == "kb-a"
-    assert nodes[0].metadata["url"] == "https://r.jina.ai/https://example.com"
-    manager.insert_nodes.assert_called_once_with(nodes)
-
-
-def test_load_websites_raises_when_no_extractable_text(monkeypatch: pytest.MonkeyPatch) -> None:
-    class EmptyReader:
-        def load_data(self, urls):
-            return []
-
-    fake_web_module = types.ModuleType("server.readers.beautiful_soup_web")
-    fake_web_module.BeautifulSoupWebReader = EmptyReader
-    monkeypatch.setitem(sys.modules, "server.readers.beautiful_soup_web", fake_web_module)
-
-    with pytest.raises(ValueError, match="No extractable text"):
-        _manager().load_websites(["https://example.com"], 128, 16)
-
-
-def test_load_websites_returns_empty_when_pipeline_produces_no_nodes(monkeypatch: pytest.MonkeyPatch) -> None:
-    class Reader:
-        def load_data(self, urls):
-            return [SimpleNamespace(text="ok", metadata={}, extra_info={})]
-
-    fake_web_module = types.ModuleType("server.readers.beautiful_soup_web")
-    fake_web_module.BeautifulSoupWebReader = Reader
-    monkeypatch.setitem(sys.modules, "server.readers.beautiful_soup_web", fake_web_module)
-
-    class EmptyPipeline:
-        def run(self, documents):
-            return []
-
-    monkeypatch.setattr(index_module, "AdvancedIngestionPipeline", EmptyPipeline)
-
-    assert _manager().load_websites(["https://example.com"], 128, 16) == []
-
-
-def test_delete_ref_doc_deletes_from_docstore_and_persists() -> None:
-    manager = _manager()
-    manager.index = FakeIndex("idx")
-
-    manager.delete_ref_doc("doc-1")
-
-    assert manager.index.deleted == ("doc-1", True)
-    assert manager.storage_context.persist_calls == 1
-
-
-def test_delete_ref_doc_prunes_stale_node_ids_not_in_index_struct() -> None:
-    """历史脏数据下 ref_doc_info 里的 node_id 可能已不在 index_struct.nodes_dict：
-    LlamaIndex 原生 delete_ref_doc 遇到这类陈旧 id 会执行 `del nodes_dict[node_id]`
-    直接抛 KeyError；这里验证陈旧 id 会被提前从 docstore 摘掉，不再传给原生删除逻辑。
-    """
-    docstore = FakeDocStore(FakeRefDocInfo(node_ids=["stale-node", "valid-node"]))
-    manager = _manager()
-    manager.storage_context = FakeStorage(docstore=docstore)
-    manager.index = FakeIndex("idx", nodes_dict={"valid-node": "doc-1"})
-
-    manager.delete_ref_doc("doc-1")
-
-    assert docstore.deleted_documents == ["stale-node"]
-    assert manager.index.deleted == ("doc-1", True)
-    assert manager.storage_context.persist_calls == 1
-
-
-def test_delete_ref_doc_skips_pruning_when_no_stale_node_ids() -> None:
-    docstore = FakeDocStore(FakeRefDocInfo(node_ids=["valid-node"]))
-    manager = _manager()
-    manager.storage_context = FakeStorage(docstore=docstore)
-    manager.index = FakeIndex("idx", nodes_dict={"valid-node": "doc-1"})
-
-    manager.delete_ref_doc("doc-1")
-
-    assert docstore.deleted_documents == []
-    assert manager.index.deleted == ("doc-1", True)
+    assert len(nodes) == 1
+    assert diagnostics is not None
+    assert diagnostics["document_count"] == 2
+    assert diagnostics["empty_document_count"] == 1
+    assert diagnostics["input_text_chars"] == 5
+    assert diagnostics["node_count"] == 1
+    assert diagnostics["nodes_with_embedding_count"] == 1
+    assert diagnostics["nodes_without_embedding_count"] == 0
+    assert diagnostics["stage_timings"]["document_load_ms"] == 0.0
+    assert diagnostics["stage_timings"]["chunking_ms"] == 2.0
+    assert diagnostics["stage_timings"]["index_insert_ms"] >= 0

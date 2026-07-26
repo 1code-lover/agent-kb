@@ -36,22 +36,31 @@ class PDFOCRReader(BasePydanticReader):
 
     @staticmethod
     def _text_is_garbled(text: str) -> bool:
-        """判断 PyMuPDF 提取的文本是否有效（非乱码/非水印碎片）。"""
+        """判断 PyMuPDF 提取的文本是否有效（兼容中英文，避免短正文被误判为乱码）。"""
         text = text.strip()
         if not text:
             return True
-        # 有效中文字符占比太低 → 乱码
-        cn_chars = len(re.findall(r'[\u4e00-\u9fff]', text))
-        total = len(text)
-        if total > 0 and cn_chars / total < 0.1:
+
+        visible_chars = [char for char in text if not char.isspace()]
+        visible_len = len(visible_chars)
+        if visible_len == 0:
             return True
-        # 总字数少于 200 → 仅有水印/页眉/页码碎片
-        if len(text) < 200:
+
+        cjk_chars = len(re.findall(r'[\u4e00-\u9fff]', text))
+        latin_chars = len(re.findall(r'[A-Za-z]', text))
+        digit_chars = len(re.findall(r'\d', text))
+        readable_ratio = (cjk_chars + latin_chars + digit_chars) / visible_len
+        if readable_ratio < 0.3:
             return True
-        # 去重后行数太少 → 重复水印
-        lines = set(l.strip() for l in text.split('\n') if l.strip())
-        if len(lines) <= 2 and len(text) < 500:
+
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        unique_lines = list(dict.fromkeys(lines))
+        longest_line_length = max((len(line) for line in unique_lines), default=0)
+
+        # 仅有极短碎片且行数很少时，仍视为无效文字层，避免页码/水印误判为正文。
+        if len(unique_lines) <= 2 and visible_len < 30 and longest_line_length < 20:
             return True
+
         return False
 
     def _try_pymupdf(self, file_path):
