@@ -60,24 +60,30 @@ def _get_registry() -> KBRegistry:
 
 
 def _new_import_stage_timings() -> dict[str, float]:
-    """创建导入批次级 stage_timings 初始结构，便于统一累计耗时。"""
+    """创建批次级 stage_timings 初始结构，便于累计导入耗时。"""
     return {
         "ensure_models_ready_ms": 0.0,
         "get_index_manager_ms": 0.0,
+        "file_save_ms": 0.0,
         "persist_ms": 0.0,
         "standalone_ocr_ms": 0.0,
         "primary_index_ms": 0.0,
         "embedded_asset_extract_ms": 0.0,
         "embedded_asset_ocr_ms": 0.0,
         "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 0.0,
+        "doc_count_update_ms": 0.0,
         "register_assets_ms": 0.0,
+        "receipt_store_ms": 0.0,
+        "result_build_ms": 0.0,
         "total_ms": 0.0,
     }
 
 
 def _new_file_stage_timings() -> dict[str, float]:
-    """创建单文件级 stage_timings 初始结构。"""
+    """创建单文件 stage_timings 初始结构。"""
     return {
+        "file_save_ms": 0.0,
         "persist_ms": 0.0,
         "standalone_ocr_ms": 0.0,
         "primary_index_ms": 0.0,
@@ -101,12 +107,12 @@ INDEX_STAGE_TIMING_KEYS = (
 
 
 def _new_index_stage_timings() -> dict[str, float]:
-    """??????????embedding ???????????"""
+    """创建索引阶段耗时结构，覆盖 embedding 等细分步骤。"""
     return {key: 0.0 for key in INDEX_STAGE_TIMING_KEYS}
 
 
 def _new_ingestion_diagnostics_summary() -> dict[str, Any]:
-    """????????? ingestion diagnostics ?????"""
+    """创建导入诊断聚合结构，用于汇总文件级 ingestion 信息。"""
     return {
         "document_count": 0,
         "empty_document_count": 0,
@@ -119,7 +125,7 @@ def _new_ingestion_diagnostics_summary() -> dict[str, Any]:
 
 
 def _merge_ingestion_diagnostics(target: dict[str, Any], source: dict[str, Any] | None) -> None:
-    """? IndexManager ??? ingestion diagnostics ????????"""
+    """把 IndexManager 返回的 ingestion diagnostics 合并进目标汇总。"""
     if not isinstance(target, dict) or not isinstance(source, dict):
         return
 
@@ -149,7 +155,7 @@ def _merge_ingestion_diagnostics(target: dict[str, Any], source: dict[str, Any] 
 
 
 def _consume_manager_ingestion_diagnostics(manager: Any, *targets: dict[str, Any] | None) -> dict[str, Any] | None:
-    """?? manager ???? ingestion diagnostics????????????"""
+    """从 manager 消费一次 ingestion diagnostics，并同步写入多个目标。"""
     consumer = getattr(manager, "consume_last_ingestion_diagnostics", None)
     if not callable(consumer):
         return None
@@ -166,17 +172,44 @@ def _elapsed_ms(started_at: float) -> float:
 
 
 def _add_stage_elapsed(stage_targets: tuple[dict[str, float], ...], key: str, started_at: float) -> float:
-    """把当前阶段耗时累计写入多个 timing 容器。"""
+    """把某个阶段耗时累计写入多个 timing 容器。"""
     elapsed_ms = _elapsed_ms(started_at)
     for target in stage_targets:
         target[key] = round(float(target.get(key, 0.0)) + elapsed_ms, 3)
     return elapsed_ms
 
 
+def _sync_stage_timing_aliases(*stage_timings_list: dict[str, float] | None) -> None:
+    """同步阶段耗时别名字段，保证兼容 persist_ms 旧字段。"""
+    for stage_timings in stage_timings_list:
+        if not isinstance(stage_timings, dict):
+            continue
+        if "file_save_ms" in stage_timings:
+            stage_timings["persist_ms"] = round(float(stage_timings.get("file_save_ms") or 0.0), 3)
+
+
+def _record_file_save_elapsed(stage_targets: tuple[dict[str, float], ...], started_at: float) -> float:
+    """记录文件保存耗时，并同步 persist_ms 兼容别名。"""
+    elapsed_ms = _add_stage_elapsed(stage_targets, "file_save_ms", started_at)
+    _sync_stage_timing_aliases(*stage_targets)
+    return elapsed_ms
+
+
+def _refresh_import_result_stage_timings(result: dict[str, Any], stage_timings: dict[str, float]) -> None:
+    """把最新批次级阶段耗时回写到结果 diagnostics。"""
+    diagnostics = result.get("diagnostics")
+    if isinstance(diagnostics, dict):
+        diagnostics["stage_timings"] = dict(stage_timings)
+
+
 def _finalize_stage_total(stage_timings: dict[str, float]) -> None:
-    """汇总除 total_ms 外的阶段耗时，并回填 total_ms。"""
+    """汇总阶段耗时并回填 total_ms，避免重复累计别名字段。"""
+    _sync_stage_timing_aliases(stage_timings)
+    excluded_keys = {"total_ms"}
+    if "file_save_ms" in stage_timings:
+        excluded_keys.add("persist_ms")
     stage_timings["total_ms"] = round(
-        sum(float(value) for key, value in stage_timings.items() if key != "total_ms"),
+        sum(float(value) for key, value in stage_timings.items() if key not in excluded_keys),
         3,
     )
 
@@ -259,7 +292,7 @@ def _build_file_result(
     stage_timings: dict[str, float] | None = None,
     skip_standalone_asset: bool = False,
 ) -> dict[str, Any]:
-    """??????????????????????"""
+    """将一次导入的 OCR 运行时信息裁剪为可序列化诊断字段。"""
     embedded_asset_items = embedded_assets or []
     result = {
         "name": filename,
@@ -430,7 +463,7 @@ def _index_embedded_image_assets(
     ingestion_targets: tuple[dict[str, Any], ...] = (),
     persist: bool = True,
 ) -> int:
-    """? Markdown ?????? OCR?????????????????"""
+    """为 Markdown 内嵌图片执行 OCR 入索引，并累计对应阶段耗时。"""
     total_indexed_chunks = 0
     manager = None
     for asset in embedded_assets:
@@ -563,7 +596,7 @@ def _build_file_diagnostics(
     stage_timings: dict[str, float] | None = None,
     skip_standalone_asset: bool = False,
 ) -> dict[str, Any]:
-    """????? diagnostics??? empty ???????????"""
+    """构建单文件 diagnostics，并补齐 empty 场景的原因字段。"""
     file_kind = _detect_file_kind(path, content_type)
     embedded_summary = _summarize_embedded_assets(embedded_assets)
     embedded_ocr_summary = _summarize_embedded_asset_ocr(embedded_assets)
@@ -634,7 +667,7 @@ def _aggregate_import_diagnostics(
     *,
     stage_timings: dict[str, float] | None = None,
 ) -> dict[str, Any]:
-    """?????? diagnostics????????????"""
+    """聚合批次级 diagnostics，生成导入结果摘要。"""
     summary: dict[str, Any] = {
         "total_files": len(file_results),
         "indexed_files": 0,
@@ -989,6 +1022,7 @@ def import_files(
     import_stage_timings = _new_import_stage_timings()
     manager = None
     index_storage_dirty = False
+    storage_persist_diagnostics: dict[str, Any] | None = None
 
     def _ensure_import_runtime():
         """仅在本批次确实需要入索引时，才懒加载模型与索引管理器。"""
@@ -1050,7 +1084,7 @@ def import_files(
 
             with target_path.open("wb") as buffer:
                 buffer.write(file_content)
-            _add_stage_elapsed((file_stage_timings, import_stage_timings), "persist_ms", persist_started_at)
+            _record_file_save_elapsed((file_stage_timings, import_stage_timings), persist_started_at)
 
             pending_items.append(
                 {
@@ -1069,7 +1103,7 @@ def import_files(
                 }
             )
         except Exception as exc:
-            _add_stage_elapsed((file_stage_timings, import_stage_timings), "persist_ms", persist_started_at)
+            _record_file_save_elapsed((file_stage_timings, import_stage_timings), persist_started_at)
             if target_path is not None:
                 try:
                     if target_path.exists() and target_path.is_file():
@@ -1307,17 +1341,27 @@ def import_files(
         file_results[item["index"]] = file_record
 
     if manager is not None and index_storage_dirty:
+        persist_index_started_at = time.perf_counter()
         manager.persist_storage()
+        _add_stage_elapsed((import_stage_timings,), "index_storage_persist_ms", persist_index_started_at)
+        consume_persist_diagnostics = getattr(manager, "consume_last_persist_diagnostics", None)
+        if callable(consume_persist_diagnostics):
+            candidate_persist_diagnostics = consume_persist_diagnostics()
+            if isinstance(candidate_persist_diagnostics, dict):
+                storage_persist_diagnostics = dict(candidate_persist_diagnostics)
 
     completed_results = [item for item in file_results if item is not None]
     if success_count > 0:
+        doc_count_started_at = time.perf_counter()
         _safe_add_doc_count(kb_id, success_count)
+        _add_stage_elapsed((import_stage_timings,), "doc_count_update_ms", doc_count_started_at)
 
     register_started_at = time.perf_counter()
     asset_service.register_imported_assets(kb_id, completed_results)
     _add_stage_elapsed((import_stage_timings,), "register_assets_ms", register_started_at)
-    import_stage_timings["total_ms"] = _elapsed_ms(import_started_at)
+    _sync_stage_timing_aliases(import_stage_timings)
 
+    result_build_started_at = time.perf_counter()
     result = {
         "receipt_id": receipt_id,
         "files": retained_files,
@@ -1330,10 +1374,25 @@ def import_files(
         "import_mode": safe_import_mode,
         "diagnostics": _aggregate_import_diagnostics(completed_results, stage_timings=import_stage_timings),
     }
+    if isinstance(storage_persist_diagnostics, dict):
+        result["diagnostics"]["storage_persist_stage_timings"] = storage_persist_diagnostics
+    _add_stage_elapsed((import_stage_timings,), "result_build_ms", result_build_started_at)
+    _refresh_import_result_stage_timings(result, import_stage_timings)
+
+    receipt_store_started_at = time.perf_counter()
+    saved_receipt = kb_import_receipt_store.save_latest_import_receipt(
+        kb_id,
+        source_label="\u6587\u4ef6\u4e0a\u4f20",
+        result=result,
+    )
+    _add_stage_elapsed((import_stage_timings,), "receipt_store_ms", receipt_store_started_at)
+    import_stage_timings["total_ms"] = _elapsed_ms(import_started_at)
+    _refresh_import_result_stage_timings(result, import_stage_timings)
     kb_import_receipt_store.save_latest_import_receipt(
         kb_id,
-        source_label="文件上传",
+        source_label=saved_receipt["source_label"],
         result=result,
+        created_at=saved_receipt["created_at"],
     )
     return result
 

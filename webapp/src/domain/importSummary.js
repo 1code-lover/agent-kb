@@ -148,24 +148,34 @@ const STAGE_TIMING_LABELS = {
   total_ms: '总耗时',
   ensure_models_ready_ms: '模型检查',
   get_index_manager_ms: '索引管理器',
-  persist_ms: '落盘',
+  file_save_ms: '文件保存',
+  persist_ms: '文件保存',
   standalone_ocr_ms: '独立 OCR',
   primary_index_ms: '主索引',
   embedded_asset_extract_ms: '内嵌抽取',
   embedded_asset_ocr_ms: '内嵌 OCR',
   embedded_asset_index_ms: '内嵌索引',
+  index_storage_persist_ms: '索引落盘',
+  doc_count_update_ms: '文档计数',
   register_assets_ms: '资产登记',
+  receipt_store_ms: '回执落盘',
+  result_build_ms: '结果组装',
 };
 
 const STAGE_TIMING_ORDER = [
   'total_ms',
+  'file_save_ms',
   'persist_ms',
   'primary_index_ms',
   'embedded_asset_extract_ms',
   'embedded_asset_ocr_ms',
   'embedded_asset_index_ms',
   'standalone_ocr_ms',
+  'index_storage_persist_ms',
+  'doc_count_update_ms',
   'register_assets_ms',
+  'receipt_store_ms',
+  'result_build_ms',
   'ensure_models_ready_ms',
   'get_index_manager_ms',
 ];
@@ -230,6 +240,7 @@ function buildEmptyReasonMetrics(emptyReasonCounts) {
 
 function buildTimingMetrics(stageTimings, order, labels, maxItems = null) {
   const metrics = order
+    .filter((key) => !(key === 'persist_ms' && hasOwnMetricField(stageTimings, 'file_save_ms')))
     .map((key) => ({
       key,
       label: labels[key] || key,

@@ -207,6 +207,7 @@ test('buildImportReceiptSummary 会汇总导入诊断与阶段耗时摘要', () 
             skip_standalone_asset: true,
             ocr_status: 'skipped',
             stage_timings: {
+              file_save_ms: 6,
               persist_ms: 6,
               standalone_ocr_ms: 0,
               primary_index_ms: 0,
@@ -235,13 +236,18 @@ test('buildImportReceiptSummary 会汇总导入诊断与阶段耗时摘要', () 
         stage_timings: {
           ensure_models_ready_ms: 1,
           get_index_manager_ms: 2,
+          file_save_ms: 6,
           persist_ms: 6,
           standalone_ocr_ms: 0,
           primary_index_ms: 0,
           embedded_asset_extract_ms: 4,
           embedded_asset_ocr_ms: 12,
           embedded_asset_index_ms: 8,
+          index_storage_persist_ms: 5,
+          doc_count_update_ms: 2,
           register_assets_ms: 3,
+          receipt_store_ms: 1,
+          result_build_ms: 2,
           total_ms: 36,
         },
         index_stage_timings: {
@@ -263,9 +269,16 @@ test('buildImportReceiptSummary 会汇总导入诊断与阶段耗时摘要', () 
   assert.ok(summary.metrics.some((item) => item.label === '被接管图片' && item.value === 1));
   assert.ok(summary.emptyReasonMetrics.some((item) => item.label === '被内嵌资产接管' && item.value === 1));
   assert.ok(summary.batchStageMetrics.some((item) => item.label === '总耗时' && item.value === 36));
+  assert.ok(summary.batchStageMetrics.some((item) => item.label === '文件保存' && item.value === 6));
+  assert.ok(summary.batchStageMetrics.some((item) => item.label === '索引落盘' && item.value === 5));
+  assert.ok(summary.batchStageMetrics.some((item) => item.label === '文档计数' && item.value === 2));
+  assert.ok(summary.batchStageMetrics.some((item) => item.label === '回执落盘' && item.value === 1));
+  assert.ok(summary.batchStageMetrics.some((item) => item.label === '结果组装' && item.value === 2));
   assert.ok(summary.batchStageSummaryText.includes('总耗时 36 ms'));
+  assert.ok(summary.batchStageSummaryText.includes('文件保存 6 ms'));
   assert.equal(summary.items[0].skipStandaloneAsset, true);
   assert.ok(summary.items[0].stageTimingSummaryText.includes('总耗时 6 ms'));
+  assert.ok(summary.items[0].stageTimingSummaryText.includes('文件保存 6 ms'));
 });
 
 

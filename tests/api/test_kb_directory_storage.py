@@ -343,7 +343,18 @@ def test_import_files_emits_stage_timings_for_batch_and_file_diagnostics(monkeyp
     monkeypatch.chdir(tmp_path)
     registry = _patch_registry(monkeypatch, tmp_path)
     registry.create_kb("kb-a", "KB A")
-    _patch_runtime(monkeypatch)
+    manager = _patch_runtime(monkeypatch)
+    manager.consume_last_persist_diagnostics.return_value = {
+        "docstore_persist_ms": 0.25,
+        "index_store_persist_ms": 0.25,
+        "graph_store_persist_ms": 0.25,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 0.5,
+        "vector_store_namespaces_ms": {"default": 0.5},
+        "fallback_persist_ms": 0.0,
+        "total_ms": 1.25,
+    }
+    monkeypatch.setattr(kb_service, "_elapsed_ms", lambda _started_at: 1.25)
     monkeypatch.setattr(kb_service.FilenameSanitizer, "generate_unique_filename", staticmethod(lambda name: name))
 
     result = kb_service.import_files([FakeUploadFile("a.txt", b"alpha")], 128, 16, kb_id="kb-a")
@@ -352,21 +363,52 @@ def test_import_files_emits_stage_timings_for_batch_and_file_diagnostics(monkeyp
     assert set(batch_timings) == {
         "ensure_models_ready_ms",
         "get_index_manager_ms",
+        "file_save_ms",
         "persist_ms",
         "standalone_ocr_ms",
         "primary_index_ms",
         "embedded_asset_extract_ms",
         "embedded_asset_ocr_ms",
         "embedded_asset_index_ms",
+        "index_storage_persist_ms",
+        "doc_count_update_ms",
         "register_assets_ms",
+        "receipt_store_ms",
+        "result_build_ms",
         "total_ms",
     }
     assert all(value >= 0 for value in batch_timings.values())
-    assert batch_timings["persist_ms"] >= 0
-    assert batch_timings["primary_index_ms"] >= 0
+    assert batch_timings["file_save_ms"] == 1.25
+    assert batch_timings["persist_ms"] == batch_timings["file_save_ms"]
+    assert batch_timings["primary_index_ms"] == 1.25
+    assert batch_timings["index_storage_persist_ms"] == 1.25
+    assert batch_timings["doc_count_update_ms"] == 1.25
+    assert batch_timings["register_assets_ms"] == 1.25
+    assert batch_timings["receipt_store_ms"] == 1.25
+    assert batch_timings["result_build_ms"] == 1.25
+
+    receipt = kb_service.get_latest_import_receipt("kb-a")
+    assert receipt is not None
+    receipt_batch_timings = receipt["result"]["diagnostics"]["stage_timings"]
+    assert receipt_batch_timings["receipt_store_ms"] == batch_timings["receipt_store_ms"]
+    assert receipt_batch_timings["total_ms"] == batch_timings["total_ms"]
+
+    storage_persist_timings = result["diagnostics"]["storage_persist_stage_timings"]
+    assert storage_persist_timings == {
+        "docstore_persist_ms": 0.25,
+        "index_store_persist_ms": 0.25,
+        "graph_store_persist_ms": 0.25,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 0.5,
+        "vector_store_namespaces_ms": {"default": 0.5},
+        "fallback_persist_ms": 0.0,
+        "total_ms": 1.25,
+    }
+    assert receipt["result"]["diagnostics"]["storage_persist_stage_timings"] == storage_persist_timings
 
     file_timings = result["file_results"][0]["diagnostics"]["stage_timings"]
     assert set(file_timings) == {
+        "file_save_ms",
         "persist_ms",
         "standalone_ocr_ms",
         "primary_index_ms",
@@ -376,6 +418,8 @@ def test_import_files_emits_stage_timings_for_batch_and_file_diagnostics(monkeyp
         "total_ms",
     }
     assert all(value >= 0 for value in file_timings.values())
+    assert file_timings["file_save_ms"] == 1.25
+    assert file_timings["persist_ms"] == file_timings["file_save_ms"]
     assert file_timings["standalone_ocr_ms"] == 0
     assert file_timings["embedded_asset_ocr_ms"] == 0
     assert file_timings["embedded_asset_index_ms"] == 0

@@ -24,6 +24,15 @@ from typing import Any
 
 from llama_index.core import Document, Settings, SimpleDirectoryReader, StorageContext, VectorStoreIndex
 from llama_index.core import load_index_from_storage, load_indices_from_storage
+from llama_index.core.storage.storage_context import (
+    DEFAULT_PERSIST_DIR,
+    DOCSTORE_FNAME,
+    GRAPH_STORE_FNAME,
+    INDEX_STORE_FNAME,
+    NAMESPACE_SEP,
+    PG_FNAME,
+    VECTOR_STORE_FNAME,
+)
 from server.stores.strage_context import STORAGE_CONTEXT
 from server.ingestion import AdvancedIngestionPipeline
 from config import DEV_MODE
@@ -45,13 +54,27 @@ _INGESTION_STAGE_KEYS = (
 
 
 def _new_ingestion_stage_timings() -> dict[str, float]:
-    """?? ingestion ??????????"""
+    """创建 ingestion 过程诊断结构。"""
     return {key: 0.0 for key in _INGESTION_STAGE_KEYS}
 
 
 
+def _new_storage_persist_diagnostics() -> dict[str, Any]:
+    """创建存储落盘诊断结构。"""
+    return {
+        "docstore_persist_ms": 0.0,
+        "index_store_persist_ms": 0.0,
+        "graph_store_persist_ms": 0.0,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 0.0,
+        "vector_store_namespaces_ms": {},
+        "fallback_persist_ms": 0.0,
+        "total_ms": 0.0,
+    }
+
+
 def _new_ingestion_diagnostics(source: str, input_file_count: int = 0) -> dict[str, Any]:
-    """???? ingestion ??? diagnostics ???"""
+    """创建 ingestion 过程诊断结构。"""
     return {
         "source": source,
         "input_file_count": int(input_file_count or 0),
@@ -66,7 +89,7 @@ def _new_ingestion_diagnostics(source: str, input_file_count: int = 0) -> dict[s
 
 
 def _read_document_text(document: Any) -> str:
-    """???? Document ?? Document ????????"""
+    """兼容不同 Document 实现，统一读取文本内容。"""
     if document is None:
         return ""
 
@@ -80,7 +103,7 @@ def _read_document_text(document: Any) -> str:
 
 
 def _summarize_documents(documents: list[Any]) -> dict[str, int]:
-    """???????????????????"""
+    """统计文档数量、空文档数量与文本字符数。"""
     summary = {
         "document_count": len(documents or []),
         "empty_document_count": 0,
@@ -96,19 +119,19 @@ def _summarize_documents(documents: list[Any]) -> dict[str, int]:
 
 
 def _count_nodes_with_embeddings(nodes: list[Any]) -> tuple[int, int]:
-    """??? embedding ??? embedding ?????"""
+    """统计带 embedding 与不带 embedding 的节点数量。"""
     node_list = list(nodes or [])
     with_embeddings = sum(1 for node in node_list if getattr(node, "embedding", None) is not None)
     return with_embeddings, max(len(node_list) - with_embeddings, 0)
 
 
 def _elapsed_ms(started_at: float) -> float:
-    """?? monotonic ?????????"""
+    """基于 monotonic 时钟计算耗时。"""
     return round(max(time.perf_counter() - started_at, 0.0) * 1000, 3)
 
 
 def _finalize_ingestion_total(stage_timings: dict[str, Any], started_at: float) -> float:
-    """?? total_ms???? mock ?????????????"""
+    """收敛 total_ms，兼容 mock 场景下的阶段耗时校验。"""
     component_max = 0.0
     for key, value in (stage_timings or {}).items():
         if key == 'total_ms':
@@ -197,19 +220,86 @@ class IndexManager:
         self.index_id: str = None
         self.index: VectorStoreIndex = None
         self._last_ingestion_diagnostics: dict[str, Any] | None = None
+        self._last_persist_diagnostics: dict[str, Any] | None = None
 
     def _set_last_ingestion_diagnostics(self, diagnostics: dict[str, Any] | None) -> None:
-        """?????? ingestion diagnostics???????????"""
+        """缓存最近一次 ingestion diagnostics，避免外部误改。"""
         self._last_ingestion_diagnostics = copy.deepcopy(diagnostics) if isinstance(diagnostics, dict) else None
 
     def consume_last_ingestion_diagnostics(self) -> dict[str, Any] | None:
-        """????????? ingestion diagnostics?"""
+        """消费最近一次 ingestion diagnostics。"""
         diagnostics = copy.deepcopy(self._last_ingestion_diagnostics) if isinstance(self._last_ingestion_diagnostics, dict) else None
         self._last_ingestion_diagnostics = None
         return diagnostics
 
+    def _set_last_persist_diagnostics(self, diagnostics: dict[str, Any] | None) -> None:
+        """缓存最近一次存储落盘诊断，避免外部误改。"""
+        self._last_persist_diagnostics = copy.deepcopy(diagnostics) if isinstance(diagnostics, dict) else None
+
+    def consume_last_persist_diagnostics(self) -> dict[str, Any] | None:
+        """消费最近一次存储落盘诊断。"""
+        diagnostics = copy.deepcopy(self._last_persist_diagnostics) if isinstance(self._last_persist_diagnostics, dict) else None
+        self._last_persist_diagnostics = None
+        return diagnostics
+
+    def _persist_storage_with_diagnostics(self) -> dict[str, Any] | None:
+        """按 doc/index/vector/graph 分阶段执行落盘并记录耗时。"""
+        docstore = getattr(self.storage_context, "docstore", None)
+        index_store = getattr(self.storage_context, "index_store", None)
+        graph_store = getattr(self.storage_context, "graph_store", None)
+        vector_stores = getattr(self.storage_context, "vector_stores", None)
+        if not all(callable(getattr(target, "persist", None)) for target in (docstore, index_store, graph_store)):
+            return None
+        if not isinstance(vector_stores, dict):
+            return None
+
+        diagnostics = _new_storage_persist_diagnostics()
+        persist_dir = Path(DEFAULT_PERSIST_DIR)
+        started_at = time.perf_counter()
+
+        phase_started_at = time.perf_counter()
+        docstore.persist(persist_path=str(persist_dir / DOCSTORE_FNAME), fs=None)
+        diagnostics["docstore_persist_ms"] = _elapsed_ms(phase_started_at)
+
+        phase_started_at = time.perf_counter()
+        index_store.persist(persist_path=str(persist_dir / INDEX_STORE_FNAME), fs=None)
+        diagnostics["index_store_persist_ms"] = _elapsed_ms(phase_started_at)
+
+        phase_started_at = time.perf_counter()
+        graph_store.persist(persist_path=str(persist_dir / GRAPH_STORE_FNAME), fs=None)
+        diagnostics["graph_store_persist_ms"] = _elapsed_ms(phase_started_at)
+
+        property_graph_store = getattr(self.storage_context, "property_graph_store", None)
+        property_graph_persist = getattr(property_graph_store, "persist", None)
+        if callable(property_graph_persist):
+            phase_started_at = time.perf_counter()
+            property_graph_persist(persist_path=str(persist_dir / PG_FNAME), fs=None)
+            diagnostics["property_graph_store_persist_ms"] = _elapsed_ms(phase_started_at)
+
+        namespace_timings: dict[str, float] = {}
+        for vector_store_name, vector_store in vector_stores.items():
+            vector_persist = getattr(vector_store, "persist", None)
+            if not callable(vector_persist):
+                continue
+            phase_started_at = time.perf_counter()
+            vector_persist(
+                persist_path=str(persist_dir / f"{vector_store_name}{NAMESPACE_SEP}{VECTOR_STORE_FNAME}"),
+                fs=None,
+            )
+            elapsed_ms = _elapsed_ms(phase_started_at)
+            namespace_timings[str(vector_store_name)] = elapsed_ms
+            diagnostics["vector_store_persist_ms"] = round(
+                float(diagnostics["vector_store_persist_ms"]) + elapsed_ms,
+                3,
+            )
+
+        diagnostics["vector_store_namespaces_ms"] = namespace_timings
+        diagnostics["total_ms"] = _elapsed_ms(started_at)
+        return diagnostics
+
+
     def _run_pipeline_with_diagnostics(self, *, documents: list[Any], diagnostics: dict[str, Any]) -> list[Any]:
-        """?? ingestion pipeline?????????? diagnostics?"""
+        """执行 ingestion pipeline，并把统计信息写回 diagnostics。"""
         diagnostics.update(_summarize_documents(documents))
         stage_timings = diagnostics.setdefault("stage_timings", _new_ingestion_stage_timings())
         for key, value in _new_ingestion_stage_timings().items():
@@ -343,13 +433,25 @@ class IndexManager:
         return self.index
 
     def persist_storage(self) -> bool:
-        """开发模式下持久化 storage_context，便于批量导入时显式控制落盘时机。"""
+        """持久化当前 storage_context，并记录细粒度落盘诊断。"""
+        self._set_last_persist_diagnostics(None)
         if not DEV_MODE:
             return False
         persist = getattr(self.storage_context, "persist", None)
         if not callable(persist):
             return False
+
+        diagnostics = self._persist_storage_with_diagnostics()
+        if isinstance(diagnostics, dict):
+            self._set_last_persist_diagnostics(diagnostics)
+            return True
+
+        fallback_started_at = time.perf_counter()
         persist()
+        fallback_diagnostics = _new_storage_persist_diagnostics()
+        fallback_diagnostics["fallback_persist_ms"] = _elapsed_ms(fallback_started_at)
+        fallback_diagnostics["total_ms"] = fallback_diagnostics["fallback_persist_ms"]
+        self._set_last_persist_diagnostics(fallback_diagnostics)
         return True
 
     def load_dir(self, input_dir, chunk_size, chunk_overlap):
@@ -410,7 +512,7 @@ class IndexManager:
         kb_id: str | None = None,
         persist: bool = True,
     ) -> list[Any]:
-        """?????? Document ????? metadata ??????"""
+        """加载内存中的 Document 列表，并补齐文件路径等 metadata。"""
         started_at = time.perf_counter()
         diagnostics = _new_ingestion_diagnostics(source="documents")
 
@@ -472,7 +574,7 @@ class IndexManager:
         kb_id: str | None = None,
         persist: bool = True,
     ) -> list[Any]:
-        """???????????? diagnostics ??????"""
+        """从文件路径加载文档，并记录完整 diagnostics 摘要。"""
         started_at = time.perf_counter()
         diagnostics = _new_ingestion_diagnostics(source="files")
 

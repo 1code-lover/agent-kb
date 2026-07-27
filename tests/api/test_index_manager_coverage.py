@@ -65,6 +65,34 @@ class FakeStorage:
         self.persist_calls += 1
 
 
+class FakePersistTarget:
+    """?? persist ???????????"""
+
+    def __init__(self) -> None:
+        self.persist_calls: list[tuple[str | None, object]] = []
+
+    def persist(self, persist_path=None, fs=None) -> None:
+        self.persist_calls.append((persist_path, fs))
+
+
+class FakeProfiledStorage:
+    """?? doc/index/vector/graph ?????????????????"""
+
+    def __init__(self) -> None:
+        self.docstore = FakePersistTarget()
+        self.index_store = FakePersistTarget()
+        self.graph_store = FakePersistTarget()
+        self.property_graph_store = None
+        self.vector_stores = {
+            "default": FakePersistTarget(),
+            "image": FakePersistTarget(),
+        }
+        self.persist_calls = 0
+
+    def persist(self) -> None:
+        self.persist_calls += 1
+
+
 def _manager() -> index_module.IndexManager:
     manager = index_module.IndexManager("test-index")
     manager.storage_context = FakeStorage()
@@ -185,6 +213,33 @@ def test_insert_nodes_can_skip_persist(monkeypatch: pytest.MonkeyPatch) -> None:
     assert result is manager.index
     assert manager.index.inserted_nodes == ["n1", "n2"]
     assert manager.storage_context.persist_calls == 0
+
+
+def test_persist_storage_records_component_timings(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(index_module, "DEV_MODE", True)
+    manager = index_module.IndexManager("test-index")
+    manager.storage_context = FakeProfiledStorage()
+
+    assert manager.persist_storage() is True
+
+    diagnostics = manager.consume_last_persist_diagnostics()
+    assert diagnostics is not None
+    assert diagnostics["docstore_persist_ms"] >= 0
+    assert diagnostics["index_store_persist_ms"] >= 0
+    assert diagnostics["graph_store_persist_ms"] >= 0
+    assert diagnostics["vector_store_persist_ms"] >= 0
+    assert diagnostics["fallback_persist_ms"] == 0.0
+    assert diagnostics["vector_store_namespaces_ms"].keys() == {"default", "image"}
+    assert diagnostics["vector_store_namespaces_ms"]["default"] >= 0
+    assert diagnostics["vector_store_namespaces_ms"]["image"] >= 0
+    assert diagnostics["total_ms"] >= diagnostics["vector_store_persist_ms"]
+    assert manager.storage_context.persist_calls == 0
+    assert manager.storage_context.docstore.persist_calls[0][0].endswith("docstore.json")
+    assert manager.storage_context.index_store.persist_calls[0][0].endswith("index_store.json")
+    assert manager.storage_context.graph_store.persist_calls[0][0].endswith("graph_store.json")
+    assert manager.storage_context.vector_stores["default"].persist_calls[0][0].endswith("default__vector_store.json")
+    assert manager.storage_context.vector_stores["image"].persist_calls[0][0].endswith("image__vector_store.json")
+    assert manager.consume_last_persist_diagnostics() is None
 
 
 def test_insert_nodes_initializes_index_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
