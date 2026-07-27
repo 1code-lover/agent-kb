@@ -40,7 +40,7 @@ def _patch_runtime(monkeypatch: pytest.MonkeyPatch, manager: MagicMock | None = 
     manager = manager or MagicMock()
     manager.load_files.return_value = [SimpleNamespace(metadata={})]
 
-    def _load_documents(documents, chunk_size, chunk_overlap, kb_id=None):
+    def _load_documents(documents, chunk_size, chunk_overlap, kb_id=None, persist=True):
         nodes = []
         for document in documents:
             metadata = dict(getattr(document, "metadata", {}) or {})
@@ -50,6 +50,7 @@ def _patch_runtime(monkeypatch: pytest.MonkeyPatch, manager: MagicMock | None = 
         return nodes
 
     manager.load_documents.side_effect = _load_documents
+    manager.persist_storage.return_value = True
     monkeypatch.setattr(kb_service.runtime_state, "ensure_models_ready", MagicMock())
     monkeypatch.setattr(kb_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))
     return manager

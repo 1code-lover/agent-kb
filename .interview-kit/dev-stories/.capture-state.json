@@ -1,8 +1,8 @@
 {
-  "last_generated_hash": "25dc20a4cdc1c434ec42981ddff7bc0a00318a24",
-  "last_capture_time": "2026-07-26T14:41:59Z",
-  "last_story_file": "2026-07-26-feature-knowledge-workspace-import-diagnostics.md",
+  "last_generated_hash": "f6619f11fba1c376ad156c06f25449dede055390",
+  "last_capture_time": "2026-07-27T06:21:37Z",
+  "last_story_file": "2026-07-27-refactor-batch-import-persist-optimization.md",
   "last_prompt_decision": "generated",
   "last_generated_push_hash": null,
-  "last_prompted_hash": "25dc20a4cdc1c434ec42981ddff7bc0a00318a24"
+  "last_prompted_hash": "f6619f11fba1c376ad156c06f25449dede055390"
 }

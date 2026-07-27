@@ -428,6 +428,7 @@ def _index_embedded_image_assets(
     chunk_overlap: int,
     stage_targets: tuple[dict[str, float], ...] = (),
     ingestion_targets: tuple[dict[str, Any], ...] = (),
+    persist: bool = True,
 ) -> int:
     """? Markdown ?????? OCR?????????????????"""
     total_indexed_chunks = 0
@@ -479,7 +480,7 @@ def _index_embedded_image_assets(
         try:
             if manager is None:
                 manager = manager_getter()
-            nodes = manager.load_documents([document], chunk_size, chunk_overlap, kb_id=kb_id) or []
+            nodes = manager.load_documents([document], chunk_size, chunk_overlap, kb_id=kb_id, persist=persist) or []
             _consume_manager_ingestion_diagnostics(manager, *ingestion_targets)
         except Exception as exc:
             _add_stage_elapsed(stage_targets, "embedded_asset_index_ms", index_started_at)
@@ -987,6 +988,7 @@ def import_files(
 
     import_stage_timings = _new_import_stage_timings()
     manager = None
+    index_storage_dirty = False
 
     def _ensure_import_runtime():
         """仅在本批次确实需要入索引时，才懒加载模型与索引管理器。"""
@@ -1182,7 +1184,7 @@ def import_files(
             index_started_at = time.perf_counter()
             try:
                 current_manager = _ensure_import_runtime()
-                nodes = current_manager.load_documents([document], chunk_size, chunk_overlap, kb_id=kb_id) or []
+                nodes = current_manager.load_documents([document], chunk_size, chunk_overlap, kb_id=kb_id, persist=False) or []
                 _consume_manager_ingestion_diagnostics(current_manager, item["ingestion_diagnostics"])
             except Exception as exc:
                 _add_stage_elapsed(stage_targets, "primary_index_ms", index_started_at)
@@ -1202,13 +1204,15 @@ def import_files(
             _add_stage_elapsed(stage_targets, "primary_index_ms", index_started_at)
             item["indexed_chunks"] = len(nodes)
             item["status"] = "indexed" if item["indexed_chunks"] > 0 else "empty"
+            if item["indexed_chunks"] > 0:
+                index_storage_dirty = True
             item["ocr_diagnostics"]["indexed_from_ocr"] = item["indexed_chunks"] > 0
             continue
 
         index_started_at = time.perf_counter()
         try:
             current_manager = _ensure_import_runtime()
-            nodes = current_manager.load_files([target_path.resolve()], chunk_size, chunk_overlap, kb_id=kb_id) or []
+            nodes = current_manager.load_files([target_path.resolve()], chunk_size, chunk_overlap, kb_id=kb_id, persist=False) or []
             _consume_manager_ingestion_diagnostics(current_manager, item["ingestion_diagnostics"])
         except Exception as exc:
             _add_stage_elapsed(stage_targets, "primary_index_ms", index_started_at)
@@ -1224,6 +1228,8 @@ def import_files(
         _add_stage_elapsed(stage_targets, "primary_index_ms", index_started_at)
         item["indexed_chunks"] = len(nodes)
         item["status"] = "indexed" if item["indexed_chunks"] > 0 else "empty"
+        if item["indexed_chunks"] > 0:
+            index_storage_dirty = True
 
     for item in pending_items:
         status = item["status"]
@@ -1260,7 +1266,10 @@ def import_files(
                 chunk_overlap=chunk_overlap,
                 stage_targets=(item["stage_timings"], import_stage_timings),
                 ingestion_targets=(item["ingestion_diagnostics"],),
+                persist=False,
             )
+            if embedded_chunk_count > 0:
+                index_storage_dirty = True
         chunk_count = item["indexed_chunks"] + embedded_chunk_count
         status = item["status"]
         if status == "empty" and embedded_chunk_count > 0:
@@ -1296,6 +1305,9 @@ def import_files(
             }
         )
         file_results[item["index"]] = file_record
+
+    if manager is not None and index_storage_dirty:
+        manager.persist_storage()
 
     completed_results = [item for item in file_results if item is not None]
     if success_count > 0:

@@ -106,6 +106,19 @@ def test_init_index_persists_and_returns_created_index(monkeypatch: pytest.Monke
     vector_ctor.assert_called_once_with(["node"], storage_context=manager.storage_context, store_nodes_override=True)
 
 
+def test_init_index_can_skip_persist(monkeypatch: pytest.MonkeyPatch) -> None:
+    created = FakeIndex("created")
+    vector_ctor = MagicMock(return_value=created)
+    monkeypatch.setattr(index_module, "VectorStoreIndex", vector_ctor)
+    monkeypatch.setattr(index_module, "DEV_MODE", True)
+    manager = _manager()
+
+    result = manager.init_index(["node"], persist=False)
+
+    assert result is created
+    assert manager.storage_context.persist_calls == 0
+
+
 def test_load_index_returns_cached_index_without_storage_call(monkeypatch: pytest.MonkeyPatch) -> None:
     cached = FakeIndex("cached")
     load_spy = MagicMock()
@@ -162,6 +175,18 @@ def test_insert_nodes_inserts_into_existing_index_and_persists(monkeypatch: pyte
     assert manager.storage_context.persist_calls == 1
 
 
+def test_insert_nodes_can_skip_persist(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(index_module, "DEV_MODE", True)
+    manager = _manager()
+    manager.index = FakeIndex("existing")
+
+    result = manager.insert_nodes(["n1", "n2"], persist=False)
+
+    assert result is manager.index
+    assert manager.index.inserted_nodes == ["n1", "n2"]
+    assert manager.storage_context.persist_calls == 0
+
+
 def test_insert_nodes_initializes_index_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     manager = _manager()
     init_spy = MagicMock(return_value=FakeIndex("new"))
@@ -169,7 +194,7 @@ def test_insert_nodes_initializes_index_when_missing(monkeypatch: pytest.MonkeyP
 
     result = manager.insert_nodes(["n1"])
 
-    init_spy.assert_called_once_with(nodes=["n1"])
+    init_spy.assert_called_once_with(nodes=["n1"], persist=True)
     assert result is None
 
 

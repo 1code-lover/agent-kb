@@ -261,7 +261,7 @@ class IndexManager:
         else:
             return False
 
-    def init_index(self, nodes):
+    def init_index(self, nodes, persist: bool = True):
         """
         功能：
         - 基于节点集合创建新索引并持久化（开发模式）。
@@ -276,8 +276,8 @@ class IndexManager:
                                       storage_context=self.storage_context, 
                                       store_nodes_override=True) # note: no nodes in doc store if using vector database, set store_nodes_override=True to add nodes to doc store
         self.index_id = self.index.index_id
-        if DEV_MODE:
-            self.storage_context.persist()
+        if persist:
+            self.persist_storage()
         print(f"Created index {self.index.index_id}")
         return self.index
 
@@ -322,7 +322,7 @@ class IndexManager:
         print(f"Loaded index {self.index.index_id}")
         return self.index
 
-    def insert_nodes(self, nodes):
+    def insert_nodes(self, nodes, persist: bool = True):
         """
         功能：
         - 向已有索引插入节点；若索引不存在则自动初始化。
@@ -335,12 +335,22 @@ class IndexManager:
         """
         if self.index is not None:
             self.index.insert_nodes(nodes=nodes)
-            if DEV_MODE:
-                self.storage_context.persist()                
+            if persist:
+                self.persist_storage()
             print(f"Inserted {len(nodes)} nodes into index {self.index.index_id}")
         else:
-            self.init_index(nodes=nodes)
+            self.init_index(nodes=nodes, persist=persist)
         return self.index
+
+    def persist_storage(self) -> bool:
+        """开发模式下持久化 storage_context，便于批量导入时显式控制落盘时机。"""
+        if not DEV_MODE:
+            return False
+        persist = getattr(self.storage_context, "persist", None)
+        if not callable(persist):
+            return False
+        persist()
+        return True
 
     def load_dir(self, input_dir, chunk_size, chunk_overlap):
         """
@@ -398,6 +408,7 @@ class IndexManager:
         chunk_size: int,
         chunk_overlap: int,
         kb_id: str | None = None,
+        persist: bool = True,
     ) -> list[Any]:
         """?????? Document ????? metadata ??????"""
         started_at = time.perf_counter()
@@ -447,7 +458,7 @@ class IndexManager:
                 n.metadata["kb_id"] = kb_id
 
         insert_started_at = time.perf_counter()
-        self.insert_nodes(nodes)
+        self.insert_nodes(nodes, persist=persist)
         diagnostics["stage_timings"]["index_insert_ms"] = _elapsed_ms(insert_started_at)
         _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
         self._set_last_ingestion_diagnostics(diagnostics)
@@ -459,6 +470,7 @@ class IndexManager:
         chunk_size: int,
         chunk_overlap: int,
         kb_id: str | None = None,
+        persist: bool = True,
     ) -> list[Any]:
         """???????????? diagnostics ??????"""
         started_at = time.perf_counter()
@@ -511,7 +523,7 @@ class IndexManager:
                 if kb_id is not None:
                     n.metadata["kb_id"] = kb_id
             insert_started_at = time.perf_counter()
-            self.insert_nodes(nodes)
+            self.insert_nodes(nodes, persist=persist)
             diagnostics["stage_timings"]["index_insert_ms"] = _elapsed_ms(insert_started_at)
             _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
             self._set_last_ingestion_diagnostics(diagnostics)

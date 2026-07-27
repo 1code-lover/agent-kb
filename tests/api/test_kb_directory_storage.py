@@ -41,6 +41,7 @@ def _patch_runtime(monkeypatch: pytest.MonkeyPatch, manager: MagicMock | None = 
     manager.load_documents.return_value = [SimpleNamespace(metadata={})]
     manager.load_websites.return_value = [SimpleNamespace(metadata={})]
     manager.consume_last_ingestion_diagnostics.return_value = None
+    manager.persist_storage.return_value = True
     monkeypatch.setattr(kb_service.runtime_state, "ensure_models_ready", MagicMock())
     monkeypatch.setattr(kb_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))
     return manager
@@ -208,6 +209,29 @@ def test_import_files_marks_empty_results_without_incrementing_doc_count(monkeyp
     assert result["file_results"][0]["status"] == "empty"
     assert registry.get_kb("kb-a")["doc_count"] == 0
     assert (tmp_path / "data" / "kb-a" / "a.txt").read_bytes() == b"alpha"
+
+
+def test_import_files_defers_index_persist_until_batch_end(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    registry = _patch_registry(monkeypatch, tmp_path)
+    registry.create_kb("kb-a", "KB A")
+    manager = _patch_runtime(monkeypatch)
+
+    result = kb_service.import_files(
+        [
+            FakeUploadFile("a.txt", b"alpha"),
+            FakeUploadFile("b.txt", b"beta"),
+        ],
+        128,
+        16,
+        kb_id="kb-a",
+    )
+
+    assert result["success_count"] == 2
+    assert manager.load_files.call_count == 2
+    for call in manager.load_files.call_args_list:
+        assert call.kwargs["persist"] is False
+    manager.persist_storage.assert_called_once_with()
 
 
 def test_import_files_partial_failure_only_counts_indexed_items(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

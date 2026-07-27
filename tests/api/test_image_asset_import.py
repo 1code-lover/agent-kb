@@ -76,13 +76,13 @@ def _patch_asset_registry(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> KB
 def _patch_runtime(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     manager = MagicMock()
 
-    def _load_files(paths, chunk_size, chunk_overlap, kb_id=None):
+    def _load_files(paths, chunk_size, chunk_overlap, kb_id=None, persist=True):
         path = Path(paths[0])
         if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp"}:
             return []
         return [SimpleNamespace(metadata={"file_path": str(path), "file_name": path.name}, text="plain text")]
 
-    def _load_documents(documents, chunk_size, chunk_overlap, kb_id=None):
+    def _load_documents(documents, chunk_size, chunk_overlap, kb_id=None, persist=True):
         nodes = []
         for document in documents:
             metadata = dict(getattr(document, "metadata", {}) or {})
@@ -93,6 +93,7 @@ def _patch_runtime(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
     manager.load_files.side_effect = _load_files
     manager.load_documents.side_effect = _load_documents
+    manager.persist_storage.return_value = True
     monkeypatch.setattr(kb_service.runtime_state, "ensure_models_ready", MagicMock())
     monkeypatch.setattr(kb_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))
     return manager
@@ -282,6 +283,8 @@ def test_image_import_indexes_ocr_text_and_links_document_metadata(
     assert result["diagnostics"]["indexed_files"] == 1
     assert result["diagnostics"]["ocr_success_count"] == 1
     assert manager.load_documents.call_count == 1
+    assert manager.load_documents.call_args.kwargs["persist"] is False
+    manager.persist_storage.assert_called_once_with()
 
     image_document = manager.load_documents.call_args[0][0][0]
     assert image_document.text == ocr_text
@@ -478,6 +481,8 @@ def test_embedded_image_preempts_standalone_ocr_index_and_asset_registration(
     )
 
     assert manager.load_documents.call_count == 1
+    assert manager.load_documents.call_args.kwargs["persist"] is False
+    manager.persist_storage.assert_called_once_with()
     indexed_document = manager.load_documents.call_args[0][0][0]
     assert indexed_document.metadata["source_doc_relative_path"] == "docs/readme.md"
     assert indexed_document.metadata["referenced_path"] == "./images/flow.png"
