@@ -1,0 +1,4004 @@
+[
+  {
+    "case_id": "eval-img-001",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "From the scope board, what should requested_scope_type remain?",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "single_kb"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross kb",
+      "kb-shadow"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-002",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "From the scope board, how should effective_kb_ids behave?",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective_kb_ids",
+      "declared image knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "global scope",
+      "multi-kb merge"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-003",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Summarize the scope contract shown on the image board.",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "single_kb",
+      "effective_kb_ids",
+      "declared image knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb scope",
+      "undeclared KB"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-004",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Which two scope signals are named on the image board?",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "effective_kb_ids"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "preview_locator",
+      "folder boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-005",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Compare the role of requested_scope_type and effective_kb_ids for an image answer.",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "single_kb",
+      "effective_kb_ids",
+      "declared image knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "same as folder object",
+      "cross-kb answer"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-006",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "According to the folder board, what is a folder?",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder",
+      "organization object"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "authorization boundary",
+      "separate KB"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-007",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "图片 OCR 回答的授权边界是什么？",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Folder is the authorization boundary",
+      "page boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-008",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Compare the role of folders and the role of a knowledge base for image OCR answers.",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder",
+      "organization object",
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder-level authorization",
+      "folder replaces KB"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-009",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "How should image OCR answers stay scoped according to the folder board?",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Knowledge Base",
+      "authorization boundary",
+      "image OCR answers"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb answer",
+      "folder scope only"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-010",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Is folder the authorization boundary on the folder board?",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder",
+      "organization object",
+      "Knowledge Base"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "yes, folder is the boundary",
+      "folder isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-011",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "根据 evidence board，证据结果至少要包含哪两个字段？",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "empty evidence",
+      "no locator"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-012",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "For OCR derived assets, what must the excerpt be?",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "resolvable excerpt",
+      "OCR derived assets"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "free-form summary only",
+      "unresolvable excerpt"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-013",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Summarize the evidence contract shown on the OCR board.",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator",
+      "resolvable excerpt",
+      "OCR derived assets"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "evidence optional",
+      "preview unnecessary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-014",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Which locator fields are named explicitly on the evidence board?",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "page cursor only",
+      "title only"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-015",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Why is the excerpt requirement tied to OCR derived assets on the evidence board?",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "policy",
+    "difficulty": "complex",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "resolvable excerpt",
+      "OCR derived assets"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "OCR assets need no excerpt",
+      "locator-free evidence"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-016",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Which image board defines tenant shard checksum escrow?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-board.png",
+      "evidence-board.png"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-017",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Where is the namespace pinning barrier note in this image KB?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "folder-board.png",
+      "scope-board.png"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-018",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Compare the helios escrow board with the orion shard barrier board from this OCR KB.",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "invented board",
+      "made-up OCR result"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-019",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "On the image scope board, what should effective_kb_ids echo?",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective_kb_ids",
+      "declared image knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "all image kb ids",
+      "global image scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-020",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "For OCR derived assets, what kind of excerpt should evidence return?",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "resolvable excerpt",
+      "OCR derived assets"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "opaque excerpt",
+      "unresolvable snippet"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-021",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "How does the folder board describe folder scope for image OCR answers?",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder is an organization object",
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder permission wall",
+      "folder scope boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-022",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Which two locator fields are named on the OCR evidence board?",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "locator omitted",
+      "image title only"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-023",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Summarize the folder boundary rule for image OCR answers.",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder is an organization object",
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder manages authorization",
+      "image folder isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-024",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "What does the prism archive board say about escrow mirror locks?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "prism archive board",
+      "escrow mirror locks"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-025",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "From the OCR scope board, what should requested_scope_type remain?",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type must remain single_kb"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross kb",
+      "global scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-026",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "If the low-contrast OCR board leaves only sparse policy evidence, what should the assistant say and what boundary still applies?",
+    "source_doc": "noisy-policy-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['noisy-policy-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "no confirmable information",
+      "active knowledge base only",
+      "no fabricated memory"
+    ],
+    "required_evidence_docs": [
+      "noisy-policy-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "outside image kb",
+      "fabricated board"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-027",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Summarize the OCR answer-suite metric expectations from the metrics board.",
+    "source_doc": "metrics-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['metrics-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate",
+      "one point zero"
+    ],
+    "required_evidence_docs": [
+      "metrics-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "metric optional",
+      "preview can fail"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-028",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "How does the OCR folder board distinguish organizational structure from authorization boundary?",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder is an organization object",
+      "Knowledge Base is the authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder is the authorization boundary",
+      "folder-level scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-029",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Which OCR QA rates should stay at one point zero for a clean answer suite?",
+    "source_doc": "metrics-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['metrics-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "metrics",
+    "difficulty": "complex",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate"
+    ],
+    "required_evidence_docs": [
+      "metrics-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "rate can be partial",
+      "no preview metric"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-030",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Which OCR board describes the helium escrow raster and mirror shard covenant?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-board.png",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-031",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Explain quartzium lattice zx91 and cobalt escrow mirroring.",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate an answer"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-board.png",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-032",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "If the low-contrast OCR policy board stays sparse, what should the assistant say and what boundary still applies to memory?",
+    "source_doc": "noisy-policy-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['noisy-policy-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "no confirmable information",
+      "active knowledge base only",
+      "no fabricated memory"
+    ],
+    "required_evidence_docs": [
+      "noisy-policy-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb access",
+      "hallucinated image memory"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-img-033",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "question": "Summarize the low contrast OCR fallback rule: when evidence is sparse, what should the assistant say, which knowledge boundary applies, and what kind of memory is forbidden?",
+    "source_doc": "noisy-policy-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['noisy-policy-board.png']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "low contrast OCR fallback",
+      "no confirmable information",
+      "active knowledge base only",
+      "no fabricated memory"
+    ],
+    "required_evidence_docs": [
+      "noisy-policy-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb access",
+      "fabricated board facts"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "case_id": "eval-img-034",
+    "question": "Which OCR suite metrics should stay at one point zero on the clean metrics board?",
+    "source_doc": "metrics-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['metrics-board.png']",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate",
+      "one point zero"
+    ],
+    "required_evidence_docs": [
+      "metrics-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "preview can drift",
+      "outside board memory"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "case_id": "eval-img-035",
+    "question": "What does zephyr incident protocol zx-91 require?",
+    "source_doc": null,
+    "source_locator": null,
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "zephyr incident board states",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "case_id": "eval-img-036",
+    "question": "Summarize the OCR evidence contract for derived assets: what fields and preview property should the output keep?",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['evidence-board.png']",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator",
+      "resolvable excerpt",
+      "OCR derived assets"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder preview only",
+      "missing excerpt"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "case_id": "eval-img-037",
+    "question": "请说明图片 scope board 的范围契约：requested_scope_type 和 effective_kb_ids 应该怎么回显？",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['scope-board.png']",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type must remain single_kb",
+      "effective_kb_ids should echo the declared image knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "global scope",
+      "cross-kb"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "case_id": "eval-img-038",
+    "question": "For image OCR answers, compare the folder organization role with the authorization boundary that still applies.",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/test_chat_image_ocr_semireal.py::IMAGE_IMPORTS['folder-board.png']",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder is an organization object",
+      "authorization boundary",
+      "image OCR answers"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder authorization boundary",
+      "folder becomes a separate KB"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-image",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "image_ocr",
+    "case_id": "eval-img-039",
+    "question": "请用中文总结 low contrast OCR fallback：当 sparse OCR 命中不足时，为什么要说 no confirmable information，并保持 active knowledge base only 与 no fabricated memory？",
+    "source_doc": "noisy-policy-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['noisy-policy-board.png']",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "no confirmable information",
+      "active knowledge base only",
+      "no fabricated memory"
+    ],
+    "required_evidence_docs": [
+      "noisy-policy-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb memory",
+      "fabricated board facts"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-001",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which scope fields must a single-kb chat response echo from the scope contract?",
+    "source_doc": "scope-contract.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/scope-contract.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "requested_kb_ids",
+      "effective_kb_ids"
+    ],
+    "required_evidence_docs": [
+      "scope-contract.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "global compatibility mode",
+      "cross-kb"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-002",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "After a knowledge base is explicitly requested, how should the effective scope behave?",
+    "source_doc": "scope-contract.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/scope-contract.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective scope",
+      "explicitly requested knowledge base",
+      "effective_kb_ids"
+    ],
+    "required_evidence_docs": [
+      "scope-contract.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "all knowledge bases",
+      "folder-level scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-003",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "请用中文概括单库回复的范围回显契约。",
+    "source_doc": "scope-contract.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/scope-contract.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "requested_kb_ids",
+      "effective_scope_type",
+      "effective_kb_ids",
+      "is_default_deny_applied",
+      "isolation_level"
+    ],
+    "required_evidence_docs": [
+      "scope-contract.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "global fallback",
+      "cross-kb expansion"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-004",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which fields are required so the frontend can preview evidence?",
+    "source_doc": "evidence-preview.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evidence-preview.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "title",
+      "source",
+      "excerpt"
+    ],
+    "required_evidence_docs": [
+      "evidence-preview.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "optional evidence",
+      "cross-kb access"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-005",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which identifiers let the frontend jump back to the originating document and source location?",
+    "source_doc": "evidence-preview.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evidence-preview.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator",
+      "source location"
+    ],
+    "required_evidence_docs": [
+      "evidence-preview.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "anonymous chunk",
+      "memory-only answer"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-006",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Summarize why the evidence preview contract matters to the frontend.",
+    "source_doc": "evidence-preview.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evidence-preview.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "evidence preview",
+      "source location",
+      "jump back",
+      "originating document"
+    ],
+    "required_evidence_docs": [
+      "evidence-preview.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "evidence optional",
+      "no preview needed"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-007",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "What should the assistant say when the current KB has no confirmable evidence?",
+    "source_doc": "refusal-guideline.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/refusal-guideline.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "simple",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "no confirmable information",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [
+      "refusal-guideline.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "I guess",
+      "outside memory"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-008",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "When refusing due to missing evidence, what two guardrails must the reply keep?",
+    "source_doc": "refusal-guideline.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/refusal-guideline.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "active knowledge base",
+      "must not fabricate",
+      "outside memory"
+    ],
+    "required_evidence_docs": [
+      "refusal-guideline.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb answer",
+      "speculative answer"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-009",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which per-case quality dimensions should a QA report record?",
+    "source_doc": "evaluation-metrics.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evaluation-metrics.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "per_case_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "scope correctness",
+      "keypoint coverage",
+      "evidence hit",
+      "preview resolvability"
+    ],
+    "required_evidence_docs": [
+      "evaluation-metrics.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "pass/fail only",
+      "single exit code"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-010",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Why is pass or fail alone not enough for evaluating answer quality?",
+    "source_doc": "evaluation-metrics.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evaluation-metrics.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "per_case_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass or fail alone is not enough",
+      "answer quality",
+      "preview resolvability"
+    ],
+    "required_evidence_docs": [
+      "evaluation-metrics.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "binary result is sufficient",
+      "metrics unnecessary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-011",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "在这个模型里，文件夹和知识库应该是什么关系？",
+    "source_doc": "folder-boundary.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/folder-boundary.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "organizational objects",
+      "one knowledge base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "each folder is its own KB",
+      "folder-level authorization already exists"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-012",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Compare folder responsibilities with knowledge-base responsibilities.",
+    "source_doc": "folder-boundary.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/folder-boundary.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "import tree display",
+      "browsing",
+      "query scope",
+      "access control",
+      "knowledge-base level"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder replaces KB",
+      "folder is the security boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-013",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "What should the QA program stabilize before expanding PDF and image OCR baselines?",
+    "source_doc": "ingestion-priority.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/ingestion-priority.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "simple",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "Markdown import",
+      "indexing",
+      "single-kb query",
+      "preview"
+    ],
+    "required_evidence_docs": [
+      "ingestion-priority.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "full image understanding first",
+      "cross-kb query first"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-014",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which dependency readiness signals should be visible in testing instead of hidden behind generic failures?",
+    "source_doc": "ingestion-priority.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/ingestion-priority.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "fitz",
+      "paddleocr",
+      "dependency readiness"
+    ],
+    "required_evidence_docs": [
+      "ingestion-priority.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "hidden failures",
+      "silent dependency issue"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-015",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which suite-level rates should the QA baseline track, and why is exit code alone insufficient?",
+    "source_doc": "suite-metrics-gate.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/suite-metrics-gate.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "metrics",
+    "difficulty": "complex",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "scope pass rate",
+      "evidence hit rate",
+      "preview resolvability rate",
+      "passing exit code alone is not enough"
+    ],
+    "required_evidence_docs": [
+      "suite-metrics-gate.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "single aggregate only",
+      "exit code is enough"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-016",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "What does nebula telemetry protocol zx-42 require?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-contract.md",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-017",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which document defines tenant shard checksum escrow and namespace pinning barriers?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "folder-boundary.md",
+      "evaluation-metrics.md"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-018",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Compare the helios namespace escrow policy with the orion shard barrier checklist.",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "outside memory",
+      "invented comparison"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-019",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which effective-scope fields must the single-kb contract echo back?",
+    "source_doc": "scope-contract.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/scope-contract.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective_scope_type",
+      "effective_kb_ids"
+    ],
+    "required_evidence_docs": [
+      "scope-contract.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb expansion",
+      "global fallback"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-020",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which extra QA gate rates should be tracked besides pass rate?",
+    "source_doc": "suite-metrics-gate.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/suite-metrics-gate.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "source count match rate",
+      "forbidden-term clean rate"
+    ],
+    "required_evidence_docs": [
+      "suite-metrics-gate.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "exit code only",
+      "single boolean metric"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-021",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "When evidence is missing, what should the reply avoid guessing from?",
+    "source_doc": "refusal-guideline.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/refusal-guideline.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "active knowledge base",
+      "outside memory"
+    ],
+    "required_evidence_docs": [
+      "refusal-guideline.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "free speculation",
+      "cross-kb memory"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "groundedness",
+      "citation_accuracy"
+    ]
+  },
+  {
+    "case_id": "eval-md-022",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which preview-related per-case dimensions should a QA report record?",
+    "source_doc": "evaluation-metrics.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evaluation-metrics.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "metrics",
+    "difficulty": "medium",
+    "category": "per_case_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "scope correctness",
+      "keypoint coverage",
+      "evidence hit",
+      "preview resolvability"
+    ],
+    "required_evidence_docs": [
+      "evaluation-metrics.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "preview optionality only",
+      "pass fail only"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-023",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Summarize what should be stabilized before expanding PDF text-layer and image OCR baselines.",
+    "source_doc": "ingestion-priority.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/ingestion-priority.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "Markdown import",
+      "single-kb query",
+      "evidence output",
+      "preview"
+    ],
+    "required_evidence_docs": [
+      "ingestion-priority.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "skip markdown baseline",
+      "hide dependency readiness"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-024",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "What does the atlas retention escrow memo say about rotating shard seals?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "atlas memo",
+      "rotating shard seals are required"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-025",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Which two echo fields show that the request stayed inside the selected knowledge base?",
+    "source_doc": "scope-contract.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/scope-contract.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_kb_ids",
+      "effective_kb_ids"
+    ],
+    "required_evidence_docs": [
+      "scope-contract.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "all knowledge bases",
+      "cross-kb fallback"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-026",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "When confirmable evidence is absent, what should the assistant say and what must it avoid doing?",
+    "source_doc": "refusal-guideline.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/refusal-guideline.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "no confirmable information is available",
+      "must not fabricate an answer"
+    ],
+    "required_evidence_docs": [
+      "refusal-guideline.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "fabricated answer",
+      "cross-kb answer"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-027",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Summarize what the QA program should stabilize before expanding PDF and image baselines.",
+    "source_doc": "ingestion-priority.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/ingestion-priority.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "stabilize Markdown import, indexing, single-kb query, evidence output, and preview",
+      "before expanding PDF text-layer and image OCR baselines"
+    ],
+    "required_evidence_docs": [
+      "ingestion-priority.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "skip markdown baseline",
+      "hide dependency readiness"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-028",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "How do folders help browsing without changing the authorization boundary?",
+    "source_doc": "folder-boundary.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/folder-boundary.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "organizational objects inside one knowledge base",
+      "do not create a separate authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder-level authorization boundary",
+      "separate access control per folder"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-029",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Why is pass or fail alone insufficient, and which per-case signals should the QA report still record?",
+    "source_doc": "evaluation-metrics.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evaluation-metrics.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "metrics",
+    "difficulty": "complex",
+    "category": "per_case_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "scope correctness",
+      "keypoint coverage",
+      "evidence hit",
+      "preview resolvability"
+    ],
+    "required_evidence_docs": [
+      "evaluation-metrics.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "pass or fail alone is enough"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-030",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "What does the aurora shard escrow memo say about mirror-lock rotation?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-contract.md",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-031",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Explain quartzium lattice zx91 and cobalt escrow mirroring.",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate an answer"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-contract.md",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-032",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "When the current KB has no confirmable evidence, how should the reply treat outside memory and the active knowledge base?",
+    "source_doc": "refusal-guideline.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/refusal-guideline.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "no confirmable information is available",
+      "active knowledge base",
+      "outside memory"
+    ],
+    "required_evidence_docs": [
+      "refusal-guideline.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb access",
+      "guess freely"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-md-033",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "question": "Summarize the QA readiness order before expanding OCR baselines, including Markdown import, indexing, single-kb query, evidence output, preview, fitz, and paddleocr readiness.",
+    "source_doc": "ingestion-priority.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/ingestion-priority.md",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "Markdown import",
+      "indexing",
+      "single-kb query",
+      "evidence output",
+      "preview",
+      "fitz",
+      "paddleocr"
+    ],
+    "required_evidence_docs": [
+      "ingestion-priority.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "generic success only",
+      "skip dependency readiness"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "case_id": "eval-md-034",
+    "question": "Which evidence location fields let the frontend jump back to the originating Markdown document?",
+    "source_doc": "evidence-preview.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evidence-preview.md",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator",
+      "jump back to the originating document"
+    ],
+    "required_evidence_docs": [
+      "evidence-preview.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder scope",
+      "cross-kb preview"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "case_id": "eval-md-035",
+    "question": "Compare a pass/fail-only QA check with the per-case metrics this Markdown eval baseline still needs to record.",
+    "source_doc": "evaluation-metrics.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/evaluation-metrics.md",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "per_case_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "scope correctness",
+      "keypoint coverage",
+      "evidence hit",
+      "preview resolvability",
+      "Pass or fail alone is not enough"
+    ],
+    "required_evidence_docs": [
+      "evaluation-metrics.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "pass or fail alone is enough",
+      "only final score matters"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "case_id": "eval-md-036",
+    "question": "请说明 aurora ledger annex zx-73 的审批窗口规则。",
+    "source_doc": null,
+    "source_locator": null,
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "aurora ledger annex requires",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "case_id": "eval-md-037",
+    "question": "Which QA baseline rates should the Markdown suite report besides pass rate?",
+    "source_doc": "suite-metrics-gate.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/suite-metrics-gate.md",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "scope pass rate",
+      "evidence hit rate",
+      "preview resolvability rate",
+      "source count match rate",
+      "forbidden-term clean rate"
+    ],
+    "required_evidence_docs": [
+      "suite-metrics-gate.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "pass rate alone is enough",
+      "single final grade"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "case_id": "eval-md-038",
+    "question": "请用中文说明：文件夹为什么只是组织对象，而知识库为什么仍然是查询与访问控制边界？",
+    "source_doc": "folder-boundary.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/folder-boundary.md",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "文件夹只是知识库内部的组织对象",
+      "新的授权边界",
+      "查询范围和访问控制仍然以知识库为边界"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "??????",
+      "folder becomes a separate KB"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-markdown",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "markdown",
+    "case_id": "eval-md-039",
+    "question": "Summarize the Markdown ingestion priority: what should stabilize first, and how should fitz/paddleocr readiness appear in testing?",
+    "source_doc": "ingestion-priority.md",
+    "source_locator": "tests/fixtures/rag_quality/semireal_markdown/ingestion-priority.md",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "Markdown import",
+      "indexing",
+      "single-kb query",
+      "evidence output",
+      "preview",
+      "fitz",
+      "paddleocr",
+      "generic failures"
+    ],
+    "required_evidence_docs": [
+      "ingestion-priority.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "skip Markdown stabilization",
+      "hide readiness behind generic failures"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-001",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the PDF scope manual, what should requested_scope_type remain?",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['scope-manual.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "single_kb"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross_kb",
+      "kb-other"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-002",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the scope manual, what should effective_kb_ids do?",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['scope-manual.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective_kb_ids",
+      "active PDF knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "all PDF knowledge bases",
+      "folder scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-003",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Summarize the scope contract described by the PDF manual.",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['scope-manual.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type",
+      "single_kb",
+      "effective_kb_ids",
+      "active PDF knowledge base",
+      "isolation_level",
+      "logical_filter_only"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb expansion",
+      "physical isolation already done"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-004",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Which isolation level does the current PDF architecture keep?",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['scope-manual.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "isolation_level",
+      "logical_filter_only"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "physical isolation",
+      "namespace isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-005",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "根据 preview guide，每条 PDF 回答都必须携带哪两个字段？",
+    "source_doc": "preview-guide.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['preview-guide.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "preview-guide.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "fabricated reference",
+      "empty evidence"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-006",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "What should the preview excerpt do for PDF imports?",
+    "source_doc": "preview-guide.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['preview-guide.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "preview excerpt",
+      "original PDF chunk"
+    ],
+    "required_evidence_docs": [
+      "preview-guide.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "unresolvable excerpt",
+      "memory-only source"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-007",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Summarize the PDF evidence preview contract.",
+    "source_doc": "preview-guide.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['preview-guide.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator",
+      "original PDF chunk"
+    ],
+    "required_evidence_docs": [
+      "preview-guide.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "preview optional",
+      "citation-free answer"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-008",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Why should every PDF answer carry doc_id and preview_locator?",
+    "source_doc": "preview-guide.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['preview-guide.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "complex",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "every answer",
+      "doc_id",
+      "preview_locator",
+      "original PDF chunk"
+    ],
+    "required_evidence_docs": [
+      "preview-guide.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "citation can be omitted",
+      "preview unavailable"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-009",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "For the folder boundary note, is folder the authorization boundary or an organization object?",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['folder-boundary.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "simple",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "organization object",
+      "not an authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder is the authorization boundary",
+      "folder isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-010",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "What remains the range and authorization boundary in the PDF suite?",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['folder-boundary.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Knowledge Base",
+      "range",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder range",
+      "document page boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-011",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Compare the role of folders and the role of a knowledge base in the PDF suite.",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['folder-boundary.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "organization object",
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder owns authorization",
+      "folder replaces KB"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-012",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "What metrics does the PDF metrics gate expect to stay at one point zero?",
+    "source_doc": "metrics-gate.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['metrics-gate.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass_rate",
+      "scope_pass_rate",
+      "evidence_hit_rate"
+    ],
+    "required_evidence_docs": [
+      "metrics-gate.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "zero evidence",
+      "non-deterministic threshold"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-013",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "For evidence-backed PDF cases, what should preview_resolvable_rate remain?",
+    "source_doc": "metrics-gate.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['metrics-gate.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "metrics",
+    "difficulty": "medium",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "preview_resolvable_rate",
+      "one point zero",
+      "evidence-backed cases"
+    ],
+    "required_evidence_docs": [
+      "metrics-gate.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "preview can drift",
+      "preview optional"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-014",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Summarize the PDF metrics gate in one answer.",
+    "source_doc": "metrics-gate.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['metrics-gate.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass_rate",
+      "scope_pass_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate",
+      "one point zero"
+    ],
+    "required_evidence_docs": [
+      "metrics-gate.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "single pass/fail only",
+      "no evidence metrics"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-015",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Besides pass_rate, which other PDF gate metrics are explicitly named?",
+    "source_doc": "metrics-gate.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['metrics-gate.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "scope_pass_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate"
+    ],
+    "required_evidence_docs": [
+      "metrics-gate.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "latency only",
+      "token usage only"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-016",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Which PDF defines tenant shard checksum escrow?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-manual.pdf",
+      "preview-guide.pdf"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-017",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Where is the namespace pinning barrier handbook in this PDF KB?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "folder-boundary.pdf",
+      "metrics-gate.pdf"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-018",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Compare the helios escrow appendix with the orion shard barrier supplement.",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "invented appendix",
+      "made-up supplement"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-019",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "What should evidence_hit_rate stay at in the PDF metrics gate?",
+    "source_doc": "metrics-gate.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['metrics-gate.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "evidence_hit_rate",
+      "one point zero"
+    ],
+    "required_evidence_docs": [
+      "metrics-gate.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "partial evidence",
+      "non deterministic"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-020",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the PDF folder note, are folders the authorization boundary?",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['folder-boundary.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "simple",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "organization object",
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder owns authorization",
+      "folder range isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-021",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "According to the PDF scope manual, which knowledge base should effective_kb_ids echo?",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['scope-manual.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective_kb_ids",
+      "active PDF knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "any available kb",
+      "cross pdf scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-022",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Which two fields should every PDF answer carry for evidence preview?",
+    "source_doc": "preview-guide.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['preview-guide.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "preview-guide.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "preview without locator",
+      "title only"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-023",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Summarize the folder boundary rule for the PDF suite.",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['folder-boundary.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder is an organization object",
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder defines permissions",
+      "folder first authorization"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-024",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "What does the vertex escrow appendix say about namespace shard mirroring?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "vertex escrow appendix",
+      "namespace shard mirroring"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-025",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the PDF scope manual, what should requested_scope_type remain and what isolation level is documented?",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['scope-manual.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type must remain single_kb",
+      "isolation_level remains logical_filter_only"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "cross-kb default",
+      "global scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-026",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "If confirmable evidence is missing in the active PDF knowledge base, what should the assistant say and what must it avoid?",
+    "source_doc": "refusal-rule.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['refusal-rule.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "no confirmable information is available",
+      "must not fabricate from outside memory"
+    ],
+    "required_evidence_docs": [
+      "refusal-rule.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "fabricated appendix",
+      "cross-pdf answer"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-027",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "For the handover window scanned PDF, what must OCR fallback do for each page batch, and what should the scanned content become in retrieval?",
+    "source_doc": "scan-fallback.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['scan-fallback.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page",
+      "中文流程说明也要写回当前知识库，避免导入后只剩图片像素",
+      "Scanned PDF content should still become searchable evidence in the active knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scan-fallback.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "No confirmable information is available",
+      "drop later OCR batches"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-028",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "How does the PDF folder boundary note contrast folders with the knowledge-base boundary?",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['folder-boundary.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "Folder is an organization object",
+      "Knowledge Base remains the range and authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder is the authorization boundary",
+      "separate pdf folder scope"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-029",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Which PDF QA rates should stay at one point zero for a passing suite?",
+    "source_doc": "metrics-gate.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['metrics-gate.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "metrics",
+    "difficulty": "complex",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass_rate",
+      "scope_pass_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate"
+    ],
+    "required_evidence_docs": [
+      "metrics-gate.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "pass rate can drop below one point zero"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-030",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Which PDF appendix defines the zenith escrow lattice and shard mirror ordinance?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-manual.pdf",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-031",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Explain quartzium lattice zx91 and cobalt escrow mirroring.",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate an answer"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "scope-manual.pdf",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-032",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "When evidence is missing in the active PDF knowledge base, what should the assistant say and what should it avoid doing with outside memory?",
+    "source_doc": "refusal-rule.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['refusal-rule.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "refusal_policy",
+    "answerable": true,
+    "expected_keypoints": [
+      "active PDF knowledge base",
+      "no confirmable information is available",
+      "must not fabricate from outside memory"
+    ],
+    "required_evidence_docs": [
+      "refusal-rule.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "search other pdf kb",
+      "guess from another source"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "case_id": "eval-pdf-033",
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "question": "Summarize the PDF OCR readiness checks covering fitz text-layer extraction, OCR fallback, paddleocr readiness, and the rule against generic failures.",
+    "source_doc": "ocr-readiness.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['ocr-readiness.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "fitz text-layer extraction",
+      "OCR fallback",
+      "paddleocr dependency readiness",
+      "generic failures"
+    ],
+    "required_evidence_docs": [
+      "ocr-readiness.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "skip fitz",
+      "dependency status can stay hidden"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "case_id": "eval-pdf-034",
+    "question": "根据 preview guide，PDF 证据预览至少要带哪两个字段，才能回跳原始片段？",
+    "source_doc": "preview-guide.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['preview-guide.pdf']",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_preview",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator",
+      "original PDF chunk"
+    ],
+    "required_evidence_docs": [
+      "preview-guide.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder_id",
+      "cross-kb preview"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "case_id": "eval-pdf-035",
+    "question": "What does helios escrow appendix zx-91 require?",
+    "source_doc": null,
+    "source_locator": null,
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "active knowledge base",
+      "must not fabricate"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "helios escrow appendix says",
+      "preview_locator"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "case_id": "eval-pdf-036",
+    "question": "Compare the PDF OCR readiness checks: what comes before OCR fallback, and what readiness or failure signal must tests surface?",
+    "source_doc": "ocr-readiness.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['ocr-readiness.pdf']",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "ingestion_priority",
+    "answerable": true,
+    "expected_keypoints": [
+      "fitz text-layer extraction",
+      "OCR fallback",
+      "paddleocr dependency readiness",
+      "generic failures"
+    ],
+    "required_evidence_docs": [
+      "ocr-readiness.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "skip fitz first",
+      "dependency status can stay hidden"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "case_id": "eval-pdf-037",
+    "question": "Which PDF suite metrics should stay at one point zero for evidence-backed runs?",
+    "source_doc": "metrics-gate.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['metrics-gate.pdf']",
+    "answer_style": "metrics",
+    "difficulty": "simple",
+    "category": "suite_metrics",
+    "answerable": true,
+    "expected_keypoints": [
+      "pass_rate",
+      "scope_pass_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate",
+      "one point zero"
+    ],
+    "required_evidence_docs": [
+      "metrics-gate.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "half credit is enough",
+      "preview can stay unresolved"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "case_id": "eval-pdf-038",
+    "question": "请根据 PDF folder boundary note 说明：Folder is an organization object、not an authorization boundary，以及 Knowledge Base remains the range and authorization boundary 分别意味着什么？",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['folder-boundary.pdf']",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "folder_model",
+    "answerable": true,
+    "expected_keypoints": [
+      "organization object",
+      "not an authorization boundary",
+      "Knowledge Base remains the range and authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder-scoped authorization",
+      "folder replaces knowledge base"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v2",
+    "kb_id": "eval-kb-pdf",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "logical_filter_only",
+    "modality": "pdf",
+    "case_id": "eval-pdf-039",
+    "question": "请用中文概括 PDF scope manual：requested_scope_type、effective_kb_ids 和 isolation_level 分别有什么要求？",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/test_chat_pdf_semireal.py::PDF_IMPORTS['scope-manual.pdf']",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_scope_type must remain single_kb",
+      "effective_kb_ids must echo the active PDF knowledge base",
+      "isolation_level remains logical_filter_only"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "multi_kb",
+      "physical isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  }
+]

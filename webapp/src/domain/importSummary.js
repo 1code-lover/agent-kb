@@ -39,67 +39,247 @@ function buildOptionalMetrics(diagnostics) {
   const optionalMetrics = [
     {
       key: 'standalone_asset_candidate_count',
-      label: '独立资产候选',
+      label: '\u72ec\u7acb\u8d44\u4ea7\u5019\u9009',
       value: toSafeNumber(diagnostics.standalone_asset_candidate_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'skip_standalone_asset_count',
-      label: '被接管图片',
+      label: '\u88ab\u63a5\u7ba1\u56fe\u7247',
       value: toSafeNumber(diagnostics.skip_standalone_asset_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'embedded_asset_count',
-      label: '内嵌资产',
+      label: '\u5185\u5d4c\u8d44\u4ea7',
       value: toSafeNumber(diagnostics.embedded_asset_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'asset_warning_count',
-      label: '资产告警',
+      label: '\u8d44\u4ea7\u544a\u8b66',
       value: toSafeNumber(diagnostics.asset_warning_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'ocr_success_count',
-      label: 'OCR 成功',
+      label: 'OCR \u6210\u529f',
       value: toSafeNumber(diagnostics.ocr_success_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'ocr_failed_count',
-      label: 'OCR 失败',
+      label: 'OCR \u5931\u8d25',
       value: toSafeNumber(diagnostics.ocr_failed_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'embedded_ocr_success_count',
-      label: '内嵌 OCR 成功',
+      label: '\u5185\u5d4c OCR \u6210\u529f',
       value: toSafeNumber(diagnostics.embedded_ocr_success_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'embedded_ocr_failed_count',
-      label: '内嵌 OCR 失败',
+      label: '\u5185\u5d4c OCR \u5931\u8d25',
       value: toSafeNumber(diagnostics.embedded_ocr_failed_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'embedded_ocr_no_text_count',
-      label: '内嵌 OCR 无文本',
+      label: '\u5185\u5d4c OCR \u65e0\u6587\u672c',
       value: toSafeNumber(diagnostics.embedded_ocr_no_text_count),
-      unit: '项',
+      unit: '\u9879',
     },
     {
       key: 'embedded_indexed_from_ocr_count',
-      label: '内嵌 OCR 入索引',
+      label: '\u5185\u5d4c OCR \u5165\u7d22\u5f15',
       value: toSafeNumber(diagnostics.embedded_indexed_from_ocr_count),
-      unit: '项',
+      unit: '\u9879',
     },
   ];
 
   return optionalMetrics.filter((item) => item.value > 0);
+}
+
+function mergeMetrics(...metricGroups) {
+  const merged = [];
+  const seen = new Set();
+
+  for (const metrics of metricGroups) {
+    if (!Array.isArray(metrics)) {
+      continue;
+    }
+    for (const metric of metrics) {
+      if (!metric || !metric.key || seen.has(metric.key)) {
+        continue;
+      }
+      seen.add(metric.key);
+      merged.push(metric);
+    }
+  }
+  return merged;
+}
+
+function getDisplaySummary(result) {
+  const displaySummary = result?.display_summary;
+  if (!displaySummary || typeof displaySummary !== 'object' || Array.isArray(displaySummary)) {
+    return null;
+  }
+  return displaySummary;
+}
+
+function buildDisplaySummaryMetrics(displaySummary) {
+  if (!displaySummary) {
+    return [];
+  }
+  return [
+    buildDiagnosticMetric(displaySummary, 'asset_registered_count', '\u5df2\u767b\u8bb0\u8d44\u4ea7', '\u9879'),
+    buildDiagnosticMetric(displaySummary, 'asset_registered_but_not_indexed_count', '\u5df2\u767b\u8bb0\u672a\u5165\u7d22\u5f15\u8d44\u4ea7', '\u9879'),
+    buildDiagnosticMetric(displaySummary, 'asset_warning_count', '\u8d44\u4ea7\u544a\u8b66', '\u9879'),
+    buildDiagnosticMetric(displaySummary, 'dependency_missing_count', '\u4f9d\u8d56\u7f3a\u5931', '\u9879'),
+  ].filter((item) => item && item.value > 0);
+}
+
+function resolveDisplaySummaryCount(displaySummary, key, fallbackValue) {
+  if (!displaySummary || !hasOwnMetricField(displaySummary, key)) {
+    return toSafeNumber(fallbackValue);
+  }
+  return toSafeNumber(displaySummary[key]);
+}
+
+function buildDisplayHeadline(displaySummary, sourceLabel) {
+  if (!displaySummary) {
+    return '';
+  }
+  const totalItems = toSafeNumber(displaySummary.total_items);
+  const indexedItems = toSafeNumber(displaySummary.indexed_items);
+  const emptyItems = toSafeNumber(displaySummary.empty_items);
+  const failedItems = toSafeNumber(displaySummary.failed_items);
+  const dependencyMissingCount = toSafeNumber(displaySummary.dependency_missing_count);
+  const topMissingDependencyMetrics = buildDisplaySummaryDependencyMetrics(displaySummary);
+  const affectedCount = dependencyMissingCount || topMissingDependencyMetrics.reduce((sum, item) => sum + item.value, 0);
+  const assetRegisteredButNotIndexedCount = toSafeNumber(displaySummary.asset_registered_but_not_indexed_count);
+  const sourceName = sourceLabel || '\u5bfc\u5165';
+
+  if (Boolean(displaySummary.has_dependency_issues)) {
+    return '\u6709 ' + affectedCount + ' \u9879\u5bf9\u8c61\u56e0\u4f9d\u8d56\u7f3a\u5931\u672a\u5b8c\u6210' + sourceName;
+  }
+  if (failedItems > 0) {
+    return '\u6709 ' + failedItems + ' \u9879\u5bf9\u8c61' + sourceName + '\u5931\u8d25';
+  }
+  if (assetRegisteredButNotIndexedCount > 0) {
+    return '\u6709 ' + assetRegisteredButNotIndexedCount + ' \u9879\u56fe\u7247\u5df2\u5165\u5e93\uff0c\u4f46\u672a\u8fdb\u5165\u7d22\u5f15';
+  }
+  if (emptyItems > 0) {
+    return '\u6709 ' + emptyItems + ' \u9879\u5bf9\u8c61' + sourceName + '\u540e\u4e3a\u7a7a';
+  }
+  if (indexedItems === totalItems && totalItems > 0) {
+    return '\u5df2\u6210\u529f\u5b8c\u6210 ' + indexedItems + ' \u9879' + sourceName;
+  }
+  if (totalItems > 0) {
+    return sourceName + '\u5df2\u5b8c\u6210\uff0c\u53ef\u7ee7\u7eed\u67e5\u770b\u5bf9\u8c61\u8be6\u60c5\u4e0e\u8bc1\u636e\u9884\u89c8';
+  }
+  return '\u6700\u8fd1\u4e00\u6b21' + sourceName + '\u6682\u65e0\u53ef\u5c55\u793a\u5bf9\u8c61';
+}
+
+function buildDisplayUserMessage(displaySummary) {
+  if (!displaySummary) {
+    return '';
+  }
+  if (Boolean(displaySummary.has_dependency_issues)) {
+    return '\u8bf7\u5148\u5b89\u88c5\u7f3a\u5931\u4f9d\u8d56\uff0c\u518d\u91cd\u65b0\u5bfc\u5165\u6216\u91cd\u8bd5\u53d7\u5f71\u54cd\u5bf9\u8c61\u3002';
+  }
+  if (toSafeNumber(displaySummary.failed_items) > 0) {
+    return '\u8bf7\u6839\u636e\u5931\u8d25\u5bf9\u8c61\u7684\u9519\u8bef\u4fe1\u606f\u548c\u65e5\u5fd7\u6392\u67e5\u540e\u91cd\u8bd5\u3002';
+  }
+  if (toSafeNumber(displaySummary.asset_registered_but_not_indexed_count) > 0) {
+    return '\u8fd9\u901a\u5e38\u610f\u5473\u7740\u56fe\u7247\u8d44\u4ea7\u5df2\u7ecf\u5165\u5e93\uff0c\u4f46 OCR \u6ca1\u6709\u63d0\u53d6\u5230\u53ef\u7d22\u5f15\u6587\u672c\u3002';
+  }
+  if (toSafeNumber(displaySummary.empty_items) > 0) {
+    return '\u5bf9\u8c61\u5df2\u5165\u5e93\uff0c\u4f46\u6682\u672a\u63d0\u53d6\u5230\u53ef\u7d22\u5f15\u5185\u5bb9\uff0c\u53ef\u91cd\u70b9\u68c0\u67e5 OCR \u6216\u89e3\u6790\u914d\u7f6e\u3002';
+  }
+  if (toSafeNumber(displaySummary.indexed_items) > 0) {
+    return '\u5bf9\u8c61\u5df2\u5b8c\u6210\u89e3\u6790\u5e76\u8fdb\u5165\u7d22\u5f15\uff0c\u53ef\u4ee5\u76f4\u63a5\u7528\u4e8e\u68c0\u7d22\u4e0e\u95ee\u7b54\u3002';
+  }
+  return '\u5bfc\u5165\u5df2\u5b8c\u6210\uff0c\u4f46\u5f53\u524d\u6ca1\u6709\u53ef\u7528\u4e8e\u6458\u8981\u7684\u7ed3\u6784\u5316\u6307\u6807\u3002';
+}
+
+function buildDisplaySummaryDependencyMetrics(displaySummary) {
+  const dependencies = Array.isArray(displaySummary?.top_missing_dependencies)
+    ? displaySummary.top_missing_dependencies
+    : [];
+  return dependencies
+    .map((item, index) => {
+      const dependency = toSafeText(item?.dependency);
+      const count = toSafeNumber(item?.count);
+      if (!dependency || count <= 0) {
+        return null;
+      }
+      return {
+        key: 'dependency:' + dependency + ':' + index,
+        label: dependency,
+        value: count,
+        unit: '\u9879',
+      };
+    })
+    .filter(Boolean);
+}
+
+function buildDisplaySummaryEmptyReasonCounts(displaySummary) {
+  const emptyReasons = Array.isArray(displaySummary?.top_empty_reasons) ? displaySummary.top_empty_reasons : [];
+  const counts = {};
+  for (const item of emptyReasons) {
+    const reason = toSafeText(item?.reason);
+    const count = toSafeNumber(item?.count);
+    if (!reason || count <= 0) {
+      continue;
+    }
+    counts[reason] = count;
+  }
+  return counts;
+}
+
+function buildDisplayActionLabel(actionItem) {
+  const action = toSafeText(actionItem?.action);
+  const count = toSafeNumber(actionItem?.count);
+  const dependency = toSafeText(actionItem?.dependency);
+
+  if (action === 'install_dependency') {
+    return dependency
+      ? '\u5b89\u88c5\u7f3a\u5931\u4f9d\u8d56 ' + dependency + (count > 0 ? '\uff08\u5f71\u54cd ' + count + ' \u9879\uff09' : '')
+      : '\u5b89\u88c5\u7f3a\u5931\u4f9d\u8d56\u540e\u91cd\u8bd5';
+  }
+  if (action === 'review_failed_items') {
+    return '\u68c0\u67e5\u5931\u8d25\u5bf9\u8c61\u5e76\u6839\u636e\u9519\u8bef\u4fe1\u606f\u91cd\u8bd5' + (count > 0 ? '\uff08' + count + ' \u9879\uff09' : '');
+  }
+  if (action === 'review_empty_assets') {
+    return '\u68c0\u67e5\u672a\u5165\u7d22\u5f15\u56fe\u7247\uff0c\u91cd\u70b9\u5173\u6ce8 OCR \u6216\u56fe\u7247\u6587\u672c\u8d28\u91cf' + (count > 0 ? '\uff08' + count + ' \u9879\uff09' : '');
+  }
+  if (action === 'review_empty_items') {
+    return '\u68c0\u67e5\u7a7a\u7ed3\u679c\u5bf9\u8c61\uff0c\u786e\u8ba4\u662f\u5426\u9700\u8981 OCR \u6216\u5176\u4ed6\u89e3\u6790\u65b9\u5f0f' + (count > 0 ? '\uff08' + count + ' \u9879\uff09' : '');
+  }
+  return toSafeText(actionItem?.label);
+}
+
+function buildDisplaySummaryActions(displaySummary) {
+  const nextActions = Array.isArray(displaySummary?.next_actions) ? displaySummary.next_actions : [];
+  return nextActions
+    .map((item, index) => {
+      const label = buildDisplayActionLabel(item);
+      if (!label) {
+        return null;
+      }
+      return {
+        key: 'next-action:' + index + ':' + (toSafeText(item?.action) || 'unknown'),
+        action: toSafeText(item?.action),
+        label,
+        count: toSafeNumber(item?.count),
+        dependency: toSafeText(item?.dependency),
+        raw: item,
+      };
+    })
+    .filter(Boolean);
 }
 
 function formatMetric(metric) {
@@ -256,7 +436,7 @@ function buildTimingMetrics(stageTimings, order, labels, maxItems = null) {
 }
 
 function formatTimingSummary(stageTimings, order, labels, maxItems = 4) {
-  return buildTimingMetrics(stageTimings, order, labels, maxItems).map(formatMetric).join(' ? ');
+  return buildTimingMetrics(stageTimings, order, labels, maxItems).map(formatMetric).join(' \u00b7 ');
 }
 
 function buildStageTimingMetrics(stageTimings, maxItems = null) {
@@ -403,34 +583,42 @@ export function buildReceiptObjectItems(result) {
 
 export function buildImportReceiptSummary(result, sourceLabel, createdAt = new Date().toISOString()) {
   const diagnostics = result?.diagnostics || {};
-  const itemCount = resolveItemCount(result, diagnostics);
-  const indexedFiles = toSafeNumber(diagnostics.indexed_files ?? result?.success_count);
-  const emptyFiles = toSafeNumber(diagnostics.empty_files ?? result?.empty_count);
-  const failedFiles = toSafeNumber(diagnostics.failed_files ?? result?.failed_count);
+  const displaySummary = getDisplaySummary(result);
+  const itemCount = resolveDisplaySummaryCount(displaySummary, 'total_items', resolveItemCount(result, diagnostics));
+  const indexedFiles = resolveDisplaySummaryCount(displaySummary, 'indexed_items', diagnostics.indexed_files ?? result?.success_count);
+  const emptyFiles = resolveDisplaySummaryCount(displaySummary, 'empty_items', diagnostics.empty_files ?? result?.empty_count);
+  const failedFiles = resolveDisplaySummaryCount(displaySummary, 'failed_items', diagnostics.failed_files ?? result?.failed_count);
   const indexedChunks = toSafeNumber(result?.indexed_chunks);
-  const metrics = buildOptionalMetrics(diagnostics);
+  const metrics = mergeMetrics(buildDisplaySummaryMetrics(displaySummary), buildOptionalMetrics(diagnostics));
   const items = buildReceiptObjectItems(result);
-  const emptyReasonCounts = buildEmptyReasonCounts(result, diagnostics);
+  const displaySummaryEmptyReasonCounts = buildDisplaySummaryEmptyReasonCounts(displaySummary);
+  const emptyReasonCounts = Object.keys(displaySummaryEmptyReasonCounts).length > 0
+    ? displaySummaryEmptyReasonCounts
+    : buildEmptyReasonCounts(result, diagnostics);
   const ingestionMetrics = buildIngestionMetrics(diagnostics);
   const batchStageTimings = diagnostics?.stage_timings || {};
   const batchIndexStageTimings = diagnostics?.index_stage_timings || {};
   const baseMetrics = [
-    { key: 'item_count', label: '对象', value: itemCount, unit: '项' },
-    { key: 'indexed_files', label: '已索引', value: indexedFiles, unit: '项' },
-    { key: 'empty_files', label: '空导入', value: emptyFiles, unit: '项' },
-    { key: 'failed_files', label: '失败', value: failedFiles, unit: '项' },
-    { key: 'indexed_chunks', label: '切片', value: indexedChunks, unit: '个' },
+    { key: 'item_count', label: '\u5bf9\u8c61', value: itemCount, unit: '\u9879' },
+    { key: 'indexed_files', label: '\u5df2\u7d22\u5f15', value: indexedFiles, unit: '\u9879' },
+    { key: 'empty_files', label: '\u7a7a\u5bfc\u5165', value: emptyFiles, unit: '\u9879' },
+    { key: 'failed_files', label: '\u5931\u8d25', value: failedFiles, unit: '\u9879' },
+    { key: 'indexed_chunks', label: '\u5207\u7247', value: indexedChunks, unit: '\u4e2a' },
   ];
-  const summaryText = [...baseMetrics, ...metrics].map(formatMetric).join(' · ');
+  const summaryText = [...baseMetrics, ...metrics].map(formatMetric).join(' \u00b7 ');
   const isoCreatedAt = createdAt instanceof Date ? createdAt.toISOString() : String(createdAt);
-  const hasWarnings = emptyFiles > 0 || failedFiles > 0;
+  const hasBlockers = Boolean(displaySummary?.has_blockers);
+  const hasWarnings = Boolean(displaySummary?.has_warnings) || emptyFiles > 0 || failedFiles > 0;
 
   return {
     kbId: result?.kb_id || '',
     sourceLabel,
-    title: sourceLabel + '回执',
+    sourceKind: toSafeText(displaySummary?.source_kind),
+    title: sourceLabel + '\u56de\u6267',
     createdAt: isoCreatedAt,
-    status: hasWarnings ? 'warning' : 'success',
+    status: hasBlockers || hasWarnings ? 'warning' : 'success',
+    headline: buildDisplayHeadline(displaySummary, sourceLabel),
+    userMessage: buildDisplayUserMessage(displaySummary),
     itemCount,
     indexedFiles,
     emptyFiles,
@@ -449,12 +637,18 @@ export function buildImportReceiptSummary(result, sourceLabel, createdAt = new D
     ingestionMetrics,
     emptyReasonCounts,
     emptyReasonMetrics: buildEmptyReasonMetrics(emptyReasonCounts),
+    topMissingDependencyMetrics: buildDisplaySummaryDependencyMetrics(displaySummary),
+    nextActions: buildDisplaySummaryActions(displaySummary),
+    hasBlockers,
+    hasDependencyIssues: Boolean(displaySummary?.has_dependency_issues),
+    hasWarnings,
     batchStageTimings,
     batchStageMetrics: buildStageTimingMetrics(batchStageTimings),
     batchStageSummaryText: formatStageTimingSummary(batchStageTimings, 5),
     batchIndexStageTimings,
     batchIndexStageMetrics: buildIndexStageTimingMetrics(batchIndexStageTimings),
     batchIndexStageSummaryText: formatIndexStageTimingSummary(batchIndexStageTimings, 5),
+    displaySummary,
   };
 }
 

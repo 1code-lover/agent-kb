@@ -1,0 +1,355 @@
+{
+  "base_url": "http://127.0.0.1:18090",
+  "kb_id": "diag-pdf-scan-1785505929",
+  "question": "In the scanned diagnostic PDF, what should the scanned content become in the active knowledge base?",
+  "health": {
+    "status": "ok",
+    "runtime": {
+      "pid": 19340,
+      "python_executable": "C:\\Users\\ethan1.zhao\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "python_version": "3.12.10",
+      "python_implementation": "CPython",
+      "cwd": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb"
+    },
+    "embedding_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 38600.09,
+      "started_at": "2026-07-31T13:51:12.170663+00:00",
+      "finished_at": "2026-07-31T13:52:08.948473+00:00",
+      "current_model": "bge-small-zh-v1.5",
+      "loaded_model": "bge-small-zh-v1.5",
+      "is_ready": true
+    },
+    "ocr_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 36926.188,
+      "started_at": "2026-07-31T13:51:12.170663+00:00",
+      "finished_at": "2026-07-31T13:51:49.097916+00:00",
+      "is_ready": true
+    },
+    "import_capabilities": {
+      "pdf_text_extraction": {
+        "ready": true,
+        "dependencies": [
+          "fitz"
+        ]
+      },
+      "image_ocr": {
+        "ready": true,
+        "dependencies": [
+          "paddleocr",
+          "paddle",
+          "pillow"
+        ]
+      },
+      "dependencies": {
+        "fitz": {
+          "installed": true,
+          "package": "PyMuPDF",
+          "import_name": "fitz",
+          "used_for": [
+            "pdf_text_extraction"
+          ]
+        },
+        "paddleocr": {
+          "installed": true,
+          "package": "paddleocr",
+          "import_name": "paddleocr",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "paddle": {
+          "installed": true,
+          "package": "paddlepaddle",
+          "import_name": "paddle",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "pillow": {
+          "installed": true,
+          "package": "Pillow",
+          "import_name": "PIL",
+          "used_for": [
+            "image_ocr"
+          ]
+        }
+      }
+    }
+  },
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-scan-fallback.pdf",
+    "sha256": "5d4bd5de90352bd6485058566b87368aad54f0c7f03878547759a386d83c9663",
+    "size": 11524076,
+    "page_count": 2,
+    "font": "C:\\Windows\\Fonts\\arial.ttf",
+    "text_layer_preview": "",
+    "text_layer_empty": true,
+    "expected_ocr_preview": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt"
+  },
+  "saved": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785505929\\pdf\\diag-scan-fallback.pdf",
+    "sha256": "5d4bd5de90352bd6485058566b87368aad54f0c7f03878547759a386d83c9663",
+    "size": 11524076,
+    "text_layer_preview": "",
+    "text_layer_empty": true
+  },
+  "checks": {
+    "source_saved_hash_match": true,
+    "source_text_layer_empty": true,
+    "saved_text_layer_empty": true,
+    "chat_answer_has_expected_terms": true,
+    "chat_source_has_expected_terms": true,
+    "chat_evidence_has_expected_terms": true,
+    "preview_has_expected_terms": true
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-939511e1cbe640129a63a2add03509b9",
+    "files": [
+      {
+        "name": "diag-scan-fallback.pdf",
+        "type": "application/pdf",
+        "size": 11524076,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785505929\\pdf\\diag-scan-fallback.pdf",
+        "kb_id": "diag-pdf-scan-1785505929",
+        "relative_path": "pdf/diag-scan-fallback.pdf",
+        "folder_path": "pdf"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "diag-scan-fallback.pdf",
+        "type": "application/pdf",
+        "size": 11524076,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785505929\\pdf\\diag-scan-fallback.pdf",
+        "kb_id": "diag-pdf-scan-1785505929",
+        "status": "indexed",
+        "indexed_chunks": 1,
+        "relative_path": "pdf/diag-scan-fallback.pdf",
+        "folder_path": "pdf",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "pdf",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "file_retained_on_disk": true,
+          "ocr_attempted": true,
+          "ocr_status": "success",
+          "ocr_text_length": 293,
+          "ocr_error": null,
+          "indexed_from_ocr": true,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 16.249,
+            "persist_ms": 16.249,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 24343.903,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 24360.152
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 293,
+          "node_count": 1,
+          "nodes_with_embedding_count": 1,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 24226.071,
+            "chunking_ms": 1.269,
+            "embedding_ms": 68.364,
+            "title_extract_ms": 0.478,
+            "vector_store_ms": 0.398,
+            "docstore_ms": 0.209,
+            "index_insert_ms": 1.318,
+            "total_ms": 24305.584
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "ready",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 60.363,
+          "ocr_predict_ms": 24137.135000000002,
+          "ocr_postprocess_ms": 0.495,
+          "ocr_total_ms": 24200.713,
+          "ocr_instance_reused": true,
+          "ocr_engine": "paddleocr",
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 1,
+    "success_count": 1,
+    "failed_count": 0,
+    "empty_count": 0,
+    "kb_id": "diag-pdf-scan-1785505929",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 1,
+      "empty_files": 0,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 0,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 1,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 1,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 0,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "failure_category_counts": {},
+      "dependency_status_counts": {
+        "ready": 1
+      },
+      "dependency_missing_count": 0,
+      "missing_dependency_counts": {},
+      "stage_timings": {
+        "ensure_models_ready_ms": 0.08,
+        "get_index_manager_ms": 36.161,
+        "file_save_ms": 16.249,
+        "persist_ms": 16.249,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 24343.903,
+        "embedded_asset_extract_ms": 0.0,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 14.027,
+        "doc_count_update_ms": 9.193,
+        "register_assets_ms": 0.416,
+        "receipt_store_ms": 9.489,
+        "result_build_ms": 0.074,
+        "total_ms": 24404.368
+      },
+      "document_count": 1,
+      "empty_document_count": 0,
+      "input_text_chars": 293,
+      "node_count": 1,
+      "nodes_with_embedding_count": 1,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 24226.071,
+        "chunking_ms": 1.269,
+        "embedding_ms": 68.364,
+        "title_extract_ms": 0.478,
+        "vector_store_ms": 0.398,
+        "docstore_ms": 0.209,
+        "index_insert_ms": 1.318,
+        "total_ms": 24305.584
+      },
+      "storage_persist_stage_timings": {
+        "docstore_persist_ms": 1.562,
+        "index_store_persist_ms": 1.352,
+        "graph_store_persist_ms": 1.868,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 6.668,
+        "vector_store_namespaces_ms": {
+          "default": 5.022,
+          "image": 1.646
+        },
+        "fallback_persist_ms": 0.0,
+        "total_ms": 11.519
+      }
+    },
+    "display_summary": {
+      "source_kind": "file_import",
+      "item_label": "文件",
+      "total_items": 1,
+      "indexed_items": 1,
+      "empty_items": 0,
+      "failed_items": 0,
+      "asset_registered_count": 0,
+      "asset_registered_but_not_indexed_count": 0,
+      "asset_warning_count": 0,
+      "dependency_missing_count": 0,
+      "top_missing_dependencies": [],
+      "top_empty_reasons": [],
+      "has_blockers": false,
+      "has_dependency_issues": false,
+      "has_warnings": false,
+      "headline": "成功导入 1 个文件",
+      "user_message": "文件已完成解析并写入知识库。",
+      "next_actions": []
+    }
+  },
+  "chat_summary": {
+    "answer": "In the scanned diagnostic PDF, the scanned content should become searchable evidence in the active knowledge base.",
+    "requested_scope_type": "single_kb",
+    "requested_kb_ids": [
+      "diag-pdf-scan-1785505929"
+    ],
+    "effective_scope_type": "single_kb",
+    "effective_kb_ids": [
+      "diag-pdf-scan-1785505929"
+    ],
+    "is_default_deny_applied": false,
+    "isolation_level": "logical_filter_only",
+    "first_source": {
+      "id": "ev:eyJkb2NfaWQiOiI0NjA0ODhiOC1hMWZlLTRjNTctYmM4ZC0yMzQ0N2FhMzNiYmQiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTUwNTkyOSIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiNTU3MGE0NDgtNGVmMy00MTk1LThmMDYtZWZhOGJhNDY0Zjk4In19",
+      "file": "diag-scan-fallback.pdf",
+      "page": "N/A",
+      "score": 0.8666666666666667,
+      "text": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "kb_id": "diag-pdf-scan-1785505929",
+      "doc_id": "460488b8-a1fe-4c57-bc8d-23447aa33bbd",
+      "preview_locator": {
+        "node_id": "5570a448-4ef3-4195-8f06-efa8ba464f98"
+      },
+      "asset_id": null
+    },
+    "first_evidence": {
+      "id": "ev:eyJkb2NfaWQiOiI0NjA0ODhiOC1hMWZlLTRjNTctYmM4ZC0yMzQ0N2FhMzNiYmQiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTUwNTkyOSIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiNTU3MGE0NDgtNGVmMy00MTk1LThmMDYtZWZhOGJhNDY0Zjk4In19",
+      "title": "diag-scan-fallback.pdf",
+      "source": "diag-scan-fallback.pdf",
+      "page": "N/A",
+      "score": 0.8666666666666667,
+      "excerpt": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "receipt_id": null,
+      "kb_id": "diag-pdf-scan-1785505929",
+      "doc_id": "460488b8-a1fe-4c57-bc8d-23447aa33bbd",
+      "preview_locator": {
+        "node_id": "5570a448-4ef3-4195-8f06-efa8ba464f98"
+      },
+      "asset_id": null
+    },
+    "preview": {
+      "title": "diag-scan-fallback.pdf",
+      "kb_id": "diag-pdf-scan-1785505929",
+      "doc_id": "460488b8-a1fe-4c57-bc8d-23447aa33bbd",
+      "excerpt": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "locator": {
+        "node_id": "5570a448-4ef3-4195-8f06-efa8ba464f98"
+      },
+      "preview_type": "text_excerpt",
+      "evidence_id": "ev:eyJkb2NfaWQiOiI0NjA0ODhiOC1hMWZlLTRjNTctYmM4ZC0yMzQ0N2FhMzNiYmQiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTUwNTkyOSIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiNTU3MGE0NDgtNGVmMy00MTk1LThmMDYtZWZhOGJhNDY0Zjk4In19"
+    }
+  }
+}

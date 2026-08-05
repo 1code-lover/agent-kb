@@ -1,0 +1,370 @@
+{
+  "base_url": "http://127.0.0.1:18141",
+  "kb_id": "diag-pdf-text-1785320743",
+  "question": "In the diagnostic PDF, what remains the authorization boundary.",
+  "health": {
+    "status": "ok",
+    "embedding_warmup": {
+      "state": "ready",
+      "attempt_count": 0,
+      "last_error": null,
+      "last_duration_ms": null,
+      "started_at": null,
+      "finished_at": "2026-07-29T10:25:31.845824+00:00",
+      "current_model": "bge-small-zh-v1.5",
+      "loaded_model": "bge-small-zh-v1.5",
+      "is_ready": true
+    },
+    "ocr_warmup": {
+      "state": "failed",
+      "attempt_count": 1,
+      "last_error": "No module named 'paddleocr'",
+      "last_duration_ms": 4.779,
+      "started_at": "2026-07-29T09:58:59.099620+00:00",
+      "finished_at": "2026-07-29T09:58:59.106493+00:00",
+      "is_ready": false
+    },
+    "import_capabilities": {
+      "pdf_text_extraction": {
+        "ready": false,
+        "dependencies": [
+          "fitz"
+        ]
+      },
+      "image_ocr": {
+        "ready": false,
+        "dependencies": [
+          "paddleocr",
+          "paddle",
+          "pillow"
+        ]
+      },
+      "dependencies": {
+        "fitz": {
+          "installed": false,
+          "package": "PyMuPDF",
+          "import_name": "fitz",
+          "used_for": [
+            "pdf_text_extraction"
+          ]
+        },
+        "paddleocr": {
+          "installed": false,
+          "package": "paddleocr",
+          "import_name": "paddleocr",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "paddle": {
+          "installed": false,
+          "package": "paddlepaddle",
+          "import_name": "paddle",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "pillow": {
+          "installed": true,
+          "package": "Pillow",
+          "import_name": "PIL",
+          "used_for": [
+            "image_ocr"
+          ]
+        }
+      }
+    }
+  },
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-text-layer.pdf",
+    "sha256": "f22cffb16abef9f75bafca52f6eb00506796857105677ecc4b68caa337d21019",
+    "size": 782,
+    "expected_text_preview": "PDF diagnostic note.\nFolder is an organization object.\nKnowledge Base remains the authorization boundary.\nEvidence preview should resolve to the original PDF chunk.",
+    "text_preview": "PDF diagnostic note.\nFolder is an organization object.\nKnowledge Base remains the authorization boundary.\nEvidence preview should resolve to the original PDF chunk.",
+    "extractor": "fitz",
+    "extract_error": null
+  },
+  "saved": {
+    "requested_relative_path": "pdf/diag-text-layer.pdf",
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-text-1785320743\\pdf\\diag-text-layer.pdf",
+    "exists": false,
+    "sha256": null,
+    "size": null,
+    "text_preview": null,
+    "text_extractor": null,
+    "text_extract_error": null,
+    "import_status": "failed",
+    "import_message": "缺少 PyMuPDF（fitz）依赖，暂时无法解析 PDF 文件",
+    "import_diagnostics": {
+      "file_kind": "pdf",
+      "empty_reason": null,
+      "standalone_asset_candidate": false,
+      "skip_standalone_asset": false,
+      "ocr_attempted": false,
+      "ocr_status": null,
+      "ocr_text_length": 0,
+      "ocr_error": null,
+      "indexed_from_ocr": false,
+      "asset_registered": false,
+      "stage_timings": {
+        "file_save_ms": 12.008,
+        "persist_ms": 12.008,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 51.608,
+        "embedded_asset_extract_ms": 0.0,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "total_ms": 63.616
+      },
+      "document_count": 0,
+      "empty_document_count": 0,
+      "input_text_chars": 0,
+      "node_count": 0,
+      "nodes_with_embedding_count": 0,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 0.0,
+        "chunking_ms": 0.0,
+        "embedding_ms": 0.0,
+        "title_extract_ms": 0.0,
+        "vector_store_ms": 0.0,
+        "docstore_ms": 0.0,
+        "index_insert_ms": 0.0,
+        "total_ms": 0.0
+      },
+      "failure_category": "dependency_missing",
+      "missing_dependency": "fitz",
+      "dependency_status": "missing",
+      "ocr_init_ms": 0.0,
+      "ocr_load_image_ms": 0.0,
+      "ocr_predict_ms": 0.0,
+      "ocr_postprocess_ms": 0.0,
+      "ocr_total_ms": 0.0,
+      "ocr_instance_reused": false,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0
+    }
+  },
+  "checks": {
+    "source_saved_hash_match": null,
+    "saved_text_has_expected_terms": null,
+    "chat_answer_has_expected_terms": null,
+    "chat_source_has_expected_terms": null,
+    "chat_evidence_has_expected_terms": null,
+    "preview_has_expected_terms": null
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-3f7320c8de7840de85be248c5347f73a",
+    "files": [],
+    "file_results": [
+      {
+        "name": "diag-text-layer.pdf",
+        "type": "application/pdf",
+        "size": 782,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-text-1785320743\\pdf\\diag-text-layer.pdf",
+        "kb_id": "diag-pdf-text-1785320743",
+        "status": "failed",
+        "indexed_chunks": 0,
+        "relative_path": "pdf/diag-text-layer.pdf",
+        "folder_path": "pdf",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "pdf",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 12.008,
+            "persist_ms": 12.008,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 51.608,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 63.616
+          },
+          "document_count": 0,
+          "empty_document_count": 0,
+          "input_text_chars": 0,
+          "node_count": 0,
+          "nodes_with_embedding_count": 0,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 0.0,
+            "chunking_ms": 0.0,
+            "embedding_ms": 0.0,
+            "title_extract_ms": 0.0,
+            "vector_store_ms": 0.0,
+            "docstore_ms": 0.0,
+            "index_insert_ms": 0.0,
+            "total_ms": 0.0
+          },
+          "failure_category": "dependency_missing",
+          "missing_dependency": "fitz",
+          "dependency_status": "missing",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 0.0,
+          "ocr_predict_ms": 0.0,
+          "ocr_postprocess_ms": 0.0,
+          "ocr_total_ms": 0.0,
+          "ocr_instance_reused": false,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        },
+        "message": "缺少 PyMuPDF（fitz）依赖，暂时无法解析 PDF 文件"
+      }
+    ],
+    "indexed_chunks": 0,
+    "success_count": 0,
+    "failed_count": 1,
+    "empty_count": 0,
+    "kb_id": "diag-pdf-text-1785320743",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 0,
+      "empty_files": 0,
+      "failed_files": 1,
+      "standalone_asset_candidate_count": 0,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 0,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 0,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 0,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "failure_category_counts": {
+        "dependency_missing": 1
+      },
+      "dependency_status_counts": {
+        "missing": 1
+      },
+      "dependency_missing_count": 1,
+      "missing_dependency_counts": {
+        "fitz": 1
+      },
+      "stage_timings": {
+        "ensure_models_ready_ms": 5.047,
+        "get_index_manager_ms": 29.041,
+        "file_save_ms": 12.008,
+        "persist_ms": 12.008,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 51.608,
+        "embedded_asset_extract_ms": 0.0,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 0.0,
+        "doc_count_update_ms": 0.0,
+        "register_assets_ms": 0.114,
+        "receipt_store_ms": 17.771,
+        "result_build_ms": 0.312,
+        "total_ms": 120.275
+      },
+      "document_count": 0,
+      "empty_document_count": 0,
+      "input_text_chars": 0,
+      "node_count": 0,
+      "nodes_with_embedding_count": 0,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 0.0,
+        "chunking_ms": 0.0,
+        "embedding_ms": 0.0,
+        "title_extract_ms": 0.0,
+        "vector_store_ms": 0.0,
+        "docstore_ms": 0.0,
+        "index_insert_ms": 0.0,
+        "total_ms": 0.0
+      }
+    },
+    "display_summary": {
+      "source_kind": "file_import",
+      "item_label": "文件",
+      "total_items": 1,
+      "indexed_items": 0,
+      "empty_items": 0,
+      "failed_items": 1,
+      "asset_registered_count": 0,
+      "asset_registered_but_not_indexed_count": 0,
+      "asset_warning_count": 0,
+      "dependency_missing_count": 1,
+      "top_missing_dependencies": [
+        {
+          "dependency": "fitz",
+          "count": 1
+        }
+      ],
+      "top_empty_reasons": [],
+      "has_blockers": true,
+      "has_dependency_issues": true,
+      "has_warnings": false,
+      "headline": "1 个文件因依赖缺失未完成导入",
+      "user_message": "请先安装缺失依赖后重试；详情可查看缺失依赖列表和失败项。",
+      "next_actions": [
+        {
+          "action": "install_dependency",
+          "label": "安装缺失依赖：fitz",
+          "dependency": "fitz",
+          "count": 1
+        },
+        {
+          "action": "review_failed_items",
+          "label": "查看 1 个失败项",
+          "count": 1
+        }
+      ]
+    }
+  },
+  "chat_summary": {
+    "attempted": false,
+    "executed": false,
+    "skipped_reason": "import_status=failed",
+    "error": null,
+    "answer": "",
+    "requested_scope_type": null,
+    "requested_kb_ids": null,
+    "effective_scope_type": null,
+    "effective_kb_ids": null,
+    "is_default_deny_applied": null,
+    "isolation_level": null,
+    "first_source": {},
+    "first_evidence": {},
+    "preview": null,
+    "preview_error": null
+  }
+}

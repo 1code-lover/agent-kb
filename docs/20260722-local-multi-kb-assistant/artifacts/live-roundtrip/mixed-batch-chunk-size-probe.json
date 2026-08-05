@@ -1,0 +1,101 @@
+{
+  "base_url": "http://127.0.0.1:18127",
+  "generated_at": null,
+  "cases": [
+    {
+      "chunk_size": 128,
+      "kb_id": "diag-mixed-batch-1785303239",
+      "success_count": 3,
+      "failed_count": 0,
+      "empty_count": 1,
+      "indexed_chunks": 7,
+      "diagnostics": {
+        "ocr_success_count": 1,
+        "embedded_ocr_success_count": 1,
+        "embedded_ocr_failed_count": 0,
+        "embedded_indexed_from_ocr_count": 1,
+        "asset_registered_count": 2,
+        "skip_standalone_asset_count": 1
+      },
+      "embedded_ocr_error": null,
+      "run_passed": true,
+      "strict_no_evidence_contract_passed": true
+    },
+    {
+      "chunk_size": 192,
+      "kb_id": "diag-mixed-batch-1785303426",
+      "success_count": 3,
+      "failed_count": 0,
+      "empty_count": 1,
+      "indexed_chunks": 4,
+      "diagnostics": {
+        "ocr_success_count": 1,
+        "embedded_ocr_success_count": 1,
+        "embedded_ocr_failed_count": 0,
+        "embedded_indexed_from_ocr_count": 1,
+        "asset_registered_count": 2,
+        "skip_standalone_asset_count": 1
+      },
+      "embedded_ocr_error": null,
+      "run_passed": true,
+      "strict_no_evidence_contract_passed": true
+    },
+    {
+      "chunk_size": 256,
+      "kb_id": "diag-mixed-batch-1785303500",
+      "success_count": 3,
+      "failed_count": 0,
+      "empty_count": 1,
+      "indexed_chunks": 4,
+      "diagnostics": {
+        "ocr_success_count": 1,
+        "embedded_ocr_success_count": 1,
+        "embedded_ocr_failed_count": 0,
+        "embedded_indexed_from_ocr_count": 1,
+        "asset_registered_count": 2,
+        "skip_standalone_asset_count": 1
+      },
+      "embedded_ocr_error": null,
+      "run_passed": true,
+      "strict_no_evidence_contract_passed": true
+    },
+    {
+      "chunk_size": 384,
+      "kb_id": "diag-mixed-batch-1785303549",
+      "success_count": 3,
+      "failed_count": 0,
+      "empty_count": 1,
+      "indexed_chunks": 4,
+      "diagnostics": {
+        "ocr_success_count": 1,
+        "embedded_ocr_success_count": 1,
+        "embedded_ocr_failed_count": 0,
+        "embedded_indexed_from_ocr_count": 1,
+        "asset_registered_count": 2,
+        "skip_standalone_asset_count": 1
+      },
+      "embedded_ocr_error": null,
+      "run_passed": true,
+      "strict_no_evidence_contract_passed": true
+    },
+    {
+      "chunk_size": 512,
+      "kb_id": "diag-mixed-batch-1785303601",
+      "success_count": 3,
+      "failed_count": 0,
+      "empty_count": 1,
+      "indexed_chunks": 4,
+      "diagnostics": {
+        "ocr_success_count": 1,
+        "embedded_ocr_success_count": 1,
+        "embedded_ocr_failed_count": 0,
+        "embedded_indexed_from_ocr_count": 1,
+        "asset_registered_count": 2,
+        "skip_standalone_asset_count": 1
+      },
+      "embedded_ocr_error": null,
+      "run_passed": true,
+      "strict_no_evidence_contract_passed": true
+    }
+  ]
+}

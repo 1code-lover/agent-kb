@@ -203,3 +203,10 @@ temp/
 temp-node-utf8-test.txt
 temp-powershell-utf8-test.txt
 tmp_unicode_test.txt
+
+# Local QA / eval scratch outputs
+/.tmp*
+/tmp_*
+/temp_*
+/docs/20260722-local-multi-kb-assistant/artifacts/temp/
+/docs/20260722-local-multi-kb-assistant/artifacts/tmp*/

@@ -1,8 +1,9 @@
-"""Persistent session snapshot store."""
+"""会话快照持久化存储。"""
 
 from __future__ import annotations
 
 import json
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -31,9 +32,18 @@ def _ensure_session_dir() -> None:
     _SESSION_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def _sanitize_session_id_for_path(session_id: str) -> str:
+    """清洗 session_id，避免生成 Windows 非法文件名。"""
+    raw = (session_id or "desktop-default").strip() or "desktop-default"
+    sanitized = re.sub(r'[<>:"/\|?*]+', '_', raw)
+    sanitized = sanitized.rstrip(' .')
+    return sanitized or "desktop-default"
+
+
+
 def _session_file(session_id: str) -> Path:
     _ensure_session_dir()
-    safe_session_id = (session_id or "desktop-default").strip() or "desktop-default"
+    safe_session_id = _sanitize_session_id_for_path(session_id)
     return _SESSION_DIR / f"{safe_session_id}.json"
 
 

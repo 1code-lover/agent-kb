@@ -1,0 +1,480 @@
+{
+  "scenario": "extensionless-octet-stream-fallback-import",
+  "base_url": "http://127.0.0.1:18089",
+  "health": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "status": "ok",
+      "runtime": {
+        "pid": 33148,
+        "python_executable": "C:\\Users\\ethan1.zhao\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+        "python_version": "3.12.10",
+        "python_implementation": "CPython",
+        "cwd": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb"
+      },
+      "embedding_warmup": {
+        "state": "warming",
+        "attempt_count": 1,
+        "last_error": null,
+        "last_duration_ms": null,
+        "started_at": "2026-07-31T11:05:30.791549+00:00",
+        "finished_at": null,
+        "current_model": "bge-small-zh-v1.5",
+        "loaded_model": null,
+        "is_ready": false
+      },
+      "ocr_warmup": {
+        "state": "warming",
+        "attempt_count": 1,
+        "last_error": null,
+        "last_duration_ms": null,
+        "started_at": "2026-07-31T11:05:30.792548+00:00",
+        "finished_at": null,
+        "is_ready": true
+      },
+      "import_capabilities": {
+        "pdf_text_extraction": {
+          "ready": true,
+          "dependencies": [
+            "fitz"
+          ]
+        },
+        "image_ocr": {
+          "ready": true,
+          "dependencies": [
+            "paddleocr",
+            "paddle",
+            "pillow"
+          ]
+        },
+        "dependencies": {
+          "fitz": {
+            "installed": true,
+            "package": "PyMuPDF",
+            "import_name": "fitz",
+            "used_for": [
+              "pdf_text_extraction"
+            ]
+          },
+          "paddleocr": {
+            "installed": true,
+            "package": "paddleocr",
+            "import_name": "paddleocr",
+            "used_for": [
+              "image_ocr"
+            ]
+          },
+          "paddle": {
+            "installed": true,
+            "package": "paddlepaddle",
+            "import_name": "paddle",
+            "used_for": [
+              "image_ocr"
+            ]
+          },
+          "pillow": {
+            "installed": true,
+            "package": "Pillow",
+            "import_name": "PIL",
+            "used_for": [
+              "image_ocr"
+            ]
+          }
+        }
+      }
+    },
+    "request_id": "b6fa2bdf-0e4e-4611-9f6b-1cf2d4403eac"
+  },
+  "create_kb_status_code": 200,
+  "create_kb_response": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "kb_id": "live-octet-fallback-18089",
+      "kb_name": "Live Octet Fallback 18089",
+      "created_at": "2026-07-31T11:06:07.936972+00:00",
+      "updated_at": "2026-07-31T11:06:07.936972+00:00",
+      "status": "active",
+      "doc_count": 0
+    },
+    "request_id": "fbd0ac06-3c80-4a83-9289-5e76866d724e"
+  },
+  "import_status_code": 200,
+  "import_response": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "receipt_id": "kb-file-import-e7d775b9b30646f58cd90721e0b1373e",
+      "files": [
+        {
+          "name": "README_9e2ea494",
+          "type": "application/octet-stream",
+          "size": 50,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\live-octet-fallback-18089\\README_9e2ea494",
+          "kb_id": "live-octet-fallback-18089",
+          "relative_path": "README_9e2ea494",
+          "folder_path": ""
+        },
+        {
+          "name": "diagram_45c019d4",
+          "type": "application/octet-stream",
+          "size": 92,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\live-octet-fallback-18089\\diagram_45c019d4",
+          "kb_id": "live-octet-fallback-18089",
+          "relative_path": "diagram_45c019d4",
+          "folder_path": ""
+        }
+      ],
+      "file_results": [
+        {
+          "name": "README_9e2ea494",
+          "type": "application/octet-stream",
+          "size": 50,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\live-octet-fallback-18089\\README_9e2ea494",
+          "kb_id": "live-octet-fallback-18089",
+          "status": "indexed",
+          "indexed_chunks": 1,
+          "relative_path": "README_9e2ea494",
+          "folder_path": "",
+          "embedded_assets": [],
+          "asset_warning_count": 0,
+          "diagnostics": {
+            "file_kind": "text",
+            "empty_reason": null,
+            "standalone_asset_candidate": false,
+            "skip_standalone_asset": false,
+            "file_retained_on_disk": true,
+            "ocr_attempted": false,
+            "ocr_status": null,
+            "ocr_text_length": 0,
+            "ocr_error": null,
+            "indexed_from_ocr": false,
+            "asset_registered": false,
+            "stage_timings": {
+              "file_save_ms": 12.207,
+              "persist_ms": 12.207,
+              "standalone_ocr_ms": 0.0,
+              "primary_index_ms": 2924.589,
+              "embedded_asset_extract_ms": 0.0,
+              "embedded_asset_ocr_ms": 0.0,
+              "embedded_asset_index_ms": 0.0,
+              "total_ms": 2936.796
+            },
+            "document_count": 1,
+            "empty_document_count": 0,
+            "input_text_chars": 50,
+            "node_count": 1,
+            "nodes_with_embedding_count": 1,
+            "nodes_without_embedding_count": 0,
+            "index_stage_timings": {
+              "document_load_ms": 165.158,
+              "chunking_ms": 1.246,
+              "embedding_ms": 35.711,
+              "title_extract_ms": 0.252,
+              "vector_store_ms": 0.116,
+              "docstore_ms": 0.097,
+              "index_insert_ms": 1.169,
+              "total_ms": 206.72
+            },
+            "failure_category": null,
+            "missing_dependency": null,
+            "dependency_status": "unknown",
+            "ocr_init_ms": 0.0,
+            "ocr_load_image_ms": 0.0,
+            "ocr_predict_ms": 0.0,
+            "ocr_postprocess_ms": 0.0,
+            "ocr_total_ms": 0.0,
+            "ocr_instance_reused": false,
+            "embedded_asset_count": 0,
+            "embedded_asset_ready_count": 0,
+            "embedded_asset_missing_count": 0,
+            "embedded_asset_invalid_count": 0,
+            "embedded_ocr_attempted_count": 0,
+            "embedded_ocr_success_count": 0,
+            "embedded_ocr_no_text_count": 0,
+            "embedded_ocr_failed_count": 0,
+            "embedded_ocr_skipped_count": 0,
+            "embedded_indexed_from_ocr_count": 0
+          }
+        },
+        {
+          "name": "diagram_45c019d4",
+          "type": "application/octet-stream",
+          "size": 92,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\live-octet-fallback-18089\\diagram_45c019d4",
+          "kb_id": "live-octet-fallback-18089",
+          "status": "empty",
+          "indexed_chunks": 0,
+          "relative_path": "diagram_45c019d4",
+          "folder_path": "",
+          "embedded_assets": [],
+          "asset_warning_count": 0,
+          "diagnostics": {
+            "file_kind": "image",
+            "empty_reason": "no_extractable_text",
+            "standalone_asset_candidate": true,
+            "skip_standalone_asset": false,
+            "file_retained_on_disk": true,
+            "ocr_attempted": true,
+            "ocr_status": "no_text",
+            "ocr_text_length": 0,
+            "ocr_error": null,
+            "indexed_from_ocr": false,
+            "asset_registered": true,
+            "stage_timings": {
+              "file_save_ms": 7.757,
+              "persist_ms": 7.757,
+              "standalone_ocr_ms": 183.853,
+              "primary_index_ms": 0.0,
+              "embedded_asset_extract_ms": 0.0,
+              "embedded_asset_ocr_ms": 0.0,
+              "embedded_asset_index_ms": 0.0,
+              "total_ms": 191.61
+            },
+            "document_count": 0,
+            "empty_document_count": 0,
+            "input_text_chars": 0,
+            "node_count": 0,
+            "nodes_with_embedding_count": 0,
+            "nodes_without_embedding_count": 0,
+            "index_stage_timings": {
+              "document_load_ms": 0.0,
+              "chunking_ms": 0.0,
+              "embedding_ms": 0.0,
+              "title_extract_ms": 0.0,
+              "vector_store_ms": 0.0,
+              "docstore_ms": 0.0,
+              "index_insert_ms": 0.0,
+              "total_ms": 0.0
+            },
+            "failure_category": null,
+            "missing_dependency": null,
+            "dependency_status": "ready",
+            "ocr_init_ms": 0.0,
+            "ocr_load_image_ms": 11.505,
+            "ocr_predict_ms": 171.466,
+            "ocr_postprocess_ms": 0.181,
+            "ocr_total_ms": 183.824,
+            "ocr_instance_reused": true,
+            "ocr_engine": "paddleocr",
+            "embedded_asset_count": 0,
+            "embedded_asset_ready_count": 0,
+            "embedded_asset_missing_count": 0,
+            "embedded_asset_invalid_count": 0,
+            "embedded_ocr_attempted_count": 0,
+            "embedded_ocr_success_count": 0,
+            "embedded_ocr_no_text_count": 0,
+            "embedded_ocr_failed_count": 0,
+            "embedded_ocr_skipped_count": 0,
+            "embedded_indexed_from_ocr_count": 0
+          }
+        },
+        {
+          "name": "BLOB",
+          "type": "application/octet-stream",
+          "size": 4,
+          "path": null,
+          "kb_id": "live-octet-fallback-18089",
+          "status": "failed",
+          "indexed_chunks": 0,
+          "relative_path": null,
+          "folder_path": null,
+          "embedded_assets": [],
+          "asset_warning_count": 0,
+          "diagnostics": {
+            "file_kind": "binary",
+            "empty_reason": null,
+            "standalone_asset_candidate": false,
+            "skip_standalone_asset": false,
+            "file_retained_on_disk": false,
+            "ocr_attempted": false,
+            "ocr_status": null,
+            "ocr_text_length": 0,
+            "ocr_error": null,
+            "indexed_from_ocr": false,
+            "asset_registered": false,
+            "stage_timings": {
+              "file_save_ms": 0.0,
+              "persist_ms": 0.0,
+              "standalone_ocr_ms": 0.0,
+              "primary_index_ms": 0.0,
+              "embedded_asset_extract_ms": 0.0,
+              "embedded_asset_ocr_ms": 0.0,
+              "embedded_asset_index_ms": 0.0,
+              "total_ms": 0.0
+            },
+            "document_count": 0,
+            "empty_document_count": 0,
+            "input_text_chars": 0,
+            "node_count": 0,
+            "nodes_with_embedding_count": 0,
+            "nodes_without_embedding_count": 0,
+            "index_stage_timings": {
+              "document_load_ms": 0.0,
+              "chunking_ms": 0.0,
+              "embedding_ms": 0.0,
+              "title_extract_ms": 0.0,
+              "vector_store_ms": 0.0,
+              "docstore_ms": 0.0,
+              "index_insert_ms": 0.0,
+              "total_ms": 0.0
+            },
+            "failure_category": "unsupported_file_type",
+            "missing_dependency": null,
+            "dependency_status": "unknown",
+            "ocr_init_ms": 0.0,
+            "ocr_load_image_ms": 0.0,
+            "ocr_predict_ms": 0.0,
+            "ocr_postprocess_ms": 0.0,
+            "ocr_total_ms": 0.0,
+            "ocr_instance_reused": false,
+            "embedded_asset_count": 0,
+            "embedded_asset_ready_count": 0,
+            "embedded_asset_missing_count": 0,
+            "embedded_asset_invalid_count": 0,
+            "embedded_ocr_attempted_count": 0,
+            "embedded_ocr_success_count": 0,
+            "embedded_ocr_no_text_count": 0,
+            "embedded_ocr_failed_count": 0,
+            "embedded_ocr_skipped_count": 0,
+            "embedded_indexed_from_ocr_count": 0
+          },
+          "message": "暂不支持该文件类型导入（application/octet-stream），请上传 Markdown、PDF、文本或图片文件"
+        }
+      ],
+      "indexed_chunks": 1,
+      "success_count": 1,
+      "failed_count": 1,
+      "empty_count": 1,
+      "kb_id": "live-octet-fallback-18089",
+      "import_mode": "preserve_tree",
+      "diagnostics": {
+        "total_files": 3,
+        "indexed_files": 1,
+        "empty_files": 1,
+        "failed_files": 1,
+        "standalone_asset_candidate_count": 1,
+        "embedded_asset_count": 0,
+        "embedded_asset_ready_count": 0,
+        "embedded_asset_missing_count": 0,
+        "embedded_asset_invalid_count": 0,
+        "asset_warning_count": 0,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 1,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "asset_registered_count": 1,
+        "skip_standalone_asset_count": 0,
+        "empty_reason_counts": {
+          "no_extractable_text": 1
+        },
+        "failure_category_counts": {
+          "unsupported_file_type": 1
+        },
+        "dependency_status_counts": {
+          "unknown": 2,
+          "ready": 1
+        },
+        "dependency_missing_count": 0,
+        "missing_dependency_counts": {},
+        "stage_timings": {
+          "ensure_models_ready_ms": 2690.747,
+          "get_index_manager_ms": 26.599,
+          "file_save_ms": 19.964,
+          "persist_ms": 19.964,
+          "standalone_ocr_ms": 183.853,
+          "primary_index_ms": 2924.589,
+          "embedded_asset_extract_ms": 0.0,
+          "embedded_asset_ocr_ms": 0.0,
+          "embedded_asset_index_ms": 0.0,
+          "index_storage_persist_ms": 10.707,
+          "doc_count_update_ms": 6.737,
+          "register_assets_ms": 0.4,
+          "receipt_store_ms": 3.409,
+          "result_build_ms": 0.133,
+          "total_ms": 3182.223
+        },
+        "document_count": 1,
+        "empty_document_count": 0,
+        "input_text_chars": 50,
+        "node_count": 1,
+        "nodes_with_embedding_count": 1,
+        "nodes_without_embedding_count": 0,
+        "index_stage_timings": {
+          "document_load_ms": 165.158,
+          "chunking_ms": 1.246,
+          "embedding_ms": 35.711,
+          "title_extract_ms": 0.252,
+          "vector_store_ms": 0.116,
+          "docstore_ms": 0.097,
+          "index_insert_ms": 1.169,
+          "total_ms": 206.72
+        },
+        "storage_persist_stage_timings": {
+          "docstore_persist_ms": 1.385,
+          "index_store_persist_ms": 1.108,
+          "graph_store_persist_ms": 1.197,
+          "property_graph_store_persist_ms": 0.0,
+          "vector_store_persist_ms": 5.622,
+          "vector_store_namespaces_ms": {
+            "default": 4.29,
+            "image": 1.332
+          },
+          "fallback_persist_ms": 0.0,
+          "total_ms": 9.372
+        }
+      },
+      "display_summary": {
+        "source_kind": "file_import",
+        "item_label": "文件",
+        "total_items": 3,
+        "indexed_items": 1,
+        "empty_items": 1,
+        "failed_items": 1,
+        "asset_registered_count": 1,
+        "asset_registered_but_not_indexed_count": 1,
+        "asset_warning_count": 0,
+        "dependency_missing_count": 0,
+        "top_missing_dependencies": [],
+        "top_empty_reasons": [
+          {
+            "reason": "no_extractable_text",
+            "count": 1
+          }
+        ],
+        "has_blockers": true,
+        "has_dependency_issues": false,
+        "has_warnings": true,
+        "headline": "1 个文件导入失败",
+        "user_message": "请检查失败项中的错误信息，修复后重新导入。",
+        "next_actions": [
+          {
+            "action": "review_failed_items",
+            "label": "查看 1 个失败项",
+            "count": 1
+          },
+          {
+            "action": "review_empty_assets",
+            "label": "查看 1 个未索引图片资产",
+            "count": 1,
+            "top_empty_reasons": [
+              {
+                "reason": "no_extractable_text",
+                "count": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "request_id": "b376b325-4973-4d44-9e92-a32c063ead62"
+  }
+}

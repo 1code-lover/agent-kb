@@ -5,11 +5,11 @@
 
 function formatReceiptTime(value) {
   if (!value) {
-    return '刚刚';
+    return '\u521a\u521a';
   }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return '刚刚';
+    return '\u521a\u521a';
   }
   return date.toLocaleString('zh-CN', {
     month: '2-digit',
@@ -34,7 +34,61 @@ function MetricBadges({ metrics, className = 'kb-receipt-metrics' }) {
   );
 }
 
-export default function KbReceiptSummary({ receiptSummary, emptyMessage = '当前知识库还没有导入回执。' }) {
+function StatusBadges({ receiptSummary }) {
+  const badges = [];
+
+  if (receiptSummary.hasBlockers) {
+    badges.push({
+      key: 'blocker',
+      className: 'kb-receipt-status-pill is-blocker',
+      label: '\u6709\u963b\u65ad',
+    });
+  } else if (receiptSummary.hasWarnings) {
+    badges.push({
+      key: 'warning',
+      className: 'kb-receipt-status-pill is-warning',
+      label: '\u9700\u5173\u6ce8',
+    });
+  } else {
+    badges.push({
+      key: 'success',
+      className: 'kb-receipt-status-pill is-success',
+      label: '\u5df2\u5b8c\u6210',
+    });
+  }
+
+  if (receiptSummary.hasDependencyIssues) {
+    badges.push({
+      key: 'dependency',
+      className: 'kb-receipt-status-pill is-warning',
+      label: '\u4f9d\u8d56\u7f3a\u5931',
+    });
+  }
+
+  return (
+    <div className='kb-receipt-status-row'>
+      {badges.map((badge) => (
+        <span key={badge.key} className={badge.className}>{badge.label}</span>
+      ))}
+    </div>
+  );
+}
+
+function ActionList({ actions }) {
+  if (!Array.isArray(actions) || actions.length === 0) {
+    return null;
+  }
+
+  return (
+    <ul className='kb-receipt-action-list'>
+      {actions.map((item) => (
+        <li key={item.key}>{item.label}</li>
+      ))}
+    </ul>
+  );
+}
+
+export default function KbReceiptSummary({ receiptSummary, emptyMessage = '\u5f53\u524d\u77e5\u8bc6\u5e93\u8fd8\u6ca1\u6709\u5bfc\u5165\u56de\u6267\u3002' }) {
   if (!receiptSummary) {
     return <div className='kb-receipt-summary kb-receipt-summary-empty'>{emptyMessage}</div>;
   }
@@ -42,6 +96,10 @@ export default function KbReceiptSummary({ receiptSummary, emptyMessage = '当�
   const emptyReasonMetrics = Array.isArray(receiptSummary.emptyReasonMetrics)
     ? receiptSummary.emptyReasonMetrics
     : [];
+  const topMissingDependencyMetrics = Array.isArray(receiptSummary.topMissingDependencyMetrics)
+    ? receiptSummary.topMissingDependencyMetrics
+    : [];
+  const nextActions = Array.isArray(receiptSummary.nextActions) ? receiptSummary.nextActions : [];
   const batchStageMetrics = Array.isArray(receiptSummary.batchStageMetrics)
     ? receiptSummary.batchStageMetrics.slice(0, 5)
     : [];
@@ -51,52 +109,74 @@ export default function KbReceiptSummary({ receiptSummary, emptyMessage = '当�
   const batchIndexStageMetrics = Array.isArray(receiptSummary.batchIndexStageMetrics)
     ? receiptSummary.batchIndexStageMetrics.slice(0, 5)
     : [];
+  const primaryText = receiptSummary.userMessage || receiptSummary.summaryText;
 
   return (
     <section className={'kb-receipt-summary ' + (receiptSummary.status === 'warning' ? 'warning' : 'success')}>
       <div className='kb-receipt-summary-head'>
         <div>
-          <p className='kb-receipt-eyebrow'>最近回执</p>
+          <p className='kb-receipt-eyebrow'>{'\u6700\u8fd1\u56de\u6267'}</p>
           <h3>{receiptSummary.title}</h3>
         </div>
-        <span className='kb-receipt-time'>{formatReceiptTime(receiptSummary.createdAt)}</span>
+        <div className='kb-receipt-summary-head-side'>
+          <StatusBadges receiptSummary={receiptSummary} />
+          <span className='kb-receipt-time'>{formatReceiptTime(receiptSummary.createdAt)}</span>
+        </div>
       </div>
 
-      <p className='kb-receipt-text'>{receiptSummary.summaryText}</p>
-      {receiptSummary.receiptId ? <p className='kb-receipt-meta'>回执 ID：{receiptSummary.receiptId}</p> : null}
+      {receiptSummary.headline ? <p className='kb-receipt-headline'>{receiptSummary.headline}</p> : null}
+      <p className='kb-receipt-text'>{primaryText}</p>
+      {receiptSummary.userMessage && receiptSummary.summaryText ? (
+        <p className='kb-receipt-subtext'>{'\u6982\u89c8\uff1a'}{receiptSummary.summaryText}</p>
+      ) : null}
+      {receiptSummary.receiptId ? <p className='kb-receipt-meta'>{'\u56de\u6267 ID\uff1a'}{receiptSummary.receiptId}</p> : null}
       {receiptSummary.batchStageSummaryText ? (
-        <p className='kb-receipt-subtext'>批次耗时：{receiptSummary.batchStageSummaryText}</p>
+        <p className='kb-receipt-subtext'>{'\u6279\u6b21\u8017\u65f6\uff1a'}{receiptSummary.batchStageSummaryText}</p>
       ) : null}
       {receiptSummary.batchIndexStageSummaryText ? (
-        <p className='kb-receipt-subtext'>索引细分：{receiptSummary.batchIndexStageSummaryText}</p>
+        <p className='kb-receipt-subtext'>{'\u7d22\u5f15\u7ec6\u5206\uff1a'}{receiptSummary.batchIndexStageSummaryText}</p>
       ) : null}
 
       <MetricBadges metrics={receiptSummary.metrics} />
 
+      {topMissingDependencyMetrics.length > 0 ? (
+        <div className='kb-receipt-section'>
+          <p className='kb-receipt-section-title'>{'\u7f3a\u5931\u4f9d\u8d56'}</p>
+          <MetricBadges metrics={topMissingDependencyMetrics} className='kb-receipt-metrics kb-receipt-metrics-secondary' />
+        </div>
+      ) : null}
+
+      {nextActions.length > 0 ? (
+        <div className='kb-receipt-section'>
+          <p className='kb-receipt-section-title'>{'\u5efa\u8bae\u52a8\u4f5c'}</p>
+          <ActionList actions={nextActions} />
+        </div>
+      ) : null}
+
       {ingestionMetrics.length > 0 ? (
         <div className='kb-receipt-section'>
-          <p className='kb-receipt-section-title'>解析与节点</p>
+          <p className='kb-receipt-section-title'>{'\u89e3\u6790\u4e0e\u8282\u70b9'}</p>
           <MetricBadges metrics={ingestionMetrics} className='kb-receipt-metrics kb-receipt-metrics-secondary' />
         </div>
       ) : null}
 
       {emptyReasonMetrics.length > 0 ? (
         <div className='kb-receipt-section'>
-          <p className='kb-receipt-section-title'>空结果原因</p>
+          <p className='kb-receipt-section-title'>{'\u7a7a\u7ed3\u679c\u539f\u56e0'}</p>
           <MetricBadges metrics={emptyReasonMetrics} className='kb-receipt-metrics kb-receipt-metrics-secondary' />
         </div>
       ) : null}
 
       {batchStageMetrics.length > 0 ? (
         <div className='kb-receipt-section'>
-          <p className='kb-receipt-section-title'>导入阶段耗时</p>
+          <p className='kb-receipt-section-title'>{'\u5bfc\u5165\u9636\u6bb5\u8017\u65f6'}</p>
           <MetricBadges metrics={batchStageMetrics} className='kb-receipt-metrics kb-receipt-metrics-secondary' />
         </div>
       ) : null}
 
       {batchIndexStageMetrics.length > 0 ? (
         <div className='kb-receipt-section'>
-          <p className='kb-receipt-section-title'>索引细分耗时</p>
+          <p className='kb-receipt-section-title'>{'\u7d22\u5f15\u7ec6\u5206\u8017\u65f6'}</p>
           <MetricBadges metrics={batchIndexStageMetrics} className='kb-receipt-metrics kb-receipt-metrics-secondary' />
         </div>
       ) : null}

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import copy
+import re
 import time
 
 from pathlib import Path
@@ -46,6 +48,26 @@ OCR_RUNTIME_FLOAT_KEYS = (
     "ocr_predict_ms",
     "ocr_postprocess_ms",
     "ocr_total_ms",
+)
+
+_TEXT_CONTROL_CHAR_BYTES = {9, 10, 12, 13}
+_TEXT_CONTROL_CHARS = {"\t", "\n", "\f", "\r"}
+_CONTENT_SNIFF_FALLBACK_MIME_TYPES = {"", "application/octet-stream", "binary/octet-stream"}
+
+
+# OCR 派生文本入索引时，不应让路径/内部标识耗尽 chunk budget。
+OCR_INDEX_EXCLUDED_METADATA_KEYS = (
+    "kb_id",
+    "asset_id",
+    "source_type",
+    "file_path",
+    "relative_path",
+    "mime_type",
+    "ocr_engine",
+    "source_doc_path",
+    "source_doc_relative_path",
+    "referenced_path",
+    "occurrence_index",
 )
 
 # 延迟初始化 registry，便于测试替换工作目录。
@@ -261,19 +283,578 @@ def _safe_add_doc_count(kb_id: str, delta: int) -> None:
         return
 
 
+def _collect_existing_ref_docs_for_import(
+    manager: Any,
+    *,
+    kb_id: str,
+    target_path: Path,
+    relative_path: str | None,
+) -> list[dict[str, Any]]:
+    """收集与当前导入目标绑定的旧 ref_doc，供成功重导入后替换。"""
+    storage_context = getattr(manager, "storage_context", None)
+    doc_store = getattr(storage_context, "docstore", None)
+    raw_docs = getattr(doc_store, "docs", {}) if doc_store is not None else {}
+    get_all_ref_doc_info = getattr(doc_store, "get_all_ref_doc_info", None) if doc_store is not None else None
+    if not raw_docs or not callable(get_all_ref_doc_info):
+        return []
+
+    resolved_target = str(target_path.resolve())
+    target_set = {resolved_target}
+    ref_doc_info = get_all_ref_doc_info() or {}
+    matches: list[dict[str, Any]] = []
+    seen_ref_doc_ids: set[str] = set()
+
+    for ref_doc_id, ref_doc in ref_doc_info.items():
+        if not isinstance(ref_doc_id, str) or not ref_doc_id or ref_doc_id in seen_ref_doc_ids:
+            continue
+
+        metadata = getattr(ref_doc, "metadata", {}) or {}
+        if not _doc_belongs_to_request(metadata, kb_id):
+            continue
+
+        file_path = metadata.get("file_path")
+        source_doc_path = metadata.get("source_doc_path")
+        same_target = _path_matches(file_path, target_set) or _path_matches(source_doc_path, target_set)
+        same_source_doc = bool(relative_path) and metadata.get("source_doc_relative_path") == relative_path
+        if not (same_target or same_source_doc):
+            continue
+
+        seen_ref_doc_ids.add(ref_doc_id)
+        matches.append(
+            {
+                "ref_doc_id": ref_doc_id,
+                "counts_doc": not _is_embedded_asset_doc(metadata),
+            }
+        )
+    return matches
+
+
+def _restore_reimport_backup_file(target_path: Path | None, backup_bytes: bytes | None) -> None:
+    """重导入未成功落库时恢复旧文件字节，避免磁盘内容与旧索引脱节。"""
+    if target_path is None or backup_bytes is None:
+        return
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    with target_path.open("wb") as buffer:
+        buffer.write(backup_bytes)
+
+
+
+def _get_manager_docstore(manager: Any) -> Any | None:
+    """读取索引管理器上的 docstore，供导入期回滚逻辑复用。"""
+    storage_context = getattr(manager, "storage_context", None)
+    return getattr(storage_context, "docstore", None) if storage_context is not None else None
+
+
+
+def _get_manager_ref_doc_info(manager: Any) -> dict[str, Any]:
+    """读取当前 docstore 中全部 ref_doc 信息，异常时返回空映射。"""
+    doc_store = _get_manager_docstore(manager)
+    get_all_ref_doc_info = getattr(doc_store, "get_all_ref_doc_info", None) if doc_store is not None else None
+    if not callable(get_all_ref_doc_info):
+        return {}
+    try:
+        raw_info = get_all_ref_doc_info() or {}
+    except Exception:
+        return {}
+    return raw_info if isinstance(raw_info, dict) else {}
+
+
+
+def _capture_ref_doc_ids(manager: Any) -> set[str]:
+    """抓取当前索引中的 ref_doc_id 集合，用于识别本批新增对象。"""
+    return {str(ref_doc_id) for ref_doc_id in _get_manager_ref_doc_info(manager) if isinstance(ref_doc_id, str) and ref_doc_id}
+
+
+
+def _collect_new_ref_doc_ids(manager: Any, before_ref_doc_ids: set[str] | None) -> list[str]:
+    """根据导入前快照识别当前步骤新增的 ref_doc。"""
+    previous = before_ref_doc_ids or set()
+    current = _capture_ref_doc_ids(manager)
+    return sorted(ref_doc_id for ref_doc_id in current - previous if ref_doc_id)
+
+
+
+def _snapshot_ref_doc_payloads(manager: Any, ref_doc_ids: list[str] | None) -> list[dict[str, Any]]:
+    """备份待替换 ref_doc 的节点与元数据，供 persist 失败时恢复。"""
+    if not ref_doc_ids:
+        return []
+
+    doc_store = _get_manager_docstore(manager)
+    if doc_store is None:
+        return []
+
+    all_ref_doc_info = _get_manager_ref_doc_info(manager)
+    get_ref_doc_info = getattr(doc_store, "get_ref_doc_info", None)
+    get_document = getattr(doc_store, "get_document", None)
+    docs_dict = getattr(doc_store, "docs", None)
+
+    snapshots: list[dict[str, Any]] = []
+    for ref_doc_id in ref_doc_ids:
+        if not isinstance(ref_doc_id, str) or not ref_doc_id:
+            continue
+        ref_doc_info = None
+        if callable(get_ref_doc_info):
+            try:
+                ref_doc_info = get_ref_doc_info(ref_doc_id)
+            except Exception:
+                ref_doc_info = None
+        if ref_doc_info is None:
+            ref_doc_info = all_ref_doc_info.get(ref_doc_id)
+        if ref_doc_info is None:
+            continue
+
+        nodes: list[Any] = []
+        for node_id in list(getattr(ref_doc_info, "node_ids", []) or []):
+            node = None
+            if callable(get_document):
+                try:
+                    node = get_document(node_id, raise_error=False)
+                except TypeError:
+                    try:
+                        node = get_document(node_id)
+                    except Exception:
+                        node = None
+                except Exception:
+                    node = None
+            if node is None and isinstance(docs_dict, dict):
+                node = docs_dict.get(node_id)
+            if node is not None:
+                nodes.append(copy.deepcopy(node))
+
+        snapshots.append(
+            {
+                "ref_doc_id": ref_doc_id,
+                "ref_doc_info": copy.deepcopy(ref_doc_info),
+                "nodes": nodes,
+            }
+        )
+    return snapshots
+
+
+
+def _delete_ref_doc_with_optional_persist(manager: Any, ref_doc_id: str, *, persist: bool) -> bool:
+    """删除 ref_doc，并兼容旧测试替身上不支持 persist 参数的签名。"""
+    if not isinstance(ref_doc_id, str) or not ref_doc_id:
+        return False
+
+    current_ref_doc_info = _get_manager_ref_doc_info(manager)
+    if ref_doc_id not in current_ref_doc_info:
+        return False
+
+    delete_ref_doc = getattr(manager, "delete_ref_doc", None)
+    if not callable(delete_ref_doc):
+        return False
+
+    try:
+        delete_ref_doc(ref_doc_id, persist=persist)
+    except TypeError:
+        delete_ref_doc(ref_doc_id)
+    return True
+
+
+
+def _restore_ref_doc_snapshots(manager: Any, snapshots: list[dict[str, Any]] | None) -> int:
+    """在批量 persist 失败后恢复被替换掉的旧 ref_doc。"""
+    if not snapshots:
+        return 0
+
+    nodes_to_restore: list[Any] = []
+    for item in snapshots:
+        for node in item.get("nodes") or []:
+            nodes_to_restore.append(copy.deepcopy(node))
+
+    insert_nodes = getattr(manager, "insert_nodes", None)
+    if nodes_to_restore and callable(insert_nodes):
+        try:
+            insert_nodes(nodes_to_restore, persist=False)
+        except TypeError:
+            insert_nodes(nodes_to_restore)
+        return len(snapshots)
+
+    doc_store = _get_manager_docstore(manager)
+    docs_dict = getattr(doc_store, "docs", None) if doc_store is not None else None
+    legacy_ref_docs = getattr(doc_store, "_ref_docs", None) if doc_store is not None else None
+    alt_ref_docs = getattr(doc_store, "ref_docs", None) if doc_store is not None else None
+    if doc_store is None:
+        return 0
+
+    restored_count = 0
+    for item in snapshots:
+        ref_doc_id = item.get("ref_doc_id")
+        ref_doc_info = item.get("ref_doc_info")
+        if not isinstance(ref_doc_id, str) or not ref_doc_id or ref_doc_info is None:
+            continue
+        if isinstance(docs_dict, dict):
+            for node in item.get("nodes") or []:
+                node_copy = copy.deepcopy(node)
+                node_id = getattr(node_copy, "node_id", None)
+                if isinstance(node_id, str) and node_id:
+                    docs_dict[node_id] = node_copy
+        if isinstance(legacy_ref_docs, dict):
+            legacy_ref_docs[ref_doc_id] = copy.deepcopy(ref_doc_info)
+        elif isinstance(alt_ref_docs, dict):
+            alt_ref_docs[ref_doc_id] = copy.deepcopy(ref_doc_info)
+        restored_count += 1
+    return restored_count
+
+
+
+def _rollback_import_batch_after_persist_failure(manager: Any, *, kb_id: str, pending_items: list[dict[str, Any]]) -> None:
+    """在批量 persist 失败后回滚新写入内容，并尽量恢复被替换的 ref_doc。"""
+    restored_doc_count = 0
+    for item in pending_items:
+        status = item.get("status")
+        if status == "failed":
+            continue
+
+        for ref_doc_id in item.get("embedded_created_ref_doc_ids") or []:
+            _delete_ref_doc_with_optional_persist(manager, ref_doc_id, persist=False)
+        for ref_doc_id in item.get("created_ref_doc_ids") or []:
+            _delete_ref_doc_with_optional_persist(manager, ref_doc_id, persist=False)
+
+        replacement_snapshots = item.get("replacement_snapshots") or []
+        replacement_refs = item.get("replacement_refs") or []
+        if replacement_snapshots:
+            _restore_ref_doc_snapshots(manager, replacement_snapshots)
+            _restore_reimport_backup_file(item.get("path"), item.get("replacement_backup_bytes"))
+            restored_doc_count += int(item.get("replacement_deleted_doc_count") or 0)
+            continue
+
+        if replacement_refs:
+            _restore_reimport_backup_file(item.get("path"), item.get("replacement_backup_bytes"))
+            continue
+
+        target_path = item.get("path")
+        if isinstance(target_path, Path):
+            try:
+                if target_path.exists() and target_path.is_file():
+                    target_path.unlink()
+            except OSError:
+                pass
+
+    if restored_doc_count > 0:
+        _safe_add_doc_count(kb_id, restored_doc_count)
+
+
+
+def _commit_reimport_replacements(
+    manager: Any,
+    *,
+    kb_id: str,
+    replacement_refs: list[dict[str, Any]] | None,
+    persist: bool = True,
+) -> dict[str, int]:
+    """提交重导入替换操作，删除旧 ref_doc 并同步修正 doc_count。"""
+    if not replacement_refs:
+        return {"deleted_ref_doc_count": 0, "deleted_counted_doc_count": 0}
+
+    deleted_ref_doc_count = 0
+    deleted_counted_doc_count = 0
+    seen_ref_doc_ids: set[str] = set()
+    for item in replacement_refs:
+        ref_doc_id = item.get("ref_doc_id")
+        if not isinstance(ref_doc_id, str) or not ref_doc_id or ref_doc_id in seen_ref_doc_ids:
+            continue
+        seen_ref_doc_ids.add(ref_doc_id)
+        if _delete_ref_doc_with_optional_persist(manager, ref_doc_id, persist=persist):
+            deleted_ref_doc_count += 1
+            if bool(item.get("counts_doc", False)):
+                deleted_counted_doc_count += 1
+
+    if deleted_counted_doc_count > 0:
+        _safe_add_doc_count(kb_id, -deleted_counted_doc_count)
+    return {
+        "deleted_ref_doc_count": deleted_ref_doc_count,
+        "deleted_counted_doc_count": deleted_counted_doc_count,
+    }
+
+
+
 def _build_import_receipt_id(prefix: str) -> str:
     """生成导入回执 ID，便于前后端串联一次导入批次。"""
     return f"{prefix}-{uuid4().hex}"
 
 
 def get_latest_import_receipt(kb_id: str) -> dict[str, Any] | None:
-    """读取指定知识库最近一次导入回执。"""
+    """读取指定知识库最近一次导入回执，并补齐展示摘要。"""
     safe_kb_id = validate_kb_id(kb_id)
     _ensure_kb_active(safe_kb_id)
-    return kb_import_receipt_store.load_latest_import_receipt(safe_kb_id)
+    receipt = kb_import_receipt_store.load_latest_import_receipt(safe_kb_id)
+    if not isinstance(receipt, dict):
+        return receipt
+
+    payload = dict(receipt)
+    result = payload.get("result")
+    if isinstance(result, dict):
+        payload["result"] = _ensure_import_display_summary(dict(result))
+    return payload
+
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    """把任意值尽量稳定转换为 int，失败时返回默认值。"""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+
+def _rank_count_items(
+    counts: dict[str, Any] | None,
+    *,
+    name_key: str,
+    limit: int = 3,
+) -> list[dict[str, Any]]:
+    """把计数字典整理为按数量降序的展示列表。"""
+    if not isinstance(counts, dict):
+        return []
+
+    items: list[dict[str, Any]] = []
+    for raw_name, raw_count in counts.items():
+        name = str(raw_name).strip()
+        count = _safe_int(raw_count)
+        if not name or count <= 0:
+            continue
+        items.append({name_key: name, "count": count})
+    items.sort(key=lambda item: (-item["count"], item[name_key]))
+    return items[:limit]
+
+
+
+def _build_display_action(action: str, label: str, **extra: Any) -> dict[str, Any]:
+    """构造导入回执中的建议操作项。"""
+    payload = {"action": action, "label": label}
+    payload.update({key: value for key, value in extra.items() if value is not None})
+    return payload
+
+
+
+def _build_file_import_display_summary(result: dict[str, Any]) -> dict[str, Any]:
+    """构造文件导入结果的展示摘要，供前端回执直接渲染。"""
+    file_results = result.get("file_results") or []
+    diagnostics = result.get("diagnostics") or {}
+
+    total_items = _safe_int(diagnostics.get("total_files"), len(file_results))
+    indexed_items = _safe_int(diagnostics.get("indexed_files"), _safe_int(result.get("success_count")))
+    empty_items = _safe_int(diagnostics.get("empty_files"), _safe_int(result.get("empty_count")))
+    failed_items = _safe_int(diagnostics.get("failed_files"), _safe_int(result.get("failed_count")))
+    asset_registered_count = _safe_int(diagnostics.get("asset_registered_count"))
+    asset_warning_count = _safe_int(diagnostics.get("asset_warning_count"))
+    asset_registered_but_not_indexed_count = sum(
+        1
+        for item in file_results
+        if item.get("status") != "indexed" and bool((item.get("diagnostics") or {}).get("asset_registered"))
+    )
+    dependency_missing_count = _safe_int(diagnostics.get("dependency_missing_count"))
+    top_missing_dependencies = _rank_count_items(
+        diagnostics.get("missing_dependency_counts"),
+        name_key="dependency",
+    )
+    top_empty_reasons = _rank_count_items(diagnostics.get("empty_reason_counts"), name_key="reason")
+
+    has_dependency_issues = dependency_missing_count > 0 or bool(top_missing_dependencies)
+    has_blockers = has_dependency_issues or failed_items > 0
+    has_warnings = asset_warning_count > 0 or empty_items > 0 or asset_registered_but_not_indexed_count > 0
+
+    if has_dependency_issues:
+        affected_count = dependency_missing_count or sum(item["count"] for item in top_missing_dependencies)
+        headline = f"{affected_count} 个文件因依赖缺失未完成导入"
+        user_message = "请先安装缺失依赖后重试；详情可查看缺失依赖列表和失败项。"
+    elif failed_items > 0:
+        headline = f"{failed_items} 个文件导入失败"
+        user_message = "请检查失败项中的错误信息，修复后重新导入。"
+    elif asset_registered_but_not_indexed_count > 0:
+        headline = f"{asset_registered_but_not_indexed_count} 个图片资产已入库但未索引"
+        user_message = "图片资产已登记，但 OCR 尚未提取到可索引文本；可稍后补装 OCR 依赖或人工补录。"
+    elif indexed_items == total_items and total_items > 0:
+        headline = f"成功导入 {indexed_items} 个文件"
+        user_message = "文件已完成解析并写入知识库。"
+    elif empty_items > 0:
+        headline = f"{empty_items} 个文件未提取到可索引内容"
+        user_message = "请检查文件内容是否为空，或确认 OCR / PDF 解析依赖已正确安装。"
+    else:
+        headline = "导入已完成"
+        user_message = "可查看导入明细，确认各文件的最终状态。"
+
+    next_actions: list[dict[str, Any]] = []
+    for item in top_missing_dependencies:
+        dependency = item["dependency"]
+        next_actions.append(
+            _build_display_action(
+                "install_dependency",
+                f"安装缺失依赖：{dependency}",
+                dependency=dependency,
+                count=item["count"],
+            )
+        )
+    if failed_items > 0:
+        next_actions.append(
+            _build_display_action(
+                "review_failed_items",
+                f"查看 {failed_items} 个失败项",
+                count=failed_items,
+            )
+        )
+    if asset_registered_but_not_indexed_count > 0:
+        next_actions.append(
+            _build_display_action(
+                "review_empty_assets",
+                f"查看 {asset_registered_but_not_indexed_count} 个未索引图片资产",
+                count=asset_registered_but_not_indexed_count,
+                top_empty_reasons=top_empty_reasons,
+            )
+        )
+    elif empty_items > 0:
+        next_actions.append(
+            _build_display_action(
+                "review_empty_items",
+                f"查看 {empty_items} 个空结果文件",
+                count=empty_items,
+                top_empty_reasons=top_empty_reasons,
+            )
+        )
+
+    return {
+        "source_kind": "file_import",
+        "item_label": "文件",
+        "total_items": total_items,
+        "indexed_items": indexed_items,
+        "empty_items": empty_items,
+        "failed_items": failed_items,
+        "asset_registered_count": asset_registered_count,
+        "asset_registered_but_not_indexed_count": asset_registered_but_not_indexed_count,
+        "asset_warning_count": asset_warning_count,
+        "dependency_missing_count": dependency_missing_count,
+        "top_missing_dependencies": top_missing_dependencies,
+        "top_empty_reasons": top_empty_reasons,
+        "has_blockers": has_blockers,
+        "has_dependency_issues": has_dependency_issues,
+        "has_warnings": has_warnings,
+        "headline": headline,
+        "user_message": user_message,
+        "next_actions": next_actions,
+    }
+
+
+
+def _build_url_import_display_summary(result: dict[str, Any]) -> dict[str, Any]:
+    """构造 URL 导入结果的展示摘要。"""
+    url_results = result.get("url_results") or []
+    total_items = len(url_results) or len(result.get("urls") or [])
+    indexed_items = sum(1 for item in url_results if item.get("status") == "indexed")
+    empty_items = sum(1 for item in url_results if item.get("status") == "empty")
+    failed_items = sum(1 for item in url_results if item.get("status") == "failed")
+    has_blockers = failed_items > 0
+    has_warnings = empty_items > 0
+
+    if failed_items > 0:
+        headline = f"{failed_items} 个 URL 导入失败"
+        user_message = "请检查抓取结果和错误信息后重试。"
+    elif indexed_items == total_items and total_items > 0:
+        headline = f"成功导入 {indexed_items} 个 URL"
+        user_message = "URL 内容已完成抓取并写入知识库。"
+    elif empty_items > 0:
+        headline = f"{empty_items} 个 URL 未提取到可索引内容"
+        user_message = "请检查页面正文是否可访问，或页面内容是否为空。"
+    else:
+        headline = "URL 导入已完成"
+        user_message = "可查看导入明细确认最终状态。"
+
+    next_actions: list[dict[str, Any]] = []
+    if failed_items > 0:
+        next_actions.append(
+            _build_display_action(
+                "review_failed_items",
+                f"查看 {failed_items} 个失败 URL",
+                count=failed_items,
+            )
+        )
+    elif empty_items > 0:
+        next_actions.append(
+            _build_display_action(
+                "review_empty_items",
+                f"查看 {empty_items} 个空结果 URL",
+                count=empty_items,
+            )
+        )
+
+    return {
+        "source_kind": "url_import",
+        "item_label": "URL",
+        "total_items": total_items,
+        "indexed_items": indexed_items,
+        "empty_items": empty_items,
+        "failed_items": failed_items,
+        "asset_registered_count": 0,
+        "asset_registered_but_not_indexed_count": 0,
+        "asset_warning_count": 0,
+        "dependency_missing_count": 0,
+        "top_missing_dependencies": [],
+        "top_empty_reasons": [],
+        "has_blockers": has_blockers,
+        "has_dependency_issues": False,
+        "has_warnings": has_warnings,
+        "headline": headline,
+        "user_message": user_message,
+        "next_actions": next_actions,
+    }
+
+
+
+def _ensure_import_display_summary(result: dict[str, Any]) -> dict[str, Any]:
+    """确保导入结果始终包含 display_summary，便于前端稳定渲染。"""
+    if not isinstance(result, dict):
+        return result
+    display_summary = result.get("display_summary")
+    if isinstance(display_summary, dict):
+        return result
+
+    payload = dict(result)
+    if isinstance(payload.get("file_results"), list):
+        payload["display_summary"] = _build_file_import_display_summary(payload)
+    elif isinstance(payload.get("url_results"), list):
+        payload["display_summary"] = _build_url_import_display_summary(payload)
+    else:
+        payload["display_summary"] = {
+            "source_kind": "unknown",
+            "item_label": "项目",
+            "total_items": 0,
+            "indexed_items": 0,
+            "empty_items": 0,
+            "failed_items": 0,
+            "asset_registered_count": 0,
+            "asset_registered_but_not_indexed_count": 0,
+            "asset_warning_count": 0,
+            "dependency_missing_count": 0,
+            "top_missing_dependencies": [],
+            "top_empty_reasons": [],
+            "has_blockers": False,
+            "has_dependency_issues": False,
+            "has_warnings": False,
+            "headline": "导入结果已生成",
+            "user_message": "可查看导入明细确认状态。",
+            "next_actions": [],
+        }
+    return payload
+
+
+
+def _resolve_persisted_file_path(path: Path | None) -> str | None:
+    """返回已落盘文件的绝对路径；如果文件不存在或无法访问则返回 None。"""
+    if path is None:
+        return None
+    try:
+        if path.exists() and path.is_file():
+            return str(path.resolve())
+    except OSError:
+        return None
+    return None
+
 
 
 def _build_file_result(
+
     *,
     kb_id: str,
     filename: str,
@@ -288,17 +869,19 @@ def _build_file_result(
     embedded_assets: list[dict[str, Any]] | None = None,
     asset_warning_count: int = 0,
     ocr_diagnostics: dict[str, Any] | None = None,
+    failure_diagnostics: dict[str, Any] | None = None,
     ingestion_diagnostics: dict[str, Any] | None = None,
     stage_timings: dict[str, float] | None = None,
     skip_standalone_asset: bool = False,
+    file_kind_override: str | None = None,
 ) -> dict[str, Any]:
-    """将一次导入的 OCR 运行时信息裁剪为可序列化诊断字段。"""
+    """构造单文件导入结果，统一补齐 OCR、资产与诊断字段。"""
     embedded_asset_items = embedded_assets or []
     result = {
         "name": filename,
         "type": content_type,
         "size": size,
-        "path": str(path.resolve()) if path is not None else None,
+        "path": _resolve_persisted_file_path(path),
         "kb_id": kb_id,
         "status": status,
         "indexed_chunks": indexed_chunks,
@@ -312,14 +895,17 @@ def _build_file_result(
             status=status,
             embedded_assets=embedded_asset_items,
             ocr_diagnostics=ocr_diagnostics,
+            failure_diagnostics=failure_diagnostics,
             ingestion_diagnostics=ingestion_diagnostics,
             stage_timings=stage_timings,
             skip_standalone_asset=skip_standalone_asset,
+            file_kind_override=file_kind_override,
         ),
     }
     if message is not None:
         result["message"] = message
     return result
+
 
 
 def _is_markdown_file(path: Path | None, content_type: str) -> bool:
@@ -336,22 +922,137 @@ def _is_image_file(path: Path | None, content_type: str) -> bool:
     return content_type.lower().startswith("image/")
 
 
-def _detect_file_kind(path: Path | None, content_type: str) -> str:
-    """基于文件名后缀与 MIME 类型推断导入文件类别。"""
+def _decoded_text_looks_reasonable(text: str) -> bool:
+    """判断解码后的文本是否仍像可索引文本，而不是控制字符噪声。"""
+    if not text:
+        return True
+    disallowed_controls = sum(1 for char in text if ord(char) < 32 and char not in _TEXT_CONTROL_CHARS)
+    return disallowed_controls / len(text) <= 0.05
+
+
+def _looks_like_utf16_text(sample: bytes) -> bool:
+    """仅在 BOM 或零字节分布明显时，才把无后缀内容视为 UTF-16 文本。"""
+    if len(sample) < 2:
+        return False
+
+    encoding = None
+    if sample.startswith((b"\xff\xfe", b"\xfe\xff")):
+        encoding = "utf-16"
+    else:
+        even_bytes = sample[0::2]
+        odd_bytes = sample[1::2]
+        even_zero_ratio = even_bytes.count(0) / len(even_bytes) if even_bytes else 0.0
+        odd_zero_ratio = odd_bytes.count(0) / len(odd_bytes) if odd_bytes else 0.0
+        if max(even_zero_ratio, odd_zero_ratio) < 0.3:
+            return False
+        encoding = "utf-16-le" if odd_zero_ratio >= even_zero_ratio else "utf-16-be"
+
+    try:
+        decoded = sample.decode(encoding)
+    except UnicodeDecodeError:
+        return False
+    return _decoded_text_looks_reasonable(decoded)
+
+
+def _looks_like_text_payload(content: bytes | None) -> bool:
+    """判断无后缀无 MIME 内容是否像可索引文本。"""
+    if content is None:
+        return False
+    sample = content[:8192]
+    if not sample:
+        return True
+
+    for encoding in ("utf-8", "utf-8-sig"):
+        try:
+            decoded = sample.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+        if _decoded_text_looks_reasonable(decoded):
+            return True
+
+    return _looks_like_utf16_text(sample)
+
+
+def _looks_like_binary_payload(content: bytes | None) -> bool:
+    """判断无后缀无 MIME 内容是否明显属于二进制字节流。"""
+    if content is None:
+        return False
+    sample = content[:8192]
+    if not sample:
+        return False
+    if _looks_like_text_payload(sample):
+        return False
+    if b"\x00" in sample:
+        return True
+
+    disallowed_controls = sum(1 for byte in sample if byte < 32 and byte not in _TEXT_CONTROL_CHAR_BYTES)
+    return disallowed_controls / len(sample) >= 0.1
+
+
+def _detect_file_kind_from_content_signature(content: bytes | None) -> str | None:
+    """基于常见文件头特征识别无后缀无 MIME 的已支持文件类型。"""
+    if not content:
+        return None
+
+    sample = content[:32]
+    if sample.startswith(b"%PDF-"):
+        return "pdf"
+    if sample.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image"
+    if sample.startswith(b"\xff\xd8\xff"):
+        return "image"
+    if sample.startswith((b"GIF87a", b"GIF89a")):
+        return "image"
+    if sample.startswith(b"BM"):
+        return "image"
+    if len(sample) >= 12 and sample[:4] == b"RIFF" and sample[8:12] == b"WEBP":
+        return "image"
+    return None
+
+
+def _detect_file_kind(path: Path | None, content_type: str, content: bytes | None = None) -> str:
+    """基于文件名后缀、MIME 类型与必要时的内容嗅探推断导入文件类别。"""
     if _is_markdown_file(path, content_type):
         return "markdown"
     if _is_image_file(path, content_type):
         return "image"
 
-    lower_content_type = content_type.lower()
+    lower_content_type = str(content_type or "").strip().lower()
     suffix = path.suffix.lower() if path is not None else ""
     if suffix == ".pdf" or lower_content_type == "application/pdf":
         return "pdf"
     if lower_content_type.startswith("text/") or suffix in {".txt", ".csv", ".json", ".xml", ".yaml", ".yml", ".html", ".htm", ".rst", ".log"}:
         return "text"
+    if not suffix and lower_content_type in _CONTENT_SNIFF_FALLBACK_MIME_TYPES:
+        signature_kind = _detect_file_kind_from_content_signature(content)
+        if signature_kind is not None:
+            return signature_kind
+        if _looks_like_text_payload(content):
+            return "text"
+        if _looks_like_binary_payload(content):
+            return "binary"
     if lower_content_type:
         return "binary"
+    if suffix:
+        return "binary"
     return "unknown"
+
+def _is_rejected_file_kind(file_kind: str) -> bool:
+    """判断当前文件类型是否应在导入入口直接拒绝。"""
+    return file_kind == "binary"
+
+
+def _build_unsupported_file_type_message(*, path: Path | None, content_type: str) -> str:
+    """构造不支持文件类型时的用户提示。"""
+    suffix = path.suffix.lower() if path is not None else ""
+    content_type_label = content_type.strip()
+    detail_parts = []
+    if suffix:
+        detail_parts.append(suffix)
+    if content_type_label:
+        detail_parts.append(content_type_label)
+    detail = f"（{' / '.join(detail_parts)}）" if detail_parts else ""
+    return f"暂不支持该文件类型导入{detail}，请上传 Markdown、PDF、文本或图片文件"
 
 
 def _extract_image_ocr_result(path: Path, content_type: str) -> dict[str, Any]:
@@ -369,7 +1070,7 @@ def _new_ocr_runtime_diagnostics() -> dict[str, Any]:
 
 
 def _extract_ocr_runtime_diagnostics(source: dict[str, Any] | None) -> dict[str, Any]:
-    """提取 OCR 细粒度运行时字段，避免主链路散落复制逻辑。"""
+    """提取 OCR 运行时耗时与实例复用诊断字段。"""
     payload = _new_ocr_runtime_diagnostics()
     if not isinstance(source, dict):
         return payload
@@ -381,6 +1082,256 @@ def _extract_ocr_runtime_diagnostics(source: dict[str, Any] | None) -> dict[str,
             payload[key] = 0.0
     payload["ocr_instance_reused"] = bool(source.get("ocr_instance_reused", False))
     return payload
+
+
+
+def _extract_pdf_ocr_diagnostics_from_source(
+    ingestion_diagnostics: dict[str, Any] | None,
+    *,
+    target_path: Path | None,
+) -> dict[str, Any] | None:
+    """从文件级 ingestion diagnostics 中提取 PDF OCR 诊断。"""
+    if not isinstance(ingestion_diagnostics, dict):
+        return None
+
+    source_items = ingestion_diagnostics.get("source_file_diagnostics")
+    if not isinstance(source_items, list) or not source_items:
+        return None
+
+    resolved_target = str(target_path.resolve()) if target_path is not None else None
+    selected = None
+    for item in source_items:
+        if not isinstance(item, dict):
+            continue
+        source_type = item.get("source_type")
+        if source_type not in {"pdf_text_layer", "pdf_ocr_fallback"}:
+            continue
+        if resolved_target is None or item.get("file_path") == resolved_target:
+            selected = item
+            break
+    if selected is None:
+        return None
+
+    payload = {
+        "ocr_attempted": bool(selected.get("ocr_attempted", False)),
+        "ocr_status": selected.get("ocr_status"),
+        "ocr_text_length": int(selected.get("ocr_text_length") or 0),
+        "ocr_error": selected.get("ocr_error"),
+        "indexed_from_ocr": bool(selected.get("indexed_from_ocr", False)),
+        "ocr_engine": selected.get("ocr_engine"),
+        **_extract_failure_diagnostics(selected),
+        **_extract_ocr_runtime_diagnostics(selected),
+    }
+    if selected.get("source_type") == "pdf_ocr_fallback":
+        payload["ocr_attempted"] = True
+        if payload["ocr_status"] is None:
+            payload["ocr_status"] = "success" if payload["indexed_from_ocr"] else "no_text"
+        if payload["ocr_engine"] is None:
+            payload["ocr_engine"] = "paddleocr"
+    return payload
+
+
+def _new_failure_diagnostics() -> dict[str, Any]:
+    """创建失败诊断的稳定默认结构。"""
+    return {
+        "failure_category": None,
+        "missing_dependency": None,
+        "dependency_status": "unknown",
+    }
+
+
+
+def _canonicalize_dependency_name(raw_name: Any) -> str | None:
+    """规范化依赖名，兼容 PyMuPDF / fitz 等别名。"""
+    if raw_name is None:
+        return None
+    name = str(raw_name).strip().lower()
+    if not name:
+        return None
+    alias_map = {
+        "pymupdf": "fitz",
+        "fitz": "fitz",
+        "paddleocr": "paddleocr",
+        "paddle": "paddle",
+        "paddlepaddle": "paddle",
+        "pil": "pillow",
+        "pillow": "pillow",
+    }
+    return alias_map.get(name, name)
+
+
+
+def _infer_missing_dependency(exc: Exception | None = None, message: str | None = None) -> str | None:
+    """从异常对象或错误文案中推断缺失依赖。"""
+    exc_name = _canonicalize_dependency_name(getattr(exc, "name", None)) if exc is not None else None
+    if exc_name:
+        return exc_name
+
+    text = str(message or exc or "")
+    lowered = text.lower()
+    if "pymupdf" in lowered or "fitz" in lowered:
+        return "fitz"
+    if "paddleocr" in lowered:
+        return "paddleocr"
+    if "paddlepaddle" in lowered or "no module named 'paddle'" in lowered or 'no module named "paddle"' in lowered:
+        return "paddle"
+    if "pillow" in lowered or "pil" in lowered:
+        return "pillow"
+
+    match = re.search(r'no module named [\'"]([^\'"]+)[\'"]', text, re.IGNORECASE)
+    if match:
+        return _canonicalize_dependency_name(match.group(1))
+    return None
+
+
+
+def _dependency_display_name(dependency: str | None) -> str | None:
+    """返回适合展示给用户的依赖名称。"""
+    normalized = _canonicalize_dependency_name(dependency)
+    label_map = {
+        "fitz": "PyMuPDF（fitz）",
+        "paddleocr": "paddleocr",
+        "paddle": "paddlepaddle",
+        "pillow": "Pillow（PIL）",
+    }
+    return label_map.get(normalized, normalized)
+
+
+
+def _build_dependency_missing_message(dependency: str | None, *, file_kind: str | None = None) -> str | None:
+    """为缺失依赖场景生成更可读的失败文案。"""
+    normalized = _canonicalize_dependency_name(dependency)
+    if normalized == "fitz":
+        return "缺少 PyMuPDF（fitz）依赖，暂时无法解析 PDF 文件"
+    if normalized == "paddleocr":
+        return "缺少 paddleocr 依赖，暂时无法执行图片 OCR"
+    if normalized == "paddle":
+        return "缺少 paddlepaddle 依赖，暂时无法执行图片 OCR"
+    if normalized == "pillow":
+        return "缺少 Pillow（PIL）依赖，暂时无法加载图片文件"
+
+    display_name = _dependency_display_name(normalized)
+    if display_name is None:
+        return None
+    if file_kind == "image":
+        return f"缺少 {display_name} 依赖，暂时无法处理图片文件"
+    return f"缺少 {display_name} 依赖，请安装后重试"
+
+
+
+def _build_failure_message(
+    exc: Exception | None,
+    *,
+    failure_diagnostics: dict[str, Any] | None = None,
+    file_kind: str | None = None,
+) -> str:
+    """构造用户可读的导入失败消息。"""
+    diagnostics = _extract_failure_diagnostics(failure_diagnostics)
+    message = _build_dependency_missing_message(diagnostics.get("missing_dependency"), file_kind=file_kind)
+    if message:
+        return message
+
+    raw_message = str(exc or "").strip()
+    if raw_message:
+        return raw_message
+    return "文件导入失败，请检查日志后重试"
+
+
+
+def _build_exception_failure_diagnostics(
+    exc: Exception | None,
+    *,
+    default_category: str | None = None,
+    dependency_status: str = "unknown",
+) -> dict[str, Any]:
+    """根据异常生成失败诊断。"""
+    payload = _new_failure_diagnostics()
+    missing_dependency = _infer_missing_dependency(exc=exc)
+    if missing_dependency is not None:
+        payload["failure_category"] = "dependency_missing"
+        payload["missing_dependency"] = missing_dependency
+        payload["dependency_status"] = "missing"
+        return payload
+
+    payload["failure_category"] = default_category
+    payload["dependency_status"] = dependency_status
+    return payload
+
+
+
+def _extract_failure_diagnostics(
+source: dict[str, Any] | None) -> dict[str, Any]:
+    """从任意诊断对象中提取统一失败诊断结构。"""
+    payload = _new_failure_diagnostics()
+    if not isinstance(source, dict):
+        return payload
+
+    failure_category = source.get("failure_category")
+    if isinstance(failure_category, str) and failure_category:
+        payload["failure_category"] = failure_category
+
+    missing_dependency = _canonicalize_dependency_name(source.get("missing_dependency"))
+    if missing_dependency is not None:
+        payload["missing_dependency"] = missing_dependency
+
+    dependency_status = source.get("dependency_status")
+    if isinstance(dependency_status, str) and dependency_status:
+        payload["dependency_status"] = dependency_status
+
+    if payload["missing_dependency"] is not None:
+        payload["failure_category"] = "dependency_missing"
+        payload["dependency_status"] = "missing"
+    return payload
+
+
+
+def _resolve_file_failure_diagnostics(
+    *,
+    file_kind: str,
+    status: str,
+    ocr_info: dict[str, Any],
+    failure_diagnostics: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """合并文件级失败信息与 OCR 失败信息，得到最终诊断。"""
+    resolved = _extract_failure_diagnostics(failure_diagnostics)
+    ocr_failure = _extract_failure_diagnostics(ocr_info)
+
+    for key in ("failure_category", "missing_dependency"):
+        if resolved.get(key) is None and ocr_failure.get(key) is not None:
+            resolved[key] = ocr_failure[key]
+    if resolved.get("dependency_status") == "unknown" and ocr_failure.get("dependency_status") != "unknown":
+        resolved["dependency_status"] = ocr_failure["dependency_status"]
+
+    if resolved["missing_dependency"] is not None:
+        resolved["failure_category"] = "dependency_missing"
+        resolved["dependency_status"] = "missing"
+        return resolved
+
+    if resolved["failure_category"] is None:
+        if file_kind == "image" and ocr_info.get("ocr_status") == "failed":
+            resolved["failure_category"] = "ocr_runtime_error"
+        elif status == "failed":
+            resolved["failure_category"] = "indexing_error"
+
+    if resolved["dependency_status"] == "unknown":
+        if resolved["failure_category"] == "dependency_missing":
+            resolved["dependency_status"] = "missing"
+        elif ocr_info.get("ocr_attempted") or ocr_info.get("ocr_engine"):
+            resolved["dependency_status"] = "ready"
+
+    return resolved
+
+
+def _build_ocr_index_document(*, text: str, metadata: dict[str, Any]) -> Document:
+    """为 OCR 派生文本补齐 metadata 排除策略，避免小 chunk_size 被元数据挤爆。"""
+    normalized_metadata = {key: value for key, value in metadata.items() if value is not None}
+    excluded_keys = [key for key in OCR_INDEX_EXCLUDED_METADATA_KEYS if key in normalized_metadata]
+    return Document(
+        text=text,
+        metadata=normalized_metadata,
+        excluded_embed_metadata_keys=excluded_keys,
+        excluded_llm_metadata_keys=excluded_keys,
+    )
 
 
 def _build_image_ocr_document(
@@ -409,8 +1360,7 @@ def _build_image_ocr_document(
         "mime_type": content_type or "application/octet-stream",
         "ocr_engine": ocr_result.get("engine"),
     }
-    metadata = {key: value for key, value in metadata.items() if value is not None}
-    return Document(text=text, metadata=metadata)
+    return _build_ocr_index_document(text=text, metadata=metadata)
 
 
 def _is_embedded_image_ocr_candidate(asset: dict[str, Any]) -> bool:
@@ -448,8 +1398,7 @@ def _build_embedded_image_ocr_document(*, kb_id: str, asset: dict[str, Any], ocr
         "referenced_path": asset.get("referenced_path"),
         "occurrence_index": asset.get("occurrence_index"),
     }
-    metadata = {key: value for key, value in metadata.items() if value is not None}
-    return Document(text=text, metadata=metadata)
+    return _build_ocr_index_document(text=text, metadata=metadata)
 
 
 def _index_embedded_image_assets(
@@ -489,6 +1438,7 @@ def _index_embedded_image_assets(
                 "ocr_error": str(exc),
                 "indexed_from_ocr": False,
                 "ocr_engine": None,
+                **_build_exception_failure_diagnostics(exc, default_category="ocr_runtime_error"),
                 **_new_ocr_runtime_diagnostics(),
             }
             continue
@@ -501,6 +1451,7 @@ def _index_embedded_image_assets(
             "ocr_error": ocr_result.get("error"),
             "indexed_from_ocr": False,
             "ocr_engine": ocr_result.get("engine"),
+            **_extract_failure_diagnostics(ocr_result),
             **_extract_ocr_runtime_diagnostics(ocr_result),
         }
         asset["ocr_diagnostics"] = ocr_diagnostics
@@ -522,6 +1473,7 @@ def _index_embedded_image_assets(
                 "ocr_status": "failed",
                 "ocr_error": str(exc),
                 "indexed_from_ocr": False,
+                **_build_exception_failure_diagnostics(exc, default_category="indexing_error", dependency_status="ready"),
             }
             continue
         _add_stage_elapsed(stage_targets, "embedded_asset_index_ms", index_started_at)
@@ -592,15 +1544,23 @@ def _build_file_diagnostics(
     status: str,
     embedded_assets: list[dict[str, Any]] | None = None,
     ocr_diagnostics: dict[str, Any] | None = None,
+    failure_diagnostics: dict[str, Any] | None = None,
     ingestion_diagnostics: dict[str, Any] | None = None,
     stage_timings: dict[str, float] | None = None,
     skip_standalone_asset: bool = False,
+    file_kind_override: str | None = None,
 ) -> dict[str, Any]:
     """构建单文件 diagnostics，并补齐 empty 场景的原因字段。"""
-    file_kind = _detect_file_kind(path, content_type)
+    file_kind = file_kind_override or _detect_file_kind(path, content_type)
     embedded_summary = _summarize_embedded_assets(embedded_assets)
     embedded_ocr_summary = _summarize_embedded_asset_ocr(embedded_assets)
     ocr_info = dict(ocr_diagnostics or {})
+    failure_info = _resolve_file_failure_diagnostics(
+        file_kind=file_kind,
+        status=status,
+        ocr_info=ocr_info,
+        failure_diagnostics=failure_diagnostics,
+    )
     ingestion_summary = _new_ingestion_diagnostics_summary()
     _merge_ingestion_diagnostics(ingestion_summary, ingestion_diagnostics)
 
@@ -639,6 +1599,7 @@ def _build_file_diagnostics(
         "empty_reason": empty_reason,
         "standalone_asset_candidate": file_kind == "image",
         "skip_standalone_asset": bool(skip_standalone_asset),
+        "file_retained_on_disk": _resolve_persisted_file_path(path) is not None,
         "ocr_attempted": bool(ocr_info.get("ocr_attempted", False)),
         "ocr_status": ocr_info.get("ocr_status"),
         "ocr_text_length": int(ocr_info.get("ocr_text_length") or 0),
@@ -653,6 +1614,7 @@ def _build_file_diagnostics(
         "nodes_with_embedding_count": int(ingestion_summary.get("nodes_with_embedding_count") or 0),
         "nodes_without_embedding_count": int(ingestion_summary.get("nodes_without_embedding_count") or 0),
         "index_stage_timings": dict(ingestion_summary.get("index_stage_timings") or _new_index_stage_timings()),
+        **failure_info,
         **_extract_ocr_runtime_diagnostics(ocr_info),
     }
     if ocr_info.get("ocr_engine"):
@@ -693,6 +1655,10 @@ def _aggregate_import_diagnostics(
         "asset_registered_count": 0,
         "skip_standalone_asset_count": 0,
         "empty_reason_counts": {},
+        "failure_category_counts": {},
+        "dependency_status_counts": {},
+        "dependency_missing_count": 0,
+        "missing_dependency_counts": {},
         "stage_timings": dict(stage_timings or {}),
         **_new_ingestion_diagnostics_summary(),
     }
@@ -715,6 +1681,27 @@ def _aggregate_import_diagnostics(
         empty_reason = diagnostics.get("empty_reason")
         if isinstance(empty_reason, str) and empty_reason:
             summary["empty_reason_counts"][empty_reason] = int(summary["empty_reason_counts"].get(empty_reason) or 0) + 1
+
+        failure_category = diagnostics.get("failure_category")
+        if isinstance(failure_category, str) and failure_category:
+            summary["failure_category_counts"][failure_category] = (
+                int(summary["failure_category_counts"].get(failure_category) or 0) + 1
+            )
+            if failure_category == "dependency_missing":
+                summary["dependency_missing_count"] += 1
+
+        dependency_status = diagnostics.get("dependency_status")
+        if isinstance(dependency_status, str) and dependency_status:
+            summary["dependency_status_counts"][dependency_status] = (
+                int(summary["dependency_status_counts"].get(dependency_status) or 0) + 1
+            )
+
+        missing_dependency = diagnostics.get("missing_dependency")
+        if isinstance(missing_dependency, str) and missing_dependency:
+            summary["missing_dependency_counts"][missing_dependency] = (
+                int(summary["missing_dependency_counts"].get(missing_dependency) or 0) + 1
+            )
+
         summary["embedded_asset_count"] += int(diagnostics.get("embedded_asset_count") or 0)
         summary["embedded_asset_ready_count"] += int(diagnostics.get("embedded_asset_ready_count") or 0)
         summary["embedded_asset_missing_count"] += int(diagnostics.get("embedded_asset_missing_count") or 0)
@@ -862,7 +1849,7 @@ def _build_import_path_aliases(pending_items: list[dict[str, Any]], kb_dir: Path
 
 
 def _collect_ready_embedded_image_relative_paths(embedded_assets: list[dict[str, Any]] | None) -> set[str]:
-    """收集 ready 的 embedded 图片路径，用于压制同图 standalone 处理。"""
+    """收集当前批次 ready 的 embedded 图片路径，用于压制同路径 standalone 处理。"""
     ready_paths: set[str] = set()
     for item in embedded_assets or []:
         if item.get("status") != "ready":
@@ -871,6 +1858,31 @@ def _collect_ready_embedded_image_relative_paths(embedded_assets: list[dict[str,
         if asset_type != "image":
             continue
         relative_path = item.get("resolved_relative_path")
+        if isinstance(relative_path, str) and relative_path:
+            ready_paths.add(relative_path)
+    return ready_paths
+
+
+
+def _collect_existing_embedded_image_relative_paths(
+    kb_id: str,
+    *,
+    excluded_source_docs: set[str],
+) -> set[str]:
+    """收集历史已生效的 embedded 图片路径，避免跨批次重导入回弹为 standalone。"""
+    ready_paths: set[str] = set()
+    for asset in asset_service.list_assets(kb_id):
+        if asset.get("asset_role") != "embedded":
+            continue
+        asset_type = asset.get("asset_type") or "image"
+        if asset_type != "image":
+            continue
+        if asset.get("status") == "orphaned":
+            continue
+        source_relative_path = asset.get("source_doc_relative_path")
+        if isinstance(source_relative_path, str) and source_relative_path in excluded_source_docs:
+            continue
+        relative_path = asset.get("relative_path")
         if isinstance(relative_path, str) and relative_path:
             ready_paths.add(relative_path)
     return ready_paths
@@ -886,6 +1898,7 @@ def _build_skipped_standalone_ocr_diagnostics() -> dict[str, Any]:
         "ocr_error": None,
         "indexed_from_ocr": False,
         "ocr_engine": None,
+        **_new_failure_diagnostics(),
         **_new_ocr_runtime_diagnostics(),
     }
 
@@ -1038,7 +2051,7 @@ def import_files(
 
         manager_started_at = time.perf_counter()
         try:
-            manager = runtime_state.get_index_manager()
+            manager = runtime_state.get_index_manager(kb_id)
         finally:
             _add_stage_elapsed((import_stage_timings,), "get_index_manager_ms", manager_started_at)
         return manager
@@ -1062,8 +2075,11 @@ def import_files(
         content_type = getattr(file, "content_type", "") or ""
         file_size = 0
         target_path: Path | None = None
+        detected_file_kind = "unknown"
         stored_filename = FilenameSanitizer.sanitize(original_name)
         folder_path = folder_path_from_relative_path(relative_path) if relative_path is not None else None
+        replacement_refs: list[dict[str, Any]] = []
+        replacement_backup_bytes: bytes | None = None
 
         persist_started_at = time.perf_counter()
         try:
@@ -1074,6 +2090,31 @@ def import_files(
             if hasattr(file.file, "seek"):
                 file.file.seek(0)
 
+            detected_path = Path(relative_path or original_name) if (relative_path or original_name) else None
+            detected_file_kind = _detect_file_kind(detected_path, content_type, file_content)
+            if _is_rejected_file_kind(detected_file_kind):
+                failure_diagnostics = _new_failure_diagnostics()
+                failure_diagnostics["failure_category"] = "unsupported_file_type"
+                failed_count += 1
+                _finalize_stage_total(file_stage_timings)
+                file_results[index] = _build_file_result(
+                    kb_id=kb_id,
+                    filename=stored_filename,
+                    content_type=content_type,
+                    size=file_size,
+                    path=detected_path,
+                    status="failed",
+                    indexed_chunks=0,
+                    relative_path=relative_path,
+                    folder_path=folder_path,
+                    message=_build_unsupported_file_type_message(path=detected_path, content_type=content_type),
+                    failure_diagnostics=failure_diagnostics,
+                    ingestion_diagnostics=_new_ingestion_diagnostics_summary(),
+                    stage_timings=file_stage_timings,
+                    file_kind_override=detected_file_kind,
+                )
+                continue
+
             if safe_import_mode == "preserve_tree" and relative_path is not None:
                 target_path = ensure_path_within(kb_dir, kb_dir / relative_path)
                 target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1081,6 +2122,17 @@ def import_files(
             else:
                 stored_filename = FilenameSanitizer.generate_unique_filename(stored_filename)
                 target_path = ensure_path_within(kb_dir, kb_dir / stored_filename)
+
+            if target_path.exists() and target_path.is_file():
+                current_manager = _ensure_import_runtime()
+                replacement_refs = _collect_existing_ref_docs_for_import(
+                    current_manager,
+                    kb_id=kb_id,
+                    target_path=target_path,
+                    relative_path=relative_path,
+                )
+                if replacement_refs:
+                    replacement_backup_bytes = target_path.read_bytes()
 
             with target_path.open("wb") as buffer:
                 buffer.write(file_content)
@@ -1097,14 +2149,30 @@ def import_files(
                     "path": target_path,
                     "relative_path": relative_path,
                     "folder_path": folder_path,
-                    "file_kind": _detect_file_kind(target_path, content_type),
+                    "file_kind": detected_file_kind,
                     "stage_timings": file_stage_timings,
                     "ingestion_diagnostics": _new_ingestion_diagnostics_summary(),
+                    "replacement_refs": replacement_refs,
+                    "replacement_backup_bytes": replacement_backup_bytes,
+                    "created_ref_doc_ids": [],
+                    "embedded_created_ref_doc_ids": [],
+                    "replacement_snapshots": [],
+                    "replacement_deleted_doc_count": 0,
                 }
             )
         except Exception as exc:
             _record_file_save_elapsed((file_stage_timings, import_stage_timings), persist_started_at)
-            if target_path is not None:
+            if replacement_refs:
+                try:
+                    _restore_reimport_backup_file(target_path, replacement_backup_bytes)
+                except OSError:
+                    if target_path is not None:
+                        try:
+                            if target_path.exists() and target_path.is_file():
+                                target_path.unlink()
+                        except OSError:
+                            pass
+            elif target_path is not None:
                 try:
                     if target_path.exists() and target_path.is_file():
                         target_path.unlink()
@@ -1125,6 +2193,7 @@ def import_files(
                 message=str(exc),
                 ingestion_diagnostics=_new_ingestion_diagnostics_summary(),
                 stage_timings=file_stage_timings,
+                file_kind_override=detected_file_kind,
             )
 
     import_path_aliases = _build_import_path_aliases(pending_items, kb_dir)
@@ -1139,12 +2208,17 @@ def import_files(
             )
 
     embedded_image_relative_paths: set[str] = set()
+    current_batch_markdown_relative_paths: set[str] = set()
     for item in pending_items:
         target_path = item["path"]
         if not _is_markdown_file(target_path, item["content_type"]):
             item["embedded_assets"] = []
             item["asset_warning_count"] = 0
             continue
+
+        relative_path = item.get("relative_path")
+        if isinstance(relative_path, str) and relative_path:
+            current_batch_markdown_relative_paths.add(relative_path)
 
         extract_started_at = time.perf_counter()
         embedded_assets, asset_warning_count = _extract_embedded_assets_for_file(
@@ -1158,6 +2232,13 @@ def import_files(
         item["embedded_assets"] = embedded_assets
         item["asset_warning_count"] = asset_warning_count
         embedded_image_relative_paths.update(_collect_ready_embedded_image_relative_paths(embedded_assets))
+
+    embedded_image_relative_paths.update(
+        _collect_existing_embedded_image_relative_paths(
+            kb_id,
+            excluded_source_docs=current_batch_markdown_relative_paths,
+        )
+    )
 
     for item in pending_items:
         target_path = item["path"]
@@ -1186,6 +2267,7 @@ def import_files(
                     "ocr_error": str(exc),
                     "indexed_from_ocr": False,
                     "ocr_engine": None,
+                    **_build_exception_failure_diagnostics(exc, default_category="ocr_runtime_error"),
                     **_new_ocr_runtime_diagnostics(),
                 }
                 continue
@@ -1198,6 +2280,7 @@ def import_files(
                 "ocr_error": ocr_result.get("error"),
                 "indexed_from_ocr": False,
                 "ocr_engine": ocr_result.get("engine"),
+                **_extract_failure_diagnostics(ocr_result),
                 **_extract_ocr_runtime_diagnostics(ocr_result),
             }
             item["ocr_diagnostics"] = ocr_diagnostics
@@ -1218,7 +2301,9 @@ def import_files(
             index_started_at = time.perf_counter()
             try:
                 current_manager = _ensure_import_runtime()
+                ref_doc_ids_before_index = _capture_ref_doc_ids(current_manager)
                 nodes = current_manager.load_documents([document], chunk_size, chunk_overlap, kb_id=kb_id, persist=False) or []
+                item["created_ref_doc_ids"] = _collect_new_ref_doc_ids(current_manager, ref_doc_ids_before_index)
                 _consume_manager_ingestion_diagnostics(current_manager, item["ingestion_diagnostics"])
             except Exception as exc:
                 _add_stage_elapsed(stage_targets, "primary_index_ms", index_started_at)
@@ -1232,6 +2317,7 @@ def import_files(
                     "ocr_error": str(exc),
                     "indexed_from_ocr": False,
                     "ocr_engine": existing_ocr.get("ocr_engine"),
+                    **_build_exception_failure_diagnostics(exc, default_category="indexing_error", dependency_status="ready"),
                     **_extract_ocr_runtime_diagnostics(existing_ocr),
                 }
                 continue
@@ -1244,12 +2330,26 @@ def import_files(
             continue
 
         index_started_at = time.perf_counter()
+        current_manager = None
         try:
             current_manager = _ensure_import_runtime()
+            ref_doc_ids_before_index = _capture_ref_doc_ids(current_manager)
             nodes = current_manager.load_files([target_path.resolve()], chunk_size, chunk_overlap, kb_id=kb_id, persist=False) or []
-            _consume_manager_ingestion_diagnostics(current_manager, item["ingestion_diagnostics"])
+            item["created_ref_doc_ids"] = _collect_new_ref_doc_ids(current_manager, ref_doc_ids_before_index)
+            consumed_ingestion = _consume_manager_ingestion_diagnostics(current_manager, item["ingestion_diagnostics"])
+            if file_kind == "pdf":
+                pdf_ocr_diagnostics = _extract_pdf_ocr_diagnostics_from_source(consumed_ingestion, target_path=target_path)
+                if pdf_ocr_diagnostics is not None:
+                    item["ocr_diagnostics"] = pdf_ocr_diagnostics
         except Exception as exc:
             _add_stage_elapsed(stage_targets, "primary_index_ms", index_started_at)
+            consumed_ingestion = None
+            if current_manager is not None:
+                consumed_ingestion = _consume_manager_ingestion_diagnostics(current_manager, item["ingestion_diagnostics"])
+            if file_kind == "pdf":
+                pdf_ocr_diagnostics = _extract_pdf_ocr_diagnostics_from_source(consumed_ingestion, target_path=target_path)
+                if pdf_ocr_diagnostics is not None:
+                    item["ocr_diagnostics"] = pdf_ocr_diagnostics
             try:
                 if target_path.exists() and target_path.is_file():
                     target_path.unlink()
@@ -1257,7 +2357,12 @@ def import_files(
                 pass
             item["status"] = "failed"
             item["indexed_chunks"] = 0
-            item["message"] = str(exc)
+            item["failure_diagnostics"] = _build_exception_failure_diagnostics(exc, default_category="indexing_error")
+            item["message"] = _build_failure_message(
+                exc,
+                failure_diagnostics=item["failure_diagnostics"],
+                file_kind=item.get("file_kind"),
+            )
             continue
         _add_stage_elapsed(stage_targets, "primary_index_ms", index_started_at)
         item["indexed_chunks"] = len(nodes)
@@ -1268,7 +2373,11 @@ def import_files(
     for item in pending_items:
         status = item["status"]
         target_path = item["path"]
+        replacement_refs = item.get("replacement_refs") or []
+        replacement_backup_bytes = item.get("replacement_backup_bytes")
         if status == "failed":
+            if replacement_refs:
+                _restore_reimport_backup_file(target_path, replacement_backup_bytes)
             failed_count += 1
             _finalize_stage_total(item["stage_timings"])
             file_results[item["index"]] = _build_file_result(
@@ -1282,8 +2391,14 @@ def import_files(
                 relative_path=item["relative_path"],
                 folder_path=item["folder_path"],
                 message=item.get("message"),
+                embedded_assets=item.get("embedded_assets"),
+                asset_warning_count=int(item.get("asset_warning_count") or 0),
+                ocr_diagnostics=item.get("ocr_diagnostics"),
+                failure_diagnostics=item.get("failure_diagnostics"),
                 ingestion_diagnostics=item.get("ingestion_diagnostics"),
                 stage_timings=item["stage_timings"],
+                skip_standalone_asset=bool(item.get("skip_standalone_asset", False)),
+                file_kind_override=item.get("file_kind"),
             )
             continue
 
@@ -1292,6 +2407,8 @@ def import_files(
 
         embedded_chunk_count = 0
         if embedded_assets:
+            current_manager = _ensure_import_runtime()
+            ref_doc_ids_before_embedded_index = _capture_ref_doc_ids(current_manager)
             embedded_chunk_count = _index_embedded_image_assets(
                 manager_getter=_ensure_import_runtime,
                 kb_id=kb_id,
@@ -1302,12 +2419,33 @@ def import_files(
                 ingestion_targets=(item["ingestion_diagnostics"],),
                 persist=False,
             )
+            item["embedded_created_ref_doc_ids"] = _collect_new_ref_doc_ids(current_manager, ref_doc_ids_before_embedded_index)
             if embedded_chunk_count > 0:
                 index_storage_dirty = True
         chunk_count = item["indexed_chunks"] + embedded_chunk_count
         status = item["status"]
         if status == "empty" and embedded_chunk_count > 0:
             status = "indexed"
+
+        if status == "indexed" and replacement_refs:
+            current_manager = _ensure_import_runtime()
+            item["replacement_snapshots"] = _snapshot_ref_doc_payloads(
+                current_manager,
+                [entry.get("ref_doc_id") for entry in replacement_refs if isinstance(entry, dict)],
+            )
+            replacement_result = _commit_reimport_replacements(
+                current_manager,
+                kb_id=kb_id,
+                replacement_refs=replacement_refs,
+                persist=False,
+            )
+            item["replacement_deleted_doc_count"] = replacement_result["deleted_counted_doc_count"]
+            if replacement_result["deleted_ref_doc_count"] > 0:
+                item["ingestion_diagnostics"]["replaced_ref_doc_count"] = replacement_result["deleted_ref_doc_count"]
+                item["ingestion_diagnostics"]["replaced_doc_count"] = replacement_result["deleted_counted_doc_count"]
+        elif replacement_refs:
+            _restore_reimport_backup_file(target_path, replacement_backup_bytes)
+
         indexed_chunks += chunk_count
         if status == "indexed":
             success_count += 1
@@ -1331,6 +2469,7 @@ def import_files(
             ingestion_diagnostics=item.get("ingestion_diagnostics"),
             stage_timings=item["stage_timings"],
             skip_standalone_asset=bool(item.get("skip_standalone_asset", False)),
+            file_kind_override=item.get("file_kind"),
         )
         retained_files.append(
             {
@@ -1340,17 +2479,59 @@ def import_files(
         )
         file_results[item["index"]] = file_record
 
+    completed_results: list[dict[str, Any]] | None = None
     if manager is not None and index_storage_dirty:
         persist_index_started_at = time.perf_counter()
-        manager.persist_storage()
-        _add_stage_elapsed((import_stage_timings,), "index_storage_persist_ms", persist_index_started_at)
-        consume_persist_diagnostics = getattr(manager, "consume_last_persist_diagnostics", None)
-        if callable(consume_persist_diagnostics):
-            candidate_persist_diagnostics = consume_persist_diagnostics()
-            if isinstance(candidate_persist_diagnostics, dict):
-                storage_persist_diagnostics = dict(candidate_persist_diagnostics)
+        try:
+            manager.persist_storage()
+        except Exception as exc:
+            _add_stage_elapsed((import_stage_timings,), "index_storage_persist_ms", persist_index_started_at)
+            _rollback_import_batch_after_persist_failure(manager, kb_id=kb_id, pending_items=pending_items)
+            persist_failure_diagnostics = _build_exception_failure_diagnostics(
+                exc,
+                default_category="storage_persist_error",
+            )
+            persist_failure_message = _build_failure_message(exc, failure_diagnostics=persist_failure_diagnostics)
+            retained_files = []
+            for item in pending_items:
+                if item.get("status") == "failed":
+                    continue
+                _finalize_stage_total(item["stage_timings"])
+                file_results[item["index"]] = _build_file_result(
+                    kb_id=kb_id,
+                    filename=item["filename"],
+                    content_type=item["content_type"],
+                    size=item["size"],
+                    path=item.get("path"),
+                    status="failed",
+                    indexed_chunks=0,
+                    relative_path=item["relative_path"],
+                    folder_path=item["folder_path"],
+                    message=persist_failure_message,
+                    embedded_assets=item.get("embedded_assets"),
+                    asset_warning_count=int(item.get("asset_warning_count") or 0),
+                    ocr_diagnostics=item.get("ocr_diagnostics"),
+                    failure_diagnostics=persist_failure_diagnostics,
+                    ingestion_diagnostics=item.get("ingestion_diagnostics"),
+                    stage_timings=item["stage_timings"],
+                    skip_standalone_asset=bool(item.get("skip_standalone_asset", False)),
+                    file_kind_override=item.get("file_kind"),
+                )
+            completed_results = [entry for entry in file_results if entry is not None]
+            indexed_chunks = sum(int(entry.get("indexed_chunks") or 0) for entry in completed_results)
+            success_count = sum(1 for entry in completed_results if entry.get("status") == "indexed")
+            failed_count = sum(1 for entry in completed_results if entry.get("status") == "failed")
+            empty_count = sum(1 for entry in completed_results if entry.get("status") == "empty")
+        else:
+            _add_stage_elapsed((import_stage_timings,), "index_storage_persist_ms", persist_index_started_at)
+            consume_persist_diagnostics = getattr(manager, "consume_last_persist_diagnostics", None)
+            if callable(consume_persist_diagnostics):
+                candidate_persist_diagnostics = consume_persist_diagnostics()
+                if isinstance(candidate_persist_diagnostics, dict):
+                    storage_persist_diagnostics = dict(candidate_persist_diagnostics)
 
-    completed_results = [item for item in file_results if item is not None]
+    if completed_results is None:
+        completed_results = [item for item in file_results if item is not None]
     if success_count > 0:
         doc_count_started_at = time.perf_counter()
         _safe_add_doc_count(kb_id, success_count)
@@ -1374,6 +2555,7 @@ def import_files(
         "import_mode": safe_import_mode,
         "diagnostics": _aggregate_import_diagnostics(completed_results, stage_timings=import_stage_timings),
     }
+    result = _ensure_import_display_summary(result)
     if isinstance(storage_persist_diagnostics, dict):
         result["diagnostics"]["storage_persist_stage_timings"] = storage_persist_diagnostics
     _add_stage_elapsed((import_stage_timings,), "result_build_ms", result_build_started_at)
@@ -1402,7 +2584,7 @@ def import_urls(urls: list[str], chunk_size: int, chunk_overlap: int, kb_id: str
     """逐项导入 URL，区分 indexed / empty / failed 三种结果。"""
     _ensure_kb_active(kb_id)
     runtime_state.ensure_models_ready(require_llm=False)
-    manager = runtime_state.get_index_manager()
+    manager = runtime_state.get_index_manager(kb_id)
 
     receipt_id = _build_import_receipt_id("kb-url-import")
     url_results: list[dict[str, Any]] = []
@@ -1453,6 +2635,7 @@ def import_urls(urls: list[str], chunk_size: int, chunk_overlap: int, kb_id: str
         "empty_count": empty_count,
         "kb_id": kb_id,
     }
+    result = _ensure_import_display_summary(result)
     kb_import_receipt_store.save_latest_import_receipt(
         kb_id,
         source_label="网页导入",
@@ -1465,42 +2648,70 @@ def list_docs(kb_id: str | None = None) -> list[dict[str, Any]]:
     """列出知识库文档。
 
     Args:
-        kb_id: 可选知识库 ID；为空时返回全部文档。
+        kb_id: 可选知识库 ID；为空时聚合全部 active 知识库文档。
     """
     safe_kb_id = validate_kb_id(kb_id) if kb_id is not None else None
-    manager = runtime_state.get_index_manager()
-    doc_store = manager.storage_context.docstore
-    ref_doc_info = doc_store.get_all_ref_doc_info() if len(doc_store.docs) > 0 else {}
+
+    if safe_kb_id is not None:
+        kb_ids = [safe_kb_id]
+    else:
+        kb_ids = ["default"]
+        for kb in _get_registry().list_kbs():
+            candidate = kb.get("kb_id")
+            status = kb.get("status", "active")
+            if not isinstance(candidate, str) or status != "active":
+                continue
+            if candidate not in kb_ids:
+                kb_ids.append(candidate)
+
+    manager_entries = [(requested_kb_id, runtime_state.get_index_manager(requested_kb_id)) for requested_kb_id in kb_ids]
+    unique_manager_count = len({id(manager) for _, manager in manager_entries})
+    enforce_manager_membership = safe_kb_id is None and unique_manager_count > 1
+
+    processed_entries: list[tuple[str, Any]] = []
+    seen_manager_ids: set[int] = set()
+    for requested_kb_id, manager in manager_entries:
+        manager_identity = id(manager)
+        if manager_identity in seen_manager_ids:
+            continue
+        seen_manager_ids.add(manager_identity)
+        processed_entries.append((requested_kb_id, manager))
 
     docs: list[dict[str, Any]] = []
     seen_paths: set[str] = set()
-    for ref_doc_id, ref_doc in ref_doc_info.items():
-        metadata = ref_doc.metadata
-        doc_kb_id = _normalize_doc_kb_id(metadata)
-        if not _doc_belongs_to_request(metadata, safe_kb_id):
-            continue
-        if _is_embedded_asset_doc(metadata):
-            continue
-        file_path = metadata.get("file_path")
-        if file_path and file_path in seen_paths:
-            continue
-        path_or_url = file_path or metadata.get("url_source", "")
-        relative_path = resolve_relative_path_from_metadata(metadata, doc_kb_id) if file_path else None
-        folder_path = folder_path_from_relative_path(relative_path) if relative_path is not None else None
-        docs.append(
-            {
-                "id": ref_doc_id,
-                "name": metadata.get("file_name") or metadata.get("title", "N/A"),
-                "path": path_or_url,
-                "type": "file" if file_path else "url",
-                "date": metadata.get("creation_date", ""),
-                "kb_id": doc_kb_id,
-                "relative_path": relative_path,
-                "folder_path": folder_path,
-            }
-        )
-        if file_path:
-            seen_paths.add(file_path)
+    for requested_kb_id, manager in processed_entries:
+        doc_store = manager.storage_context.docstore
+        raw_docs = getattr(doc_store, "docs", {}) or {}
+        ref_doc_info = doc_store.get_all_ref_doc_info() if len(raw_docs) > 0 else {}
+        for ref_doc_id, ref_doc in ref_doc_info.items():
+            metadata = getattr(ref_doc, "metadata", {}) or {}
+            doc_kb_id = _normalize_doc_kb_id(metadata)
+            if not _doc_belongs_to_request(metadata, safe_kb_id):
+                continue
+            if enforce_manager_membership and doc_kb_id != requested_kb_id:
+                continue
+            if _is_embedded_asset_doc(metadata):
+                continue
+            file_path = metadata.get("file_path")
+            if file_path and file_path in seen_paths:
+                continue
+            path_or_url = file_path or metadata.get("url_source", "")
+            relative_path = resolve_relative_path_from_metadata(metadata, doc_kb_id) if file_path else None
+            folder_path = folder_path_from_relative_path(relative_path) if relative_path is not None else None
+            docs.append(
+                {
+                    "id": ref_doc_id,
+                    "name": metadata.get("file_name") or metadata.get("title", "N/A"),
+                    "path": path_or_url,
+                    "type": "file" if file_path else "url",
+                    "date": metadata.get("creation_date", ""),
+                    "kb_id": doc_kb_id,
+                    "relative_path": relative_path,
+                    "folder_path": folder_path,
+                }
+            )
+            if file_path:
+                seen_paths.add(file_path)
     return docs
 
 
@@ -1568,8 +2779,8 @@ def _delete_local_file_for_doc(metadata: dict[str, Any], request_kb_id: str) -> 
 def delete_docs(request: DeleteDocsRequest) -> dict[str, int]:
     """判断 doc_id 是否属于本次删除请求的候选范围。"""
     safe_kb_id = validate_kb_id(request.kb_id)
-    manager = runtime_state.get_index_manager()
-    runtime_state.ensure_index_loaded()
+    manager = runtime_state.get_index_manager(safe_kb_id)
+    runtime_state.ensure_index_loaded(safe_kb_id)
     doc_store = manager.storage_context.docstore
     ref_doc_info = doc_store.get_all_ref_doc_info() if len(doc_store.docs) > 0 else {}
     deleted = 0
@@ -1596,9 +2807,9 @@ def delete_docs(request: DeleteDocsRequest) -> dict[str, int]:
     return {"deleted": deleted, "files_deleted": files_deleted, "files_skipped": files_skipped}
 
 
-def _get_preview_docstore():
-    """获取 preview 所需的 docstore。"""
-    manager = runtime_state.get_index_manager()
+def _get_preview_docstore(kb_id: str):
+    """获取指定知识库 preview 所需的 docstore。"""
+    manager = runtime_state.get_index_manager(kb_id)
     return manager.storage_context.docstore
 
 
@@ -1683,8 +2894,8 @@ def preview_document(request: PreviewRequest) -> dict[str, Any]:
         raise KBValidationError("预览请求缺少有效 doc_id")
     doc_id = doc_id.strip()
 
-    runtime_state.ensure_index_loaded()
-    doc_store = _get_preview_docstore()
+    runtime_state.ensure_index_loaded(safe_kb_id)
+    doc_store = _get_preview_docstore(safe_kb_id)
     ref_doc = doc_store.get_ref_doc_info(doc_id) if hasattr(doc_store, "get_ref_doc_info") else None
     if ref_doc is None:
         raise KBNotFoundError(f"文档不存在或不属于该知识库: {doc_id}")

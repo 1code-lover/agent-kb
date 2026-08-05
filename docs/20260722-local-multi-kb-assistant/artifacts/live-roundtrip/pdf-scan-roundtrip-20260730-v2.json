@@ -1,0 +1,190 @@
+{
+  "base_url": "http://127.0.0.1:18080",
+  "kb_id": "diag-pdf-scan-1785389602",
+  "question": "In the scanned diagnostic PDF, what should the scanned content become in the active knowledge base?",
+  "health": {
+    "status": "ok"
+  },
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-scan-fallback.pdf",
+    "sha256": "0a2689dc70faafd2e6e1b10f43c0ac6343d7888c341345321b2847a2f8dca70f",
+    "size": 11524076,
+    "page_count": 2,
+    "font": "C:\\Windows\\Fonts\\arial.ttf",
+    "text_layer_preview": "",
+    "text_layer_empty": true,
+    "expected_ocr_preview": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt"
+  },
+  "saved": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785389602\\pdf\\diag-scan-fallback.pdf",
+    "sha256": "0a2689dc70faafd2e6e1b10f43c0ac6343d7888c341345321b2847a2f8dca70f",
+    "size": 11524076,
+    "text_layer_preview": "",
+    "text_layer_empty": true
+  },
+  "checks": {
+    "source_saved_hash_match": true,
+    "source_text_layer_empty": true,
+    "saved_text_layer_empty": true,
+    "chat_answer_has_expected_terms": true,
+    "chat_source_has_expected_terms": true,
+    "chat_evidence_has_expected_terms": true,
+    "preview_has_expected_terms": true
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-3cbd7f1ae5d14ed6b5420f9a00f4fa5c",
+    "files": [
+      {
+        "name": "diag-scan-fallback.pdf",
+        "type": "application/pdf",
+        "size": 11524076,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785389602\\pdf\\diag-scan-fallback.pdf",
+        "kb_id": "diag-pdf-scan-1785389602",
+        "relative_path": "pdf/diag-scan-fallback.pdf",
+        "folder_path": "pdf"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "diag-scan-fallback.pdf",
+        "type": "application/pdf",
+        "size": 11524076,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785389602\\pdf\\diag-scan-fallback.pdf",
+        "kb_id": "diag-pdf-scan-1785389602",
+        "status": "indexed",
+        "indexed_chunks": 1,
+        "relative_path": "pdf/diag-scan-fallback.pdf",
+        "folder_path": "pdf",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "pdf",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "persist_ms": 20.428,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 107578.036,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 107598.464
+          },
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 1,
+    "success_count": 1,
+    "failed_count": 0,
+    "empty_count": 0,
+    "kb_id": "diag-pdf-scan-1785389602",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 1,
+      "empty_files": 0,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 0,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 0,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 0,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 0,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "stage_timings": {
+        "ensure_models_ready_ms": 0.044,
+        "get_index_manager_ms": 0.002,
+        "persist_ms": 20.428,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 107578.036,
+        "embedded_asset_extract_ms": 0.0,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "register_assets_ms": 0.115,
+        "total_ms": 107983.814
+      }
+    }
+  },
+  "chat_summary": {
+    "answer": "In the scanned diagnostic PDF, the scanned content should become searchable evidence in the active knowledge base.",
+    "requested_scope_type": "single_kb",
+    "requested_kb_ids": [
+      "diag-pdf-scan-1785389602"
+    ],
+    "effective_scope_type": "single_kb",
+    "effective_kb_ids": [
+      "diag-pdf-scan-1785389602"
+    ],
+    "is_default_deny_applied": false,
+    "isolation_level": "logical_filter_only",
+    "first_source": {
+      "id": "ev:eyJkb2NfaWQiOiIwNGRlY2U1Mi0zOGUwLTQ3ZTEtOGY0YS1lMjA5YjNjYjRjNzUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTM4OTYwMiIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiYmIzNDRkNzUtM2JhOS00NmZkLWEzZGQtNTFkMTVkMzExZTVlIn19",
+      "file": "diag-scan-fallback.pdf",
+      "page": "N/A",
+      "score": 0.9333333333333333,
+      "text": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "kb_id": "diag-pdf-scan-1785389602",
+      "doc_id": "04dece52-38e0-47e1-8f4a-e209b3cb4c75",
+      "preview_locator": {
+        "node_id": "bb344d75-3ba9-46fd-a3dd-51d15d311e5e"
+      },
+      "asset_id": null
+    },
+    "first_evidence": {
+      "id": "ev:eyJkb2NfaWQiOiIwNGRlY2U1Mi0zOGUwLTQ3ZTEtOGY0YS1lMjA5YjNjYjRjNzUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTM4OTYwMiIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiYmIzNDRkNzUtM2JhOS00NmZkLWEzZGQtNTFkMTVkMzExZTVlIn19",
+      "title": "diag-scan-fallback.pdf",
+      "source": "diag-scan-fallback.pdf",
+      "page": "N/A",
+      "score": 0.9333333333333333,
+      "excerpt": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "receipt_id": null,
+      "kb_id": "diag-pdf-scan-1785389602",
+      "doc_id": "04dece52-38e0-47e1-8f4a-e209b3cb4c75",
+      "preview_locator": {
+        "node_id": "bb344d75-3ba9-46fd-a3dd-51d15d311e5e"
+      },
+      "asset_id": null
+    },
+    "preview": {
+      "title": "diag-scan-fallback.pdf",
+      "kb_id": "diag-pdf-scan-1785389602",
+      "doc_id": "04dece52-38e0-47e1-8f4a-e209b3cb4c75",
+      "excerpt": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "locator": {
+        "node_id": "bb344d75-3ba9-46fd-a3dd-51d15d311e5e"
+      },
+      "preview_type": "text_excerpt",
+      "evidence_id": "ev:eyJkb2NfaWQiOiIwNGRlY2U1Mi0zOGUwLTQ3ZTEtOGY0YS1lMjA5YjNjYjRjNzUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTM4OTYwMiIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiYmIzNDRkNzUtM2JhOS00NmZkLWEzZGQtNTFkMTVkMzExZTVlIn19"
+    }
+  }
+}

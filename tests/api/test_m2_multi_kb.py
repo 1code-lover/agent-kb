@@ -128,7 +128,7 @@ class TestM2KbServiceImport:
     """KB 服务层导入支持 kb_id"""
 
     def test_import_files_with_kb_id_routes_to_load_files(self):
-        """import_files 调用 IndexManager.load_files 时传入 kb_id"""
+        """import_files ?? IndexManager.load_files ??? kb_id?"""
         from api.services.kb_service import import_files
         import tempfile
         tmp_save = tempfile.mkdtemp()
@@ -142,14 +142,16 @@ class TestM2KbServiceImport:
                     with patch("api.services.kb_service._get_registry") as mock_registry_factory:
                         mock_registry_factory.return_value.add_doc_count.return_value = None
                         with patch("api.services.kb_service.get_kb_data_dir", return_value=__import__("pathlib").Path(tmp_save)):
-                            mock_file = MagicMock()
-                            mock_file.file.read.return_value = b"content"
-                            mock_file.filename = "test.txt"
-                            mock_file.content_type = "text/plain"
-                            result = import_files([mock_file], 2048, 512, kb_id="my-kb")
-                            assert result["kb_id"] == "my-kb"
-                            call_kwargs = mock_manager.load_files.call_args[1]
-                            assert call_kwargs["kb_id"] == "my-kb"
+                            with patch("api.services.kb_service._collect_existing_embedded_image_relative_paths", return_value=set()):
+                                with patch("api.services.kb_service.asset_service.register_imported_assets"):
+                                    mock_file = MagicMock()
+                                    mock_file.file.read.return_value = b"content"
+                                    mock_file.filename = "test.txt"
+                                    mock_file.content_type = "text/plain"
+                                    result = import_files([mock_file], 2048, 512, kb_id="my-kb")
+                                    assert result["kb_id"] == "my-kb"
+                                    call_kwargs = mock_manager.load_files.call_args[1]
+                                    assert call_kwargs["kb_id"] == "my-kb"
 
     def test_import_urls_with_kb_id(self):
         """import_urls 调用 IndexManager.load_websites 时传入 kb_id"""

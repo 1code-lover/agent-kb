@@ -1,0 +1,404 @@
+{
+  "base_url": "http://127.0.0.1:18087",
+  "kb_id": "diag-kb-utf8-1785494874",
+  "question": "诊断文档里，什么对象仍然是授权边界。",
+  "health": {
+    "status": "ok",
+    "runtime": {
+      "pid": 20556,
+      "python_executable": "C:\\Users\\ethan1.zhao\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "python_version": "3.12.10",
+      "python_implementation": "CPython",
+      "cwd": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb"
+    },
+    "embedding_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 39929.802,
+      "started_at": "2026-07-31T10:47:10.236151+00:00",
+      "finished_at": "2026-07-31T10:47:50.166495+00:00",
+      "current_model": "bge-small-zh-v1.5",
+      "loaded_model": "bge-small-zh-v1.5",
+      "is_ready": true
+    },
+    "ocr_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 36914.071,
+      "started_at": "2026-07-31T10:47:10.236151+00:00",
+      "finished_at": "2026-07-31T10:47:47.151377+00:00",
+      "is_ready": true
+    },
+    "import_capabilities": {
+      "pdf_text_extraction": {
+        "ready": true,
+        "dependencies": [
+          "fitz"
+        ]
+      },
+      "image_ocr": {
+        "ready": true,
+        "dependencies": [
+          "paddleocr",
+          "paddle",
+          "pillow"
+        ]
+      },
+      "dependencies": {
+        "fitz": {
+          "installed": true,
+          "package": "PyMuPDF",
+          "import_name": "fitz",
+          "used_for": [
+            "pdf_text_extraction"
+          ]
+        },
+        "paddleocr": {
+          "installed": true,
+          "package": "paddleocr",
+          "import_name": "paddleocr",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "paddle": {
+          "installed": true,
+          "package": "paddlepaddle",
+          "import_name": "paddle",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "pillow": {
+          "installed": true,
+          "package": "Pillow",
+          "import_name": "PIL",
+          "used_for": [
+            "image_ocr"
+          ]
+        }
+      }
+    }
+  },
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-import-utf8.md",
+    "sha256": "18fd66631467981e6e31de4c3cf516ed65449e6a43369e3ad678005a5d2541cf",
+    "size": 218,
+    "text_preview": "# UTF-8 诊断知识库\n\n这是一份用于验证本地知识库导入链路的 Markdown 诊断文档。\n\n文档明确说明：知识库仍然是授权边界，文件夹只承担组织作用，不承担权限隔离。\n"
+  },
+  "saved": {
+    "requested_relative_path": "diag/diag-import-utf8.md",
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-utf8-1785494874\\diag\\diag-import-utf8.md",
+    "exists": true,
+    "sha256": "18fd66631467981e6e31de4c3cf516ed65449e6a43369e3ad678005a5d2541cf",
+    "size": 218,
+    "text_preview": "# UTF-8 诊断知识库\n\n这是一份用于验证本地知识库导入链路的 Markdown 诊断文档。\n\n文档明确说明：知识库仍然是授权边界，文件夹只承担组织作用，不承担权限隔离。\n",
+    "import_status": "indexed",
+    "import_message": null,
+    "import_diagnostics": {
+      "file_kind": "markdown",
+      "empty_reason": null,
+      "standalone_asset_candidate": false,
+      "skip_standalone_asset": false,
+      "file_retained_on_disk": true,
+      "ocr_attempted": false,
+      "ocr_status": null,
+      "ocr_text_length": 0,
+      "ocr_error": null,
+      "indexed_from_ocr": false,
+      "asset_registered": false,
+      "stage_timings": {
+        "file_save_ms": 3.479,
+        "persist_ms": 3.479,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 1164.987,
+        "embedded_asset_extract_ms": 2.408,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "total_ms": 1170.874
+      },
+      "document_count": 1,
+      "empty_document_count": 0,
+      "input_text_chars": 87,
+      "node_count": 6,
+      "nodes_with_embedding_count": 6,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 136.938,
+        "chunking_ms": 689.232,
+        "embedding_ms": 296.276,
+        "title_extract_ms": 1.089,
+        "vector_store_ms": 0.897,
+        "docstore_ms": 0.132,
+        "index_insert_ms": 4.184,
+        "total_ms": 1137.084
+      },
+      "failure_category": null,
+      "missing_dependency": null,
+      "dependency_status": "unknown",
+      "ocr_init_ms": 0.0,
+      "ocr_load_image_ms": 0.0,
+      "ocr_predict_ms": 0.0,
+      "ocr_postprocess_ms": 0.0,
+      "ocr_total_ms": 0.0,
+      "ocr_instance_reused": false,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0
+    }
+  },
+  "checks": {
+    "source_saved_hash_match": true,
+    "saved_text_contains_expected_snippet": true,
+    "chat_answer_contains_expected_snippet": true,
+    "chat_answer_has_expected_anchor": true,
+    "chat_answer_meets_minimum_contract": true,
+    "chat_source_contains_expected_snippet": true,
+    "chat_evidence_contains_expected_snippet": true
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-a4586101503d40d08cd93e67eab271a2",
+    "files": [
+      {
+        "name": "diag-import-utf8.md",
+        "type": "text/markdown",
+        "size": 218,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-utf8-1785494874\\diag\\diag-import-utf8.md",
+        "kb_id": "diag-kb-utf8-1785494874",
+        "relative_path": "diag/diag-import-utf8.md",
+        "folder_path": "diag"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "diag-import-utf8.md",
+        "type": "text/markdown",
+        "size": 218,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-utf8-1785494874\\diag\\diag-import-utf8.md",
+        "kb_id": "diag-kb-utf8-1785494874",
+        "status": "indexed",
+        "indexed_chunks": 6,
+        "relative_path": "diag/diag-import-utf8.md",
+        "folder_path": "diag",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "markdown",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "file_retained_on_disk": true,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 3.479,
+            "persist_ms": 3.479,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 1164.987,
+            "embedded_asset_extract_ms": 2.408,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 1170.874
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 87,
+          "node_count": 6,
+          "nodes_with_embedding_count": 6,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 136.938,
+            "chunking_ms": 689.232,
+            "embedding_ms": 296.276,
+            "title_extract_ms": 1.089,
+            "vector_store_ms": 0.897,
+            "docstore_ms": 0.132,
+            "index_insert_ms": 4.184,
+            "total_ms": 1137.084
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "unknown",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 0.0,
+          "ocr_predict_ms": 0.0,
+          "ocr_postprocess_ms": 0.0,
+          "ocr_total_ms": 0.0,
+          "ocr_instance_reused": false,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 6,
+    "success_count": 1,
+    "failed_count": 0,
+    "empty_count": 0,
+    "kb_id": "diag-kb-utf8-1785494874",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 1,
+      "empty_files": 0,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 0,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 0,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 0,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 0,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "failure_category_counts": {},
+      "dependency_status_counts": {
+        "unknown": 1
+      },
+      "dependency_missing_count": 0,
+      "missing_dependency_counts": {},
+      "stage_timings": {
+        "ensure_models_ready_ms": 0.065,
+        "get_index_manager_ms": 26.913,
+        "file_save_ms": 3.479,
+        "persist_ms": 3.479,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 1164.987,
+        "embedded_asset_extract_ms": 2.408,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 39.964,
+        "doc_count_update_ms": 39.553,
+        "register_assets_ms": 11.849,
+        "receipt_store_ms": 5.019,
+        "result_build_ms": 0.098,
+        "total_ms": 1277.863
+      },
+      "document_count": 1,
+      "empty_document_count": 0,
+      "input_text_chars": 87,
+      "node_count": 6,
+      "nodes_with_embedding_count": 6,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 136.938,
+        "chunking_ms": 689.232,
+        "embedding_ms": 296.276,
+        "title_extract_ms": 1.089,
+        "vector_store_ms": 0.897,
+        "docstore_ms": 0.132,
+        "index_insert_ms": 4.184,
+        "total_ms": 1137.084
+      },
+      "storage_persist_stage_timings": {
+        "docstore_persist_ms": 2.164,
+        "index_store_persist_ms": 1.683,
+        "graph_store_persist_ms": 3.365,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 29.854,
+        "vector_store_namespaces_ms": {
+          "default": 28.24,
+          "image": 1.614
+        },
+        "fallback_persist_ms": 0.0,
+        "total_ms": 37.194
+      }
+    },
+    "display_summary": {
+      "source_kind": "file_import",
+      "item_label": "文件",
+      "total_items": 1,
+      "indexed_items": 1,
+      "empty_items": 0,
+      "failed_items": 0,
+      "asset_registered_count": 0,
+      "asset_registered_but_not_indexed_count": 0,
+      "asset_warning_count": 0,
+      "dependency_missing_count": 0,
+      "top_missing_dependencies": [],
+      "top_empty_reasons": [],
+      "has_blockers": false,
+      "has_dependency_issues": false,
+      "has_warnings": false,
+      "headline": "成功导入 1 个文件",
+      "user_message": "文件已完成解析并写入知识库。",
+      "next_actions": []
+    }
+  },
+  "chat_summary": {
+    "attempted": true,
+    "executed": true,
+    "skipped_reason": null,
+    "error": null,
+    "answer": "知识库仍然是授权边界。",
+    "requested_scope_type": "single_kb",
+    "requested_kb_ids": [
+      "diag-kb-utf8-1785494874"
+    ],
+    "effective_scope_type": "single_kb",
+    "effective_kb_ids": [
+      "diag-kb-utf8-1785494874"
+    ],
+    "is_default_deny_applied": false,
+    "isolation_level": "logical_filter_only",
+    "first_source": {
+      "id": "ev:eyJkb2NfaWQiOiJjYTRlNmEyMC04NDY3LTQ4MGYtOTM0MS1jNTI1YWYzYWI1OTgiLCJrYl9pZCI6ImRpYWcta2ItdXRmOC0xNzg1NDk0ODc0IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI0ZGE0MDNjOS04Y2JiLTRkZWQtYjE5Yy0yMDgxMWJiOWRlZGMifX0",
+      "file": "diag-import-utf8.md",
+      "page": "N/A",
+      "score": 0.42486821400376923,
+      "text": "明确说明：知识库仍然是授权边界，文件夹只承担",
+      "kb_id": "diag-kb-utf8-1785494874",
+      "doc_id": "ca4e6a20-8467-480f-9341-c525af3ab598",
+      "preview_locator": {
+        "node_id": "4da403c9-8cbb-4ded-b19c-20811bb9dedc"
+      },
+      "asset_id": null
+    },
+    "first_evidence": {
+      "id": "ev:eyJkb2NfaWQiOiJjYTRlNmEyMC04NDY3LTQ4MGYtOTM0MS1jNTI1YWYzYWI1OTgiLCJrYl9pZCI6ImRpYWcta2ItdXRmOC0xNzg1NDk0ODc0IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI0ZGE0MDNjOS04Y2JiLTRkZWQtYjE5Yy0yMDgxMWJiOWRlZGMifX0",
+      "title": "diag-import-utf8.md",
+      "source": "diag-import-utf8.md",
+      "page": "N/A",
+      "score": 0.42486821400376923,
+      "excerpt": "明确说明：知识库仍然是授权边界，文件夹只承担",
+      "receipt_id": null,
+      "kb_id": "diag-kb-utf8-1785494874",
+      "doc_id": "ca4e6a20-8467-480f-9341-c525af3ab598",
+      "preview_locator": {
+        "node_id": "4da403c9-8cbb-4ded-b19c-20811bb9dedc"
+      },
+      "asset_id": null
+    }
+  }
+}

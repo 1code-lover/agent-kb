@@ -1,0 +1,343 @@
+{
+  "base_url": "http://127.0.0.1:18141",
+  "kb_id": "diag-image-ocr-1785321575",
+  "question": "In the OCR diagnostic image, what is the authorization boundary?",
+  "health": {
+    "status": "ok",
+    "embedding_warmup": {
+      "state": "ready",
+      "attempt_count": 0,
+      "last_error": null,
+      "last_duration_ms": null,
+      "started_at": null,
+      "finished_at": "2026-07-29T10:39:18.199923+00:00",
+      "current_model": "bge-small-zh-v1.5",
+      "loaded_model": "bge-small-zh-v1.5",
+      "is_ready": true
+    },
+    "ocr_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 114097.893,
+      "started_at": "2026-07-29T10:36:06.370486+00:00",
+      "finished_at": "2026-07-29T10:38:00.491564+00:00",
+      "is_ready": true
+    },
+    "import_capabilities": {
+      "pdf_text_extraction": {
+        "ready": true,
+        "dependencies": [
+          "fitz"
+        ]
+      },
+      "image_ocr": {
+        "ready": true,
+        "dependencies": [
+          "paddleocr",
+          "paddle",
+          "pillow"
+        ]
+      },
+      "dependencies": {
+        "fitz": {
+          "installed": true,
+          "package": "PyMuPDF",
+          "import_name": "fitz",
+          "used_for": [
+            "pdf_text_extraction"
+          ]
+        },
+        "paddleocr": {
+          "installed": true,
+          "package": "paddleocr",
+          "import_name": "paddleocr",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "paddle": {
+          "installed": true,
+          "package": "paddlepaddle",
+          "import_name": "paddle",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "pillow": {
+          "installed": true,
+          "package": "Pillow",
+          "import_name": "PIL",
+          "used_for": [
+            "image_ocr"
+          ]
+        }
+      }
+    }
+  },
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-ocr.png",
+    "sha256": "ec28287b5873023ea094a0946727a6cd9faddd67847afef5717b84312355e5d7",
+    "size": 28361,
+    "text_preview": "Image OCR diagnostic\nFolder is organization only\nKnowledge Base is the authorization boundary\nPreview should resolve to OCR chunk",
+    "font": "C:\\Windows\\Fonts\\arial.ttf"
+  },
+  "saved": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-image-ocr-1785321575\\images\\diag-ocr.png",
+    "sha256": "ec28287b5873023ea094a0946727a6cd9faddd67847afef5717b84312355e5d7",
+    "size": 28361
+  },
+  "checks": {
+    "source_saved_hash_match": true,
+    "chat_answer_has_expected_terms": true,
+    "chat_source_has_expected_terms": true,
+    "chat_evidence_has_expected_terms": true,
+    "preview_has_expected_terms": true,
+    "ocr_attempted": true,
+    "indexed_from_ocr": true
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-997a23bbc4d844a0907fac3a2be917d7",
+    "files": [
+      {
+        "name": "diag-ocr.png",
+        "type": "image/png",
+        "size": 28361,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-image-ocr-1785321575\\images\\diag-ocr.png",
+        "kb_id": "diag-image-ocr-1785321575",
+        "relative_path": "images/diag-ocr.png",
+        "folder_path": "images"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "diag-ocr.png",
+        "type": "image/png",
+        "size": 28361,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-image-ocr-1785321575\\images\\diag-ocr.png",
+        "kb_id": "diag-image-ocr-1785321575",
+        "status": "indexed",
+        "indexed_chunks": 1,
+        "relative_path": "images/diag-ocr.png",
+        "folder_path": "images",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "image",
+          "empty_reason": null,
+          "standalone_asset_candidate": true,
+          "skip_standalone_asset": false,
+          "file_retained_on_disk": true,
+          "ocr_attempted": true,
+          "ocr_status": "success",
+          "ocr_text_length": 129,
+          "ocr_error": null,
+          "indexed_from_ocr": true,
+          "asset_registered": true,
+          "stage_timings": {
+            "file_save_ms": 10.407,
+            "persist_ms": 10.407,
+            "standalone_ocr_ms": 48422.653,
+            "primary_index_ms": 159.156,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 48592.216
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 129,
+          "node_count": 1,
+          "nodes_with_embedding_count": 1,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 0.0,
+            "chunking_ms": 2.987,
+            "embedding_ms": 121.043,
+            "title_extract_ms": 0.836,
+            "vector_store_ms": 0.606,
+            "docstore_ms": 0.368,
+            "index_insert_ms": 3.836,
+            "total_ms": 137.665
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "ready",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 79.015,
+          "ocr_predict_ms": 48323.235,
+          "ocr_postprocess_ms": 1.651,
+          "ocr_total_ms": 48406.408,
+          "ocr_instance_reused": true,
+          "ocr_engine": "paddleocr",
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 1,
+    "success_count": 1,
+    "failed_count": 0,
+    "empty_count": 0,
+    "kb_id": "diag-image-ocr-1785321575",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 1,
+      "empty_files": 0,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 1,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 1,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 1,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 1,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "failure_category_counts": {},
+      "dependency_status_counts": {
+        "ready": 1
+      },
+      "dependency_missing_count": 0,
+      "missing_dependency_counts": {},
+      "stage_timings": {
+        "ensure_models_ready_ms": 0.26,
+        "get_index_manager_ms": 20.919,
+        "file_save_ms": 10.407,
+        "persist_ms": 10.407,
+        "standalone_ocr_ms": 48422.653,
+        "primary_index_ms": 159.156,
+        "embedded_asset_extract_ms": 0.0,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 60.322,
+        "doc_count_update_ms": 17.776,
+        "register_assets_ms": 11.332,
+        "receipt_store_ms": 11.048,
+        "result_build_ms": 0.239,
+        "total_ms": 48720.624
+      },
+      "document_count": 1,
+      "empty_document_count": 0,
+      "input_text_chars": 129,
+      "node_count": 1,
+      "nodes_with_embedding_count": 1,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 0.0,
+        "chunking_ms": 2.987,
+        "embedding_ms": 121.043,
+        "title_extract_ms": 0.836,
+        "vector_store_ms": 0.606,
+        "docstore_ms": 0.368,
+        "index_insert_ms": 3.836,
+        "total_ms": 137.665
+      },
+      "storage_persist_stage_timings": {
+        "docstore_persist_ms": 5.936,
+        "index_store_persist_ms": 5.439,
+        "graph_store_persist_ms": 15.467,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 26.289,
+        "vector_store_namespaces_ms": {
+          "default": 20.909,
+          "image": 5.38
+        },
+        "fallback_persist_ms": 0.0,
+        "total_ms": 53.299
+      }
+    },
+    "display_summary": {
+      "source_kind": "file_import",
+      "item_label": "文件",
+      "total_items": 1,
+      "indexed_items": 1,
+      "empty_items": 0,
+      "failed_items": 0,
+      "asset_registered_count": 1,
+      "asset_registered_but_not_indexed_count": 0,
+      "asset_warning_count": 0,
+      "dependency_missing_count": 0,
+      "top_missing_dependencies": [],
+      "top_empty_reasons": [],
+      "has_blockers": false,
+      "has_dependency_issues": false,
+      "has_warnings": false,
+      "headline": "成功导入 1 个文件",
+      "user_message": "文件已完成解析并写入知识库。",
+      "next_actions": []
+    }
+  },
+  "chat_summary": {
+    "answer": "In the OCR diagnostic image, the authorization boundary is the Knowledge Base.",
+    "requested_scope_type": "single_kb",
+    "requested_kb_ids": [
+      "diag-image-ocr-1785321575"
+    ],
+    "effective_scope_type": "single_kb",
+    "effective_kb_ids": [
+      "diag-image-ocr-1785321575"
+    ],
+    "is_default_deny_applied": false,
+    "isolation_level": "logical_filter_only",
+    "first_source": {
+      "id": "ev:eyJkb2NfaWQiOiI1MjU3YTdjOS0yMjY1LTQ0YzYtODBkMS0xYzk2NWNjYWY2ODciLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTE3ODUzMjE1NzUiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjU3ZjY3OGMwLTY0N2EtNDg5Mi04ZjdlLWUzODUyNzk0YzllYiJ9fQ",
+      "file": "diag-ocr.png",
+      "page": "N/A",
+      "score": 1.4,
+      "text": "Image OCR diagnostic\nFolder is organization only\nKnowledge Base is the authorization boundary\nPreview should resolve to OCR chunk",
+      "kb_id": "diag-image-ocr-1785321575",
+      "doc_id": "5257a7c9-2265-44c6-80d1-1c965ccaf687",
+      "preview_locator": {
+        "node_id": "57f678c0-647a-4892-8f7e-e3852794c9eb"
+      },
+      "asset_id": "asset-standalone-7a51dcf6ca696509"
+    },
+    "first_evidence": {
+      "id": "ev:eyJkb2NfaWQiOiI1MjU3YTdjOS0yMjY1LTQ0YzYtODBkMS0xYzk2NWNjYWY2ODciLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTE3ODUzMjE1NzUiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjU3ZjY3OGMwLTY0N2EtNDg5Mi04ZjdlLWUzODUyNzk0YzllYiJ9fQ",
+      "title": "diag-ocr.png",
+      "source": "diag-ocr.png",
+      "page": "N/A",
+      "score": 1.4,
+      "excerpt": "Image OCR diagnostic\nFolder is organization only\nKnowledge Base is the authorization boundary\nPreview should resolve to OCR chunk",
+      "receipt_id": null,
+      "kb_id": "diag-image-ocr-1785321575",
+      "doc_id": "5257a7c9-2265-44c6-80d1-1c965ccaf687",
+      "preview_locator": {
+        "node_id": "57f678c0-647a-4892-8f7e-e3852794c9eb"
+      },
+      "asset_id": "asset-standalone-7a51dcf6ca696509"
+    },
+    "preview": {
+      "title": "diag-ocr.png",
+      "kb_id": "diag-image-ocr-1785321575",
+      "doc_id": "5257a7c9-2265-44c6-80d1-1c965ccaf687",
+      "excerpt": "Image OCR diagnostic\nFolder is organization only\nKnowledge Base is the authorization boundary\nPreview should resolve to OCR chunk",
+      "locator": {
+        "node_id": "57f678c0-647a-4892-8f7e-e3852794c9eb"
+      },
+      "preview_type": "text_excerpt",
+      "evidence_id": "ev:eyJkb2NfaWQiOiI1MjU3YTdjOS0yMjY1LTQ0YzYtODBkMS0xYzk2NWNjYWY2ODciLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTE3ODUzMjE1NzUiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjU3ZjY3OGMwLTY0N2EtNDg5Mi04ZjdlLWUzODUyNzk0YzllYiJ9fQ"
+    }
+  }
+}

@@ -1,0 +1,1702 @@
+{
+  "dataset_name": "local_multi_kb_eval_v3",
+  "evaluation_mode": "diagnostic",
+  "run_at": "2026-07-31T12:52:51.394816+00:00",
+  "suite_summary": {
+    "total_cases": 6,
+    "passed_cases": 2,
+    "failed_cases": 4,
+    "pass_rate": 0.3333333333333333,
+    "pass_rate_ci95": {
+      "low": 0.09676933255921683,
+      "high": 0.7000116786584712
+    },
+    "scope_pass_rate": 1.0,
+    "average_keypoint_coverage": 0.5833333333333334,
+    "total_keypoints": 10,
+    "matched_keypoints": 5,
+    "missing_keypoints": 5,
+    "keypoint_hit_rate": 0.5,
+    "evidence_expected_cases": 4,
+    "evidence_hit_cases": 0,
+    "evidence_hit_rate": 0.0,
+    "preview_required_cases": 4,
+    "preview_resolved_cases": 3,
+    "preview_resolvable_rate": 0.75,
+    "preview_term_total": 0,
+    "preview_term_hits": 0,
+    "preview_term_hit_rate": 1.0,
+    "source_count_match_rate": 0.8333333333333334,
+    "blocked_term_hit_cases": 0,
+    "forbidden_term_clean_rate": 1.0,
+    "category_breakdown": {
+      "no_evidence": {
+        "count": 2,
+        "passed": 2,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": {
+          "low": 0.34237195288961925,
+          "high": 1.0
+        }
+      },
+      "scope_contract": {
+        "count": 4,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "pass_rate_ci95": {
+          "low": 0.0,
+          "high": 0.48990002040399916
+        }
+      }
+    }
+  },
+  "run_gates": {
+    "scope_pass_rate_min": {
+      "metric": "scope_pass_rate",
+      "actual": 1.0,
+      "minimum": 1.0,
+      "passed": true
+    },
+    "average_keypoint_coverage_min": {
+      "metric": "average_keypoint_coverage",
+      "actual": 0.5833333333333334,
+      "minimum": 0.0,
+      "passed": true
+    },
+    "evidence_hit_rate_min": {
+      "metric": "evidence_hit_rate",
+      "actual": 0.0,
+      "minimum": 0.0,
+      "passed": true
+    },
+    "preview_resolvable_rate_min": {
+      "metric": "preview_resolvable_rate",
+      "actual": 0.75,
+      "minimum": 0.0,
+      "passed": true
+    },
+    "source_count_match_rate_min": {
+      "metric": "source_count_match_rate",
+      "actual": 0.8333333333333334,
+      "minimum": 0.0,
+      "passed": true
+    },
+    "forbidden_term_clean_rate_min": {
+      "metric": "forbidden_term_clean_rate",
+      "actual": 1.0,
+      "minimum": 1.0,
+      "passed": true
+    }
+  },
+  "run_passed": true,
+  "breakdowns": {
+    "modality": {
+      "image_ocr": {
+        "count": 3,
+        "passed": 0,
+        "failed": 3,
+        "pass_rate": 0.0,
+        "pass_rate_ci95": {
+          "low": 0.0,
+          "high": 0.5615060804490177
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 0.3333333333333333,
+        "total_keypoints": 6,
+        "matched_keypoints": 2,
+        "keypoint_hit_rate": 0.3333333333333333,
+        "evidence_expected_cases": 3,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 0.0,
+        "preview_required_cases": 3,
+        "preview_resolved_cases": 2,
+        "preview_resolvable_rate": 0.6666666666666666,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 0.6666666666666666,
+        "forbidden_term_clean_rate": 1.0
+      },
+      "pdf": {
+        "count": 3,
+        "passed": 2,
+        "failed": 1,
+        "pass_rate": 0.6666666666666666,
+        "pass_rate_ci95": {
+          "low": 0.20765495512648796,
+          "high": 0.9385096847238394
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 0.8333333333333334,
+        "total_keypoints": 4,
+        "matched_keypoints": 3,
+        "keypoint_hit_rate": 0.75,
+        "evidence_expected_cases": 1,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 0.0,
+        "preview_required_cases": 1,
+        "preview_resolved_cases": 1,
+        "preview_resolvable_rate": 1.0,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 1.0,
+        "forbidden_term_clean_rate": 1.0
+      }
+    },
+    "difficulty": {
+      "simple": {
+        "count": 6,
+        "passed": 2,
+        "failed": 4,
+        "pass_rate": 0.3333333333333333,
+        "pass_rate_ci95": {
+          "low": 0.09676933255921683,
+          "high": 0.7000116786584712
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 0.5833333333333334,
+        "total_keypoints": 10,
+        "matched_keypoints": 5,
+        "keypoint_hit_rate": 0.5,
+        "evidence_expected_cases": 4,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 0.0,
+        "preview_required_cases": 4,
+        "preview_resolved_cases": 3,
+        "preview_resolvable_rate": 0.75,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 0.8333333333333334,
+        "forbidden_term_clean_rate": 1.0
+      }
+    },
+    "answer_style": {
+      "policy": {
+        "count": 4,
+        "passed": 0,
+        "failed": 4,
+        "pass_rate": 0.0,
+        "pass_rate_ci95": {
+          "low": 0.0,
+          "high": 0.48990002040399916
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 0.375,
+        "total_keypoints": 8,
+        "matched_keypoints": 3,
+        "keypoint_hit_rate": 0.375,
+        "evidence_expected_cases": 4,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 0.0,
+        "preview_required_cases": 4,
+        "preview_resolved_cases": 3,
+        "preview_resolvable_rate": 0.75,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 0.75,
+        "forbidden_term_clean_rate": 1.0
+      },
+      "refusal": {
+        "count": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": {
+          "low": 0.34237195288961925,
+          "high": 1.0
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 1.0,
+        "total_keypoints": 2,
+        "matched_keypoints": 2,
+        "keypoint_hit_rate": 1.0,
+        "evidence_expected_cases": 0,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 1.0,
+        "preview_required_cases": 0,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 1.0,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 1.0,
+        "forbidden_term_clean_rate": 1.0
+      }
+    },
+    "category": {
+      "no_evidence": {
+        "count": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": {
+          "low": 0.34237195288961925,
+          "high": 1.0
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 1.0,
+        "total_keypoints": 2,
+        "matched_keypoints": 2,
+        "keypoint_hit_rate": 1.0,
+        "evidence_expected_cases": 0,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 1.0,
+        "preview_required_cases": 0,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 1.0,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 1.0,
+        "forbidden_term_clean_rate": 1.0
+      },
+      "scope_contract": {
+        "count": 4,
+        "passed": 0,
+        "failed": 4,
+        "pass_rate": 0.0,
+        "pass_rate_ci95": {
+          "low": 0.0,
+          "high": 0.48990002040399916
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 0.375,
+        "total_keypoints": 8,
+        "matched_keypoints": 3,
+        "keypoint_hit_rate": 0.375,
+        "evidence_expected_cases": 4,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 0.0,
+        "preview_required_cases": 4,
+        "preview_resolved_cases": 3,
+        "preview_resolvable_rate": 0.75,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 0.75,
+        "forbidden_term_clean_rate": 1.0
+      }
+    },
+    "kb_id": {
+      "eval-kb-image": {
+        "count": 3,
+        "passed": 0,
+        "failed": 3,
+        "pass_rate": 0.0,
+        "pass_rate_ci95": {
+          "low": 0.0,
+          "high": 0.5615060804490177
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 0.3333333333333333,
+        "total_keypoints": 6,
+        "matched_keypoints": 2,
+        "keypoint_hit_rate": 0.3333333333333333,
+        "evidence_expected_cases": 3,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 0.0,
+        "preview_required_cases": 3,
+        "preview_resolved_cases": 2,
+        "preview_resolvable_rate": 0.6666666666666666,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 0.6666666666666666,
+        "forbidden_term_clean_rate": 1.0
+      },
+      "eval-kb-pdf": {
+        "count": 2,
+        "passed": 1,
+        "failed": 1,
+        "pass_rate": 0.5,
+        "pass_rate_ci95": {
+          "low": 0.09452865480086614,
+          "high": 0.9054713451991339
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 0.75,
+        "total_keypoints": 3,
+        "matched_keypoints": 2,
+        "keypoint_hit_rate": 0.6666666666666666,
+        "evidence_expected_cases": 1,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 0.0,
+        "preview_required_cases": 1,
+        "preview_resolved_cases": 1,
+        "preview_resolvable_rate": 1.0,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 1.0,
+        "forbidden_term_clean_rate": 1.0
+      },
+      "eval-kb-pdf-zero": {
+        "count": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": {
+          "low": 0.2065432914738929,
+          "high": 1.0
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 1.0,
+        "total_keypoints": 1,
+        "matched_keypoints": 1,
+        "keypoint_hit_rate": 1.0,
+        "evidence_expected_cases": 0,
+        "evidence_hit_cases": 0,
+        "evidence_hit_rate": 1.0,
+        "preview_required_cases": 0,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 1.0,
+        "preview_term_total": 0,
+        "preview_term_hits": 0,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 1.0,
+        "forbidden_term_clean_rate": 1.0
+      }
+    }
+  },
+  "preview_stats": {
+    "requested_cases": 3,
+    "required_cases": 4,
+    "skipped_cases": 1
+  },
+  "failure_stage_breakdown": {
+    "quality_gate": 4
+  },
+  "case_results": [
+    {
+      "case_id": "eval-v3-img-001",
+      "category": "scope_contract",
+      "scope_passed": true,
+      "expected_kb_ids": [
+        "eval-kb-image"
+      ],
+      "keypoint_total": 2,
+      "keypoint_hits": [
+        "doc_id",
+        "preview_locator"
+      ],
+      "keypoint_missed": [],
+      "keypoint_coverage": 1.0,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 1,
+      "actual_source_count": 1,
+      "actual_evidence_count": 1,
+      "source_count_match": true,
+      "expected_doc": "weak-no-text-board.png",
+      "required_evidence_docs": [
+        "weak-no-text-board.png"
+      ],
+      "returned_titles": [
+        "evidence-board.png"
+      ],
+      "evidence_hit": false,
+      "preview_required": true,
+      "preview_resolvable": true,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 1.0,
+      "passed": false,
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "answer_style": "policy",
+      "kb_id": "eval-kb-image",
+      "question": "What evidence fields are required by the weak no text board?",
+      "answerable": true,
+      "judge_focus": [
+        "groundedness"
+      ],
+      "response_status_code": 200,
+      "preview_status_code": 200,
+      "preview_requested": true,
+      "failure_stage": null,
+      "failure_message": ""
+    },
+    {
+      "case_id": "eval-v3-img-002",
+      "category": "scope_contract",
+      "scope_passed": true,
+      "expected_kb_ids": [
+        "eval-kb-image"
+      ],
+      "keypoint_total": 2,
+      "keypoint_hits": [],
+      "keypoint_missed": [
+        "active knowledge base only",
+        "no fabricated memory"
+      ],
+      "keypoint_coverage": 0.0,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 1,
+      "actual_source_count": 1,
+      "actual_evidence_count": 1,
+      "source_count_match": true,
+      "expected_doc": "weak-failed-board.png",
+      "required_evidence_docs": [
+        "weak-failed-board.png"
+      ],
+      "returned_titles": [
+        "folder-board.png"
+      ],
+      "evidence_hit": false,
+      "preview_required": true,
+      "preview_resolvable": true,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 1.0,
+      "passed": false,
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "answer_style": "policy",
+      "kb_id": "eval-kb-image",
+      "question": "What authorization rule is shown on the weak failed board?",
+      "answerable": true,
+      "judge_focus": [
+        "groundedness"
+      ],
+      "response_status_code": 200,
+      "preview_status_code": 200,
+      "preview_requested": true,
+      "failure_stage": null,
+      "failure_message": ""
+    },
+    {
+      "case_id": "eval-v3-img-003",
+      "category": "scope_contract",
+      "scope_passed": true,
+      "expected_kb_ids": [
+        "eval-kb-image"
+      ],
+      "keypoint_total": 2,
+      "keypoint_hits": [],
+      "keypoint_missed": [
+        "paddleocr",
+        "dependency"
+      ],
+      "keypoint_coverage": 0.0,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 1,
+      "actual_source_count": 0,
+      "actual_evidence_count": 0,
+      "source_count_match": false,
+      "expected_doc": "weak-dependency-board.png",
+      "required_evidence_docs": [
+        "weak-dependency-board.png"
+      ],
+      "returned_titles": [],
+      "evidence_hit": false,
+      "preview_required": true,
+      "preview_resolvable": false,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 0.0,
+      "passed": false,
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "answer_style": "policy",
+      "kb_id": "eval-kb-image",
+      "question": "Which dependency must be ready before OCR import on the weak dependency board?",
+      "answerable": true,
+      "judge_focus": [
+        "groundedness"
+      ],
+      "response_status_code": 200,
+      "preview_status_code": null,
+      "preview_requested": false,
+      "failure_stage": null,
+      "failure_message": ""
+    },
+    {
+      "case_id": "eval-v3-pdf-001",
+      "category": "scope_contract",
+      "scope_passed": true,
+      "expected_kb_ids": [
+        "eval-kb-pdf"
+      ],
+      "keypoint_total": 2,
+      "keypoint_hits": [
+        "knowledge base"
+      ],
+      "keypoint_missed": [
+        "declared knowledge scope"
+      ],
+      "keypoint_coverage": 0.5,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 1,
+      "actual_source_count": 1,
+      "actual_evidence_count": 1,
+      "source_count_match": true,
+      "expected_doc": "embedding-gap.pdf",
+      "required_evidence_docs": [
+        "embedding-gap.pdf"
+      ],
+      "returned_titles": [
+        "folder-boundary.pdf"
+      ],
+      "evidence_hit": false,
+      "preview_required": true,
+      "preview_resolvable": true,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 1.0,
+      "passed": false,
+      "modality": "pdf",
+      "difficulty": "simple",
+      "answer_style": "policy",
+      "kb_id": "eval-kb-pdf",
+      "question": "What authorization rule is defined in the embedding gap pdf?",
+      "answerable": true,
+      "judge_focus": [
+        "groundedness"
+      ],
+      "response_status_code": 200,
+      "preview_status_code": 200,
+      "preview_requested": true,
+      "failure_stage": null,
+      "failure_message": ""
+    },
+    {
+      "case_id": "eval-v3-pdf-002",
+      "category": "no_evidence",
+      "scope_passed": true,
+      "expected_kb_ids": [
+        "eval-kb-pdf-zero"
+      ],
+      "keypoint_total": 1,
+      "keypoint_hits": [
+        "No confirmable information"
+      ],
+      "keypoint_missed": [],
+      "keypoint_coverage": 1.0,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 0,
+      "actual_source_count": 0,
+      "actual_evidence_count": 0,
+      "source_count_match": true,
+      "expected_doc": null,
+      "required_evidence_docs": [],
+      "returned_titles": [],
+      "evidence_hit": true,
+      "preview_required": false,
+      "preview_resolvable": true,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 1.0,
+      "passed": true,
+      "modality": "pdf",
+      "difficulty": "simple",
+      "answer_style": "refusal",
+      "kb_id": "eval-kb-pdf-zero",
+      "question": "What approval phrase appears in the zero text diagnostic pdf?",
+      "answerable": false,
+      "judge_focus": [
+        "refusal_correctness"
+      ],
+      "response_status_code": 200,
+      "preview_status_code": null,
+      "preview_requested": false,
+      "failure_stage": null,
+      "failure_message": ""
+    },
+    {
+      "case_id": "eval-v3-pdf-003",
+      "category": "no_evidence",
+      "scope_passed": true,
+      "expected_kb_ids": [
+        "eval-kb-pdf"
+      ],
+      "keypoint_total": 1,
+      "keypoint_hits": [
+        "No confirmable information"
+      ],
+      "keypoint_missed": [],
+      "keypoint_coverage": 1.0,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 0,
+      "actual_source_count": 0,
+      "actual_evidence_count": 0,
+      "source_count_match": true,
+      "expected_doc": null,
+      "required_evidence_docs": [],
+      "returned_titles": [],
+      "evidence_hit": true,
+      "preview_required": false,
+      "preview_resolvable": true,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 1.0,
+      "passed": true,
+      "modality": "pdf",
+      "difficulty": "simple",
+      "answer_style": "refusal",
+      "kb_id": "eval-kb-pdf",
+      "question": "What does aurora ledger annex zx-73 say?",
+      "answerable": false,
+      "judge_focus": [
+        "refusal_correctness"
+      ],
+      "response_status_code": 200,
+      "preview_status_code": null,
+      "preview_requested": false,
+      "failure_stage": null,
+      "failure_message": ""
+    }
+  ],
+  "failures": [
+    {
+      "case_id": "eval-v3-img-001",
+      "kb_id": "eval-kb-image",
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "category": "scope_contract",
+      "failure_stage": "quality_gate",
+      "failure_message": "contract or metric mismatch",
+      "keypoint_missed": [],
+      "blocked_term_hits": [],
+      "returned_titles": [
+        "evidence-board.png"
+      ],
+      "preview_requested": true,
+      "response_status_code": 200,
+      "preview_status_code": 200
+    },
+    {
+      "case_id": "eval-v3-img-002",
+      "kb_id": "eval-kb-image",
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "category": "scope_contract",
+      "failure_stage": "quality_gate",
+      "failure_message": "contract or metric mismatch",
+      "keypoint_missed": [
+        "active knowledge base only",
+        "no fabricated memory"
+      ],
+      "blocked_term_hits": [],
+      "returned_titles": [
+        "folder-board.png"
+      ],
+      "preview_requested": true,
+      "response_status_code": 200,
+      "preview_status_code": 200
+    },
+    {
+      "case_id": "eval-v3-img-003",
+      "kb_id": "eval-kb-image",
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "category": "scope_contract",
+      "failure_stage": "quality_gate",
+      "failure_message": "contract or metric mismatch",
+      "keypoint_missed": [
+        "paddleocr",
+        "dependency"
+      ],
+      "blocked_term_hits": [],
+      "returned_titles": [],
+      "preview_requested": false,
+      "response_status_code": 200,
+      "preview_status_code": null
+    },
+    {
+      "case_id": "eval-v3-pdf-001",
+      "kb_id": "eval-kb-pdf",
+      "modality": "pdf",
+      "difficulty": "simple",
+      "category": "scope_contract",
+      "failure_stage": "quality_gate",
+      "failure_message": "contract or metric mismatch",
+      "keypoint_missed": [
+        "declared knowledge scope"
+      ],
+      "blocked_term_hits": [],
+      "returned_titles": [
+        "folder-boundary.pdf"
+      ],
+      "preview_requested": true,
+      "response_status_code": 200,
+      "preview_status_code": 200
+    }
+  ],
+  "import_summary": {
+    "total_kbs": 4,
+    "total_files": 19,
+    "success_count": 16,
+    "failed_count": 0,
+    "empty_count": 3,
+    "total_success_count": 16,
+    "total_failed_count": 0,
+    "total_empty_count": 3,
+    "indexed_chunks": 16,
+    "total_indexed_chunks": 16,
+    "document_count": 16,
+    "total_document_count": 16,
+    "node_count": 16,
+    "total_node_count": 16,
+    "nodes_with_embedding_count": 15,
+    "total_nodes_with_embedding_count": 15,
+    "nodes_without_embedding_count": 1,
+    "total_nodes_without_embedding_count": 1,
+    "input_text_chars": 3727,
+    "total_input_text_chars": 3727,
+    "ocr_success_count": 3,
+    "total_ocr_success_count": 3,
+    "ocr_no_text_count": 1,
+    "total_ocr_no_text_count": 1,
+    "ocr_failed_count": 2,
+    "total_ocr_failed_count": 2,
+    "ocr_skipped_count": 0,
+    "total_ocr_skipped_count": 0,
+    "indexed_from_ocr_count": 3,
+    "total_indexed_from_ocr_count": 3,
+    "embedded_ocr_attempted_count": 0,
+    "total_embedded_ocr_attempted_count": 0,
+    "embedded_ocr_success_count": 0,
+    "total_embedded_ocr_success_count": 0,
+    "embedded_ocr_no_text_count": 0,
+    "total_embedded_ocr_no_text_count": 0,
+    "embedded_ocr_failed_count": 0,
+    "total_embedded_ocr_failed_count": 0,
+    "embedded_ocr_skipped_count": 0,
+    "total_embedded_ocr_skipped_count": 0,
+    "embedded_indexed_from_ocr_count": 0,
+    "total_embedded_indexed_from_ocr_count": 0,
+    "dependency_missing_count": 1,
+    "total_dependency_missing_count": 1,
+    "asset_registered_count": 6,
+    "total_asset_registered_count": 6,
+    "import_total_ms": 331.703,
+    "total_import_ms": 331.703,
+    "asset_registered_without_index_count": 3,
+    "success_rate": 0.8421052631578947,
+    "failed_rate": 0.0,
+    "empty_rate": 0.15789473684210525,
+    "avg_input_text_chars_per_doc": 232.9375,
+    "avg_indexed_chunks_per_doc": 1.0,
+    "nodes_without_embedding_rate": 0.0625,
+    "quality_signal_tags": [
+      "empty_imports",
+      "dependency_missing",
+      "ocr_failed",
+      "ocr_no_text",
+      "nodes_without_embedding",
+      "asset_registered_without_index"
+    ],
+    "kb_breakdown": {
+      "eval-kb-image": {
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "receipt_id": "kb-file-import-69dfdafd9fc741adaa7a06ef34dc92cc",
+        "import_mode": "preserve_tree",
+        "headline": "1 个文件因依赖缺失未完成导入",
+        "total_files": 6,
+        "success_count": 3,
+        "failed_count": 0,
+        "empty_count": 3,
+        "indexed_chunks": 3,
+        "document_count": 3,
+        "node_count": 3,
+        "nodes_with_embedding_count": 3,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 536,
+        "ocr_success_count": 3,
+        "ocr_no_text_count": 1,
+        "ocr_failed_count": 2,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 3,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 1,
+        "asset_registered_count": 6,
+        "import_total_ms": 81.975,
+        "asset_registered_without_index_count": 3,
+        "total_ocr_failed_count": 2,
+        "total_ocr_no_text_count": 1,
+        "success_rate": 0.5,
+        "failed_rate": 0.0,
+        "empty_rate": 0.5,
+        "avg_input_text_chars_per_doc": 178.66666666666666,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": [
+          "empty_imports",
+          "dependency_missing",
+          "ocr_failed",
+          "ocr_no_text",
+          "asset_registered_without_index"
+        ]
+      },
+      "eval-kb-markdown": {
+        "kb_id": "eval-kb-markdown",
+        "modality": "markdown",
+        "receipt_id": "kb-file-import-a856b68eb8394ad5abfac39e593cd3d0",
+        "import_mode": "preserve_tree",
+        "headline": "成功导入 7 个文件",
+        "total_files": 7,
+        "success_count": 7,
+        "failed_count": 0,
+        "empty_count": 0,
+        "indexed_chunks": 7,
+        "document_count": 7,
+        "node_count": 7,
+        "nodes_with_embedding_count": 7,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 2111,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
+        "asset_registered_count": 0,
+        "import_total_ms": 100.738,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 301.57142857142856,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
+      },
+      "eval-kb-pdf": {
+        "kb_id": "eval-kb-pdf",
+        "modality": "pdf",
+        "receipt_id": "kb-file-import-63ad0f7181414a71ab1f7ef497620525",
+        "import_mode": "preserve_tree",
+        "headline": "成功导入 5 个文件",
+        "total_files": 5,
+        "success_count": 5,
+        "failed_count": 0,
+        "empty_count": 0,
+        "indexed_chunks": 5,
+        "document_count": 5,
+        "node_count": 5,
+        "nodes_with_embedding_count": 4,
+        "nodes_without_embedding_count": 1,
+        "input_text_chars": 1080,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
+        "asset_registered_count": 0,
+        "import_total_ms": 112.596,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 216.0,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.2,
+        "quality_signal_tags": [
+          "nodes_without_embedding"
+        ]
+      },
+      "eval-kb-pdf-zero": {
+        "kb_id": "eval-kb-pdf-zero",
+        "modality": "pdf",
+        "receipt_id": "kb-file-import-ee643309e574415ebaae08ce751ea47b",
+        "import_mode": "preserve_tree",
+        "headline": "成功导入 1 个文件",
+        "total_files": 1,
+        "success_count": 1,
+        "failed_count": 0,
+        "empty_count": 0,
+        "indexed_chunks": 1,
+        "document_count": 1,
+        "node_count": 1,
+        "nodes_with_embedding_count": 1,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 0,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
+        "asset_registered_count": 0,
+        "import_total_ms": 36.394,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 0.0,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": [
+          "zero_text_content"
+        ]
+      }
+    },
+    "modality_breakdown": {
+      "image_ocr": {
+        "modality": "image_ocr",
+        "kb_count": 1,
+        "total_files": 6,
+        "success_count": 3,
+        "failed_count": 0,
+        "empty_count": 3,
+        "indexed_chunks": 3,
+        "document_count": 3,
+        "node_count": 3,
+        "nodes_with_embedding_count": 3,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 536,
+        "ocr_success_count": 3,
+        "ocr_no_text_count": 1,
+        "ocr_failed_count": 2,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 3,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 1,
+        "asset_registered_count": 6,
+        "import_total_ms": 81.975,
+        "asset_registered_without_index_count": 3,
+        "total_ocr_failed_count": 2,
+        "total_ocr_no_text_count": 1,
+        "success_rate": 0.5,
+        "failed_rate": 0.0,
+        "empty_rate": 0.5,
+        "avg_input_text_chars_per_doc": 178.66666666666666,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": [
+          "empty_imports",
+          "dependency_missing",
+          "ocr_failed",
+          "ocr_no_text",
+          "asset_registered_without_index"
+        ]
+      },
+      "markdown": {
+        "modality": "markdown",
+        "kb_count": 1,
+        "total_files": 7,
+        "success_count": 7,
+        "failed_count": 0,
+        "empty_count": 0,
+        "indexed_chunks": 7,
+        "document_count": 7,
+        "node_count": 7,
+        "nodes_with_embedding_count": 7,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 2111,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
+        "asset_registered_count": 0,
+        "import_total_ms": 100.738,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 301.57142857142856,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
+      },
+      "pdf": {
+        "modality": "pdf",
+        "kb_count": 2,
+        "total_files": 6,
+        "success_count": 6,
+        "failed_count": 0,
+        "empty_count": 0,
+        "indexed_chunks": 6,
+        "document_count": 6,
+        "node_count": 6,
+        "nodes_with_embedding_count": 5,
+        "nodes_without_embedding_count": 1,
+        "input_text_chars": 1080,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
+        "asset_registered_count": 0,
+        "import_total_ms": 148.99,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 180.0,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.16666666666666666,
+        "quality_signal_tags": [
+          "nodes_without_embedding"
+        ]
+      }
+    }
+  },
+  "import_qa_correlation": {
+    "weak_signal_kb_count": 3,
+    "weak_signal_kb_ids": [
+      "eval-kb-image",
+      "eval-kb-pdf",
+      "eval-kb-pdf-zero"
+    ],
+    "weak_signal_modality_count": 2,
+    "weak_signal_modalities": [
+      "image_ocr",
+      "pdf"
+    ],
+    "signal_breakdown": {
+      "asset_registered_without_index": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "dependency_missing": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "empty_imports": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "nodes_without_embedding": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-pdf"
+        ],
+        "qa_case_count": 2,
+        "qa_passed_cases": 1,
+        "qa_failed_cases": 1,
+        "evidence_miss_cases": 1,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "qa_pass_rate": 0.5
+      },
+      "ocr_failed": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "ocr_no_text": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "zero_text_content": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-pdf-zero"
+        ],
+        "qa_case_count": 1,
+        "qa_passed_cases": 1,
+        "qa_failed_cases": 0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "qa_pass_rate": 1.0
+      }
+    },
+    "kb_alignment": {
+      "eval-kb-image": {
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "quality_signal_tags": [
+          "empty_imports",
+          "dependency_missing",
+          "ocr_failed",
+          "ocr_no_text",
+          "asset_registered_without_index"
+        ],
+        "signal_count": 5,
+        "qa_total_cases": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "qa_pass_rate": 0.0,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 0.0,
+        "qa_preview_resolvable_rate": 0.6666666666666666,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "import_total_files": 6,
+        "import_success_count": 3,
+        "import_failed_count": 0,
+        "import_empty_count": 3,
+        "import_document_count": 3,
+        "import_input_text_chars": 536,
+        "import_avg_input_text_chars_per_doc": 178.66666666666666,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 2,
+        "import_total_ocr_no_text_count": 1,
+        "import_dependency_missing_count": 1,
+        "import_asset_registered_without_index_count": 3
+      },
+      "eval-kb-markdown": {
+        "kb_id": "eval-kb-markdown",
+        "modality": "markdown",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 0,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 0,
+        "qa_pass_rate": 0.0,
+        "qa_scope_pass_rate": 0.0,
+        "qa_evidence_hit_rate": 0.0,
+        "qa_preview_resolvable_rate": 0.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "import_total_files": 7,
+        "import_success_count": 7,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 7,
+        "import_input_text_chars": 2111,
+        "import_avg_input_text_chars_per_doc": 301.57142857142856,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      },
+      "eval-kb-pdf": {
+        "kb_id": "eval-kb-pdf",
+        "modality": "pdf",
+        "quality_signal_tags": [
+          "nodes_without_embedding"
+        ],
+        "signal_count": 1,
+        "qa_total_cases": 2,
+        "qa_passed_cases": 1,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.5,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 0.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 1,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "import_total_files": 5,
+        "import_success_count": 5,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 5,
+        "import_input_text_chars": 1080,
+        "import_avg_input_text_chars_per_doc": 216.0,
+        "import_nodes_without_embedding_count": 1,
+        "import_nodes_without_embedding_rate": 0.2,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      },
+      "eval-kb-pdf-zero": {
+        "kb_id": "eval-kb-pdf-zero",
+        "modality": "pdf",
+        "quality_signal_tags": [
+          "zero_text_content"
+        ],
+        "signal_count": 1,
+        "qa_total_cases": 1,
+        "qa_passed_cases": 1,
+        "qa_failed_cases": 0,
+        "qa_pass_rate": 1.0,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 1.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "import_total_files": 1,
+        "import_success_count": 1,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 1,
+        "import_input_text_chars": 0,
+        "import_avg_input_text_chars_per_doc": 0.0,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      }
+    },
+    "modality_alignment": {
+      "image_ocr": {
+        "modality": "image_ocr",
+        "quality_signal_tags": [
+          "empty_imports",
+          "dependency_missing",
+          "ocr_failed",
+          "ocr_no_text",
+          "asset_registered_without_index"
+        ],
+        "signal_count": 5,
+        "qa_total_cases": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "qa_pass_rate": 0.0,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 0.0,
+        "qa_preview_resolvable_rate": 0.6666666666666666,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "import_total_files": 6,
+        "import_success_count": 3,
+        "import_failed_count": 0,
+        "import_empty_count": 3,
+        "import_document_count": 3,
+        "import_input_text_chars": 536,
+        "import_avg_input_text_chars_per_doc": 178.66666666666666,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 2,
+        "import_total_ocr_no_text_count": 1,
+        "import_dependency_missing_count": 1,
+        "import_asset_registered_without_index_count": 3
+      },
+      "markdown": {
+        "modality": "markdown",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 0,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 0,
+        "qa_pass_rate": 0.0,
+        "qa_scope_pass_rate": 0.0,
+        "qa_evidence_hit_rate": 0.0,
+        "qa_preview_resolvable_rate": 0.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "import_total_files": 7,
+        "import_success_count": 7,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 7,
+        "import_input_text_chars": 2111,
+        "import_avg_input_text_chars_per_doc": 301.57142857142856,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      },
+      "pdf": {
+        "modality": "pdf",
+        "quality_signal_tags": [
+          "nodes_without_embedding"
+        ],
+        "signal_count": 1,
+        "qa_total_cases": 3,
+        "qa_passed_cases": 2,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.6666666666666666,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 0.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 1,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "import_total_files": 6,
+        "import_success_count": 6,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 6,
+        "import_input_text_chars": 1080,
+        "import_avg_input_text_chars_per_doc": 180.0,
+        "import_nodes_without_embedding_count": 1,
+        "import_nodes_without_embedding_rate": 0.16666666666666666,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      }
+    }
+  },
+  "diagnostic_summary": {
+    "total_cases": 6,
+    "expected_passed_cases": 2,
+    "expected_failed_cases": 4,
+    "actual_passed_cases": 2,
+    "actual_failed_cases": 4,
+    "expectation_matched_cases": 6,
+    "expectation_mismatched_cases": 0,
+    "case_expectation_match_rate": 1.0,
+    "weak_signal_case_count": 5,
+    "weak_signal_case_ids": [
+      "eval-v3-img-001",
+      "eval-v3-img-002",
+      "eval-v3-img-003",
+      "eval-v3-pdf-001",
+      "eval-v3-pdf-002"
+    ],
+    "weak_signal_breakdown": {
+      "asset_registered_without_index": 3,
+      "dependency_missing": 1,
+      "nodes_without_embedding": 1,
+      "ocr_failed": 2,
+      "ocr_no_text": 1,
+      "zero_text_content": 1
+    },
+    "weak_signal_kb_count": 3,
+    "weak_signal_kb_ids": [
+      "eval-kb-image",
+      "eval-kb-pdf",
+      "eval-kb-pdf-zero"
+    ],
+    "weak_signal_modality_count": 2,
+    "weak_signal_modalities": [
+      "image_ocr",
+      "pdf"
+    ],
+    "signal_breakdown": {
+      "asset_registered_without_index": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "dependency_missing": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "empty_imports": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "nodes_without_embedding": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-pdf"
+        ],
+        "qa_case_count": 2,
+        "qa_passed_cases": 1,
+        "qa_failed_cases": 1,
+        "evidence_miss_cases": 1,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "qa_pass_rate": 0.5
+      },
+      "ocr_failed": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "ocr_no_text": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-image"
+        ],
+        "qa_case_count": 3,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "evidence_miss_cases": 3,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
+      },
+      "zero_text_content": {
+        "kb_count": 1,
+        "kb_ids": [
+          "eval-kb-pdf-zero"
+        ],
+        "qa_case_count": 1,
+        "qa_passed_cases": 1,
+        "qa_failed_cases": 0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "qa_pass_rate": 1.0
+      }
+    },
+    "comparisons": [
+      {
+        "case_id": "eval-v3-img-001",
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "weak_signal_tags": [
+          "ocr_no_text",
+          "asset_registered_without_index"
+        ],
+        "expected_case_passed": false,
+        "actual_case_passed": false,
+        "expected_failure_stage": "quality_gate",
+        "actual_failure_stage": "quality_gate",
+        "expectation_matches": true,
+        "failure_message": ""
+      },
+      {
+        "case_id": "eval-v3-img-002",
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "weak_signal_tags": [
+          "ocr_failed",
+          "asset_registered_without_index"
+        ],
+        "expected_case_passed": false,
+        "actual_case_passed": false,
+        "expected_failure_stage": "quality_gate",
+        "actual_failure_stage": "quality_gate",
+        "expectation_matches": true,
+        "failure_message": ""
+      },
+      {
+        "case_id": "eval-v3-img-003",
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "weak_signal_tags": [
+          "dependency_missing",
+          "ocr_failed",
+          "asset_registered_without_index"
+        ],
+        "expected_case_passed": false,
+        "actual_case_passed": false,
+        "expected_failure_stage": "quality_gate",
+        "actual_failure_stage": "quality_gate",
+        "expectation_matches": true,
+        "failure_message": ""
+      },
+      {
+        "case_id": "eval-v3-pdf-001",
+        "kb_id": "eval-kb-pdf",
+        "modality": "pdf",
+        "weak_signal_tags": [
+          "nodes_without_embedding"
+        ],
+        "expected_case_passed": false,
+        "actual_case_passed": false,
+        "expected_failure_stage": "quality_gate",
+        "actual_failure_stage": "quality_gate",
+        "expectation_matches": true,
+        "failure_message": ""
+      },
+      {
+        "case_id": "eval-v3-pdf-002",
+        "kb_id": "eval-kb-pdf-zero",
+        "modality": "pdf",
+        "weak_signal_tags": [
+          "zero_text_content"
+        ],
+        "expected_case_passed": true,
+        "actual_case_passed": true,
+        "expected_failure_stage": null,
+        "actual_failure_stage": null,
+        "expectation_matches": true,
+        "failure_message": ""
+      },
+      {
+        "case_id": "eval-v3-pdf-003",
+        "kb_id": "eval-kb-pdf",
+        "modality": "pdf",
+        "weak_signal_tags": [],
+        "expected_case_passed": true,
+        "actual_case_passed": true,
+        "expected_failure_stage": null,
+        "actual_failure_stage": null,
+        "expectation_matches": true,
+        "failure_message": ""
+      }
+    ],
+    "mismatch_cases": []
+  },
+  "diagnostic_gates": {
+    "case_expectation_match_rate_min": {
+      "metric": "case_expectation_match_rate",
+      "actual": 1.0,
+      "minimum": 1.0,
+      "passed": true
+    },
+    "minimum_weak_signal_kb_count": {
+      "metric": "weak_signal_kb_count",
+      "actual": 3.0,
+      "minimum": 2.0,
+      "passed": true
+    },
+    "minimum_weak_signal_modality_count": {
+      "metric": "weak_signal_modality_count",
+      "actual": 2.0,
+      "minimum": 2.0,
+      "passed": true
+    },
+    "required_signal_tags": {
+      "metric": "signal_breakdown",
+      "actual": [
+        "asset_registered_without_index",
+        "dependency_missing",
+        "empty_imports",
+        "nodes_without_embedding",
+        "ocr_failed",
+        "ocr_no_text",
+        "zero_text_content"
+      ],
+      "required": [
+        "ocr_no_text",
+        "ocr_failed",
+        "dependency_missing",
+        "nodes_without_embedding",
+        "zero_text_content",
+        "asset_registered_without_index"
+      ],
+      "passed": true
+    }
+  },
+  "artifacts": {
+    "json": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v3-semireal-report.json",
+    "markdown": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v3-semireal-report.md"
+  }
+}

@@ -1,0 +1,158 @@
+[
+  {
+    "case_id": "semireal-markdown-001",
+    "question": "Which scope fields must a single-kb chat response echo?",
+    "expected_doc": "scope-contract.md",
+    "expected_keypoints": [
+      "requested_scope_type",
+      "effective_kb_ids",
+      "is_default_deny_applied"
+    ],
+    "must_not_contain": [
+      "kb-b",
+      "global compatibility mode"
+    ],
+    "preview_terms": [
+      "requested_kb_ids",
+      "isolation_level"
+    ],
+    "expected_source_count": 1,
+    "category": "fact"
+  },
+  {
+    "case_id": "semireal-markdown-002",
+    "question": "Which fields are required so the frontend can preview evidence?",
+    "expected_doc": "evidence-preview.md",
+    "expected_keypoints": [
+      "title",
+      "source",
+      "preview_locator"
+    ],
+    "must_not_contain": [
+      "cross-kb access",
+      "optional evidence"
+    ],
+    "preview_terms": [
+      "doc_id",
+      "source location"
+    ],
+    "expected_source_count": 1,
+    "category": "fact"
+  },
+  {
+    "case_id": "semireal-markdown-003",
+    "question": "How should the assistant respond when the current KB has no confirmable evidence?",
+    "expected_doc": "refusal-guideline.md",
+    "expected_keypoints": [
+      "no confirmable information",
+      "must not fabricate"
+    ],
+    "must_not_contain": [
+      "I guess",
+      "kb-b"
+    ],
+    "preview_terms": [
+      "active knowledge base",
+      "outside memory"
+    ],
+    "expected_source_count": 1,
+    "category": "policy"
+  },
+  {
+    "case_id": "semireal-markdown-004",
+    "question": "What should a future QA report record for each case?",
+    "expected_doc": "evaluation-metrics.md",
+    "expected_keypoints": [
+      "scope correctness",
+      "keypoint coverage",
+      "preview resolvability"
+    ],
+    "must_not_contain": [
+      "pass or fail alone is enough",
+      "global-only result"
+    ],
+    "preview_terms": [
+      "evidence hit",
+      "answer quality"
+    ],
+    "expected_source_count": 1,
+    "category": "summary"
+  },
+  {
+    "case_id": "semireal-markdown-005",
+    "question": "How should folders relate to a knowledge base?",
+    "expected_doc": "folder-boundary.md",
+    "expected_keypoints": [
+      "organizational objects",
+      "do not create a separate authorization boundary",
+      "knowledge-base level"
+    ],
+    "must_not_contain": [
+      "each folder is its own KB",
+      "folder-level authorization is already implemented"
+    ],
+    "preview_terms": [
+      "import tree display",
+      "access control"
+    ],
+    "expected_source_count": 1,
+    "category": "architecture"
+  },
+  {
+    "case_id": "semireal-markdown-006",
+    "question": "What does nebula telemetry protocol zx-42 require?",
+    "expected_doc": null,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "must_not_contain": [
+      "scope correctness",
+      "preview_locator",
+      "authorization boundary"
+    ],
+    "preview_terms": [],
+    "expected_source_count": 0,
+    "category": "no-evidence"
+  },
+  {
+    "case_id": "semireal-markdown-007",
+    "question": "What should the QA program stabilize before expanding PDF and image OCR baselines?",
+    "expected_doc": "ingestion-priority.md",
+    "expected_keypoints": [
+      "Markdown import",
+      "single-kb query",
+      "Dependency readiness"
+    ],
+    "must_not_contain": [
+      "full image understanding",
+      "automatic cross-kb query"
+    ],
+    "preview_terms": [
+      "fitz",
+      "paddleocr"
+    ],
+    "expected_source_count": 1,
+    "category": "roadmap"
+  },
+  {
+    "case_id": "semireal-markdown-008",
+    "question": "Which rate metrics should the QA baseline report track besides pass or fail?",
+    "expected_doc": "suite-metrics-gate.md",
+    "expected_keypoints": [
+      "scope pass rate",
+      "keypoint coverage",
+      "preview resolvability rate"
+    ],
+    "must_not_contain": [
+      "A passing exit code alone is enough",
+      "single aggregate only"
+    ],
+    "preview_terms": [
+      "source count match rate",
+      "forbidden-term clean rate"
+    ],
+    "expected_source_count": 1,
+    "category": "metrics"
+  }
+]

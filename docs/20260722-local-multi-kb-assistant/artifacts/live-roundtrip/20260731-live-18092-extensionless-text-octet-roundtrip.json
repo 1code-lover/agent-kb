@@ -1,0 +1,765 @@
+{
+  "base_url": "http://127.0.0.1:18092",
+  "generated_at_epoch": 1785506975,
+  "health": {
+    "status": "ok",
+    "runtime": {
+      "pid": 25136,
+      "python_executable": "C:\\Users\\ethan1.zhao\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "python_version": "3.12.10",
+      "python_implementation": "CPython",
+      "cwd": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb"
+    },
+    "embedding_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 31758.382,
+      "started_at": "2026-07-31T14:08:30.150703+00:00",
+      "finished_at": "2026-07-31T14:09:05.200792+00:00",
+      "current_model": "bge-small-zh-v1.5",
+      "loaded_model": "bge-small-zh-v1.5",
+      "is_ready": true
+    },
+    "ocr_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 29999.397,
+      "started_at": "2026-07-31T14:08:30.150703+00:00",
+      "finished_at": "2026-07-31T14:09:00.151061+00:00",
+      "is_ready": true
+    },
+    "import_capabilities": {
+      "pdf_text_extraction": {
+        "ready": true,
+        "dependencies": [
+          "fitz"
+        ]
+      },
+      "image_ocr": {
+        "ready": true,
+        "dependencies": [
+          "paddleocr",
+          "paddle",
+          "pillow"
+        ]
+      },
+      "dependencies": {
+        "fitz": {
+          "installed": true,
+          "package": "PyMuPDF",
+          "import_name": "fitz",
+          "used_for": [
+            "pdf_text_extraction"
+          ]
+        },
+        "paddleocr": {
+          "installed": true,
+          "package": "paddleocr",
+          "import_name": "paddleocr",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "paddle": {
+          "installed": true,
+          "package": "paddlepaddle",
+          "import_name": "paddle",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "pillow": {
+          "installed": true,
+          "package": "Pillow",
+          "import_name": "PIL",
+          "used_for": [
+            "image_ocr"
+          ]
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "README-utf8",
+      "kb_id": "diag-kb-extensionless-text-readme-utf8-1785506975",
+      "question": "In the extensionless UTF-8 note, what remains the authorization boundary?",
+      "expected_terms": [
+        "knowledge base",
+        "authorization boundary"
+      ],
+      "source": {
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-extensionless-text\\1785506975\\README-utf8\\README",
+        "encoding": "utf-8",
+        "sha256": "14dba994a0f3038db64e65e2f9f1b7eb811552384afa5b250acef2cf329cb9df",
+        "size": 127,
+        "text_preview": "Extensionless diagnostic note.\nKnowledge Base remains the authorization boundary.\nFolder stays an organization object only.\n"
+      },
+      "saved": {
+        "requested_relative_path": "docs/README",
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-extensionless-text-readme-utf8-1785506975\\docs\\README",
+        "exists": true,
+        "encoding": "utf-8",
+        "sha256": "14dba994a0f3038db64e65e2f9f1b7eb811552384afa5b250acef2cf329cb9df",
+        "size": 127,
+        "text_preview": "Extensionless diagnostic note.\nKnowledge Base remains the authorization boundary.\nFolder stays an organization object only.\n",
+        "text_decode_error": null,
+        "import_status": "indexed",
+        "import_message": null,
+        "import_diagnostics": {
+          "file_kind": "text",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "file_retained_on_disk": true,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 3.017,
+            "persist_ms": 3.017,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 49.198,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 52.215
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 125,
+          "node_count": 1,
+          "nodes_with_embedding_count": 1,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 1.113,
+            "chunking_ms": 0.723,
+            "embedding_ms": 37.862,
+            "title_extract_ms": 0.222,
+            "vector_store_ms": 0.115,
+            "docstore_ms": 0.138,
+            "index_insert_ms": 0.738,
+            "total_ms": 44.104
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "unknown",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 0.0,
+          "ocr_predict_ms": 0.0,
+          "ocr_postprocess_ms": 0.0,
+          "ocr_total_ms": 0.0,
+          "ocr_instance_reused": false,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      },
+      "checks": {
+        "import_indexed": true,
+        "file_kind_text": true,
+        "saved_exists": true,
+        "source_saved_hash_match": true,
+        "saved_text_contains_expected_terms": true,
+        "chat_answer_contains_expected_terms": true,
+        "chat_answer_meets_minimum_contract": true,
+        "chat_source_contains_expected_terms": true,
+        "chat_evidence_contains_expected_terms": true
+      },
+      "run_gates": {
+        "run_passed": true
+      },
+      "import_summary": {
+        "receipt_id": "kb-file-import-6c047c80d585432e937e8aeee82dae95",
+        "files": [
+          {
+            "name": "README",
+            "type": "application/octet-stream",
+            "size": 127,
+            "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-extensionless-text-readme-utf8-1785506975\\docs\\README",
+            "kb_id": "diag-kb-extensionless-text-readme-utf8-1785506975",
+            "relative_path": "docs/README",
+            "folder_path": "docs"
+          }
+        ],
+        "file_results": [
+          {
+            "name": "README",
+            "type": "application/octet-stream",
+            "size": 127,
+            "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-extensionless-text-readme-utf8-1785506975\\docs\\README",
+            "kb_id": "diag-kb-extensionless-text-readme-utf8-1785506975",
+            "status": "indexed",
+            "indexed_chunks": 1,
+            "relative_path": "docs/README",
+            "folder_path": "docs",
+            "embedded_assets": [],
+            "asset_warning_count": 0,
+            "diagnostics": {
+              "file_kind": "text",
+              "empty_reason": null,
+              "standalone_asset_candidate": false,
+              "skip_standalone_asset": false,
+              "file_retained_on_disk": true,
+              "ocr_attempted": false,
+              "ocr_status": null,
+              "ocr_text_length": 0,
+              "ocr_error": null,
+              "indexed_from_ocr": false,
+              "asset_registered": false,
+              "stage_timings": {
+                "file_save_ms": 3.017,
+                "persist_ms": 3.017,
+                "standalone_ocr_ms": 0.0,
+                "primary_index_ms": 49.198,
+                "embedded_asset_extract_ms": 0.0,
+                "embedded_asset_ocr_ms": 0.0,
+                "embedded_asset_index_ms": 0.0,
+                "total_ms": 52.215
+              },
+              "document_count": 1,
+              "empty_document_count": 0,
+              "input_text_chars": 125,
+              "node_count": 1,
+              "nodes_with_embedding_count": 1,
+              "nodes_without_embedding_count": 0,
+              "index_stage_timings": {
+                "document_load_ms": 1.113,
+                "chunking_ms": 0.723,
+                "embedding_ms": 37.862,
+                "title_extract_ms": 0.222,
+                "vector_store_ms": 0.115,
+                "docstore_ms": 0.138,
+                "index_insert_ms": 0.738,
+                "total_ms": 44.104
+              },
+              "failure_category": null,
+              "missing_dependency": null,
+              "dependency_status": "unknown",
+              "ocr_init_ms": 0.0,
+              "ocr_load_image_ms": 0.0,
+              "ocr_predict_ms": 0.0,
+              "ocr_postprocess_ms": 0.0,
+              "ocr_total_ms": 0.0,
+              "ocr_instance_reused": false,
+              "embedded_asset_count": 0,
+              "embedded_asset_ready_count": 0,
+              "embedded_asset_missing_count": 0,
+              "embedded_asset_invalid_count": 0,
+              "embedded_ocr_attempted_count": 0,
+              "embedded_ocr_success_count": 0,
+              "embedded_ocr_no_text_count": 0,
+              "embedded_ocr_failed_count": 0,
+              "embedded_ocr_skipped_count": 0,
+              "embedded_indexed_from_ocr_count": 0
+            }
+          }
+        ],
+        "indexed_chunks": 1,
+        "success_count": 1,
+        "failed_count": 0,
+        "empty_count": 0,
+        "kb_id": "diag-kb-extensionless-text-readme-utf8-1785506975",
+        "import_mode": "preserve_tree",
+        "diagnostics": {
+          "total_files": 1,
+          "indexed_files": 1,
+          "empty_files": 0,
+          "failed_files": 0,
+          "standalone_asset_candidate_count": 0,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "asset_warning_count": 0,
+          "ocr_success_count": 0,
+          "ocr_no_text_count": 0,
+          "ocr_failed_count": 0,
+          "ocr_skipped_count": 0,
+          "indexed_from_ocr_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0,
+          "asset_registered_count": 0,
+          "skip_standalone_asset_count": 0,
+          "empty_reason_counts": {},
+          "failure_category_counts": {},
+          "dependency_status_counts": {
+            "unknown": 1
+          },
+          "dependency_missing_count": 0,
+          "missing_dependency_counts": {},
+          "stage_timings": {
+            "ensure_models_ready_ms": 0.089,
+            "get_index_manager_ms": 4.359,
+            "file_save_ms": 3.017,
+            "persist_ms": 3.017,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 49.198,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "index_storage_persist_ms": 12.514,
+            "doc_count_update_ms": 58.927,
+            "register_assets_ms": 0.444,
+            "receipt_store_ms": 9.607,
+            "result_build_ms": 0.083,
+            "total_ms": 143.202
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 125,
+          "node_count": 1,
+          "nodes_with_embedding_count": 1,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 1.113,
+            "chunking_ms": 0.723,
+            "embedding_ms": 37.862,
+            "title_extract_ms": 0.222,
+            "vector_store_ms": 0.115,
+            "docstore_ms": 0.138,
+            "index_insert_ms": 0.738,
+            "total_ms": 44.104
+          },
+          "storage_persist_stage_timings": {
+            "docstore_persist_ms": 1.282,
+            "index_store_persist_ms": 1.148,
+            "graph_store_persist_ms": 1.882,
+            "property_graph_store_persist_ms": 0.0,
+            "vector_store_persist_ms": 6.34,
+            "vector_store_namespaces_ms": {
+              "default": 5.111,
+              "image": 1.229
+            },
+            "fallback_persist_ms": 0.0,
+            "total_ms": 10.713
+          }
+        },
+        "display_summary": {
+          "source_kind": "file_import",
+          "item_label": "文件",
+          "total_items": 1,
+          "indexed_items": 1,
+          "empty_items": 0,
+          "failed_items": 0,
+          "asset_registered_count": 0,
+          "asset_registered_but_not_indexed_count": 0,
+          "asset_warning_count": 0,
+          "dependency_missing_count": 0,
+          "top_missing_dependencies": [],
+          "top_empty_reasons": [],
+          "has_blockers": false,
+          "has_dependency_issues": false,
+          "has_warnings": false,
+          "headline": "成功导入 1 个文件",
+          "user_message": "文件已完成解析并写入知识库。",
+          "next_actions": []
+        }
+      },
+      "chat_summary": {
+        "attempted": true,
+        "executed": true,
+        "error": null,
+        "answer": "Knowledge Base remains the authorization boundary.",
+        "requested_scope_type": "single_kb",
+        "requested_kb_ids": [
+          "diag-kb-extensionless-text-readme-utf8-1785506975"
+        ],
+        "effective_scope_type": "single_kb",
+        "effective_kb_ids": [
+          "diag-kb-extensionless-text-readme-utf8-1785506975"
+        ],
+        "is_default_deny_applied": false,
+        "isolation_level": "logical_filter_only",
+        "source_count": 1,
+        "evidence_count": 1,
+        "first_source": {
+          "id": "ev:eyJkb2NfaWQiOiJlZGFmNGVjNC1lZjdiLTQ3NWItYTgyMS1mYmIzZWMyZDA4MGEiLCJrYl9pZCI6ImRpYWcta2ItZXh0ZW5zaW9ubGVzcy10ZXh0LXJlYWRtZS11dGY4LTE3ODU1MDY5NzUiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjM2YWRiZDNhLTdjZTYtNDU2ZC05MTJhLWZhYjljZjdlM2MyYiJ9fQ",
+          "file": "README",
+          "page": "N/A",
+          "score": 0.8666666666666667,
+          "text": "Extensionless diagnostic note.\r\nKnowledge Base remains the authorization boundary.\r\nFolder stays an organization object only.",
+          "kb_id": "diag-kb-extensionless-text-readme-utf8-1785506975",
+          "doc_id": "edaf4ec4-ef7b-475b-a821-fbb3ec2d080a",
+          "preview_locator": {
+            "node_id": "36adbd3a-7ce6-456d-912a-fab9cf7e3c2b"
+          },
+          "asset_id": null
+        },
+        "first_evidence": {
+          "id": "ev:eyJkb2NfaWQiOiJlZGFmNGVjNC1lZjdiLTQ3NWItYTgyMS1mYmIzZWMyZDA4MGEiLCJrYl9pZCI6ImRpYWcta2ItZXh0ZW5zaW9ubGVzcy10ZXh0LXJlYWRtZS11dGY4LTE3ODU1MDY5NzUiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjM2YWRiZDNhLTdjZTYtNDU2ZC05MTJhLWZhYjljZjdlM2MyYiJ9fQ",
+          "title": "README",
+          "source": "README",
+          "page": "N/A",
+          "score": 0.8666666666666667,
+          "excerpt": "Extensionless diagnostic note.\r\nKnowledge Base remains the authorization boundary.\r\nFolder stays an organization object only.",
+          "receipt_id": null,
+          "kb_id": "diag-kb-extensionless-text-readme-utf8-1785506975",
+          "doc_id": "edaf4ec4-ef7b-475b-a821-fbb3ec2d080a",
+          "preview_locator": {
+            "node_id": "36adbd3a-7ce6-456d-912a-fab9cf7e3c2b"
+          },
+          "asset_id": null
+        }
+      }
+    },
+    {
+      "case_id": "README-utf16",
+      "kb_id": "diag-kb-extensionless-text-readme-utf16-1785506975",
+      "question": "In the extensionless UTF-16 note, what remains the authorization boundary?",
+      "expected_terms": [
+        "knowledge base",
+        "authorization boundary"
+      ],
+      "source": {
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-extensionless-text\\1785506975\\README-utf16\\README",
+        "encoding": "utf-16",
+        "sha256": "4171854832d8aeab5b81893944aa59c9636eef7ea9a0f17f569af1ababddff3a",
+        "size": 262,
+        "text_preview": "Extensionless UTF-16 diagnostic note.\nThe authorization boundary remains the knowledge base.\nFolder remains organization only.\n"
+      },
+      "saved": {
+        "requested_relative_path": "docs/README",
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-extensionless-text-readme-utf16-1785506975\\docs\\README",
+        "exists": true,
+        "encoding": "utf-16",
+        "sha256": "4171854832d8aeab5b81893944aa59c9636eef7ea9a0f17f569af1ababddff3a",
+        "size": 262,
+        "text_preview": "Extensionless UTF-16 diagnostic note.\nThe authorization boundary remains the knowledge base.\nFolder remains organization only.\n",
+        "text_decode_error": null,
+        "import_status": "indexed",
+        "import_message": null,
+        "import_diagnostics": {
+          "file_kind": "text",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "file_retained_on_disk": true,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 2.327,
+            "persist_ms": 2.327,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 406.469,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 408.796
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 260,
+          "node_count": 5,
+          "nodes_with_embedding_count": 5,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 0.886,
+            "chunking_ms": 312.938,
+            "embedding_ms": 78.904,
+            "title_extract_ms": 0.426,
+            "vector_store_ms": 0.726,
+            "docstore_ms": 0.128,
+            "index_insert_ms": 1.837,
+            "total_ms": 401.226
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "unknown",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 0.0,
+          "ocr_predict_ms": 0.0,
+          "ocr_postprocess_ms": 0.0,
+          "ocr_total_ms": 0.0,
+          "ocr_instance_reused": false,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      },
+      "checks": {
+        "import_indexed": true,
+        "file_kind_text": true,
+        "saved_exists": true,
+        "source_saved_hash_match": true,
+        "saved_text_contains_expected_terms": true,
+        "chat_answer_contains_expected_terms": false,
+        "chat_answer_meets_minimum_contract": false,
+        "chat_source_contains_expected_terms": false,
+        "chat_evidence_contains_expected_terms": false
+      },
+      "run_gates": {
+        "run_passed": false
+      },
+      "import_summary": {
+        "receipt_id": "kb-file-import-77352169f097480aaa24bdbcde05ec14",
+        "files": [
+          {
+            "name": "README",
+            "type": "application/octet-stream",
+            "size": 262,
+            "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-extensionless-text-readme-utf16-1785506975\\docs\\README",
+            "kb_id": "diag-kb-extensionless-text-readme-utf16-1785506975",
+            "relative_path": "docs/README",
+            "folder_path": "docs"
+          }
+        ],
+        "file_results": [
+          {
+            "name": "README",
+            "type": "application/octet-stream",
+            "size": 262,
+            "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-extensionless-text-readme-utf16-1785506975\\docs\\README",
+            "kb_id": "diag-kb-extensionless-text-readme-utf16-1785506975",
+            "status": "indexed",
+            "indexed_chunks": 5,
+            "relative_path": "docs/README",
+            "folder_path": "docs",
+            "embedded_assets": [],
+            "asset_warning_count": 0,
+            "diagnostics": {
+              "file_kind": "text",
+              "empty_reason": null,
+              "standalone_asset_candidate": false,
+              "skip_standalone_asset": false,
+              "file_retained_on_disk": true,
+              "ocr_attempted": false,
+              "ocr_status": null,
+              "ocr_text_length": 0,
+              "ocr_error": null,
+              "indexed_from_ocr": false,
+              "asset_registered": false,
+              "stage_timings": {
+                "file_save_ms": 2.327,
+                "persist_ms": 2.327,
+                "standalone_ocr_ms": 0.0,
+                "primary_index_ms": 406.469,
+                "embedded_asset_extract_ms": 0.0,
+                "embedded_asset_ocr_ms": 0.0,
+                "embedded_asset_index_ms": 0.0,
+                "total_ms": 408.796
+              },
+              "document_count": 1,
+              "empty_document_count": 0,
+              "input_text_chars": 260,
+              "node_count": 5,
+              "nodes_with_embedding_count": 5,
+              "nodes_without_embedding_count": 0,
+              "index_stage_timings": {
+                "document_load_ms": 0.886,
+                "chunking_ms": 312.938,
+                "embedding_ms": 78.904,
+                "title_extract_ms": 0.426,
+                "vector_store_ms": 0.726,
+                "docstore_ms": 0.128,
+                "index_insert_ms": 1.837,
+                "total_ms": 401.226
+              },
+              "failure_category": null,
+              "missing_dependency": null,
+              "dependency_status": "unknown",
+              "ocr_init_ms": 0.0,
+              "ocr_load_image_ms": 0.0,
+              "ocr_predict_ms": 0.0,
+              "ocr_postprocess_ms": 0.0,
+              "ocr_total_ms": 0.0,
+              "ocr_instance_reused": false,
+              "embedded_asset_count": 0,
+              "embedded_asset_ready_count": 0,
+              "embedded_asset_missing_count": 0,
+              "embedded_asset_invalid_count": 0,
+              "embedded_ocr_attempted_count": 0,
+              "embedded_ocr_success_count": 0,
+              "embedded_ocr_no_text_count": 0,
+              "embedded_ocr_failed_count": 0,
+              "embedded_ocr_skipped_count": 0,
+              "embedded_indexed_from_ocr_count": 0
+            }
+          }
+        ],
+        "indexed_chunks": 5,
+        "success_count": 1,
+        "failed_count": 0,
+        "empty_count": 0,
+        "kb_id": "diag-kb-extensionless-text-readme-utf16-1785506975",
+        "import_mode": "preserve_tree",
+        "diagnostics": {
+          "total_files": 1,
+          "indexed_files": 1,
+          "empty_files": 0,
+          "failed_files": 0,
+          "standalone_asset_candidate_count": 0,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "asset_warning_count": 0,
+          "ocr_success_count": 0,
+          "ocr_no_text_count": 0,
+          "ocr_failed_count": 0,
+          "ocr_skipped_count": 0,
+          "indexed_from_ocr_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0,
+          "asset_registered_count": 0,
+          "skip_standalone_asset_count": 0,
+          "empty_reason_counts": {},
+          "failure_category_counts": {},
+          "dependency_status_counts": {
+            "unknown": 1
+          },
+          "dependency_missing_count": 0,
+          "missing_dependency_counts": {},
+          "stage_timings": {
+            "ensure_models_ready_ms": 0.04,
+            "get_index_manager_ms": 4.545,
+            "file_save_ms": 2.327,
+            "persist_ms": 2.327,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 406.469,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "index_storage_persist_ms": 22.215,
+            "doc_count_update_ms": 6.065,
+            "register_assets_ms": 0.337,
+            "receipt_store_ms": 9.547,
+            "result_build_ms": 0.066,
+            "total_ms": 454.036
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 260,
+          "node_count": 5,
+          "nodes_with_embedding_count": 5,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 0.886,
+            "chunking_ms": 312.938,
+            "embedding_ms": 78.904,
+            "title_extract_ms": 0.426,
+            "vector_store_ms": 0.726,
+            "docstore_ms": 0.128,
+            "index_insert_ms": 1.837,
+            "total_ms": 401.226
+          },
+          "storage_persist_stage_timings": {
+            "docstore_persist_ms": 1.708,
+            "index_store_persist_ms": 1.557,
+            "graph_store_persist_ms": 1.577,
+            "property_graph_store_persist_ms": 0.0,
+            "vector_store_persist_ms": 15.327,
+            "vector_store_namespaces_ms": {
+              "default": 13.927,
+              "image": 1.4
+            },
+            "fallback_persist_ms": 0.0,
+            "total_ms": 20.227
+          }
+        },
+        "display_summary": {
+          "source_kind": "file_import",
+          "item_label": "文件",
+          "total_items": 1,
+          "indexed_items": 1,
+          "empty_items": 0,
+          "failed_items": 0,
+          "asset_registered_count": 0,
+          "asset_registered_but_not_indexed_count": 0,
+          "asset_warning_count": 0,
+          "dependency_missing_count": 0,
+          "top_missing_dependencies": [],
+          "top_empty_reasons": [],
+          "has_blockers": false,
+          "has_dependency_issues": false,
+          "has_warnings": false,
+          "headline": "成功导入 1 个文件",
+          "user_message": "文件已完成解析并写入知识库。",
+          "next_actions": []
+        }
+      },
+      "chat_summary": {
+        "attempted": true,
+        "executed": true,
+        "error": null,
+        "answer": "The authorization boundary remains the base.",
+        "requested_scope_type": "single_kb",
+        "requested_kb_ids": [
+          "diag-kb-extensionless-text-readme-utf16-1785506975"
+        ],
+        "effective_scope_type": "single_kb",
+        "effective_kb_ids": [
+          "diag-kb-extensionless-text-readme-utf16-1785506975"
+        ],
+        "is_default_deny_applied": false,
+        "isolation_level": "logical_filter_only",
+        "source_count": 5,
+        "evidence_count": 5,
+        "first_source": {
+          "id": "ev:eyJkb2NfaWQiOiJlMGNlMmRkOC05NTYzLTRkNGItODM2YS01NmQxNjZlM2Q0ZjYiLCJrYl9pZCI6ImRpYWcta2ItZXh0ZW5zaW9ubGVzcy10ZXh0LXJlYWRtZS11dGYxNi0xNzg1NTA2OTc1IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJhNmE1MmI5Yi03ZDc2LTQ2NzEtOGExNS0xMTg5N2M4NTJjMTYifX0",
+          "file": "README",
+          "page": "N/A",
+          "score": 0.8693622728834811,
+          "text": "E\u0000x\u0000t\u0000e\u0000n\u0000s\u0000i\u0000o\u0000n\u0000l\u0000e\u0000s\u0000s\u0000 \u0000U\u0000T\u0000F\u0000-\u00001\u00006\u0000 \u0000d\u0000i\u0000a\u0000g\u0000n\u0000o\u0000s\u0000t\u0000i\u0000c\u0000 \u0000n\u0000o\u0000t\u0000e\u0000.",
+          "kb_id": "diag-kb-extensionless-text-readme-utf16-1785506975",
+          "doc_id": "e0ce2dd8-9563-4d4b-836a-56d166e3d4f6",
+          "preview_locator": {
+            "node_id": "a6a52b9b-7d76-4671-8a15-11897c852c16"
+          },
+          "asset_id": null
+        },
+        "first_evidence": {
+          "id": "ev:eyJkb2NfaWQiOiJlMGNlMmRkOC05NTYzLTRkNGItODM2YS01NmQxNjZlM2Q0ZjYiLCJrYl9pZCI6ImRpYWcta2ItZXh0ZW5zaW9ubGVzcy10ZXh0LXJlYWRtZS11dGYxNi0xNzg1NTA2OTc1IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJhNmE1MmI5Yi03ZDc2LTQ2NzEtOGExNS0xMTg5N2M4NTJjMTYifX0",
+          "title": "README",
+          "source": "README",
+          "page": "N/A",
+          "score": 0.8693622728834811,
+          "excerpt": "E\u0000x\u0000t\u0000e\u0000n\u0000s\u0000i\u0000o\u0000n\u0000l\u0000e\u0000s\u0000s\u0000 \u0000U\u0000T\u0000F\u0000-\u00001\u00006\u0000 \u0000d\u0000i\u0000a\u0000g\u0000n\u0000o\u0000s\u0000t\u0000i\u0000c\u0000 \u0000n\u0000o\u0000t\u0000e\u0000.",
+          "receipt_id": null,
+          "kb_id": "diag-kb-extensionless-text-readme-utf16-1785506975",
+          "doc_id": "e0ce2dd8-9563-4d4b-836a-56d166e3d4f6",
+          "preview_locator": {
+            "node_id": "a6a52b9b-7d76-4671-8a15-11897c852c16"
+          },
+          "asset_id": null
+        }
+      }
+    }
+  ],
+  "summary": {
+    "case_count": 2,
+    "passed_case_count": 1,
+    "all_checks_passed": false
+  }
+}

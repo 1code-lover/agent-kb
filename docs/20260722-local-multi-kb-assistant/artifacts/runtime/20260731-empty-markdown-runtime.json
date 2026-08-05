@@ -1,0 +1,25 @@
+{
+  "scenario": "empty_markdown_runtime_load_files",
+  "source": "C:\\Users\\ETHAN1~1.ZHA\\AppData\\Local\\Temp\\idx-empty-runtime-0hu2sear\\empty.md",
+  "node_count": 0,
+  "diagnostics": {
+    "source": "files",
+    "input_file_count": 1,
+    "document_count": 1,
+    "empty_document_count": 1,
+    "input_text_chars": 0,
+    "node_count": 0,
+    "nodes_with_embedding_count": 0,
+    "nodes_without_embedding_count": 0,
+    "stage_timings": {
+      "document_load_ms": 194.685,
+      "chunking_ms": 1.446,
+      "embedding_ms": 0.241,
+      "title_extract_ms": 0.124,
+      "vector_store_ms": 0.0,
+      "docstore_ms": 0.153,
+      "index_insert_ms": 0.0,
+      "total_ms": 199.742
+    }
+  }
+}

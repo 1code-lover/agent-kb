@@ -1,0 +1,1216 @@
+{
+  "base_url": "http://127.0.0.1:18080",
+  "kb_id": "diag-mixed-batch-1785390160",
+  "chunk_size": 256,
+  "chunk_overlap": 16,
+  "kb_create": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "kb_id": "diag-mixed-batch-1785390160",
+      "kb_name": "Mixed Batch Diagnostic",
+      "created_at": "2026-07-30T05:42:41.110942+00:00",
+      "updated_at": "2026-07-30T05:42:41.110942+00:00",
+      "status": "active",
+      "doc_count": 0
+    },
+    "request_id": "29e94f2d-05dd-4d08-bc45-00cf4dad38d4"
+  },
+  "health": {
+    "status": "ok"
+  },
+  "source_files": {
+    "cutover.md": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-mixed-batch\\source\\playbooks\\release\\cutover.md",
+      "sha256": "f8927862d10ca1d46e937037dfd73568b8ac08be8522a12af62862e907584a9d",
+      "size": 357,
+      "text_preview": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)\n"
+    },
+    "escalation-board.png": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-mixed-batch\\source\\playbooks\\release\\images\\escalation-board.png",
+      "sha256": "b2239780988ca06baedbee4c590f17ceedf6badbe2736d4cb7d7532cb68ce314",
+      "size": 22709,
+      "text_preview": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only"
+    },
+    "vendor-cutover.pdf": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-mixed-batch\\source\\reports\\vendor-cutover.pdf",
+      "sha256": "224ca65d22e49d08d0d8fc3daa55860b1dd3ae429969bad9e296b27856394ad3",
+      "size": 974,
+      "text_preview": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to the vendor stack. The duty SRE confirms rollback readiness afterwards."
+    },
+    "preview-board.png": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-mixed-batch\\source\\boards\\preview-board.png",
+      "sha256": "3cd009d0e2162456537efcdeeaaf7b0fdc3e490134ab86774e8e63bedc0d2547",
+      "size": 17440,
+      "text_preview": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator"
+    }
+  },
+  "saved_files": {
+    "cutover.md": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\cutover.md",
+      "sha256": "f8927862d10ca1d46e937037dfd73568b8ac08be8522a12af62862e907584a9d",
+      "size": 357,
+      "matches_source": true
+    },
+    "escalation-board.png": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\images\\escalation-board.png",
+      "sha256": "b2239780988ca06baedbee4c590f17ceedf6badbe2736d4cb7d7532cb68ce314",
+      "size": 22709,
+      "matches_source": true
+    },
+    "vendor-cutover.pdf": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\reports\\vendor-cutover.pdf",
+      "sha256": "224ca65d22e49d08d0d8fc3daa55860b1dd3ae429969bad9e296b27856394ad3",
+      "size": 974,
+      "matches_source": true
+    },
+    "preview-board.png": {
+      "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\boards\\preview-board.png",
+      "sha256": "3cd009d0e2162456537efcdeeaaf7b0fdc3e490134ab86774e8e63bedc0d2547",
+      "size": 17440,
+      "matches_source": true
+    }
+  },
+  "import_checks": {
+    "saved_hashes_match": true,
+    "success_empty_counts_expected": true,
+    "embedded_shadowing_expected": true,
+    "ocr_and_asset_counts_expected": true,
+    "asset_list_expected": true
+  },
+  "qa_gates": {
+    "positive_cases_passed": true,
+    "strict_no_evidence_contract_passed": false,
+    "no_evidence_answer_refusal_like": true
+  },
+  "run_gates": {
+    "core_ingestion_passed": true,
+    "core_positive_qa_passed": true,
+    "strict_no_evidence_contract_passed": false,
+    "no_evidence_answer_refusal_like": true,
+    "run_passed": false
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-42bd209842bb4930b82339ff6c27f0f6",
+    "files": [
+      {
+        "name": "cutover.md",
+        "type": "text/markdown",
+        "size": 357,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\cutover.md",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "relative_path": "playbooks/release/cutover.md",
+        "folder_path": "playbooks/release"
+      },
+      {
+        "name": "escalation-board.png",
+        "type": "image/png",
+        "size": 22709,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\images\\escalation-board.png",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "relative_path": "playbooks/release/images/escalation-board.png",
+        "folder_path": "playbooks/release/images"
+      },
+      {
+        "name": "vendor-cutover.pdf",
+        "type": "application/pdf",
+        "size": 974,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\reports\\vendor-cutover.pdf",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "relative_path": "reports/vendor-cutover.pdf",
+        "folder_path": "reports"
+      },
+      {
+        "name": "preview-board.png",
+        "type": "image/png",
+        "size": 17440,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\boards\\preview-board.png",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "relative_path": "boards/preview-board.png",
+        "folder_path": "boards"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "cutover.md",
+        "type": "text/markdown",
+        "size": 357,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\cutover.md",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "status": "indexed",
+        "indexed_chunks": 2,
+        "relative_path": "playbooks/release/cutover.md",
+        "folder_path": "playbooks/release",
+        "embedded_assets": [
+          {
+            "asset_id": "embedded-2cc1541ba005c5cc",
+            "asset_type": "image",
+            "asset_role": "embedded",
+            "source_type": "embedded",
+            "source_doc_path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\cutover.md",
+            "source_doc_relative_path": "playbooks/release/cutover.md",
+            "referenced_path": "./images/escalation-board.png",
+            "occurrence_index": 1,
+            "status": "ready",
+            "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\images\\escalation-board.png",
+            "resolved_relative_path": "playbooks/release/images/escalation-board.png",
+            "mime_type": "image/png",
+            "logical_relative_path": "playbooks/release/images/escalation-board.png",
+            "indexed_chunks": 1,
+            "indexed_from_ocr": true,
+            "ocr_diagnostics": {
+              "ocr_attempted": true,
+              "ocr_status": "success",
+              "ocr_text_length": 103,
+              "ocr_error": null,
+              "indexed_from_ocr": true,
+              "ocr_engine": "paddleocr"
+            }
+          }
+        ],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "markdown",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": true,
+          "stage_timings": {
+            "persist_ms": 4.529,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 141952.497,
+            "embedded_asset_extract_ms": 19.703,
+            "embedded_asset_ocr_ms": 16507.337,
+            "embedded_asset_index_ms": 40566.349,
+            "total_ms": 199050.415
+          },
+          "embedded_asset_count": 1,
+          "embedded_asset_ready_count": 1,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 1,
+          "embedded_ocr_success_count": 1,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 1
+        }
+      },
+      {
+        "name": "escalation-board.png",
+        "type": "image/png",
+        "size": 22709,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\images\\escalation-board.png",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "status": "empty",
+        "indexed_chunks": 0,
+        "relative_path": "playbooks/release/images/escalation-board.png",
+        "folder_path": "playbooks/release/images",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "image",
+          "empty_reason": "shadowed_by_embedded_asset",
+          "standalone_asset_candidate": true,
+          "skip_standalone_asset": true,
+          "ocr_attempted": false,
+          "ocr_status": "skipped",
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "persist_ms": 3.263,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 0.0,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 3.263
+          },
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      },
+      {
+        "name": "vendor-cutover.pdf",
+        "type": "application/pdf",
+        "size": 974,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\reports\\vendor-cutover.pdf",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "status": "indexed",
+        "indexed_chunks": 1,
+        "relative_path": "reports/vendor-cutover.pdf",
+        "folder_path": "reports",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "pdf",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "persist_ms": 3.598,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 61219.961,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 61223.559
+          },
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      },
+      {
+        "name": "preview-board.png",
+        "type": "image/png",
+        "size": 17440,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\boards\\preview-board.png",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "status": "indexed",
+        "indexed_chunks": 1,
+        "relative_path": "boards/preview-board.png",
+        "folder_path": "boards",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "image",
+          "empty_reason": null,
+          "standalone_asset_candidate": true,
+          "skip_standalone_asset": false,
+          "ocr_attempted": true,
+          "ocr_status": "success",
+          "ocr_text_length": 89,
+          "ocr_error": null,
+          "indexed_from_ocr": true,
+          "asset_registered": true,
+          "stage_timings": {
+            "persist_ms": 3.365,
+            "standalone_ocr_ms": 29730.705,
+            "primary_index_ms": 32536.589,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 62270.659
+          },
+          "ocr_engine": "paddleocr",
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 4,
+    "success_count": 3,
+    "failed_count": 0,
+    "empty_count": 1,
+    "kb_id": "diag-mixed-batch-1785390160",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 4,
+      "indexed_files": 3,
+      "empty_files": 1,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 2,
+      "embedded_asset_count": 1,
+      "embedded_asset_ready_count": 1,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 1,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 1,
+      "indexed_from_ocr_count": 1,
+      "embedded_ocr_attempted_count": 1,
+      "embedded_ocr_success_count": 1,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 1,
+      "asset_registered_count": 2,
+      "skip_standalone_asset_count": 1,
+      "empty_reason_counts": {
+        "shadowed_by_embedded_asset": 1
+      },
+      "stage_timings": {
+        "ensure_models_ready_ms": 8.945,
+        "get_index_manager_ms": 0.021,
+        "persist_ms": 14.755,
+        "standalone_ocr_ms": 29730.705,
+        "primary_index_ms": 235709.047,
+        "embedded_asset_extract_ms": 19.703,
+        "embedded_asset_ocr_ms": 16507.337,
+        "embedded_asset_index_ms": 40566.349,
+        "register_assets_ms": 28.998,
+        "total_ms": 323336.081
+      }
+    }
+  },
+  "assets": {
+    "total": 2,
+    "embedded_count": 1,
+    "standalone_count": 1,
+    "items": [
+      {
+        "asset_id": "asset-standalone-680bd443f944b80f",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "source_doc_id": null,
+        "source_doc_path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\boards\\preview-board.png",
+        "source_doc_relative_path": "boards/preview-board.png",
+        "asset_type": "image",
+        "asset_role": "standalone",
+        "title": "preview-board.png",
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\boards\\preview-board.png",
+        "relative_path": "boards/preview-board.png",
+        "mime_type": "image/png",
+        "locator": null,
+        "status": "active",
+        "indexed_chunks": 1,
+        "ocr_attempted": true,
+        "ocr_status": "success",
+        "ocr_text_length": 89,
+        "ocr_error": null,
+        "indexed_from_ocr": true,
+        "asset_registered": true,
+        "ocr_diagnostics": {
+          "ocr_attempted": true,
+          "ocr_status": "success",
+          "ocr_text_length": 89,
+          "ocr_error": null,
+          "indexed_from_ocr": true,
+          "ocr_engine": "paddleocr"
+        },
+        "ocr_engine": "paddleocr",
+        "created_at": "2026-07-30T05:48:04.614243+00:00",
+        "updated_at": "2026-07-30T05:48:04.614243+00:00"
+      },
+      {
+        "asset_id": "embedded-2cc1541ba005c5cc",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "source_doc_id": null,
+        "source_doc_path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\cutover.md",
+        "source_doc_relative_path": "playbooks/release/cutover.md",
+        "asset_type": "image",
+        "asset_role": "embedded",
+        "title": "escalation-board.png",
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-mixed-batch-1785390160\\playbooks\\release\\images\\escalation-board.png",
+        "relative_path": "playbooks/release/images/escalation-board.png",
+        "mime_type": "image/png",
+        "locator": {
+          "referenced_path": "./images/escalation-board.png",
+          "occurrence_index": 1,
+          "source_type": "embedded"
+        },
+        "status": "active",
+        "indexed_chunks": 1,
+        "ocr_attempted": true,
+        "ocr_status": "success",
+        "ocr_text_length": 103,
+        "ocr_error": null,
+        "indexed_from_ocr": true,
+        "asset_registered": true,
+        "ocr_diagnostics": {
+          "ocr_attempted": true,
+          "ocr_status": "success",
+          "ocr_text_length": 103,
+          "ocr_error": null,
+          "indexed_from_ocr": true,
+          "ocr_engine": "paddleocr"
+        },
+        "ocr_engine": "paddleocr",
+        "created_at": "2026-07-30T05:48:04.608215+00:00",
+        "updated_at": "2026-07-30T05:48:04.608215+00:00"
+      }
+    ]
+  },
+  "qa_cases": [
+    {
+      "case_id": "mixed-markdown-rollback-owner",
+      "question": "Who gives the final rollback approval after the deployment coordinator summarizes the evidence?",
+      "expected_terms": [
+        "platform duty lead"
+      ],
+      "expected_source_count": 1,
+      "expected_doc": "cutover.md",
+      "checks": {
+        "scope_echo_ok": true,
+        "answer_has_expected_terms": true,
+        "answer_is_refusal_like": true,
+        "source_count_match": false,
+        "evidence_count_match": false,
+        "source_count_nonzero": true,
+        "evidence_count_nonzero": true,
+        "evidence_fields_present": true,
+        "source_doc_match": true,
+        "preview_has_expected_terms": true,
+        "strict_zero_evidence_contract": true
+      },
+      "answer": "The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.",
+      "sources": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "file": "cutover.md",
+          "page": "N/A",
+          "score": 0.7849548852655761,
+          "text": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "file": "preview-board.png",
+          "page": "N/A",
+          "score": 0.5723795033580037,
+          "text": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "file": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.4948485154365531,
+          "text": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "file": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.19786761766941569,
+          "text": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "title": "cutover.md",
+          "source": "cutover.md",
+          "page": "N/A",
+          "score": 0.7849548852655761,
+          "excerpt": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "title": "preview-board.png",
+          "source": "preview-board.png",
+          "page": "N/A",
+          "score": 0.5723795033580037,
+          "excerpt": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "title": "vendor-cutover.pdf",
+          "source": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.4948485154365531,
+          "excerpt": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "title": "escalation-board.png",
+          "source": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.19786761766941569,
+          "excerpt": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        }
+      ],
+      "preview": {
+        "title": "cutover.md",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+        "excerpt": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+        "locator": {
+          "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+        },
+        "preview_type": "text_excerpt",
+        "evidence_id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19"
+      }
+    },
+    {
+      "case_id": "mixed-pdf-checklist-signer",
+      "question": "Who signs the cutover checklist before traffic moves to the vendor stack?",
+      "expected_terms": [
+        "customer success lead"
+      ],
+      "expected_source_count": 1,
+      "expected_doc": "vendor-cutover.pdf",
+      "checks": {
+        "scope_echo_ok": true,
+        "answer_has_expected_terms": true,
+        "answer_is_refusal_like": true,
+        "source_count_match": false,
+        "evidence_count_match": false,
+        "source_count_nonzero": true,
+        "evidence_count_nonzero": true,
+        "evidence_fields_present": true,
+        "source_doc_match": true,
+        "preview_has_expected_terms": true,
+        "strict_zero_evidence_contract": true
+      },
+      "answer": "The customer success lead signs the cutover checklist before traffic moves to the vendor stack.",
+      "sources": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "file": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.789381101735837,
+          "text": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "file": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.5353740791914214,
+          "text": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "file": "cutover.md",
+          "page": "N/A",
+          "score": 0.5007754628522789,
+          "text": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "file": "preview-board.png",
+          "page": "N/A",
+          "score": 0.3744693562204626,
+          "text": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "title": "vendor-cutover.pdf",
+          "source": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.789381101735837,
+          "excerpt": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "title": "escalation-board.png",
+          "source": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.5353740791914214,
+          "excerpt": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "title": "cutover.md",
+          "source": "cutover.md",
+          "page": "N/A",
+          "score": 0.5007754628522789,
+          "excerpt": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "title": "preview-board.png",
+          "source": "preview-board.png",
+          "page": "N/A",
+          "score": 0.3744693562204626,
+          "excerpt": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        }
+      ],
+      "preview": {
+        "title": "vendor-cutover.pdf",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+        "excerpt": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+        "locator": {
+          "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+        },
+        "preview_type": "text_excerpt",
+        "evidence_id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19"
+      }
+    },
+    {
+      "case_id": "mixed-embedded-image-boundary",
+      "question": "According to the escalation board image, what is the authorization boundary?",
+      "expected_terms": [
+        "knowledge base",
+        "authorization boundary"
+      ],
+      "expected_source_count": 1,
+      "expected_doc": "escalation-board.png",
+      "checks": {
+        "scope_echo_ok": true,
+        "answer_has_expected_terms": true,
+        "answer_is_refusal_like": true,
+        "source_count_match": false,
+        "evidence_count_match": false,
+        "source_count_nonzero": true,
+        "evidence_count_nonzero": true,
+        "evidence_fields_present": true,
+        "source_doc_match": true,
+        "preview_has_expected_terms": true,
+        "strict_zero_evidence_contract": true
+      },
+      "answer": "According to the escalation board image, the authorization boundary is the Knowledge Base.",
+      "sources": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "file": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.9496257621685653,
+          "text": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "file": "cutover.md",
+          "page": "N/A",
+          "score": 0.5880012132345005,
+          "text": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "file": "preview-board.png",
+          "page": "N/A",
+          "score": 0.48597224357248503,
+          "text": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "file": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.17640078102444956,
+          "text": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "title": "escalation-board.png",
+          "source": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.9496257621685653,
+          "excerpt": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "title": "cutover.md",
+          "source": "cutover.md",
+          "page": "N/A",
+          "score": 0.5880012132345005,
+          "excerpt": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "title": "preview-board.png",
+          "source": "preview-board.png",
+          "page": "N/A",
+          "score": 0.48597224357248503,
+          "excerpt": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "title": "vendor-cutover.pdf",
+          "source": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.17640078102444956,
+          "excerpt": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        }
+      ],
+      "preview": {
+        "title": "escalation-board.png",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+        "excerpt": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+        "locator": {
+          "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+        },
+        "preview_type": "text_excerpt",
+        "evidence_id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19"
+      }
+    },
+    {
+      "case_id": "mixed-standalone-image-preview-fields",
+      "question": "Which two fields must every evidence preview include?",
+      "expected_terms": [
+        "doc_id",
+        "preview_locator"
+      ],
+      "expected_source_count": 1,
+      "expected_doc": "preview-board.png",
+      "checks": {
+        "scope_echo_ok": true,
+        "answer_has_expected_terms": true,
+        "answer_is_refusal_like": true,
+        "source_count_match": false,
+        "evidence_count_match": false,
+        "source_count_nonzero": true,
+        "evidence_count_nonzero": true,
+        "evidence_fields_present": true,
+        "source_doc_match": true,
+        "preview_has_expected_terms": true,
+        "strict_zero_evidence_contract": true
+      },
+      "answer": "Every evidence preview must include **doc_id** and **preview_locator**.",
+      "sources": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "file": "preview-board.png",
+          "page": "N/A",
+          "score": 1.012680607180685,
+          "text": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "file": "cutover.md",
+          "page": "N/A",
+          "score": 0.4395190887372302,
+          "text": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "file": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.29929587421004955,
+          "text": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "file": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.169368049396983,
+          "text": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "title": "preview-board.png",
+          "source": "preview-board.png",
+          "page": "N/A",
+          "score": 1.012680607180685,
+          "excerpt": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "title": "cutover.md",
+          "source": "cutover.md",
+          "page": "N/A",
+          "score": 0.4395190887372302,
+          "excerpt": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "title": "vendor-cutover.pdf",
+          "source": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.29929587421004955,
+          "excerpt": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "title": "escalation-board.png",
+          "source": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.169368049396983,
+          "excerpt": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        }
+      ],
+      "preview": {
+        "title": "preview-board.png",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+        "excerpt": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+        "locator": {
+          "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+        },
+        "preview_type": "text_excerpt",
+        "evidence_id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19"
+      }
+    },
+    {
+      "case_id": "mixed-no-evidence-refusal",
+      "question": "What is the GPU memory requirement for the mobile build?",
+      "expected_terms": [
+        "no confirmable information is available"
+      ],
+      "expected_source_count": 0,
+      "expected_doc": null,
+      "checks": {
+        "scope_echo_ok": true,
+        "answer_has_expected_terms": true,
+        "answer_is_refusal_like": true,
+        "source_count_match": false,
+        "evidence_count_match": false,
+        "source_count_nonzero": false,
+        "evidence_count_nonzero": false,
+        "evidence_fields_present": false,
+        "source_doc_match": false,
+        "preview_has_expected_terms": false,
+        "strict_zero_evidence_contract": false
+      },
+      "answer": "The provided context does not mention any GPU memory requirement for the mobile build.",
+      "sources": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "file": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.385975341661538,
+          "text": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "file": "preview-board.png",
+          "page": "N/A",
+          "score": 0.36263585325465514,
+          "text": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "file": "cutover.md",
+          "page": "N/A",
+          "score": 0.3196155047661474,
+          "text": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "file": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.1317733003176596,
+          "text": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19",
+          "title": "escalation-board.png",
+          "source": "escalation-board.png",
+          "page": "N/A",
+          "score": 0.385975341661538,
+          "excerpt": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+          "preview_locator": {
+            "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJhNmJjMzEzYi1iOWE4LTRlZWUtYjg3NS01ZjVmMmI4ZGI3NmYiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmUzZGY0YTgtY2Q3OC00YTFlLTkwYjItOWI2Y2Q5NTYxZDI0In19",
+          "title": "preview-board.png",
+          "source": "preview-board.png",
+          "page": "N/A",
+          "score": 0.36263585325465514,
+          "excerpt": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "a6bc313b-b9a8-4eee-b875-5f5f2b8db76f",
+          "preview_locator": {
+            "node_id": "fe3df4a8-cd78-4a1e-90b2-9b6cd9561d24"
+          },
+          "asset_id": "asset-standalone-680bd443f944b80f"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiI4Zjk0NjE2Ny1iZTMyLTQ4MWUtYmMwYi1kMjdlNjViMmM1OTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTdjMzRlNTEtNzMyOS00NzFhLWI1NGYtODUyYTc2Mjg3MTU4In19",
+          "title": "cutover.md",
+          "source": "cutover.md",
+          "page": "N/A",
+          "score": 0.3196155047661474,
+          "excerpt": "# Friday release cutover\n\nThe Friday release cutover note explains who can approve rollback decisions.\nThe platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.\nThe team also keeps an escalation board image next to the runbook for scope reminders.\n\n![Escalation board](./images/escalation-board.png)",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "8f946167-be32-481e-bc0b-d27e65b2c591",
+          "preview_locator": {
+            "node_id": "17c34e51-7329-471a-b54f-852a76287158"
+          },
+          "asset_id": "embedded-2cc1541ba005c5cc"
+        },
+        {
+          "id": "ev:eyJkb2NfaWQiOiJmYzgyOTdiNC0zMDBmLTQyZjAtYmUyYy01MDNmZjEzOTk3NjkiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZDAzMjI4NzktN2E3Yi00NDVkLWJiMWItMTFjZTljMTZlMjFkIn19",
+          "title": "vendor-cutover.pdf",
+          "source": "vendor-cutover.pdf",
+          "page": "N/A",
+          "score": 0.1317733003176596,
+          "excerpt": "Vendor cutover checklist. The customer success lead signs the cutover checklist before traffic moves to\nthe vendor stack. The duty SRE confirms rollback readiness afterwards.",
+          "receipt_id": null,
+          "kb_id": "diag-mixed-batch-1785390160",
+          "doc_id": "fc8297b4-300f-42f0-be2c-503ff1399769",
+          "preview_locator": {
+            "node_id": "d0322879-7a7b-445d-bb1b-11ce9c16e21d"
+          },
+          "asset_id": null
+        }
+      ],
+      "preview": {
+        "title": "escalation-board.png",
+        "kb_id": "diag-mixed-batch-1785390160",
+        "doc_id": "27d968b5-3b32-4f2d-ae21-40d2df105b43",
+        "excerpt": "Escalation board reminder\nKnowledge Base is the authorization boundary\nFolder remains organization only",
+        "locator": {
+          "node_id": "108a51f6-8339-4274-9bd9-59ad64c9c732"
+        },
+        "preview_type": "text_excerpt",
+        "evidence_id": "ev:eyJkb2NfaWQiOiIyN2Q5NjhiNS0zYjMyLTRmMmQtYWUyMS00MGQyZGYxMDViNDMiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMTc4NTM5MDE2MCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTA4YTUxZjYtODMzOS00Mjc0LTliZDktNTlhZDY0YzljNzMyIn19"
+      }
+    }
+  ]
+}

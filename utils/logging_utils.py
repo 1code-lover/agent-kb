@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -45,21 +44,11 @@ def safe_preview(value: Any, limit: int = 800) -> str:
     return f"{text[:limit]}...(truncated)"
 
 
-def get_file_logger(name: str, file_path: Path) -> logging.Logger:
-    ensure_log_dir()
-    logger = logging.getLogger(name)
-    if logger.handlers:
-        return logger
-
-    logger.setLevel(logging.INFO)
-    logger.propagate = False
-
-    handler = logging.FileHandler(file_path, encoding="utf-8")
-    handler.setFormatter(logging.Formatter("%(message)s"))
-    logger.addHandler(handler)
-    return logger
-
-
 def append_json_log(name: str, file_path: Path, payload: dict[str, Any]) -> None:
-    logger = get_file_logger(name, file_path)
-    logger.info(json.dumps(payload, ensure_ascii=False))
+    """以 JSON Lines 追加写日志，并立即释放文件句柄。"""
+    del name
+    ensure_log_dir()
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    with file_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False))
+        handle.write("\n")

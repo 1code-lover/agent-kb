@@ -1,0 +1,426 @@
+{
+  "meta": {
+    "base_url": "http://127.0.0.1:18086",
+    "kb_id": "empty-live-1785491219",
+    "scenario": "empty_markdown_live_import"
+  },
+  "import": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "receipt_id": "kb-file-import-b34f8490d58d4bda812b8532a8d47371",
+      "files": [
+        {
+          "name": "empty_ba55c2e3.md",
+          "type": "text/markdown",
+          "size": 7,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\empty-live-1785491219\\empty_ba55c2e3.md",
+          "kb_id": "empty-live-1785491219",
+          "relative_path": "empty_ba55c2e3.md",
+          "folder_path": ""
+        }
+      ],
+      "file_results": [
+        {
+          "name": "empty_ba55c2e3.md",
+          "type": "text/markdown",
+          "size": 7,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\empty-live-1785491219\\empty_ba55c2e3.md",
+          "kb_id": "empty-live-1785491219",
+          "status": "empty",
+          "indexed_chunks": 0,
+          "relative_path": "empty_ba55c2e3.md",
+          "folder_path": "",
+          "embedded_assets": [],
+          "asset_warning_count": 0,
+          "diagnostics": {
+            "file_kind": "markdown",
+            "empty_reason": "no_nodes_generated",
+            "standalone_asset_candidate": false,
+            "skip_standalone_asset": false,
+            "file_retained_on_disk": true,
+            "ocr_attempted": false,
+            "ocr_status": null,
+            "ocr_text_length": 0,
+            "ocr_error": null,
+            "indexed_from_ocr": false,
+            "asset_registered": false,
+            "stage_timings": {
+              "file_save_ms": 1.483,
+              "persist_ms": 1.483,
+              "standalone_ocr_ms": 0.0,
+              "primary_index_ms": 9.762,
+              "embedded_asset_extract_ms": 1.346,
+              "embedded_asset_ocr_ms": 0.0,
+              "embedded_asset_index_ms": 0.0,
+              "total_ms": 12.591
+            },
+            "document_count": 1,
+            "empty_document_count": 1,
+            "input_text_chars": 0,
+            "node_count": 0,
+            "nodes_with_embedding_count": 0,
+            "nodes_without_embedding_count": 0,
+            "index_stage_timings": {
+              "document_load_ms": 1.48,
+              "chunking_ms": 0.981,
+              "embedding_ms": 0.158,
+              "title_extract_ms": 0.186,
+              "vector_store_ms": 0.0,
+              "docstore_ms": 0.138,
+              "index_insert_ms": 0.0,
+              "total_ms": 5.176
+            },
+            "failure_category": null,
+            "missing_dependency": null,
+            "dependency_status": "unknown",
+            "ocr_init_ms": 0.0,
+            "ocr_load_image_ms": 0.0,
+            "ocr_predict_ms": 0.0,
+            "ocr_postprocess_ms": 0.0,
+            "ocr_total_ms": 0.0,
+            "ocr_instance_reused": false,
+            "embedded_asset_count": 0,
+            "embedded_asset_ready_count": 0,
+            "embedded_asset_missing_count": 0,
+            "embedded_asset_invalid_count": 0,
+            "embedded_ocr_attempted_count": 0,
+            "embedded_ocr_success_count": 0,
+            "embedded_ocr_no_text_count": 0,
+            "embedded_ocr_failed_count": 0,
+            "embedded_ocr_skipped_count": 0,
+            "embedded_indexed_from_ocr_count": 0
+          }
+        }
+      ],
+      "indexed_chunks": 0,
+      "success_count": 0,
+      "failed_count": 0,
+      "empty_count": 1,
+      "kb_id": "empty-live-1785491219",
+      "import_mode": "preserve_tree",
+      "diagnostics": {
+        "total_files": 1,
+        "indexed_files": 0,
+        "empty_files": 1,
+        "failed_files": 0,
+        "standalone_asset_candidate_count": 0,
+        "embedded_asset_count": 0,
+        "embedded_asset_ready_count": 0,
+        "embedded_asset_missing_count": 0,
+        "embedded_asset_invalid_count": 0,
+        "asset_warning_count": 0,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "asset_registered_count": 0,
+        "skip_standalone_asset_count": 0,
+        "empty_reason_counts": {
+          "no_nodes_generated": 1
+        },
+        "failure_category_counts": {},
+        "dependency_status_counts": {
+          "unknown": 1
+        },
+        "dependency_missing_count": 0,
+        "missing_dependency_counts": {},
+        "stage_timings": {
+          "ensure_models_ready_ms": 0.068,
+          "get_index_manager_ms": 3.742,
+          "file_save_ms": 1.483,
+          "persist_ms": 1.483,
+          "standalone_ocr_ms": 0.0,
+          "primary_index_ms": 9.762,
+          "embedded_asset_extract_ms": 1.346,
+          "embedded_asset_ocr_ms": 0.0,
+          "embedded_asset_index_ms": 0.0,
+          "index_storage_persist_ms": 0.0,
+          "doc_count_update_ms": 0.0,
+          "register_assets_ms": 4.139,
+          "receipt_store_ms": 3.601,
+          "result_build_ms": 0.087,
+          "total_ms": 27.167
+        },
+        "document_count": 1,
+        "empty_document_count": 1,
+        "input_text_chars": 0,
+        "node_count": 0,
+        "nodes_with_embedding_count": 0,
+        "nodes_without_embedding_count": 0,
+        "index_stage_timings": {
+          "document_load_ms": 1.48,
+          "chunking_ms": 0.981,
+          "embedding_ms": 0.158,
+          "title_extract_ms": 0.186,
+          "vector_store_ms": 0.0,
+          "docstore_ms": 0.138,
+          "index_insert_ms": 0.0,
+          "total_ms": 5.176
+        }
+      },
+      "display_summary": {
+        "source_kind": "file_import",
+        "item_label": "文件",
+        "total_items": 1,
+        "indexed_items": 0,
+        "empty_items": 1,
+        "failed_items": 0,
+        "asset_registered_count": 0,
+        "asset_registered_but_not_indexed_count": 0,
+        "asset_warning_count": 0,
+        "dependency_missing_count": 0,
+        "top_missing_dependencies": [],
+        "top_empty_reasons": [
+          {
+            "reason": "no_nodes_generated",
+            "count": 1
+          }
+        ],
+        "has_blockers": false,
+        "has_dependency_issues": false,
+        "has_warnings": true,
+        "headline": "1 个文件未提取到可索引内容",
+        "user_message": "请检查文件内容是否为空，或确认 OCR / PDF 解析依赖已正确安装。",
+        "next_actions": [
+          {
+            "action": "review_empty_items",
+            "label": "查看 1 个空结果文件",
+            "count": 1,
+            "top_empty_reasons": [
+              {
+                "reason": "no_nodes_generated",
+                "count": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "request_id": "4e65f176-b4c4-4980-a3af-d061d5e22dad"
+  },
+  "latest_receipt": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "receipt": {
+        "kb_id": "empty-live-1785491219",
+        "source_label": "文件上传",
+        "created_at": "2026-07-31T09:46:59.518525+00:00",
+        "result": {
+          "receipt_id": "kb-file-import-b34f8490d58d4bda812b8532a8d47371",
+          "files": [
+            {
+              "name": "empty_ba55c2e3.md",
+              "type": "text/markdown",
+              "size": 7,
+              "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\empty-live-1785491219\\empty_ba55c2e3.md",
+              "kb_id": "empty-live-1785491219",
+              "relative_path": "empty_ba55c2e3.md",
+              "folder_path": ""
+            }
+          ],
+          "file_results": [
+            {
+              "name": "empty_ba55c2e3.md",
+              "type": "text/markdown",
+              "size": 7,
+              "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\empty-live-1785491219\\empty_ba55c2e3.md",
+              "kb_id": "empty-live-1785491219",
+              "status": "empty",
+              "indexed_chunks": 0,
+              "relative_path": "empty_ba55c2e3.md",
+              "folder_path": "",
+              "embedded_assets": [],
+              "asset_warning_count": 0,
+              "diagnostics": {
+                "file_kind": "markdown",
+                "empty_reason": "no_nodes_generated",
+                "standalone_asset_candidate": false,
+                "skip_standalone_asset": false,
+                "file_retained_on_disk": true,
+                "ocr_attempted": false,
+                "ocr_status": null,
+                "ocr_text_length": 0,
+                "ocr_error": null,
+                "indexed_from_ocr": false,
+                "asset_registered": false,
+                "stage_timings": {
+                  "file_save_ms": 1.483,
+                  "persist_ms": 1.483,
+                  "standalone_ocr_ms": 0.0,
+                  "primary_index_ms": 9.762,
+                  "embedded_asset_extract_ms": 1.346,
+                  "embedded_asset_ocr_ms": 0.0,
+                  "embedded_asset_index_ms": 0.0,
+                  "total_ms": 12.591
+                },
+                "document_count": 1,
+                "empty_document_count": 1,
+                "input_text_chars": 0,
+                "node_count": 0,
+                "nodes_with_embedding_count": 0,
+                "nodes_without_embedding_count": 0,
+                "index_stage_timings": {
+                  "document_load_ms": 1.48,
+                  "chunking_ms": 0.981,
+                  "embedding_ms": 0.158,
+                  "title_extract_ms": 0.186,
+                  "vector_store_ms": 0.0,
+                  "docstore_ms": 0.138,
+                  "index_insert_ms": 0.0,
+                  "total_ms": 5.176
+                },
+                "failure_category": null,
+                "missing_dependency": null,
+                "dependency_status": "unknown",
+                "ocr_init_ms": 0.0,
+                "ocr_load_image_ms": 0.0,
+                "ocr_predict_ms": 0.0,
+                "ocr_postprocess_ms": 0.0,
+                "ocr_total_ms": 0.0,
+                "ocr_instance_reused": false,
+                "embedded_asset_count": 0,
+                "embedded_asset_ready_count": 0,
+                "embedded_asset_missing_count": 0,
+                "embedded_asset_invalid_count": 0,
+                "embedded_ocr_attempted_count": 0,
+                "embedded_ocr_success_count": 0,
+                "embedded_ocr_no_text_count": 0,
+                "embedded_ocr_failed_count": 0,
+                "embedded_ocr_skipped_count": 0,
+                "embedded_indexed_from_ocr_count": 0
+              }
+            }
+          ],
+          "indexed_chunks": 0,
+          "success_count": 0,
+          "failed_count": 0,
+          "empty_count": 1,
+          "kb_id": "empty-live-1785491219",
+          "import_mode": "preserve_tree",
+          "diagnostics": {
+            "total_files": 1,
+            "indexed_files": 0,
+            "empty_files": 1,
+            "failed_files": 0,
+            "standalone_asset_candidate_count": 0,
+            "embedded_asset_count": 0,
+            "embedded_asset_ready_count": 0,
+            "embedded_asset_missing_count": 0,
+            "embedded_asset_invalid_count": 0,
+            "asset_warning_count": 0,
+            "ocr_success_count": 0,
+            "ocr_no_text_count": 0,
+            "ocr_failed_count": 0,
+            "ocr_skipped_count": 0,
+            "indexed_from_ocr_count": 0,
+            "embedded_ocr_attempted_count": 0,
+            "embedded_ocr_success_count": 0,
+            "embedded_ocr_no_text_count": 0,
+            "embedded_ocr_failed_count": 0,
+            "embedded_ocr_skipped_count": 0,
+            "embedded_indexed_from_ocr_count": 0,
+            "asset_registered_count": 0,
+            "skip_standalone_asset_count": 0,
+            "empty_reason_counts": {
+              "no_nodes_generated": 1
+            },
+            "failure_category_counts": {},
+            "dependency_status_counts": {
+              "unknown": 1
+            },
+            "dependency_missing_count": 0,
+            "missing_dependency_counts": {},
+            "stage_timings": {
+              "ensure_models_ready_ms": 0.068,
+              "get_index_manager_ms": 3.742,
+              "file_save_ms": 1.483,
+              "persist_ms": 1.483,
+              "standalone_ocr_ms": 0.0,
+              "primary_index_ms": 9.762,
+              "embedded_asset_extract_ms": 1.346,
+              "embedded_asset_ocr_ms": 0.0,
+              "embedded_asset_index_ms": 0.0,
+              "index_storage_persist_ms": 0.0,
+              "doc_count_update_ms": 0.0,
+              "register_assets_ms": 4.139,
+              "receipt_store_ms": 3.601,
+              "result_build_ms": 0.087,
+              "total_ms": 27.167
+            },
+            "document_count": 1,
+            "empty_document_count": 1,
+            "input_text_chars": 0,
+            "node_count": 0,
+            "nodes_with_embedding_count": 0,
+            "nodes_without_embedding_count": 0,
+            "index_stage_timings": {
+              "document_load_ms": 1.48,
+              "chunking_ms": 0.981,
+              "embedding_ms": 0.158,
+              "title_extract_ms": 0.186,
+              "vector_store_ms": 0.0,
+              "docstore_ms": 0.138,
+              "index_insert_ms": 0.0,
+              "total_ms": 5.176
+            }
+          },
+          "display_summary": {
+            "source_kind": "file_import",
+            "item_label": "文件",
+            "total_items": 1,
+            "indexed_items": 0,
+            "empty_items": 1,
+            "failed_items": 0,
+            "asset_registered_count": 0,
+            "asset_registered_but_not_indexed_count": 0,
+            "asset_warning_count": 0,
+            "dependency_missing_count": 0,
+            "top_missing_dependencies": [],
+            "top_empty_reasons": [
+              {
+                "reason": "no_nodes_generated",
+                "count": 1
+              }
+            ],
+            "has_blockers": false,
+            "has_dependency_issues": false,
+            "has_warnings": true,
+            "headline": "1 个文件未提取到可索引内容",
+            "user_message": "请检查文件内容是否为空，或确认 OCR / PDF 解析依赖已正确安装。",
+            "next_actions": [
+              {
+                "action": "review_empty_items",
+                "label": "查看 1 个空结果文件",
+                "count": 1,
+                "top_empty_reasons": [
+                  {
+                    "reason": "no_nodes_generated",
+                    "count": 1
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "request_id": "eb743a6c-58b4-4df6-84a4-368f303b3582"
+  },
+  "doc_list": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "docs": []
+    },
+    "request_id": "c0376fac-3fe5-4eb8-8f3b-ea6e007d42c3"
+  }
+}

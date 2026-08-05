@@ -1,0 +1,348 @@
+{
+  "base_url": "http://127.0.0.1:18141",
+  "kb_id": "diag-pdf-scan-1785321634",
+  "question": "In the scanned diagnostic PDF, what should the scanned content become in the active knowledge base?",
+  "health": {
+    "status": "ok",
+    "embedding_warmup": {
+      "state": "ready",
+      "attempt_count": 0,
+      "last_error": null,
+      "last_duration_ms": null,
+      "started_at": null,
+      "finished_at": "2026-07-29T10:40:25.794852+00:00",
+      "current_model": "bge-small-zh-v1.5",
+      "loaded_model": "bge-small-zh-v1.5",
+      "is_ready": true
+    },
+    "ocr_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 114097.893,
+      "started_at": "2026-07-29T10:36:06.370486+00:00",
+      "finished_at": "2026-07-29T10:38:00.491564+00:00",
+      "is_ready": true
+    },
+    "import_capabilities": {
+      "pdf_text_extraction": {
+        "ready": true,
+        "dependencies": [
+          "fitz"
+        ]
+      },
+      "image_ocr": {
+        "ready": true,
+        "dependencies": [
+          "paddleocr",
+          "paddle",
+          "pillow"
+        ]
+      },
+      "dependencies": {
+        "fitz": {
+          "installed": true,
+          "package": "PyMuPDF",
+          "import_name": "fitz",
+          "used_for": [
+            "pdf_text_extraction"
+          ]
+        },
+        "paddleocr": {
+          "installed": true,
+          "package": "paddleocr",
+          "import_name": "paddleocr",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "paddle": {
+          "installed": true,
+          "package": "paddlepaddle",
+          "import_name": "paddle",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "pillow": {
+          "installed": true,
+          "package": "Pillow",
+          "import_name": "PIL",
+          "used_for": [
+            "image_ocr"
+          ]
+        }
+      }
+    }
+  },
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-scan-fallback.pdf",
+    "sha256": "5a20b4a92034f0c3285fbf7607f8e25664bbf045c266f19fd9ada15b5b0d84d9",
+    "size": 11524076,
+    "page_count": 2,
+    "font": "C:\\Windows\\Fonts\\arial.ttf",
+    "text_layer_preview": "",
+    "text_layer_empty": true,
+    "expected_ocr_preview": "Scanned PDF diagnostic page one\nOCR fallback must merge every predict batch per page\nHandover window scan keeps page level evidence\n\nScanned PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt"
+  },
+  "saved": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785321634\\pdf\\diag-scan-fallback.pdf",
+    "sha256": "5a20b4a92034f0c3285fbf7607f8e25664bbf045c266f19fd9ada15b5b0d84d9",
+    "size": 11524076,
+    "text_layer_preview": "",
+    "text_layer_empty": true
+  },
+  "checks": {
+    "source_saved_hash_match": true,
+    "source_text_layer_empty": true,
+    "saved_text_layer_empty": true,
+    "chat_answer_has_expected_terms": true,
+    "chat_source_has_expected_terms": true,
+    "chat_evidence_has_expected_terms": true,
+    "preview_has_expected_terms": true
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-80b00427865b4ba284b9c88f476d8736",
+    "files": [
+      {
+        "name": "diag-scan-fallback.pdf",
+        "type": "application/pdf",
+        "size": 11524076,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785321634\\pdf\\diag-scan-fallback.pdf",
+        "kb_id": "diag-pdf-scan-1785321634",
+        "relative_path": "pdf/diag-scan-fallback.pdf",
+        "folder_path": "pdf"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "diag-scan-fallback.pdf",
+        "type": "application/pdf",
+        "size": 11524076,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-scan-1785321634\\pdf\\diag-scan-fallback.pdf",
+        "kb_id": "diag-pdf-scan-1785321634",
+        "status": "indexed",
+        "indexed_chunks": 3,
+        "relative_path": "pdf/diag-scan-fallback.pdf",
+        "folder_path": "pdf",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "pdf",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "file_retained_on_disk": true,
+          "ocr_attempted": true,
+          "ocr_status": "success",
+          "ocr_text_length": 293,
+          "ocr_error": null,
+          "indexed_from_ocr": true,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 66.803,
+            "persist_ms": 66.803,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 104491.518,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 104558.321
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 293,
+          "node_count": 3,
+          "nodes_with_embedding_count": 3,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 103531.546,
+            "chunking_ms": 29.114,
+            "embedding_ms": 878.831,
+            "title_extract_ms": 1.92,
+            "vector_store_ms": 1.803,
+            "docstore_ms": 0.472,
+            "index_insert_ms": 6.256,
+            "total_ms": 104469.738
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "ready",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 0.0,
+          "ocr_predict_ms": 0.0,
+          "ocr_postprocess_ms": 0.0,
+          "ocr_total_ms": 0.0,
+          "ocr_instance_reused": false,
+          "ocr_engine": "paddleocr",
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 3,
+    "success_count": 1,
+    "failed_count": 0,
+    "empty_count": 0,
+    "kb_id": "diag-pdf-scan-1785321634",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 1,
+      "empty_files": 0,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 0,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 1,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 1,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 0,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "failure_category_counts": {},
+      "dependency_status_counts": {
+        "ready": 1
+      },
+      "dependency_missing_count": 0,
+      "missing_dependency_counts": {},
+      "stage_timings": {
+        "ensure_models_ready_ms": 0.131,
+        "get_index_manager_ms": 16.482,
+        "file_save_ms": 66.803,
+        "persist_ms": 66.803,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 104491.518,
+        "embedded_asset_extract_ms": 0.0,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 67.401,
+        "doc_count_update_ms": 17.94,
+        "register_assets_ms": 0.231,
+        "receipt_store_ms": 12.26,
+        "result_build_ms": 0.209,
+        "total_ms": 104676.22
+      },
+      "document_count": 1,
+      "empty_document_count": 0,
+      "input_text_chars": 293,
+      "node_count": 3,
+      "nodes_with_embedding_count": 3,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 103531.546,
+        "chunking_ms": 29.114,
+        "embedding_ms": 878.831,
+        "title_extract_ms": 1.92,
+        "vector_store_ms": 1.803,
+        "docstore_ms": 0.472,
+        "index_insert_ms": 6.256,
+        "total_ms": 104469.738
+      },
+      "storage_persist_stage_timings": {
+        "docstore_persist_ms": 4.892,
+        "index_store_persist_ms": 4.928,
+        "graph_store_persist_ms": 5.088,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 46.737,
+        "vector_store_namespaces_ms": {
+          "default": 41.864,
+          "image": 4.873
+        },
+        "fallback_persist_ms": 0.0,
+        "total_ms": 61.818
+      }
+    },
+    "display_summary": {
+      "source_kind": "file_import",
+      "item_label": "文件",
+      "total_items": 1,
+      "indexed_items": 1,
+      "empty_items": 0,
+      "failed_items": 0,
+      "asset_registered_count": 0,
+      "asset_registered_but_not_indexed_count": 0,
+      "asset_warning_count": 0,
+      "dependency_missing_count": 0,
+      "top_missing_dependencies": [],
+      "top_empty_reasons": [],
+      "has_blockers": false,
+      "has_dependency_issues": false,
+      "has_warnings": false,
+      "headline": "成功导入 1 个文件",
+      "user_message": "文件已完成解析并写入知识库。",
+      "next_actions": []
+    }
+  },
+  "chat_summary": {
+    "answer": "In the scanned diagnostic PDF, the scanned content should become searchable evidence in the active knowledge base.",
+    "requested_scope_type": "single_kb",
+    "requested_kb_ids": [
+      "diag-pdf-scan-1785321634"
+    ],
+    "effective_scope_type": "single_kb",
+    "effective_kb_ids": [
+      "diag-pdf-scan-1785321634"
+    ],
+    "is_default_deny_applied": false,
+    "isolation_level": "logical_filter_only",
+    "first_source": {
+      "id": "ev:eyJkb2NfaWQiOiJmYTc1MTVmZS00M2Q5LTQ2YmUtYjk0OC01OWZkODE4MDlmMDMiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTMyMTYzNCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMmZiYjk5MmYtMzRmYS00NjczLWJmOGQtZTIwNTA5NmJkZTJiIn19",
+      "file": "diag-scan-fallback.pdf",
+      "page": "N/A",
+      "score": 0.7425663406068511,
+      "text": "PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "kb_id": "diag-pdf-scan-1785321634",
+      "doc_id": "fa7515fe-43d9-46be-b948-59fd81809f03",
+      "preview_locator": {
+        "node_id": "2fbb992f-34fa-4673-bf8d-e205096bde2b"
+      },
+      "asset_id": null
+    },
+    "first_evidence": {
+      "id": "ev:eyJkb2NfaWQiOiJmYTc1MTVmZS00M2Q5LTQ2YmUtYjk0OC01OWZkODE4MDlmMDMiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTMyMTYzNCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMmZiYjk5MmYtMzRmYS00NjczLWJmOGQtZTIwNTA5NmJkZTJiIn19",
+      "title": "diag-scan-fallback.pdf",
+      "source": "diag-scan-fallback.pdf",
+      "page": "N/A",
+      "score": 0.7425663406068511,
+      "excerpt": "PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "receipt_id": null,
+      "kb_id": "diag-pdf-scan-1785321634",
+      "doc_id": "fa7515fe-43d9-46be-b948-59fd81809f03",
+      "preview_locator": {
+        "node_id": "2fbb992f-34fa-4673-bf8d-e205096bde2b"
+      },
+      "asset_id": null
+    },
+    "preview": {
+      "title": "diag-scan-fallback.pdf",
+      "kb_id": "diag-pdf-scan-1785321634",
+      "doc_id": "fa7515fe-43d9-46be-b948-59fd81809f03",
+      "excerpt": "PDF diagnostic page two\nScanned content should become searchable evidence in the active knowledge base\nPreview should resolve to the scanned PDF excerpt",
+      "locator": {
+        "node_id": "2fbb992f-34fa-4673-bf8d-e205096bde2b"
+      },
+      "preview_type": "text_excerpt",
+      "evidence_id": "ev:eyJkb2NfaWQiOiJmYTc1MTVmZS00M2Q5LTQ2YmUtYjk0OC01OWZkODE4MDlmMDMiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMTc4NTMyMTYzNCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMmZiYjk5MmYtMzRmYS00NjczLWJmOGQtZTIwNTA5NmJkZTJiIn19"
+    }
+  }
+}

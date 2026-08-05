@@ -1,32 +1,22 @@
-﻿多知识库目录化存储测试报告评审建议
+﻿测试与评测阶段复核意见（2026-07-31，最新）
 
-评审对象：
-C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb\docs\20260714-kb-directory-storage\20260714-kb-directory-storage-test-report.md
+优点：
+1. 这轮对“答案过短”问题没有停留在报告备注层，而是先补了失败测试，再把修复落在 `api/services/chat_service.py` 的 source-backed 最小完整句补全逻辑里，做法符合 TDD 和真实问题驱动的要求。
+2. 修复验证链条完整：`tests/api/test_chat_service.py` 新增的两条用例已经覆盖“可扩写/不可扩写”两种边界，受影响问答回归 `86 passed`，没有通过放松断言来制造通过。
+3. live 证据闭环这次补齐了。`diag-utf8-after-answer-expand.json` 已确认回答从“知识库”提升为“知识库仍然是授权边界。”，而且 `chat_answer_contains_expected_snippet` 等关键 gate 全部转为 true，这说明修复不仅在单测里成立，也在真实本地服务 roundtrip 里成立。
+4. 这次修复没有破坏已有安全/契约语义：拒答裁剪、scope echo、evidence / preview 契约、semireal Markdown/PDF/图片/mixed batch 问答回归都仍然通过，说明改动边界控制得比较克制。
+5. 测试报告同步得比较及时，已经把 UTF-8 live 短答案从“当前缺口”更新成“已修复并纳入回归”，避免后续读者继续按旧结论理解现状。
 
-评审结论：
-通过。测试报告已满足阶段 5 正式测试执行的审核要求，可以进入下一步开发故事沉淀；开发故事完成并确认无新增未验证改动后，再按仓库流程进入 stage / commit / push。
+需要改进：
+1. `api/services/chat_service.py` 目前为兼容 shell 编码问题，部分中文文档字符串使用了 `\u` 形式写法；功能上没问题，但后续如果继续整理代码可读性，仍建议在确保 UTF-8 安全的前提下恢复为直写中文。
+2. live 诊断脚本的启动与端口管理仍略脆弱，手工拉起新服务时容易碰到端口占用或旧进程残留。后续如果继续依赖 live roundtrip 做常规验收，最好补一个统一的启动/探活/清理封装。
+3. mixed batch live 诊断与正式 eval 的 `source/evidence count` 口径差异依旧存在；这轮没有阻断，但它已经成为报告里长期重复出现的“诚实说明”，后续最好制度化收敛。
+4. 当前对“最小完整句补全”的测试仍集中在 UTF-8/Markdown 场景；如果后面继续优化答案质量，建议把 PDF / OCR 来源下的短答案场景也加入评测集，防止只修一个 fixture。
 
-审核依据：
-1. 报告记录了执行上下文：工作目录、分支、基准 commit、Python / pytest / coverage / pytest-cov 版本，以及文件系统隔离策略。
-2. 报告覆盖了测试方案要求的正式命令：语法自检、文档/格式门禁、核心目录化测试、KB/多 KB/Agent 定向回归、扩展回归、非 slow 全量门禁和覆盖率门禁。
-3. 报告如实记录了首次覆盖率失败：TOTAL 70%，并说明失败原因是 `server/index.py` 统计范围较大且原覆盖不足。
-4. 报告记录了明确修复动作：新增 `tests/api/test_index_manager_coverage.py`，补齐 `IndexManager` 多条关键分支覆盖。
-5. 最终覆盖率门禁通过：TOTAL 873 statements，141 missing，84%，高于测试方案要求的 >= 80%。
-6. 功能与回归测试结果均通过：核心目录化 90 passed，定向回归 45 passed，扩展回归 164 passed，非 slow 全量 168 passed。
-7. FastAPI `@app.on_event("startup")` warning 已标注为非本需求引入且非阻断；真实 OCR slow 测试未执行的原因和非阻断依据也已说明。
-8. 阶段 5 验收表逐项覆盖导入前校验、目录落盘、明确 file_paths、list/delete 隔离、KB 删除一致性、registry 原子写、迁移脚本、QA fixture、防回归、覆盖率和文档格式门禁。
-
-复核结果：
-1. 当前工作区执行 `git diff --check` 退出码为 0，仅有 LF/CRLF 提示，无空白格式错误。
-2. 当前环境已能发现 `coverage` 和 `pytest_cov` 模块，且 `requirements-dev.txt` 已补充 `coverage>=7.0.0`、`pytest-cov>=4.1.0`，覆盖率工具依赖已具备可复现性。
-3. 新增覆盖率测试文件 `tests/api/test_index_manager_coverage.py` 已存在。
-
-无需阻断的改进建议：
-1. P2：测试报告的语法自检命令可以补充 `server/kb_errors.py`。当前该文件已被测试和覆盖率统计间接覆盖，不影响通过结论；但作为新增生产文件，后续报告或复跑命令可把它加入 `py_compile` 列表。
-2. P2：如果项目文档是在测试报告生成后才同步更新，建议在最终测试报告或提交流程记录中补一句“项目文档同步后已重新执行 `git diff --check`”。我当前复核 `git diff --check` 已通过，因此不阻断。
-3. P2：若后续希望把 `docs/guide/DOCS_INDEX.md` 纳入占位词扫描，需要注意 `HowToDownloadModels` 会被大小写不敏感的 `TODO` 简单匹配误伤；建议占位词扫描采用更精确的正则边界或白名单说明。
-
-下一步建议：
-1. 进入开发故事沉淀，按仓库规则运行 `$dev-story-capture`，记录本次目录化存储实现、测试结果、覆盖率修复和关键权衡。
-2. 开发故事完成后，再检查 working tree 是否有故事生成后的新增改动；如有，必要时补充轻量自检。
-3. 最后进入 git stage / conventional commit / push。
+具体建议：
+1. 下一步研发重点可以明确转向两条：
+   - 扩展问答质量评测集，覆盖更多“答案过短 / 表达不完整 / 证据够但措辞弱”的真实场景；
+   - 继续完善 live 诊断脚本的工程化稳定性（端口、进程、artifact 命名、失败时日志采集）。
+2. 若准备继续提交当前阶段代码，先把这次新增的诊断产物与必要临时日志做一次筛选，保留正式 artifact，避免把无关 tmp 文件一并带入提交面。
+3. 在后续质量文档里，可以把“source-backed 最小完整句补全”正式登记为一条问答后处理策略，并注明触发条件：仅限非拒答、实体型问题、短答案、且 source/excerpt 能直接支撑更完整子句时触发。
+4. 后续如果要做更系统的问答质量优化，不要直接扩大启发式规则，而应优先通过评测数据集先定义缺口，再决定是继续做后处理、检索优化，还是改 prompt / answer synthesis。

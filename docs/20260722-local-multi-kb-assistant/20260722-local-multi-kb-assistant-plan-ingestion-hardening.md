@@ -68,14 +68,27 @@
 
 因此，本轮优先级不是“多做一个产品点”，而是“先把地基补平”。
 
+### 3.4 2026-07-28 最新运行核实结果（真实现状同步）
+基于当前工作区代码拉起的干净后端实例（`run_api.py`，验证端口 `18123`）已完成一次真实导入核实，结论如下：
+
+1. **Markdown 导入主链路可用**：文件保存、解析、切分、嵌入、索引写入均已走通，导入项状态可达 `indexed`。
+2. **独立图片导入并非“完全没做”**：图片文件能落盘、资产能注册、OCR 逻辑会被触发；当前失败主因是运行环境缺少 `paddleocr`（以及配套 `paddlepaddle`），因此结果为 `empty/ocr_failed`，而不是没有图片导入能力。
+3. **PDF 导入当前被运行时依赖阻断**：导入链路会进入 PDF reader，但当前环境缺少 `PyMuPDF (fitz)`，因此返回 `failed`；这说明问题首先是依赖就绪性，而不是产品流程不存在。
+4. **Markdown 内嵌图片抽取链路已有雏形**：Markdown 本体可以索引成功，内嵌图片能被抽取为 embedded asset 并注册；若同一图片又被独立上传，当前还能识别 `shadowed_by_embedded_asset`，说明宿主文档—资产关系与去重逻辑已经部分存在。
+5. **`display_summary` 结构已真实返回，但后端中文 copy 受损**：导入回执中的 `display_summary`、`headline`、`next_actions` 等字段已经通了前后端链路，但 `api/services/kb_service.py` 中部分中文文案写坏成 `????`，当前属于可用性/可读性问题，而不是结构缺失。
+6. **依赖健康信息仍不够完整**：`/api/health` 已能看见 OCR warmup 因缺少 `paddleocr` 而失败，但 PDF/图片导入所需依赖并没有统一能力视图，用户仍要在导入失败后才知道具体缺什么。
+
+这次核实带来的关键修正是：**当前“导入有很多问题”的真实含义，主要是运行时依赖缺失、导入可观测性不足和回执文案质量不达标，而不是基础导入/资产抽取链路完全不存在。** 因此后续优先级应回到“把基础链路拉通并验证问答质量”，而不是先扩展深度图像理解。现阶段图片策略仍维持：**先支持 OCR 提取 + 图片资产入库，不展开高级视觉语义理解。**
+
 ## 4. 本轮目标与非目标
 
 ### 4.1 本轮目标
-本轮只做下面四类稳定性加固：
+本轮只做下面五类稳定性加固：
 1. 删除链路面对历史脏引用时不再轻易炸掉；
 2. 导入计数与真实成功结果对齐，消除显著的 `doc_count` 漂移；
 3. 导入结果从“总量成功”升级为“最小可追踪的逐项结果”；
 4. 补齐导入 / 删除 / 重导入相关回归测试，为后续 P0-3 和多模态扩展清路。
+5. 为下一阶段“文档导入 → 检索 → 问答”基础链路验证提供稳定、可重复的输入前提。
 
 ### 4.2 本轮明确不做
 本轮不做：
@@ -83,9 +96,10 @@
 2. 完整 Asset 对象模型落地；
 3. Markdown 内嵌图片抽取；
 4. OCR 质量优化与流程图语义理解；
-5. 全量引入 IngestionJob 持久化存储；
-6. 把所有导入接口一次性改成全新协议；
-7. 全面开放 Agent 写路径。
+5. 深度图像语义理解、流程图结构化理解或视觉问答；
+6. 全量引入 IngestionJob 持久化存储；
+7. 把所有导入接口一次性改成全新协议；
+8. 全面开放 Agent 写路径。
 
 ### 4.3 与 P0-3 的关系
 当前主计划中的 P0-3 是“资产对象最小闭环（收窄版）”，不是“导入链路稳定性修复”。
@@ -386,7 +400,353 @@ python -m pytest tests/api/test_index_manager_coverage.py tests/api/test_kb_dire
 - 计数与真实入库结果不一致；
 - 批量导入失败不可见。
 
+同时，2026-07-28 的真实运行核实也说明：
+- Markdown 导入主链路已经可用；
+- 图片资产抽取/注册已具雏形，但 OCR 受运行时依赖阻断；
+- PDF 导入当前首先受 `fitz` 缺失阻断；
+- 问题更多集中在依赖就绪性、可观测性和回执质量，而不是“什么都没有”。
+
 因此，本轮实施方案明确建议：
 1. 先把这条稳定性链路补平；
-2. 再继续推进 P0-3 资产对象；
-3. 让后续多模态、目录层级、Agent 化能力建立在一个至少“结果可信、失败可见、计数正确、删除可控”的底座之上。
+2. 同步修复导入回执 copy 与依赖可见性，让当前能力可被真实使用；
+3. 再把优先级收敛到“文档导入 → 检索 → 问答”的基础链路验证与问答测试集构造；
+4. 让后续多模态、目录层级、Agent 化能力建立在一个至少“结果可信、失败可见、计数正确、删除可控、问答可验证”的底座之上。
+
+## 13. 基于最新运行核实的下一阶段建议
+在 H1~H4 稳定性加固之外，下一阶段建议按下面顺序推进：
+1. **先修可用性问题**：修复 `api/services/kb_service.py` 中 `display_summary` 的中文文案损坏，避免导入回执虽然有结构但不可读。
+2. **补依赖就绪性可见性**：至少把 `fitz`、`paddleocr`、`paddlepaddle` 的可用状态纳入统一的导入能力视图或健康输出，避免用户只能在失败后反推环境问题。
+3. **拉通基础链路**：围绕单库场景验证 Markdown/PDF/图片（OCR）导入、索引、检索、问答整条主线，不在此阶段扩面做高级图像理解。
+4. **尽快构造问答测试集**：以稳定 Markdown 文档为首批基线，优先建设单库问答评测集；每条样本至少包含 `kb_id`、`source_doc`、`question`、`expected_keypoints`、`expected_evidence`、`must_not_contain`。
+5. **把准确性验证前置**：P0/P1 阶段不以“能返回答案”作为通过标准，而要检查 scope 正确、证据来源正确、关键事实覆盖率达标。
+
+## 14. 2026-07-28 implementation sync
+
+Part of the `Section 13` next-step list is now completed:
+
+1. The `display_summary` usability issue is fixed in `api/services/kb_service.py`, so import receipts are readable again.
+2. Dependency readiness visibility is fixed in `/api/health`, which now exposes `import_capabilities` for `fitz / paddleocr / paddlepaddle / Pillow`.
+3. Single-kb QA smoke groundwork has started with:
+   - `tests/fixtures/rag_quality/single_kb_smoke_cases.json`
+   - `tests/api/test_chat_single_kb_qa_smoke.py`
+
+This means the focus can keep moving forward:
+- import failures are now more explainable than before;
+- the next priority is answer quality and evidence quality after import succeeds;
+- the P0 image policy remains frozen: OCR extraction + image asset registration first, no deep visual reasoning yet.
+
+## 15. 2026-07-28 implementation sync: ingestion QA baseline linkage
+
+The ingestion-hardening track has now been connected to a larger QA baseline instead of only an import smoke check:
+
+1. A semi-real Markdown fixture set exists in `tests/fixtures/rag_quality/semireal_markdown/`.
+2. Semi-real QA has been extended beyond Markdown into:
+   - `tests/api/test_chat_pdf_semireal.py`
+   - `tests/api/test_chat_image_ocr_semireal.py`
+3. Reader-layer regressions are covered by:
+   - `tests/readers/test_image_ocr.py`
+   - `tests/readers/test_pdf_ocr.py`
+4. Shared QA metric calculation now lives in `tests/api/chat_qa_metrics.py`.
+
+Current combined regression command:
+`python -m pytest tests/api/test_chat_qa_metrics.py tests/api/test_chat_markdown_qa_semireal.py tests/api/test_chat_single_kb_qa_smoke.py tests/api/test_chat_pdf_semireal.py tests/api/test_chat_image_ocr_semireal.py tests/api/test_chat_scope_contract.py tests/api/test_chat_evidence_contract.py tests/api/test_health_route.py tests/api/test_image_asset_import.py tests/api/test_kb_directory_storage.py tests/test_rag_quality_fixtures.py tests/readers/test_image_ocr.py tests/readers/test_pdf_ocr.py -q`
+
+Current verified result: **124 passed, 1 skipped, 2 warnings**.
+
+What this means for ingestion hardening:
+1. The project is no longer checking only "can files import without crashing".
+2. It is now checking whether imported Markdown / PDF / OCR text can later be queried, cited, previewed, and evaluated with explicit quality metrics.
+3. The current hardening story therefore covers import, storage, query, evidence, preview, parser diagnostics, and QA metric governance together.
+
+Boundary reminder:
+- This is still not the final PDF/OCR answer-quality benchmark.
+- It is the parser-and-ingestion quality floor that should stay green before we expand modality-specific evaluation further.
+
+
+## 16. 2026-07-28 implementation sync: deletion safety and copy repair
+
+本轮又完成了两个小而硬的 ingestion 加固项：
+
+1. `server/index.py` 中的 `delete_ref_doc()` 已增加针对陈旧 `node_id` 引用的回归测试覆盖。
+2. 导入主链路核心文件中被写坏的中文 docstring / 注释已修复，涉及：
+   - `server/readers/image_ocr.py`
+   - `api/services/kb_service.py`
+   - `api/services/asset_service.py`
+
+新增回归覆盖：
+- `tests/api/test_index_manager_coverage.py`
+  - 先清理 stale node 引用，再委托原生 delete flow
+  - 无 stale 引用时不误删正常 node
+
+已验证命令：
+`python -m pytest tests/api/test_index_manager_coverage.py tests/readers/test_image_ocr.py tests/api/test_image_asset_import.py tests/api/test_health_route.py -q`
+
+已验证结果：**44 passed, 2 warnings**。
+
+这意味着：
+1. ingestion 基线不只是“更可观测”，也对一类已知历史删除故障更安全了。
+2. 核心导入 / OCR 文件已恢复可读性，便于后续 FRD-to-code 追踪、代码评审和前后端契约维护。
+3. 下一阶段的优先级仍然不变：继续收紧“真实导入 -> 检索 -> QA 验证”这条主线，而不是过早扩展到更深的多模态推理。
+
+## 17. 2026-07-29 implementation sync: preserve_tree nested reimport regressions
+
+本轮补齐了目录导入 `preserve_tree` 模式下的 nested relative_path 回归基线，重点不是新增功能，而是把“目录层级下的重导入/删除/retry”也纳入 ingestion hardening 的保护范围。
+
+已新增 / 收紧的回归点：
+1. `tests/api/test_kb_directory_import_tree.py`
+   - `test_import_files_preserve_tree_reimport_nested_path_replaces_existing_doc`
+   - `test_import_files_preserve_tree_failed_reimport_restores_previous_bytes`
+   - `test_delete_docs_by_nested_path_allows_preserve_tree_reimport`
+2. 失败重导入用例已收紧断言顺序：先验证“失败后仍保留旧文件字节与旧 ref_doc”，再验证 retry 成功后生成新的 ref_doc。
+
+本轮验证命令：
+- `python -m pytest tests/api/test_kb_directory_import_tree.py -q`
+  - 结果：**7 passed, 2 warnings**
+- `python -m pytest tests/api/test_kb_directory_import_tree.py tests/api/test_kb_directory_storage.py tests/api/test_index_manager_coverage.py -q`
+  - 结果：**69 passed, 2 warnings**
+- `python -m pytest tests/api/test_chat_evidence_contract.py tests/api/test_health_route.py tests/api/test_kb_directory_import_tree.py tests/api/test_kb_directory_storage.py tests/api/test_index_manager_coverage.py -q`
+  - 结果：**84 passed, 2 warnings**
+
+这意味着：
+1. ingest hardening 现在不只覆盖“单文件平铺导入”，也覆盖“保留目录结构导入”下的 nested path 替换与恢复。
+2. 当前基础链路已经能更可信地支撑下一步的中文 PDF / 图片 OCR / 混合目录批量导入回归扩展。
+3. 下一阶段仍然应优先补真实导入和问答质量验证，而不是过早扩展到更深的图像理解或多 Agent 联动。
+
+
+
+## 18. 2026-07-31 implementation sync: empty-markdown import normalization
+
+本轮在继续清扫导入链路时，确认并修复了一个真实的空文档导入缺陷：空白 Markdown 文件在 live 服务里原本会返回 `failed`，错误为 `'NoneType' object is not iterable`，而不是按设计返回 `empty`。
+
+根因已定位到 `server/ingestion.py`：
+1. `AdvancedIngestionPipeline.run()` 的自定义诊断路径里，当 transform 对空文档返回 `None` 时，会直接把 `None` 传给 cache 写入；
+2. cache 层随后按可迭代节点集合处理，触发 `TypeError`；
+3. `server/index.py` 中“空节点时不 insert”的保护虽然已存在，但在这个报错点之前还来不及生效。
+
+本轮已落实的修复：
+1. `server/ingestion.py`
+   - 新增 `_normalize_transformed_nodes()`；
+   - transform 命中 cache miss / no-cache 分支时，统一把 `None` 归一化为 `[]` 后再写 cache 或进入后续阶段。
+2. `tests/api/test_ingestion_pipeline.py`
+   - 新增直接回归：transform 返回 `None` 时，断言 cache 写入 `[]`、流程不崩溃、诊断计数为 0。
+3. `tests/api/test_index_manager_coverage.py`
+   - 先前补齐的 manager 层空结果保护继续保持通过，说明 pipeline 修复与上层 guard 没有互相打架。
+
+本轮验证：
+- 定向回归命令：
+  - `python -X utf8 -m pytest tests/api/test_ingestion_pipeline.py tests/api/test_index_manager_coverage.py tests/api/test_kb_directory_storage.py -q`
+  - 结果：**82 passed**
+- 运行时直连验证：
+  - `docs/20260722-local-multi-kb-assistant/artifacts/runtime/20260731-empty-markdown-runtime.json`
+  - 结果：`node_count = 0`、`empty_document_count = 1`
+- fresh live HTTP 验证：
+  - `docs/20260722-local-multi-kb-assistant/artifacts/live-roundtrip/20260731-live-18086-empty-file.json`
+  - 结果：文件状态为 `empty`，`empty_count = 1`，`failed_count = 0`，且 KB 文档列表为空。
+
+这意味着：
+1. ingestion hardening 现在不只覆盖“有内容时能索引”，也覆盖“无可索引内容时要稳定返回 empty 而不是崩溃”；
+2. 空文档这类边界输入已经从 live 缺陷变成了有测试、有 runtime 证据、有 HTTP 证据的回归基线；
+3. 下一步仍应回到主线目标：继续扩展导入后问答准确性评测，而不是把注意力转向更深的图像理解承诺。
+
+
+## 19. 2026-07-31 implementation sync: reject unsupported binary uploads early
+
+本轮在继续清扫导入链路时，又确认了一个真实边界问题：`application/octet-stream` 的 `.bin` 文件此前会落入通用 loader 路径，并被误记为“导入成功 + 已入索引”，这与当前产品范围不一致。
+
+根因：
+1. `api/services/kb_service.py` 之前虽然已经能识别 `file_kind = binary`，但并没有在导入入口拒绝；
+2. 文件仍会被落盘并进入 `manager.load_files(...)`；
+3. 通用读取链路会把原始字节当作可处理内容，最终导致“未知二进制内容被误判为知识导入成功”。
+
+本轮已落实的修复：
+1. `api/services/kb_service.py`
+   - 新增 `_is_rejected_file_kind()`；
+   - 对 `file_kind = binary` 在落盘前直接返回 `failed`；
+   - 新增 `_build_unsupported_file_type_message()`，统一输出用户可读错误；
+   - 稳定透出 `failure_category = unsupported_file_type`，并确保该场景不触发 runtime/model/index-manager。
+2. `tests/api/test_kb_directory_storage.py`
+   - 新增 `test_import_files_rejects_binary_upload_before_runtime`；
+   - 明确断言：`status = failed`、`path is None`、`file_retained_on_disk = false`、`failure_category = unsupported_file_type`，且 `ensure_models_ready / get_index_manager / load_files` 都不应被调用。
+
+本轮验证命令：
+- `python -X utf8 -m pytest tests/api/test_kb_directory_storage.py tests/api/test_image_asset_import.py tests/api/test_ingestion_pipeline.py tests/api/test_index_manager_coverage.py -q`
+  - 结果：**96 passed**
+
+本轮运行时证据：
+- `docs/20260722-local-multi-kb-assistant/artifacts/runtime/20260731-binary-upload-rejected-runtime.json`
+  - 结果：`success_count = 0`、`failed_count = 1`、`indexed_chunks = 0`，且 `file_save_ms = 0`、`primary_index_ms = 0`、`files_on_disk = []`。
+
+这意味着：
+1. 导入链路现在不再把未知二进制内容误报为“成功入库”；
+2. 当前产品范围与实现边界更加一致：首阶段仍聚焦 Markdown / PDF / 文本 / 图片 OCR 与资产入库，不承诺任意二进制理解；
+3. 下一步仍应继续沿主线补真实导入缺陷和问答评测，而不是把范围扩大到未定义格式。
+
+
+## 20. 2026-07-31 implementation sync: reject `.bin` even when MIME is missing
+
+???????????????????????????????????????? `.bin`?? `content_type` ??????????? `unknown`???????????????
+
+???
+1. `_detect_file_kind()` ????? MIME ????????????? `unknown`?
+2. ??? `.bin` ??? `content_type` ??????????? binary ?????
+3. ?????????????????????????? MIME??????????????
+
+?????????
+1. `api/services/kb_service.py`
+   - ?? `_detect_file_kind()`????????????????????????? `binary` ????? MIME ???
+   - ??????????? `unknown`???????? README ?????????????
+   - ?? early-reject ???? diagnostics ??????????????????? `file_kind = unknown`?
+2. `tests/api/test_kb_directory_storage.py`
+   - ?? `test_import_files_rejects_binary_suffix_without_content_type_before_runtime`?
+   - ??????????? runtime??????? `file_kind = binary`?`failure_category = unsupported_file_type`?
+
+???????
+- `python -X utf8 -m pytest tests/api/test_kb_directory_storage.py tests/api/test_image_asset_import.py tests/api/test_ingestion_pipeline.py tests/api/test_index_manager_coverage.py -q`
+  - ???**98 passed**
+- `python -X utf8 -m pytest tests/api/test_chat_single_kb_qa_smoke.py tests/test_rag_quality_eval_dataset_v5.py -q`
+  - ???**13 passed**
+
+????????
+- `docs/20260722-local-multi-kb-assistant/artifacts/runtime/20260731-binary-suffix-no-content-type-rejected-runtime.json`
+  - ???`success_count = 0`?`failed_count = 1`?`indexed_chunks = 0`?? `files_on_disk = []`?
+
+?????
+1. ?????????????????????? octet-stream??????????? MIME???????
+2. ????????????????? `eval_v5` ?????????????
+3. ?????????????????????????????????????????????????
+
+## 21. 2026-07-31 implementation sync: reject extensionless binary payloads without MIME
+
+Another follow-up probe found one more real import bypass after the earlier `.bin` tightening: a file like `README` with `content_type = ""` and raw binary bytes could still pass through as `unknown` and be misreported as a successful import.
+
+Root cause:
+1. the earlier hardening used suffix and MIME only, so extensionless payloads still had no strong signal;
+2. without suffix and without MIME, the payload stayed `unknown` and still reached the generic import path;
+3. this meant obvious binary bytes could still be written and indexed under an extensionless filename.
+
+What was implemented:
+1. `api/services/kb_service.py`
+   - added a narrow content-sniffing fallback that only runs when both suffix and MIME are missing;
+   - classifies extensionless UTF-8 / UTF-16-like text as `text`, so legitimate README-style text files are not over-rejected;
+   - classifies clearly binary extensionless payloads as `binary`, so they are rejected before persistence and indexing;
+   - carries the inferred `file_kind` into final diagnostics via `file_kind_override`.
+2. `tests/api/test_kb_directory_storage.py`
+   - added `test_import_files_rejects_extensionless_binary_without_content_type_before_runtime`;
+   - added `test_import_files_allows_extensionless_utf8_text_without_content_type` as the non-regression guard.
+
+Verification commands:
+- `python -X utf8 -m pytest tests/api/test_kb_directory_storage.py tests/api/test_image_asset_import.py tests/api/test_ingestion_pipeline.py tests/api/test_index_manager_coverage.py -q`
+  - result: **100 passed**
+- `python -X utf8 -m pytest tests/api/test_chat_single_kb_qa_smoke.py tests/test_rag_quality_eval_dataset_v5.py -q`
+  - result: **13 passed**
+
+Runtime evidence:
+- `docs/20260722-local-multi-kb-assistant/artifacts/runtime/20260731-extensionless-binary-no-content-type-rejected-runtime.json`
+  - result: `success_count = 0`, `failed_count = 1`, `indexed_chunks = 0`, `files_on_disk = []`, and runtime/model/index-manager all stay uncalled.
+
+This means:
+1. unsupported extensionless binary payloads are now rejected as early as the explicit `.bin` variants;
+2. the hardening stays narrow enough to preserve suffix-less UTF-8 text import;
+3. the current product scope remains honest: Markdown / PDF / text / image-OCR import is in, arbitrary binary ingestion is out.
+
+
+## 22. 2026-07-31 implementation sync: recognize extensionless supported PDF/image payloads without MIME
+
+A new follow-up probe showed that the earlier extensionless-content hardening was still incomplete: supported files already inside product scope could still miss the right import branch when both suffix and MIME were absent.
+
+Observed gap:
+1. `manual` + `content_type = ""` + PDF header (`%PDF-...`) could still avoid the dedicated PDF classification and later lose `file_kind` precision in diagnostics.
+2. `diagram` + `content_type = ""` + PNG signature could still avoid the image/OCR branch.
+3. This was no longer a question of rejecting unsupported binary bytes; it was a question of correctly recognizing supported PDF/image inputs that arrive without filename hints.
+
+What was implemented:
+1. `api/services/kb_service.py`
+   - added `_detect_file_kind_from_content_signature()` before the generic text/binary sniffing fallback;
+   - recognizes supported signature patterns for PDF, PNG, JPEG, GIF, BMP, and WEBP when suffix and MIME are both missing;
+   - keeps the inferred `file_kind` through failed-result branches as well, so a dependency-missing PDF still reports `file_kind = pdf` instead of degrading to `unknown`.
+2. `tests/api/test_kb_directory_storage.py`
+   - added `test_import_files_detects_extensionless_pdf_without_content_type_as_pdf`;
+   - added `test_import_files_detects_extensionless_png_without_content_type_as_image`;
+   - repaired the affected Chinese docstrings/assertions so the contract is now checked against real semantics.
+
+Verification commands:
+- `python -X utf8 -m pytest tests/api/test_kb_directory_storage.py -k "extensionless_pdf_without_content_type or extensionless_png_without_content_type or extensionless_binary_without_content_type or extensionless_utf8_text_without_content_type" -q`
+  - result: **4 passed**
+- `python -X utf8 -m pytest tests/api/test_kb_directory_storage.py tests/api/test_image_asset_import.py tests/api/test_ingestion_pipeline.py tests/api/test_index_manager_coverage.py -q`
+  - result: **102 passed**
+- `python -X utf8 -m pytest tests/api/test_chat_single_kb_qa_smoke.py tests/test_rag_quality_eval_dataset_v5.py -q`
+  - result: **13 passed**
+- `python -X utf8 scripts/verify_stage3_artifacts.py`
+  - result: **ok=True** (`manifest_count = 9`, `submit_scope_count = 9`)
+
+This means:
+1. extensionless-but-supported PDF/image files now enter the correct product path even without filename or MIME hints;
+2. the hardening remains layered and narrow: supported signatures are promoted, unsupported extensionless binary bytes are still rejected by Section 21;
+3. the current product statement stays honest: we support Markdown / PDF / text / image-OCR import, not arbitrary unknown binary ingestion.
+
+
+## 23. 2026-07-31 implementation sync: align standalone image OCR with extensionless supported-image detection
+
+A live follow-up probe showed a remaining gap after Section 22: extensionless PNG payloads were already recognized as `file_kind = image`, but the standalone OCR executor still gated on suffix/MIME only. In practice this meant the import path could classify a file as image and still end with `ocr_skipped`.
+
+What was implemented:
+1. `server/readers/image_ocr.py`
+   - added `_has_supported_image_signature()` to sniff PNG/JPEG/BMP/WEBP headers directly from the saved file when suffix and MIME are both missing;
+   - added `_is_supported_image_input()` so OCR eligibility now accepts either explicit suffix/MIME or a supported image signature;
+   - kept the scope intentionally narrow: unsupported text/binary payloads still return `skipped`, so this is not a broad "try OCR on anything" change.
+2. `tests/readers/test_image_ocr.py`
+   - added `test_extract_image_ocr_result_supports_extensionless_png_without_content_type`;
+3. `tests/api/test_kb_directory_storage.py`
+   - added `test_import_files_runs_ocr_for_extensionless_png_without_content_type` to cover the import-to-OCR chain instead of only the low-level reader.
+
+Verification commands:
+- `python -X utf8 -m pytest tests/readers/test_image_ocr.py -q`
+  - result: **16 passed**
+- `python -X utf8 -m pytest tests/api/test_kb_directory_storage.py -q`
+  - result: **50 passed**
+- `python -X utf8 -m pytest tests/readers/test_image_ocr.py tests/api/test_kb_directory_storage.py tests/api/test_image_asset_import.py tests/api/test_ingestion_pipeline.py tests/api/test_index_manager_coverage.py -q`
+  - result: **119 passed**
+- live HTTP probe artifact: `docs/20260722-local-multi-kb-assistant/artifacts/live-roundtrip/20260731-live-18088-extensionless-image-empty-mime.json`
+  - observed result: extensionless PNG + empty MIME now reports `ocr_attempted = true`, `ocr_status = no_text`, `ocr_skipped_count = 0`, `asset_registered = true`.
+
+This means:
+1. extensionless supported images no longer stop at the wrong `ocr_skipped` branch merely because suffix and MIME are absent;
+2. the import classifier and the OCR executor now use consistent support rules for the currently promised image scope;
+3. blank images are now reported honestly as `no_text`, which is the correct product behavior for OCR-only image support.
+
+
+## 24. 2026-07-31 implementation sync: accept extensionless supported files behind generic octet-stream MIME
+
+A follow-up probe after Sections 22 and 23 showed another realistic client-side import gap: some extensionless uploads do not arrive with an empty MIME at all. Instead, they arrive as the generic fallback `application/octet-stream`. Under the previous logic, that generic MIME still blocked content sniffing, so supported payloads could fall back to `binary` even though their bytes were clearly text/image/PDF.
+
+What was implemented:
+1. `api/services/kb_service.py`
+   - added `_CONTENT_SNIFF_FALLBACK_MIME_TYPES` so extensionless files with generic fallback MIME can reuse the existing signature/text/binary sniffing path;
+   - keeps the scope narrow: files with explicit unsupported suffixes are still rejected by suffix, and obvious binary bytes remain `binary`.
+2. `server/readers/image_ocr.py`
+   - added `_SIGNATURE_SNIFF_FALLBACK_IMAGE_MIME_TYPES` so extensionless supported images with generic MIME can still enter OCR by signature;
+   - still requires a supported image signature, so non-image octet-stream payloads do not start OCR.
+3. `tests/readers/test_image_ocr.py`
+   - added `test_extract_image_ocr_result_supports_extensionless_png_with_octet_stream_content_type`;
+4. `tests/api/test_kb_directory_storage.py`
+   - added `test_import_files_rejects_extensionless_binary_with_octet_stream_before_runtime`;
+   - added `test_import_files_allows_extensionless_utf8_text_with_octet_stream`;
+   - added `test_import_files_detects_extensionless_pdf_with_octet_stream_as_pdf`;
+   - added `test_import_files_runs_ocr_for_extensionless_png_with_octet_stream`.
+
+Verification commands:
+- `python -X utf8 -m pytest tests/readers/test_image_ocr.py -k "extensionless_png_without_content_type or extensionless_png_with_octet_stream_content_type" -q`
+  - result: **2 passed**
+- `python -X utf8 -m pytest tests/api/test_kb_directory_storage.py -k "extensionless_binary_with_octet_stream or extensionless_utf8_text_with_octet_stream or extensionless_pdf_with_octet_stream or extensionless_png_with_octet_stream" -q`
+  - result: **4 passed**
+- `python -X utf8 -m pytest tests/readers/test_image_ocr.py tests/api/test_kb_directory_storage.py tests/api/test_image_asset_import.py tests/api/test_ingestion_pipeline.py tests/api/test_index_manager_coverage.py -q`
+  - result: **124 passed**
+- `python -X utf8 -m pytest tests/api/test_chat_image_ocr_semireal.py tests/api/test_chat_mixed_batch_semireal.py tests/api/test_chat_single_kb_qa_smoke.py -q`
+  - result: **22 passed**
+- live artifact: `docs/20260722-local-multi-kb-assistant/artifacts/live-roundtrip/20260731-live-18089-extensionless-octet-fallback-import.json`
+  - observed result: extensionless `README` + `application/octet-stream` imports as `text`, extensionless `diagram` + `application/octet-stream` enters OCR as `image/no_text`, and extensionless `BLOB` still fails as unsupported binary.
+
+This means:
+1. the import chain now better matches real upload-client behavior instead of only the ideal empty-MIME case;
+2. supported extensionless content can recover into the right path even behind a generic binary MIME;
+3. the guardrail remains intact: generic MIME is not treated as ?allow everything?, because clear binary payloads are still rejected.

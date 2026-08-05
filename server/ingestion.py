@@ -1,13 +1,13 @@
 """
-?????
-- ???????ingestion??????????????????????
+导入流水线封装。
+- 统一当前项目对 ingestion pipeline 的初始化方式与诊断输出。
 
-?????
-1. ??? Settings ??? embedding ? text splitter?
-2. ?? AdvancedIngestionPipeline ? transformations?
-3. ? run ???????????????
+当前职责：
+1. 复用 Settings 中已注册的 embedding 与 text splitter。
+2. 用 AdvancedIngestionPipeline 固定 transformations 顺序。
+3. 在 run 阶段补齐分阶段耗时诊断。
 
-?????
+相关依赖：
 - llama_index.core.ingestion.IngestionPipeline
 - server.splitters.ChineseTitleExtractor
 - server.stores.strage_context / ingestion_cache
@@ -24,12 +24,12 @@ from llama_index.core.ingestion import IngestionPipeline, DocstoreStrategy
 from llama_index.core.ingestion.pipeline import get_transformation_hash, get_tqdm_iterable
 
 from server.splitters import ChineseTitleExtractor
-from server.stores.strage_context import STORAGE_CONTEXT
+from server.stores.strage_context import get_default_storage_context
 from server.stores.ingestion_cache import INGESTION_CACHE
 
 
 def _new_ingestion_stage_timings() -> dict[str, float]:
-    """?????? ingestion ??????????"""
+    """创建 ingestion 阶段耗时诊断的默认结构。"""
     return {
         "document_load_ms": 0.0,
         "chunking_ms": 0.0,
@@ -42,42 +42,38 @@ def _new_ingestion_stage_timings() -> dict[str, float]:
     }
 
 
+def _normalize_transformed_nodes(nodes: Any):
+    """把 transform 返回的 None 归一化为 []，避免空文档导入在缓存层崩溃。"""
+    if nodes is None:
+        return []
+    return nodes
+
+
 class AdvancedIngestionPipeline(IngestionPipeline):
     def __init__(
         self,
+        *,
+        storage_context=None,
     ):
-        """
-        ???
-        - ????????????????????????
-
-        ???
-        - ?????????? Settings ???????
-
-        ?????
-        1. ???? embedding model ? text splitter?
-        2. ????????????
-        3. ?? docstore?vector_store?cache ? upsert ???
-
-        ???
-        - ?????? AdvancedIngestionPipeline ???
-        """
+        """初始化 ingestion pipeline，并支持注入当前知识库的存储上下文。"""
         embed_model = Settings.embed_model
         text_splitter = Settings.text_splitter
+        effective_storage_context = storage_context or get_default_storage_context()
 
         super().__init__(
             transformations=[
                 text_splitter,
                 embed_model,
-                ChineseTitleExtractor(),  # ????????????????
+                ChineseTitleExtractor(),
             ],
-            docstore=STORAGE_CONTEXT.docstore,
-            vector_store=STORAGE_CONTEXT.vector_store,
+            docstore=effective_storage_context.docstore,
+            vector_store=effective_storage_context.vector_store,
             cache=INGESTION_CACHE,
             docstore_strategy=DocstoreStrategy.UPSERTS,
         )
 
     def _resolve_transform_stage_key(self, transform: Any, index: int) -> str:
-        """? transform ???????? diagnostics ???"""
+        """把 transform 序号映射成稳定的 diagnostics 字段名。"""
         if index == 0:
             return "chunking_ms"
         if index == 1:
@@ -99,12 +95,12 @@ class AdvancedIngestionPipeline(IngestionPipeline):
         **kwargs: Any,
     ):
         """
-        ???
-        - ???????????????
+        运行 ingestion pipeline。
+        - 默认保持与 LlamaIndex IngestionPipeline 一致的行为。
 
-        ???
-        - ?????? diagnostics ?????????Embedding??????????????
-        - ??? diagnostics ?????????????????????
+        额外能力：
+        - 当传入 diagnostics 时，记录每个阶段的耗时、Embedding 写入和向量入库情况。
+        - 当不需要 diagnostics 时，继续走原有实现，避免无谓改动执行路径。
         """
         input_documents = documents or []
         print(f"Load {len(input_documents)} Documents")
@@ -169,12 +165,12 @@ class AdvancedIngestionPipeline(IngestionPipeline):
                 cache_key = get_transformation_hash(transformed_nodes, transform)
                 cached_nodes = self.cache.get(cache_key, collection=cache_collection)
                 if cached_nodes is not None:
-                    transformed_nodes = cached_nodes
+                    transformed_nodes = _normalize_transformed_nodes(cached_nodes)
                 else:
-                    transformed_nodes = transform(transformed_nodes, **kwargs)
+                    transformed_nodes = _normalize_transformed_nodes(transform(transformed_nodes, **kwargs))
                     self.cache.put(cache_key, transformed_nodes, collection=cache_collection)
             else:
-                transformed_nodes = transform(transformed_nodes, **kwargs)
+                transformed_nodes = _normalize_transformed_nodes(transform(transformed_nodes, **kwargs))
             stage_timings[stage_key] = round(
                 float(stage_timings.get(stage_key, 0.0))
                 + max(time.perf_counter() - transform_started_at, 0.0) * 1000,

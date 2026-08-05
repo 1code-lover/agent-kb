@@ -28,7 +28,7 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
 def _raise_http_from_kb_error(exc: KBServiceError) -> None:
-    """??? KB ??????? HTTP ????"""
+    """把知识库领域错误映射为标准 HTTP 异常。"""
     if isinstance(exc, (KBValidationError, KBUnavailableError)):
         status_code = 400
     elif isinstance(exc, KBNotFoundError):

@@ -1,0 +1,199 @@
+[
+  {
+    "case_id": "single-kb-smoke-001",
+    "kb_id": "kb-a",
+    "kb_name": "KB A",
+    "source_doc": "scope-contract.md",
+    "question": "Which scope fields must a single-kb chat response echo?",
+    "mock_answer": "A single-kb response must echo requested_scope_type, requested_kb_ids, effective_scope_type, effective_kb_ids, is_default_deny_applied, and isolation_level.",
+    "expected_keypoints": [
+      "requested_scope_type",
+      "effective_kb_ids",
+      "is_default_deny_applied"
+    ],
+    "expected_evidence": [
+      "scope-contract.md"
+    ],
+    "must_not_contain": [
+      "kb-b",
+      "global compatibility mode"
+    ],
+    "complexity": "simple",
+    "type": "positive",
+    "notes": "scope echo contract",
+    "source_nodes": [
+      {
+        "kb_id": "kb-a",
+        "title": "scope-contract.md",
+        "doc_id": "doc-scope-contract",
+        "page": "1",
+        "text": "Chat responses must echo requested_scope_type, requested_kb_ids, effective_scope_type, effective_kb_ids, is_default_deny_applied, and isolation_level.",
+        "score": 0.99
+      }
+    ]
+  },
+  {
+    "case_id": "single-kb-smoke-002",
+    "kb_id": "kb-a",
+    "kb_name": "KB A",
+    "source_doc": "evidence-preview.md",
+    "question": "Which fields are required so the frontend can preview evidence?",
+    "mock_answer": "Evidence items need title, source, excerpt, doc_id, and preview_locator so the frontend can render evidence preview and source location.",
+    "expected_keypoints": [
+      "title",
+      "source",
+      "preview_locator"
+    ],
+    "expected_evidence": [
+      "evidence-preview.md"
+    ],
+    "must_not_contain": [
+      "cross-kb access",
+      "evidence optional"
+    ],
+    "complexity": "simple",
+    "type": "positive",
+    "notes": "evidence preview contract",
+    "source_nodes": [
+      {
+        "kb_id": "kb-a",
+        "title": "evidence-preview.md",
+        "doc_id": "doc-evidence-preview",
+        "page": "2",
+        "text": "EvidenceItem should include title, source, excerpt, doc_id, and preview_locator so the frontend can build a minimal evidence preview.",
+        "score": 0.97
+      }
+    ]
+  },
+  {
+    "case_id": "single-kb-smoke-003",
+    "kb_id": "kb-a",
+    "kb_name": "KB A",
+    "source_doc": "ingestion-readiness.md",
+    "question": "What should the P0 ingestion and QA baseline stabilize first?",
+    "mock_answer": "The P0 baseline should stabilize Markdown import, indexing, single-kb QA, and evidence preview first; PDF and image OCR must expose dependency readiness clearly.",
+    "expected_keypoints": [
+      "Markdown",
+      "single-kb QA",
+      "dependency readiness"
+    ],
+    "expected_evidence": [
+      "ingestion-readiness.md"
+    ],
+    "must_not_contain": [
+      "full image understanding",
+      "automatic cross-kb query"
+    ],
+    "complexity": "simple",
+    "type": "positive",
+    "notes": "ingestion and QA priority",
+    "source_nodes": [
+      {
+        "kb_id": "kb-a",
+        "title": "ingestion-readiness.md",
+        "doc_id": "doc-ingestion-readiness",
+        "page": "3",
+        "text": "P0 should stabilize Markdown import, indexing, single-kb QA, and evidence preview before expanding PDF and image OCR evaluation.",
+        "score": 0.96
+      }
+    ]
+  },
+  {
+    "case_id": "single-kb-smoke-004",
+    "kb_id": "kb-a",
+    "kb_name": "KB A",
+    "source_doc": "refusal-guideline.md",
+    "question": "How should the assistant respond when the current KB has no confirmable evidence?",
+    "mock_answer": "When the current KB has no confirmable evidence, the assistant should say that no confirmable information is available and must not fabricate an answer.",
+    "expected_keypoints": [
+      "no confirmable information",
+      "must not fabricate"
+    ],
+    "expected_evidence": [
+      "refusal-guideline.md"
+    ],
+    "must_not_contain": [
+      "I guess",
+      "kb-b"
+    ],
+    "complexity": "simple",
+    "type": "negative-policy",
+    "notes": "refusal and anti-hallucination policy",
+    "source_nodes": [
+      {
+        "kb_id": "kb-a",
+        "title": "refusal-guideline.md",
+        "doc_id": "doc-refusal-guideline",
+        "page": "1",
+        "text": "If the current knowledge base has no confirmable evidence, the answer should explicitly say so and must not fabricate.",
+        "score": 0.95
+      }
+    ]
+  },
+  {
+    "case_id": "single-kb-smoke-005",
+    "kb_id": "kb-a",
+    "kb_name": "KB A",
+    "source_doc": "folder-boundary.md",
+    "question": "How should folders relate to a knowledge base?",
+    "mock_answer": "Folders are organizational objects inside one knowledge base; they help import tree display and browsing, but they do not create a separate authorization boundary.",
+    "expected_keypoints": [
+      "organizational objects",
+      "one knowledge base",
+      "authorization boundary"
+    ],
+    "expected_evidence": [
+      "folder-boundary.md"
+    ],
+    "must_not_contain": [
+      "each folder is its own KB",
+      "folder-level authorization is already implemented"
+    ],
+    "complexity": "simple",
+    "type": "architecture",
+    "notes": "folder model and KB boundary",
+    "source_nodes": [
+      {
+        "kb_id": "kb-a",
+        "title": "folder-boundary.md",
+        "doc_id": "doc-folder-boundary",
+        "page": "1",
+        "text": "Folders are organizational objects inside one knowledge base and do not create a separate authorization boundary.",
+        "score": 0.94
+      }
+    ]
+  },
+  {
+    "case_id": "single-kb-smoke-006",
+    "kb_id": "kb-a",
+    "kb_name": "KB A",
+    "source_doc": "suite-metrics-gate.md",
+    "question": "Which metrics should the QA baseline report track?",
+    "mock_answer": "The QA baseline report should track scope pass rate, keypoint coverage, evidence hit rate, preview resolvability rate, source count match rate, and forbidden-term clean rate.",
+    "expected_keypoints": [
+      "scope pass rate",
+      "keypoint coverage",
+      "preview resolvability rate"
+    ],
+    "expected_evidence": [
+      "suite-metrics-gate.md"
+    ],
+    "must_not_contain": [
+      "pass or fail alone is enough",
+      "single aggregate only"
+    ],
+    "complexity": "simple",
+    "type": "metrics",
+    "notes": "suite-level QA metrics",
+    "source_nodes": [
+      {
+        "kb_id": "kb-a",
+        "title": "suite-metrics-gate.md",
+        "doc_id": "doc-suite-metrics-gate",
+        "page": "1",
+        "text": "A QA baseline report should track scope pass rate, keypoint coverage, evidence hit rate, preview resolvability rate, source count match rate, and forbidden-term clean rate.",
+        "score": 0.93
+      }
+    ]
+  }
+]

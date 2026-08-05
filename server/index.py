@@ -33,13 +33,36 @@ from llama_index.core.storage.storage_context import (
     PG_FNAME,
     VECTOR_STORE_FNAME,
 )
-from server.stores.strage_context import STORAGE_CONTEXT
+from server.stores.strage_context import create_storage_context, get_default_storage_context
+from server.utils.file import get_kb_storage_dir, validate_kb_id
 from server.ingestion import AdvancedIngestionPipeline
 from config import DEV_MODE
 from server.text_file_loader import read_text_file_with_fallback
 from server.utils_json import sanitize_for_json  # metadata 清洗，避免 Tag 不可序列化
 
 _TEXT_FILE_SUFFIXES = {".md", ".markdown", ".mdown", ".mdx", ".txt", ".text", ".rst", ".log"}
+
+_OCR_RUNTIME_DIAGNOSTIC_KEYS = (
+    "ocr_init_ms",
+    "ocr_load_image_ms",
+    "ocr_predict_ms",
+    "ocr_postprocess_ms",
+    "ocr_total_ms",
+)
+
+_SOURCE_FILE_OPTIONAL_KEYS = (
+    "ocr_attempted",
+    "ocr_status",
+    "ocr_text_length",
+    "ocr_error",
+    "indexed_from_ocr",
+    "ocr_engine",
+    "ocr_instance_reused",
+    "failure_category",
+    "missing_dependency",
+    "dependency_status",
+    *_OCR_RUNTIME_DIAGNOSTIC_KEYS,
+)
 
 _INGESTION_STAGE_KEYS = (
     "document_load_ms",
@@ -60,7 +83,7 @@ def _new_ingestion_stage_timings() -> dict[str, float]:
 
 
 def _new_storage_persist_diagnostics() -> dict[str, Any]:
-    """创建存储落盘诊断结构。"""
+    """创建存储落盘阶段诊断结构。"""
     return {
         "docstore_persist_ms": 0.0,
         "index_store_persist_ms": 0.0,
@@ -71,6 +94,15 @@ def _new_storage_persist_diagnostics() -> dict[str, Any]:
         "fallback_persist_ms": 0.0,
         "total_ms": 0.0,
     }
+
+
+def _resolve_index_persist_dir(kb_id: str | None = None, persist_dir: str | Path | None = None) -> Path:
+    """解析 IndexManager 对应的持久化目录。"""
+    if persist_dir is not None:
+        return Path(persist_dir).resolve()
+    if kb_id is None:
+        return Path(DEFAULT_PERSIST_DIR).resolve()
+    return get_kb_storage_dir(kb_id, create=False)
 
 
 def _new_ingestion_diagnostics(source: str, input_file_count: int = 0) -> dict[str, Any]:
@@ -116,6 +148,71 @@ def _summarize_documents(documents: list[Any]) -> dict[str, int]:
             continue
         summary["input_text_chars"] += len(text)
     return summary
+
+
+def _extract_source_file_diagnostic(metadata: dict[str, Any] | None) -> dict[str, Any] | None:
+    """从 metadata 中提取文件级来源/OCR 诊断。"""
+    if not isinstance(metadata, dict):
+        return None
+
+    resolved_path = _resolve_path_metadata(metadata.get("file_path"))
+    if resolved_path is None:
+        return None
+
+    source_type = metadata.get("source_type")
+    if source_type not in {"pdf_text_layer", "pdf_ocr_fallback"}:
+        return None
+
+    payload: dict[str, Any] = {
+        "file_path": str(resolved_path),
+        "file_name": metadata.get("file_name") or resolved_path.name,
+        "source_type": source_type,
+        "ocr_attempted": bool(metadata.get("ocr_attempted", False)),
+        "ocr_status": metadata.get("ocr_status"),
+        "ocr_text_length": int(metadata.get("ocr_text_length") or 0),
+        "ocr_error": metadata.get("ocr_error"),
+        "indexed_from_ocr": bool(metadata.get("indexed_from_ocr", False)),
+        "ocr_engine": metadata.get("ocr_engine"),
+    }
+    for key in _SOURCE_FILE_OPTIONAL_KEYS:
+        if key in payload or key not in metadata:
+            continue
+        payload[key] = metadata.get(key)
+    return sanitize_for_json(payload)
+
+
+def _merge_source_file_diagnostics(*diagnostic_lists: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """按 file_path 合并多路文件诊断，后者覆盖前者。"""
+    merged: dict[str, dict[str, Any]] = {}
+    for diagnostic_list in diagnostic_lists:
+        if not isinstance(diagnostic_list, list):
+            continue
+        for item in diagnostic_list:
+            normalized = _extract_source_file_diagnostic(item)
+            if normalized is None:
+                continue
+            key = str(normalized["file_path"])
+            existing = merged.get(key)
+            if existing is None:
+                merged[key] = dict(normalized)
+            else:
+                existing.update(normalized)
+    return list(merged.values())
+
+
+def _collect_document_source_diagnostics(documents: list[Any]) -> list[dict[str, Any]]:
+    """从 Document metadata 中收集去重后的文件级来源诊断。"""
+    diagnostics_by_path: dict[str, dict[str, Any]] = {}
+    for document in documents or []:
+        normalized = _extract_source_file_diagnostic(getattr(document, "metadata", None))
+        if normalized is None:
+            continue
+
+        key = str(normalized["file_path"])
+        if key in diagnostics_by_path:
+            continue
+        diagnostics_by_path[key] = normalized
+    return list(diagnostics_by_path.values())
 
 
 def _count_nodes_with_embeddings(nodes: list[Any]) -> tuple[int, int]:
@@ -180,7 +277,7 @@ def _format_file_date(timestamp: float | None) -> str | None:
 
 
 def _build_text_document(file_path: str | Path) -> Document:
-    """为 Markdown/TXT 等纯文本文件构造稳定的 Document。"""
+    """? Markdown/TXT ??????????? Document?"""
     resolved_path = Path(file_path).resolve()
     decoded = read_text_file_with_fallback(resolved_path)
     stat = resolved_path.stat()
@@ -198,28 +295,88 @@ def _build_text_document(file_path: str | Path) -> Document:
     return Document(text=decoded.text, metadata=metadata)
 
 
+_TEXT_CONTROL_CHARS = {"\t", "\n", "\f", "\r"}
+
+
+
+def _decoded_text_looks_reasonable(text: str) -> bool:
+    """????????????????????????????"""
+    if not text:
+        return True
+    disallowed_controls = sum(1 for char in text if ord(char) < 32 and char not in _TEXT_CONTROL_CHARS)
+    return disallowed_controls / len(text) <= 0.05
+
+
+
+def _is_extensionless_pdf(file_path: str | Path) -> bool:
+    """???????????? PDF?"""
+    try:
+        return Path(file_path).read_bytes()[:5] == b"%PDF-"
+    except OSError:
+        return False
+
+
+
+def _is_extensionless_text(file_path: str | Path) -> bool:
+    """??????????????????"""
+    try:
+        decoded = read_text_file_with_fallback(file_path)
+    except OSError:
+        return False
+    return _decoded_text_looks_reasonable(decoded.text)
+
+
+
+def _load_pdf_documents_with_diagnostics(file_path: str | Path) -> tuple[list[Document], dict[str, Any] | None]:
+    """?? PDF????????????"""
+    from server.readers.pdf_ocr import PDFOCRReader
+
+    reader = PDFOCRReader()
+    docs: list[Document] = []
+    normalized: dict[str, Any] | None = None
+    try:
+        docs = reader.load_data(str(file_path))
+    finally:
+        consume_reader_diagnostics = getattr(reader, "consume_last_diagnostics", None)
+        reader_diagnostics = consume_reader_diagnostics() if callable(consume_reader_diagnostics) else None
+        normalized = _extract_source_file_diagnostic(reader_diagnostics)
+    return docs, normalized
+
+
 class IndexManager:
     """
     功能：
     - 管理索引生命周期及多种数据输入路径。
     """
 
-    def __init__(self, index_name):
-        """
-        功能：
-        - 初始化索引管理器状态。
+    def __init__(self, index_name, *, storage_context=None, persist_dir: str | Path | None = None, kb_id: str | None = None):
+        """初始化索引管理器。
 
-        输入：
-        - index_name(str): 业务侧索引标识。
+        Args:
+            index_name: 索引名称。
+            storage_context: 可选的 StorageContext；传入时直接复用。
+            persist_dir: 可选的持久化目录；为空时根据 kb_id 自动解析。
+            kb_id: 可选的知识库 ID。
 
-        输出：
-        - 无返回值，初始化对象属性。
+        Notes:
+            persist_dir 与 kb_id 共同决定当前 IndexManager 的存储边界。
         """
+        safe_kb_id = validate_kb_id(kb_id) if kb_id is not None else None
+        resolved_persist_dir = _resolve_index_persist_dir(safe_kb_id, persist_dir)
+
         self.index_name: str = index_name
-        self.storage_context: StorageContext = STORAGE_CONTEXT
+        self.kb_id: str | None = safe_kb_id
+        self.persist_dir: Path = resolved_persist_dir
+        if storage_context is not None:
+            self.storage_context: StorageContext = storage_context
+        elif persist_dir is None and safe_kb_id in (None, "default"):
+            self.storage_context = get_default_storage_context()
+        else:
+            self.storage_context = create_storage_context(persist_dir=str(self.persist_dir))
         self.index_id: str = None
         self.index: VectorStoreIndex = None
         self._last_ingestion_diagnostics: dict[str, Any] | None = None
+        self._last_loaded_source_diagnostics: list[dict[str, Any]] = []
         self._last_persist_diagnostics: dict[str, Any] | None = None
 
     def _set_last_ingestion_diagnostics(self, diagnostics: dict[str, Any] | None) -> None:
@@ -230,6 +387,16 @@ class IndexManager:
         """消费最近一次 ingestion diagnostics。"""
         diagnostics = copy.deepcopy(self._last_ingestion_diagnostics) if isinstance(self._last_ingestion_diagnostics, dict) else None
         self._last_ingestion_diagnostics = None
+        return diagnostics
+
+    def _set_last_loaded_source_diagnostics(self, diagnostics: list[dict[str, Any]] | None) -> None:
+        """缓存最近一次 _load_documents 产生的源文件诊断。"""
+        self._last_loaded_source_diagnostics = copy.deepcopy(diagnostics) if isinstance(diagnostics, list) else []
+
+    def _consume_last_loaded_source_diagnostics(self) -> list[dict[str, Any]]:
+        """消费最近一次 _load_documents 产生的源文件诊断。"""
+        diagnostics = copy.deepcopy(self._last_loaded_source_diagnostics) if isinstance(self._last_loaded_source_diagnostics, list) else []
+        self._last_loaded_source_diagnostics = []
         return diagnostics
 
     def _set_last_persist_diagnostics(self, diagnostics: dict[str, Any] | None) -> None:
@@ -254,7 +421,8 @@ class IndexManager:
             return None
 
         diagnostics = _new_storage_persist_diagnostics()
-        persist_dir = Path(DEFAULT_PERSIST_DIR)
+        persist_dir = self.persist_dir.resolve()
+        persist_dir.mkdir(parents=True, exist_ok=True)
         started_at = time.perf_counter()
 
         phase_started_at = time.perf_counter()
@@ -298,6 +466,13 @@ class IndexManager:
         return diagnostics
 
 
+    def _create_ingestion_pipeline(self):
+        """创建 ingestion pipeline，并优先注入当前 manager 的 storage_context。"""
+        try:
+            return AdvancedIngestionPipeline(storage_context=self.storage_context)
+        except TypeError:
+            return AdvancedIngestionPipeline()
+
     def _run_pipeline_with_diagnostics(self, *, documents: list[Any], diagnostics: dict[str, Any]) -> list[Any]:
         """执行 ingestion pipeline，并把统计信息写回 diagnostics。"""
         diagnostics.update(_summarize_documents(documents))
@@ -305,7 +480,7 @@ class IndexManager:
         for key, value in _new_ingestion_stage_timings().items():
             stage_timings.setdefault(key, value)
 
-        pipeline = AdvancedIngestionPipeline()
+        pipeline = self._create_ingestion_pipeline()
         run_method = getattr(pipeline, "run")
         supports_diagnostics = True
         try:
@@ -447,7 +622,13 @@ class IndexManager:
             return True
 
         fallback_started_at = time.perf_counter()
-        persist()
+        try:
+            persist(persist_dir=str(self.persist_dir.resolve()), fs=None)
+        except TypeError:
+            try:
+                persist(persist_dir=str(self.persist_dir.resolve()))
+            except TypeError:
+                persist()
         fallback_diagnostics = _new_storage_persist_diagnostics()
         fallback_diagnostics["fallback_persist_ms"] = _elapsed_ms(fallback_started_at)
         fallback_diagnostics["total_ms"] = fallback_diagnostics["fallback_persist_ms"]
@@ -469,7 +650,7 @@ class IndexManager:
                 file_paths.append(os.path.join(root, f))
         documents = self._load_documents(file_paths) if file_paths else []
         if len(documents) > 0:
-            pipeline = AdvancedIngestionPipeline()
+            pipeline = self._create_ingestion_pipeline()
             nodes = pipeline.run(documents=documents)
             index = self.insert_nodes(nodes)
             return nodes
@@ -479,25 +660,28 @@ class IndexManager:
         
     def _load_documents(self, file_paths):
         """
-        功能：
-        - 从文件路径列表读取 Document，PDF 自动走 OCR 回退。
-        - Markdown/TXT 等纯文本文件使用本地回退解码，避免 utf-8 ignore 静默吞字。
+        加载文件列表并统一转成 Document。
+        - PDF 走专用读取器，保留文字层 / OCR 来源诊断
+        - Markdown/TXT 走文本读取回退，保留原始编码正文
         """
         non_pdf, pdf_docs, text_docs = [], [], []
+        pdf_source_diagnostics: list[dict[str, Any]] = []
+        self._set_last_loaded_source_diagnostics([])
         for fp in file_paths:
             ext = os.path.splitext(fp)[1].lower()
-            if ext == '.pdf':
-                from server.readers.pdf_ocr import PDFOCRReader
-                reader = PDFOCRReader()
-                docs = reader.load_data(fp)
+            if ext == '.pdf' or (not ext and _is_extensionless_pdf(fp)):
+                docs, normalized = _load_pdf_documents_with_diagnostics(fp)
+                if normalized is not None:
+                    pdf_source_diagnostics.append(normalized)
                 if docs:
                     pdf_docs.extend(docs)
                 else:
-                    print(f'  跳过空 PDF: {fp}')
-            elif ext in _TEXT_FILE_SUFFIXES:
+                    print(f'  PDF ?????????: {fp}')
+            elif ext in _TEXT_FILE_SUFFIXES or (not ext and _is_extensionless_text(fp)):
                 text_docs.append(_build_text_document(fp))
             else:
                 non_pdf.append(fp)
+        self._set_last_loaded_source_diagnostics(pdf_source_diagnostics)
         if non_pdf:
             from_dirs = SimpleDirectoryReader(input_files=non_pdf).load_data()
         else:
@@ -512,7 +696,7 @@ class IndexManager:
         kb_id: str | None = None,
         persist: bool = True,
     ) -> list[Any]:
-        """加载内存中的 Document 列表，并补齐文件路径等 metadata。"""
+        """加载内存 Document 列表并写入索引，同时规范化文件 metadata。"""
         started_at = time.perf_counter()
         diagnostics = _new_ingestion_diagnostics(source="documents")
 
@@ -521,92 +705,28 @@ class IndexManager:
         from server.text_splitter import create_text_splitter
         Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
-        if not documents:
-            print("No documents found")
-            _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
-            self._set_last_ingestion_diagnostics(diagnostics)
-            return []
+        try:
+            if not documents:
+                print("No documents found")
+                return []
 
-        files: list[Path] = []
-        file_by_name: dict[str, Path] = {}
-        for document in documents:
-            if hasattr(document, "metadata") and isinstance(getattr(document, "metadata"), dict):
-                metadata = sanitize_for_json(document.metadata)
-                resolved_path = _resolve_path_metadata(metadata.get("file_path"))
-                if resolved_path is not None:
-                    files.append(resolved_path)
-                    file_by_name[resolved_path.name] = resolved_path
-                    metadata["file_path"] = str(resolved_path)
-                    metadata["file_name"] = metadata.get("file_name") or resolved_path.name
-                document.metadata = metadata
-
-        diagnostics["input_file_count"] = len(files)
-        nodes = self._run_pipeline_with_diagnostics(documents=documents, diagnostics=diagnostics)
-        for n in nodes:
-            if not hasattr(n, "metadata") or not isinstance(getattr(n, "metadata"), dict):
-                n.metadata = {}
-            n.metadata = sanitize_for_json(n.metadata)
-            raw_path = n.metadata.get("file_path")
-            resolved_path = _resolve_path_metadata(raw_path)
-            if resolved_path is None:
-                file_name = n.metadata.get("file_name")
-                resolved_path = file_by_name.get(file_name) if isinstance(file_name, str) else None
-            if resolved_path is None and len(files) == 1:
-                resolved_path = files[0]
-            if resolved_path is not None:
-                n.metadata["file_path"] = str(resolved_path)
-                n.metadata["file_name"] = Path(resolved_path).name
-            if kb_id is not None:
-                n.metadata["kb_id"] = kb_id
-
-        insert_started_at = time.perf_counter()
-        self.insert_nodes(nodes, persist=persist)
-        diagnostics["stage_timings"]["index_insert_ms"] = _elapsed_ms(insert_started_at)
-        _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
-        self._set_last_ingestion_diagnostics(diagnostics)
-        return nodes
-
-    def load_files(
-        self,
-        file_paths: list[str | Path],
-        chunk_size: int,
-        chunk_overlap: int,
-        kb_id: str | None = None,
-        persist: bool = True,
-    ) -> list[Any]:
-        """从文件路径加载文档，并记录完整 diagnostics 摘要。"""
-        started_at = time.perf_counter()
-        diagnostics = _new_ingestion_diagnostics(source="files")
-
-        Settings.chunk_size = chunk_size
-        Settings.chunk_overlap = chunk_overlap
-        from server.text_splitter import create_text_splitter
-        Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-
-        files = [Path(file_path).resolve() for file_path in file_paths]
-        diagnostics["input_file_count"] = len(files)
-        print([str(file_path) for file_path in files])
-
-        load_started_at = time.perf_counter()
-        documents = self._load_documents([str(file_path) for file_path in files])
-        diagnostics["stage_timings"]["document_load_ms"] = _elapsed_ms(load_started_at)
-        file_by_name = {file_path.name: file_path for file_path in files}
-        if len(documents) > 0:
+            files: list[Path] = []
+            file_by_name: dict[str, Path] = {}
             for document in documents:
                 if hasattr(document, "metadata") and isinstance(getattr(document, "metadata"), dict):
                     metadata = sanitize_for_json(document.metadata)
-                    raw_path = metadata.get("file_path")
-                    resolved_path = _resolve_path_metadata(raw_path)
-                    if resolved_path is None:
-                        file_name = metadata.get("file_name")
-                        resolved_path = file_by_name.get(file_name) if isinstance(file_name, str) else None
-                    if resolved_path is None and len(files) == 1:
-                        resolved_path = files[0]
+                    resolved_path = _resolve_path_metadata(metadata.get("file_path"))
                     if resolved_path is not None:
+                        files.append(resolved_path)
+                        file_by_name[resolved_path.name] = resolved_path
                         metadata["file_path"] = str(resolved_path)
                         metadata["file_name"] = metadata.get("file_name") or resolved_path.name
                     document.metadata = metadata
 
+            diagnostics["input_file_count"] = len(files)
+            source_file_diagnostics = _collect_document_source_diagnostics(documents)
+            if source_file_diagnostics:
+                diagnostics["source_file_diagnostics"] = source_file_diagnostics
             nodes = self._run_pipeline_with_diagnostics(documents=documents, diagnostics=diagnostics)
             for n in nodes:
                 if not hasattr(n, "metadata") or not isinstance(getattr(n, "metadata"), dict):
@@ -624,18 +744,104 @@ class IndexManager:
                     n.metadata["file_name"] = Path(resolved_path).name
                 if kb_id is not None:
                     n.metadata["kb_id"] = kb_id
+
+            if not nodes:
+                return []
+
             insert_started_at = time.perf_counter()
             self.insert_nodes(nodes, persist=persist)
             diagnostics["stage_timings"]["index_insert_ms"] = _elapsed_ms(insert_started_at)
+            return nodes
+        finally:
+            if not documents:
+                diagnostics["input_file_count"] = 0
             _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
             self._set_last_ingestion_diagnostics(diagnostics)
-            return nodes
-        else:
+
+    def load_files(
+        self,
+        file_paths: list[str | Path],
+        chunk_size: int,
+        chunk_overlap: int,
+        kb_id: str | None = None,
+        persist: bool = True,
+    ) -> list[Any]:
+        """加载文件列表并写入索引，同时缓存 ingestion diagnostics。"""
+        started_at = time.perf_counter()
+        diagnostics = _new_ingestion_diagnostics(source="files")
+
+        Settings.chunk_size = chunk_size
+        Settings.chunk_overlap = chunk_overlap
+        from server.text_splitter import create_text_splitter
+        Settings.text_splitter = create_text_splitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+
+        files = [Path(file_path).resolve() for file_path in file_paths]
+        diagnostics["input_file_count"] = len(files)
+        print([str(file_path) for file_path in files])
+
+        documents: list[Any] = []
+        try:
+            load_started_at = time.perf_counter()
+            try:
+                documents = self._load_documents([str(file_path) for file_path in files])
+            finally:
+                diagnostics["stage_timings"]["document_load_ms"] = _elapsed_ms(load_started_at)
+
+            source_file_diagnostics = _merge_source_file_diagnostics(
+                self._consume_last_loaded_source_diagnostics(),
+                _collect_document_source_diagnostics(documents),
+            )
+            if source_file_diagnostics:
+                diagnostics["source_file_diagnostics"] = source_file_diagnostics
+
+            file_by_name = {file_path.name: file_path for file_path in files}
+            if len(documents) > 0:
+                for document in documents:
+                    if hasattr(document, "metadata") and isinstance(getattr(document, "metadata"), dict):
+                        metadata = sanitize_for_json(document.metadata)
+                        raw_path = metadata.get("file_path")
+                        resolved_path = _resolve_path_metadata(raw_path)
+                        if resolved_path is None:
+                            file_name = metadata.get("file_name")
+                            resolved_path = file_by_name.get(file_name) if isinstance(file_name, str) else None
+                        if resolved_path is None and len(files) == 1:
+                            resolved_path = files[0]
+                        if resolved_path is not None:
+                            metadata["file_path"] = str(resolved_path)
+                            metadata["file_name"] = metadata.get("file_name") or resolved_path.name
+                        document.metadata = metadata
+
+                nodes = self._run_pipeline_with_diagnostics(documents=documents, diagnostics=diagnostics)
+                for n in nodes:
+                    if not hasattr(n, "metadata") or not isinstance(getattr(n, "metadata"), dict):
+                        n.metadata = {}
+                    n.metadata = sanitize_for_json(n.metadata)
+                    raw_path = n.metadata.get("file_path")
+                    resolved_path = _resolve_path_metadata(raw_path)
+                    if resolved_path is None:
+                        file_name = n.metadata.get("file_name")
+                        resolved_path = file_by_name.get(file_name) if isinstance(file_name, str) else None
+                    if resolved_path is None and len(files) == 1:
+                        resolved_path = files[0]
+                    if resolved_path is not None:
+                        n.metadata["file_path"] = str(resolved_path)
+                        n.metadata["file_name"] = Path(resolved_path).name
+                    if kb_id is not None:
+                        n.metadata["kb_id"] = kb_id
+                if not nodes:
+                    return []
+
+                insert_started_at = time.perf_counter()
+                self.insert_nodes(nodes, persist=persist)
+                diagnostics["stage_timings"]["index_insert_ms"] = _elapsed_ms(insert_started_at)
+                return nodes
+
             print("No documents found")
             diagnostics.update(_summarize_documents(documents))
+            return []
+        finally:
             _finalize_ingestion_total(diagnostics["stage_timings"], started_at)
             self._set_last_ingestion_diagnostics(diagnostics)
-            return []
 
     def load_websites(self, websites, chunk_size, chunk_overlap, kb_id: str | None = None):
         """
@@ -716,7 +922,7 @@ class IndexManager:
         if not documents:
             raise ValueError("No extractable text from the given URL(s).")
 
-        pipeline = AdvancedIngestionPipeline()
+        pipeline = self._create_ingestion_pipeline()
         pipeline.disable_cache = True;
         pipeline.cache = None;
         nodes = pipeline.run(documents=documents) or []
@@ -730,7 +936,7 @@ class IndexManager:
         return nodes
 
     # Delete a document and all related nodes
-    def delete_ref_doc(self, ref_doc_id):
+    def delete_ref_doc(self, ref_doc_id, *, persist: bool = True):
         """
         功能：
         - 删除指定文档及其关联节点。
@@ -759,5 +965,6 @@ class IndexManager:
                 docstore.delete_document(node_id, raise_error=False)
 
         self.index.delete_ref_doc(ref_doc_id=ref_doc_id, delete_from_docstore=True)
-        self.storage_context.persist()
+        if persist:
+            self.persist_storage()
         print("Deleted document", ref_doc_id)

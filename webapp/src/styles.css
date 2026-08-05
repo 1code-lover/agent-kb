@@ -1366,6 +1366,54 @@ button {
   border-color: #166534;
 }
 
+.kb-receipt-summary-head-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.kb-receipt-status-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.kb-receipt-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+
+.kb-receipt-status-pill.is-success {
+  background: rgba(22, 101, 52, 0.22);
+  border-color: #22c55e;
+  color: #bbf7d0;
+}
+
+.kb-receipt-status-pill.is-warning {
+  background: rgba(120, 53, 15, 0.22);
+  border-color: #f59e0b;
+  color: #fde68a;
+}
+
+.kb-receipt-status-pill.is-blocker {
+  background: rgba(127, 29, 29, 0.28);
+  border-color: #f87171;
+  color: #fecaca;
+}
+
+.kb-receipt-headline {
+  margin: 0;
+  color: #f8fafc;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
 .kb-receipt-metrics {
   display: flex;
   flex-wrap: wrap;
@@ -1402,6 +1450,17 @@ button {
   margin: 0;
   font-size: 12px;
   color: #94a3b8;
+}
+
+.kb-receipt-action-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #e2e8f0;
+  line-height: 1.6;
+}
+
+.kb-receipt-action-list li + li {
+  margin-top: 4px;
 }
 
 .kb-receipt-metrics-secondary .kb-receipt-badge {

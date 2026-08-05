@@ -1,0 +1,102 @@
+{
+  "dataset_name": "local_multi_kb_eval_v3",
+  "evaluation_mode": "diagnostic",
+  "required_fields": [
+    "case_id",
+    "dataset",
+    "kb_id",
+    "question",
+    "source_doc",
+    "source_locator",
+    "expected_scope_type",
+    "expected_isolation_level",
+    "modality",
+    "answer_style",
+    "difficulty",
+    "category",
+    "answerable",
+    "expected_keypoints",
+    "required_evidence_docs",
+    "expected_source_count",
+    "preview_required",
+    "forbidden_terms",
+    "judge_focus",
+    "weak_signal_tags",
+    "expected_case_passed",
+    "expected_failure_stage"
+  ],
+  "allowed_modalities": [
+    "pdf",
+    "image_ocr"
+  ],
+  "allowed_answer_styles": [
+    "policy",
+    "refusal"
+  ],
+  "allowed_difficulties": [
+    "simple"
+  ],
+  "allowed_categories": [
+    "scope_contract",
+    "no_evidence"
+  ],
+  "allowed_scope_types": [
+    "single_kb"
+  ],
+  "allowed_isolation_levels": [
+    "logical_filter_only"
+  ],
+  "allowed_judge_dimensions": [
+    "groundedness",
+    "refusal_correctness"
+  ],
+  "required_weak_signal_tags": [
+    "ocr_no_text",
+    "ocr_failed",
+    "dependency_missing",
+    "nodes_without_embedding",
+    "zero_text_content",
+    "asset_registered_without_index"
+  ],
+  "quality_gates": {
+    "minimum_total_cases": 6,
+    "minimum_cases_per_modality": 3,
+    "minimum_cases_per_difficulty": 6,
+    "minimum_no_evidence_cases": 2,
+    "minimum_preview_required_cases": 4,
+    "minimum_cases_per_answer_style": 2,
+    "minimum_cases_per_category": 2,
+    "minimum_weak_signal_cases": 5
+  },
+  "run_gates": {
+    "scope_pass_rate_min": 1.0,
+    "average_keypoint_coverage_min": 0.0,
+    "evidence_hit_rate_min": 0.0,
+    "preview_resolvable_rate_min": 0.0,
+    "source_count_match_rate_min": 0.0,
+    "forbidden_term_clean_rate_min": 1.0
+  },
+  "diagnostic_gates": {
+    "case_expectation_match_rate_min": 1.0,
+    "minimum_weak_signal_kb_count": 2,
+    "minimum_weak_signal_modality_count": 2,
+    "required_signal_tags": [
+      "ocr_no_text",
+      "ocr_failed",
+      "dependency_missing",
+      "nodes_without_embedding",
+      "zero_text_content",
+      "asset_registered_without_index"
+    ]
+  },
+  "rubric_dimensions": {
+    "groundedness": {
+      "weight": 0.6,
+      "min": 0.0
+    },
+    "refusal_correctness": {
+      "weight": 0.4,
+      "min": 0.0
+    }
+  }
+}

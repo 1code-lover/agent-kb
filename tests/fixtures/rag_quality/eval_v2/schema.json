@@ -1,0 +1,106 @@
+{
+  "dataset_name": "local_multi_kb_eval_v2",
+  "required_fields": [
+    "case_id",
+    "dataset",
+    "kb_id",
+    "question",
+    "source_doc",
+    "source_locator",
+    "expected_scope_type",
+    "expected_isolation_level",
+    "modality",
+    "answer_style",
+    "difficulty",
+    "category",
+    "answerable",
+    "expected_keypoints",
+    "required_evidence_docs",
+    "expected_source_count",
+    "preview_required",
+    "forbidden_terms",
+    "judge_focus"
+  ],
+  "allowed_modalities": [
+    "markdown",
+    "pdf",
+    "image_ocr"
+  ],
+  "allowed_answer_styles": [
+    "fact",
+    "summary",
+    "policy",
+    "comparison",
+    "metrics",
+    "refusal"
+  ],
+  "allowed_difficulties": [
+    "simple",
+    "medium",
+    "complex"
+  ],
+  "allowed_categories": [
+    "scope_contract",
+    "evidence_preview",
+    "refusal_policy",
+    "per_case_metrics",
+    "folder_model",
+    "ingestion_priority",
+    "suite_metrics",
+    "no_evidence"
+  ],
+  "allowed_scope_types": [
+    "single_kb"
+  ],
+  "allowed_isolation_levels": [
+    "logical_filter_only"
+  ],
+  "allowed_judge_dimensions": [
+    "factual_accuracy",
+    "completeness",
+    "citation_accuracy",
+    "groundedness",
+    "refusal_correctness"
+  ],
+  "quality_gates": {
+    "minimum_total_cases": 117,
+    "minimum_cases_per_modality": 39,
+    "minimum_cases_per_difficulty": 39,
+    "minimum_no_evidence_cases": 21,
+    "minimum_preview_required_cases": 96,
+    "minimum_cases_per_answer_style": 14,
+    "minimum_cases_per_category": 5,
+    "minimum_cjk_cases": 12,
+    "minimum_cjk_cases_per_modality": 4
+  },
+  "run_gates": {
+    "scope_pass_rate_min": 1,
+    "average_keypoint_coverage_min": 0.9,
+    "evidence_hit_rate_min": 0.95,
+    "preview_resolvable_rate_min": 0.95,
+    "source_count_match_rate_min": 0.95,
+    "forbidden_term_clean_rate_min": 1
+  },
+  "rubric_dimensions": {
+    "factual_accuracy": {
+      "weight": 0.3,
+      "min": 0.85
+    },
+    "completeness": {
+      "weight": 0.25,
+      "min": 0.8
+    },
+    "citation_accuracy": {
+      "weight": 0.2,
+      "min": 0.9
+    },
+    "groundedness": {
+      "weight": 0.15,
+      "min": 0.9
+    },
+    "refusal_correctness": {
+      "weight": 0.1,
+      "min": 0.95
+    }
+  }
+}

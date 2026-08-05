@@ -1,0 +1,308 @@
+{
+  "scenario": "extensionless-image-empty-mime-live-import",
+  "base_url": "http://127.0.0.1:18088",
+  "health_status_code": 200,
+  "health": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "status": "ok",
+      "runtime": {
+        "pid": 28508,
+        "python_executable": "C:\\Users\\ethan1.zhao\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+        "python_version": "3.12.10",
+        "python_implementation": "CPython",
+        "cwd": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb"
+      },
+      "embedding_warmup": {
+        "state": "ready",
+        "attempt_count": 1,
+        "last_error": null,
+        "last_duration_ms": 39322.854,
+        "started_at": "2026-07-31T10:58:14.820009+00:00",
+        "finished_at": "2026-07-31T10:58:54.142763+00:00",
+        "current_model": "bge-small-zh-v1.5",
+        "loaded_model": "bge-small-zh-v1.5",
+        "is_ready": true
+      },
+      "ocr_warmup": {
+        "state": "ready",
+        "attempt_count": 1,
+        "last_error": null,
+        "last_duration_ms": 39768.309,
+        "started_at": "2026-07-31T10:58:14.820009+00:00",
+        "finished_at": "2026-07-31T10:58:54.589485+00:00",
+        "is_ready": true
+      },
+      "import_capabilities": {
+        "pdf_text_extraction": {
+          "ready": true,
+          "dependencies": [
+            "fitz"
+          ]
+        },
+        "image_ocr": {
+          "ready": true,
+          "dependencies": [
+            "paddleocr",
+            "paddle",
+            "pillow"
+          ]
+        },
+        "dependencies": {
+          "fitz": {
+            "installed": true,
+            "package": "PyMuPDF",
+            "import_name": "fitz",
+            "used_for": [
+              "pdf_text_extraction"
+            ]
+          },
+          "paddleocr": {
+            "installed": true,
+            "package": "paddleocr",
+            "import_name": "paddleocr",
+            "used_for": [
+              "image_ocr"
+            ]
+          },
+          "paddle": {
+            "installed": true,
+            "package": "paddlepaddle",
+            "import_name": "paddle",
+            "used_for": [
+              "image_ocr"
+            ]
+          },
+          "pillow": {
+            "installed": true,
+            "package": "Pillow",
+            "import_name": "PIL",
+            "used_for": [
+              "image_ocr"
+            ]
+          }
+        }
+      }
+    },
+    "request_id": "7f3878f8-d9bc-4304-ae29-c44725da0369"
+  },
+  "create_kb_status_code": 200,
+  "create_kb_response": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "kb_id": "live-extless-image-18088-artifact",
+      "kb_name": "Live Extensionless Image Artifact 18088",
+      "created_at": "2026-07-31T10:58:56.921259+00:00",
+      "updated_at": "2026-07-31T10:58:56.921259+00:00",
+      "status": "active",
+      "doc_count": 0
+    },
+    "request_id": "efdcbb7a-b7a2-401f-a737-b42952162f96"
+  },
+  "import_status_code": 200,
+  "import_response": {
+    "code": 0,
+    "message": "ok",
+    "data": {
+      "receipt_id": "kb-file-import-f449f09f9b0f449aacd333e397067739",
+      "files": [
+        {
+          "name": "diagram_82171fd9",
+          "type": "",
+          "size": 92,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\live-extless-image-18088-artifact\\diagram_82171fd9",
+          "kb_id": "live-extless-image-18088-artifact",
+          "relative_path": "diagram_82171fd9",
+          "folder_path": ""
+        }
+      ],
+      "file_results": [
+        {
+          "name": "diagram_82171fd9",
+          "type": "",
+          "size": 92,
+          "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\live-extless-image-18088-artifact\\diagram_82171fd9",
+          "kb_id": "live-extless-image-18088-artifact",
+          "status": "empty",
+          "indexed_chunks": 0,
+          "relative_path": "diagram_82171fd9",
+          "folder_path": "",
+          "embedded_assets": [],
+          "asset_warning_count": 0,
+          "diagnostics": {
+            "file_kind": "image",
+            "empty_reason": "no_extractable_text",
+            "standalone_asset_candidate": true,
+            "skip_standalone_asset": false,
+            "file_retained_on_disk": true,
+            "ocr_attempted": true,
+            "ocr_status": "no_text",
+            "ocr_text_length": 0,
+            "ocr_error": null,
+            "indexed_from_ocr": false,
+            "asset_registered": true,
+            "stage_timings": {
+              "file_save_ms": 2.726,
+              "persist_ms": 2.726,
+              "standalone_ocr_ms": 38.405,
+              "primary_index_ms": 0.0,
+              "embedded_asset_extract_ms": 0.0,
+              "embedded_asset_ocr_ms": 0.0,
+              "embedded_asset_index_ms": 0.0,
+              "total_ms": 41.131
+            },
+            "document_count": 0,
+            "empty_document_count": 0,
+            "input_text_chars": 0,
+            "node_count": 0,
+            "nodes_with_embedding_count": 0,
+            "nodes_without_embedding_count": 0,
+            "index_stage_timings": {
+              "document_load_ms": 0.0,
+              "chunking_ms": 0.0,
+              "embedding_ms": 0.0,
+              "title_extract_ms": 0.0,
+              "vector_store_ms": 0.0,
+              "docstore_ms": 0.0,
+              "index_insert_ms": 0.0,
+              "total_ms": 0.0
+            },
+            "failure_category": null,
+            "missing_dependency": null,
+            "dependency_status": "ready",
+            "ocr_init_ms": 0.0,
+            "ocr_load_image_ms": 0.574,
+            "ocr_predict_ms": 36.863,
+            "ocr_postprocess_ms": 0.133,
+            "ocr_total_ms": 38.381,
+            "ocr_instance_reused": true,
+            "ocr_engine": "paddleocr",
+            "embedded_asset_count": 0,
+            "embedded_asset_ready_count": 0,
+            "embedded_asset_missing_count": 0,
+            "embedded_asset_invalid_count": 0,
+            "embedded_ocr_attempted_count": 0,
+            "embedded_ocr_success_count": 0,
+            "embedded_ocr_no_text_count": 0,
+            "embedded_ocr_failed_count": 0,
+            "embedded_ocr_skipped_count": 0,
+            "embedded_indexed_from_ocr_count": 0
+          }
+        }
+      ],
+      "indexed_chunks": 0,
+      "success_count": 0,
+      "failed_count": 0,
+      "empty_count": 1,
+      "kb_id": "live-extless-image-18088-artifact",
+      "import_mode": "preserve_tree",
+      "diagnostics": {
+        "total_files": 1,
+        "indexed_files": 0,
+        "empty_files": 1,
+        "failed_files": 0,
+        "standalone_asset_candidate_count": 1,
+        "embedded_asset_count": 0,
+        "embedded_asset_ready_count": 0,
+        "embedded_asset_missing_count": 0,
+        "embedded_asset_invalid_count": 0,
+        "asset_warning_count": 0,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 1,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "asset_registered_count": 1,
+        "skip_standalone_asset_count": 0,
+        "empty_reason_counts": {
+          "no_extractable_text": 1
+        },
+        "failure_category_counts": {},
+        "dependency_status_counts": {
+          "ready": 1
+        },
+        "dependency_missing_count": 0,
+        "missing_dependency_counts": {},
+        "stage_timings": {
+          "ensure_models_ready_ms": 0.0,
+          "get_index_manager_ms": 0.0,
+          "file_save_ms": 2.726,
+          "persist_ms": 2.726,
+          "standalone_ocr_ms": 38.405,
+          "primary_index_ms": 0.0,
+          "embedded_asset_extract_ms": 0.0,
+          "embedded_asset_ocr_ms": 0.0,
+          "embedded_asset_index_ms": 0.0,
+          "index_storage_persist_ms": 0.0,
+          "doc_count_update_ms": 0.0,
+          "register_assets_ms": 0.292,
+          "receipt_store_ms": 3.822,
+          "result_build_ms": 0.05,
+          "total_ms": 54.232
+        },
+        "document_count": 0,
+        "empty_document_count": 0,
+        "input_text_chars": 0,
+        "node_count": 0,
+        "nodes_with_embedding_count": 0,
+        "nodes_without_embedding_count": 0,
+        "index_stage_timings": {
+          "document_load_ms": 0.0,
+          "chunking_ms": 0.0,
+          "embedding_ms": 0.0,
+          "title_extract_ms": 0.0,
+          "vector_store_ms": 0.0,
+          "docstore_ms": 0.0,
+          "index_insert_ms": 0.0,
+          "total_ms": 0.0
+        }
+      },
+      "display_summary": {
+        "source_kind": "file_import",
+        "item_label": "文件",
+        "total_items": 1,
+        "indexed_items": 0,
+        "empty_items": 1,
+        "failed_items": 0,
+        "asset_registered_count": 1,
+        "asset_registered_but_not_indexed_count": 1,
+        "asset_warning_count": 0,
+        "dependency_missing_count": 0,
+        "top_missing_dependencies": [],
+        "top_empty_reasons": [
+          {
+            "reason": "no_extractable_text",
+            "count": 1
+          }
+        ],
+        "has_blockers": false,
+        "has_dependency_issues": false,
+        "has_warnings": true,
+        "headline": "1 个图片资产已入库但未索引",
+        "user_message": "图片资产已登记，但 OCR 尚未提取到可索引文本；可稍后补装 OCR 依赖或人工补录。",
+        "next_actions": [
+          {
+            "action": "review_empty_assets",
+            "label": "查看 1 个未索引图片资产",
+            "count": 1,
+            "top_empty_reasons": [
+              {
+                "reason": "no_extractable_text",
+                "count": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "request_id": "0c9e7845-f298-4901-b6ea-cbfb387c0b8c"
+  }
+}

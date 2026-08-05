@@ -363,3 +363,94 @@ def test_agent_evidence_receipt_id_required(monkeypatch, isolated_registry, tmp_
     assert result["evidence"][0]["receipt_id"] == "receipt-1"
     assert result["evidence"][0]["doc_id"] == "doc-1"
     assert result["evidence"][0]["asset_id"] == "asset-standalone-2"
+
+
+
+def test_answer_is_refusal_like_accepts_chinese_markers():
+    """中文拒答短语应被识别为无证据回答，避免误保留 sources。"""
+    import api.services.chat_service as chat_service
+
+    assert chat_service._answer_is_refusal_like("未找到可确认的信息。") is True
+    assert chat_service._answer_is_refusal_like("当前知识库中没有关于 GPU 显存要求的可确认信息。") is True
+
+
+def test_answer_is_refusal_like_accepts_english_markers_case_insensitive():
+    """英文拒答短语应忽略大小写，保持中英文拒答契约一致。"""
+    import api.services.chat_service as chat_service
+
+    assert chat_service._answer_is_refusal_like("Insufficient Information to determine the answer.") is True
+    assert chat_service._answer_is_refusal_like("This guide DOES NOT MENTION any GPU memory requirement.") is True
+    assert chat_service._answer_is_refusal_like("The answer is 42 GB.") is False
+
+
+def test_chat_refusal_like_answer_clears_ungrounded_sources(monkeypatch, isolated_registry):
+    """拒答回答若与问题无关，应清空 chat 返回的伪相关证据。"""
+    isolated_registry.create_kb("kb-a", "KB A")
+
+    import api.services.chat_service as chat_service
+
+    mock_engine = MagicMock()
+    mock_engine.query.return_value = SimpleNamespace(
+        response="The provided context does not mention any GPU memory requirement for the mobile build.",
+        source_nodes=[
+            _make_source_node(
+                title="preview-board.png",
+                doc_id="doc-preview",
+                text="Evidence preview checklist. Every evidence preview must include doc_id and preview_locator.",
+            ),
+            _make_source_node(
+                title="cutover.md",
+                doc_id="doc-cutover",
+                text="The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.",
+            ),
+        ],
+    )
+
+    monkeypatch.setattr(chat_service.runtime_state, "ensure_index_loaded", MagicMock(return_value=True))
+    monkeypatch.setattr(chat_service.runtime_state, "build_query_engine", MagicMock(return_value=mock_engine))
+
+    resp = client.post(
+        "/api/chat/query",
+        json={"question": "What is the GPU memory requirement for the mobile build?", "session_id": "chat-refusal-1", "kb_ids": ["kb-a"]},
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "does not mention" in data["answer"].lower()
+    assert data["sources"] == []
+    assert data["evidence"] == []
+
+
+
+def test_chat_refusal_like_answer_keeps_grounded_sources(monkeypatch, isolated_registry):
+    """拒答回答若明确对应当前问题，应保留同主题来源作为证据。"""
+    isolated_registry.create_kb("kb-a", "KB A")
+
+    import api.services.chat_service as chat_service
+
+    mock_engine = MagicMock()
+    mock_engine.query.return_value = SimpleNamespace(
+        response="The mobile build document does not mention any GPU memory requirement.",
+        source_nodes=[
+            _make_source_node(
+                title="mobile-build-guide.md",
+                doc_id="doc-mobile-build",
+                text="The mobile build guide describes packaging, rollout order, and supported devices, but does not mention GPU memory requirement.",
+            )
+        ],
+    )
+
+    monkeypatch.setattr(chat_service.runtime_state, "ensure_index_loaded", MagicMock(return_value=True))
+    monkeypatch.setattr(chat_service.runtime_state, "build_query_engine", MagicMock(return_value=mock_engine))
+
+    resp = client.post(
+        "/api/chat/query",
+        json={"question": "What is the GPU memory requirement for the mobile build?", "session_id": "chat-refusal-2", "kb_ids": ["kb-a"]},
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert len(data["sources"]) == 1
+    assert len(data["evidence"]) == 1
+    assert data["sources"][0]["file"] == "mobile-build-guide.md"
+    assert data["evidence"][0]["title"] == "mobile-build-guide.md"

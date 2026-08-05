@@ -1,0 +1,255 @@
+{
+  "base_url": "http://127.0.0.1:18081",
+  "kb_id": "diag-kb-utf8-1785314212",
+  "question": "这个知识库的用途是什么？",
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-import-utf8.md",
+    "sha256": "e94e061dfeeba845c286e51f5409729681b9a3c382a4505ef2eec4d0c0736e70",
+    "size": 149,
+    "text_preview": "# UTF8 Diagnostic KB\n\n这是一份中文 Markdown 诊断文档。\n\n用途：验证导入、落盘、检索、问答链路是否会把中文写坏。\n"
+  },
+  "saved": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-utf8-1785314212\\diag\\diag-import-utf8.md",
+    "sha256": "e94e061dfeeba845c286e51f5409729681b9a3c382a4505ef2eec4d0c0736e70",
+    "size": 149,
+    "text_preview": "# UTF8 Diagnostic KB\n\n这是一份中文 Markdown 诊断文档。\n\n用途：验证导入、落盘、检索、问答链路是否会把中文写坏。\n"
+  },
+  "checks": {
+    "source_saved_hash_match": true,
+    "saved_text_contains_expected_snippet": true,
+    "chat_answer_contains_expected_snippet": true,
+    "chat_source_contains_expected_snippet": true,
+    "chat_evidence_contains_expected_snippet": true
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-ce39a92b2d7a4dd2a720c4d1a55dcb0e",
+    "files": [
+      {
+        "name": "diag-import-utf8.md",
+        "type": "text/markdown",
+        "size": 149,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-utf8-1785314212\\diag\\diag-import-utf8.md",
+        "kb_id": "diag-kb-utf8-1785314212",
+        "relative_path": "diag/diag-import-utf8.md",
+        "folder_path": "diag"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "diag-import-utf8.md",
+        "type": "text/markdown",
+        "size": 149,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-kb-utf8-1785314212\\diag\\diag-import-utf8.md",
+        "kb_id": "diag-kb-utf8-1785314212",
+        "status": "indexed",
+        "indexed_chunks": 3,
+        "relative_path": "diag/diag-import-utf8.md",
+        "folder_path": "diag",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "markdown",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 3.921,
+            "persist_ms": 3.921,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 2339.039,
+            "embedded_asset_extract_ms": 2.52,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 2345.48
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 72,
+          "node_count": 3,
+          "nodes_with_embedding_count": 3,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 1.246,
+            "chunking_ms": 1112.504,
+            "embedding_ms": 1207.21,
+            "title_extract_ms": 0.393,
+            "vector_store_ms": 0.329,
+            "docstore_ms": 0.093,
+            "index_insert_ms": 1.962,
+            "total_ms": 2328.748
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "unknown",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 0.0,
+          "ocr_predict_ms": 0.0,
+          "ocr_postprocess_ms": 0.0,
+          "ocr_total_ms": 0.0,
+          "ocr_instance_reused": false,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 3,
+    "success_count": 1,
+    "failed_count": 0,
+    "empty_count": 0,
+    "kb_id": "diag-kb-utf8-1785314212",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 1,
+      "empty_files": 0,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 0,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 0,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 0,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 0,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "failure_category_counts": {},
+      "dependency_status_counts": {
+        "unknown": 1
+      },
+      "dependency_missing_count": 0,
+      "missing_dependency_counts": {},
+      "stage_timings": {
+        "ensure_models_ready_ms": 0.068,
+        "get_index_manager_ms": 9.298,
+        "file_save_ms": 3.921,
+        "persist_ms": 3.921,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 2339.039,
+        "embedded_asset_extract_ms": 2.52,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 16.242,
+        "doc_count_update_ms": 4.532,
+        "register_assets_ms": 4.408,
+        "receipt_store_ms": 5.965,
+        "result_build_ms": 0.074,
+        "total_ms": 2383.946
+      },
+      "document_count": 1,
+      "empty_document_count": 0,
+      "input_text_chars": 72,
+      "node_count": 3,
+      "nodes_with_embedding_count": 3,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 1.246,
+        "chunking_ms": 1112.504,
+        "embedding_ms": 1207.21,
+        "title_extract_ms": 0.393,
+        "vector_store_ms": 0.329,
+        "docstore_ms": 0.093,
+        "index_insert_ms": 1.962,
+        "total_ms": 2328.748
+      },
+      "storage_persist_stage_timings": {
+        "docstore_persist_ms": 1.15,
+        "index_store_persist_ms": 1.074,
+        "graph_store_persist_ms": 1.194,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 11.528,
+        "vector_store_namespaces_ms": {
+          "default": 9.964,
+          "image": 1.564
+        },
+        "fallback_persist_ms": 0.0,
+        "total_ms": 15.011
+      }
+    },
+    "display_summary": {
+      "source_kind": "file_import",
+      "item_label": "文件",
+      "total_items": 1,
+      "indexed_items": 1,
+      "empty_items": 0,
+      "failed_items": 0,
+      "asset_registered_count": 0,
+      "asset_registered_but_not_indexed_count": 0,
+      "asset_warning_count": 0,
+      "dependency_missing_count": 0,
+      "top_missing_dependencies": [],
+      "top_empty_reasons": [],
+      "has_blockers": false,
+      "has_dependency_issues": false,
+      "has_warnings": false,
+      "headline": "成功导入 1 个文件",
+      "user_message": "文件已完成解析并写入知识库。",
+      "next_actions": []
+    }
+  },
+  "chat_summary": {
+    "answer": "验证导入、落盘、检索、问答链路是否会把中文写坏。",
+    "requested_scope_type": "single_kb",
+    "requested_kb_ids": [
+      "diag-kb-utf8-1785314212"
+    ],
+    "effective_scope_type": "single_kb",
+    "effective_kb_ids": [
+      "diag-kb-utf8-1785314212"
+    ],
+    "is_default_deny_applied": false,
+    "isolation_level": "logical_filter_only",
+    "first_source": {
+      "id": "ev:eyJkb2NfaWQiOiI3MzBjNzIxNS00ZjY1LTQzNjQtYTc3OS00ZGM1OWNkMmZhNzMiLCJrYl9pZCI6ImRpYWcta2ItdXRmOC0xNzg1MzE0MjEyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJlODdjZWZlYS00ZjYxLTRjNGItODU0MS1jOTY2NGMxMjhkMzIifX0",
+      "file": "diag-import-utf8.md",
+      "page": "N/A",
+      "score": 0.42625520711169546,
+      "text": "用途：验证导入、落盘、检索、问答链路是否会把",
+      "kb_id": "diag-kb-utf8-1785314212",
+      "doc_id": "730c7215-4f65-4364-a779-4dc59cd2fa73",
+      "preview_locator": {
+        "node_id": "e87cefea-4f61-4c4b-8541-c9664c128d32"
+      },
+      "asset_id": null
+    },
+    "first_evidence": {
+      "id": "ev:eyJkb2NfaWQiOiI3MzBjNzIxNS00ZjY1LTQzNjQtYTc3OS00ZGM1OWNkMmZhNzMiLCJrYl9pZCI6ImRpYWcta2ItdXRmOC0xNzg1MzE0MjEyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJlODdjZWZlYS00ZjYxLTRjNGItODU0MS1jOTY2NGMxMjhkMzIifX0",
+      "title": "diag-import-utf8.md",
+      "source": "diag-import-utf8.md",
+      "page": "N/A",
+      "score": 0.42625520711169546,
+      "excerpt": "用途：验证导入、落盘、检索、问答链路是否会把",
+      "receipt_id": null,
+      "kb_id": "diag-kb-utf8-1785314212",
+      "doc_id": "730c7215-4f65-4364-a779-4dc59cd2fa73",
+      "preview_locator": {
+        "node_id": "e87cefea-4f61-4c4b-8541-c9664c128d32"
+      },
+      "asset_id": null
+    }
+  }
+}

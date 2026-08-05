@@ -695,10 +695,79 @@ npm --prefix webapp run build
 ---
 
 ## 13. 下一步建议
-下一步建议按仓库规范继续输出：
-1. `20260722-local-multi-kb-assistant-test-plan.md`（测试方案）
+截至 2026-07-28，本需求的 `test-plan` 已形成，且基于当前代码完成了一轮真实运行核实：Markdown 导入可用、图片资产/OCR 链路已有雏形但受 `paddleocr` 阻断、PDF 导入受 `fitz` 阻断。
 
-如果继续推进，我建议下一步只做一件事：
-- 基于本修订版实施方案，正式编写测试方案（test-plan），把每个 Task 的 DoD 进一步展开成测试用例与测试步骤。
+因此，下一步建议不再停留在“继续写文档”，而是转入下面这条主线：
+1. **同步修复基础可用性问题**：导入回执中文 copy、依赖可见性、失败原因稳定输出；
+2. **拉通基础链路**：围绕单库场景验证“文档导入 → 索引 → 检索 → 问答 → 证据预览”；
+3. **尽快构造问答测试集**：优先用稳定 Markdown 文档建设单库问答评测样本，再逐步接入 PDF / 图片（OCR）；
+4. **在测试报告里显式回答准确性问题**：不是只报接口通过数，而是报 scope 正确、证据正确、关键事实覆盖是否达标。
 
+换句话说，接下来最重要的不是继续扩展功能点，而是先把“导入和问答到底好不好用、准不准确”做成可验证事实。
 
+## 14. 2026-07-28 progress sync: single-kb QA smoke baseline
+
+### 14.1 What is completed
+1. Import usability improvements already landed:
+   - `api/services/kb_service.py` now returns readable `display_summary` copy;
+   - `api/routers/health.py` now exposes `import_capabilities` for `fitz / paddleocr / paddlepaddle / Pillow`.
+2. Structured QA smoke cases have been added at `tests/fixtures/rag_quality/single_kb_smoke_cases.json`.
+3. Executable regression coverage has been added at `tests/api/test_chat_single_kb_qa_smoke.py`.
+
+### 14.2 What this smoke baseline validates
+1. Scope echo correctness for `requested_*`, `effective_*`, and `is_default_deny_applied`.
+2. Answer coverage against `expected_keypoints`.
+3. Negative guardrails via `must_not_contain`.
+4. Evidence hit checks against `expected_evidence`.
+
+### 14.3 Current boundary
+1. This is a deterministic baseline built with a mocked query engine.
+2. It proves that the dataset structure, scope assertions, answer assertions, and evidence assertions are executable.
+3. It is not yet the final answer-quality conclusion for real model runs.
+
+### 14.4 Next track
+1. Move from mocked QA to a more realistic Markdown import -> index -> query smoke flow.
+2. Record per-case evidence hit and keypoint coverage in the test report.
+3. Extend the same baseline to PDF and image OCR after dependency readiness is stable.
+
+## 15. 2026-07-28 progress sync: expanded QA baseline
+
+### 15.1 What is newly landed
+1. The QA baseline is no longer Markdown-only; it now includes four executable QA suites:
+   - `tests/api/test_chat_single_kb_qa_smoke.py`
+   - `tests/api/test_chat_markdown_qa_semireal.py`
+   - `tests/api/test_chat_pdf_semireal.py`
+   - `tests/api/test_chat_image_ocr_semireal.py`
+2. A shared metric helper now exists at `tests/api/chat_qa_metrics.py`.
+3. Reader-layer diagnostics remain covered by:
+   - `tests/readers/test_image_ocr.py`
+   - `tests/readers/test_pdf_ocr.py`
+4. The execution-source document is `20260722-local-multi-kb-assistant-test-report.md`.
+
+### 15.2 What this expanded baseline now validates
+1. `Markdown / PDF text-layer / image OCR import -> KB storage -> single-kb query -> evidence -> preview` is executable.
+2. Chat query still enforces single-kb scope echo and default-deny assumptions from the contract tests.
+3. Returned `sources/evidence` carry usable `doc_id` and `preview_locator`.
+4. QA is now metricized instead of reporting only a green test count.
+5. Reader-layer parser behavior has an explicit regression floor before we move further into richer ingestion work.
+
+### 15.3 Current command and result
+Executed command:
+`python -m pytest tests/api/test_chat_qa_metrics.py tests/api/test_chat_markdown_qa_semireal.py tests/api/test_chat_single_kb_qa_smoke.py tests/api/test_chat_pdf_semireal.py tests/api/test_chat_image_ocr_semireal.py tests/api/test_chat_scope_contract.py tests/api/test_chat_evidence_contract.py tests/api/test_health_route.py tests/api/test_image_asset_import.py tests/api/test_kb_directory_storage.py tests/test_rag_quality_fixtures.py tests/readers/test_image_ocr.py tests/readers/test_pdf_ocr.py -q`
+
+Current verified result: **124 passed, 1 skipped, 2 warnings**.
+
+### 15.4 Metricized QA scope
+1. The QA layer now reports `pass_rate`, `scope_pass_rate`, `average_keypoint_coverage`, `evidence_hit_rate`, `preview_resolvable_rate`, `source_count_match_rate`, and `forbidden-term clean rate`.
+2. The current QA case pool contains 23 cases across smoke, Markdown semi-real, PDF semi-real, and image OCR semi-real.
+3. This means the testing story no longer stops at "did it run"; it now measures whether imported knowledge is answerable, evidence-backed, previewable, and refusal-safe.
+
+### 15.5 Coverage snapshot note
+1. A targeted coverage snapshot is now part of the QA baseline execution, using `--cov=api/services --cov=api/routers --cov=server/readers`.
+2. The aggregate snapshot is currently **62%**, but that number is not yet a standalone gate because those directories still contain unrelated modules.
+3. The execution-source report records core-file coverage for `query_scope.py`, `chat_service.py`, `kb_service.py`, `asset_service.py`, `evidence_service.py`, `health.py`, `image_ocr.py`, and `pdf_ocr.py`.
+
+### 15.6 Boundary note
+1. This is still a deterministic semi-real baseline, not a final real-model benchmark.
+2. The baseline proves the base chain is runnable, measurable, and reviewable.
+3. It does not yet prove final retrieval quality, final answer quality under real LLM orchestration, or storage-level KB isolation.

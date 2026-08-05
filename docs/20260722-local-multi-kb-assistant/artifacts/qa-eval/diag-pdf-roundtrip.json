@@ -1,0 +1,329 @@
+{
+  "base_url": "http://127.0.0.1:18123",
+  "kb_id": "diag-pdf-text-1785288285",
+  "question": "In the diagnostic PDF, what remains the authorization boundary?",
+  "health": {
+    "status": "ok",
+    "ocr_warmup": {
+      "state": "ready",
+      "attempt_count": 1,
+      "last_error": null,
+      "last_duration_ms": 149926.216,
+      "started_at": "2026-07-29T01:21:01.393882+00:00",
+      "finished_at": "2026-07-29T01:23:31.328531+00:00",
+      "is_ready": true
+    },
+    "import_capabilities": {
+      "pdf_text_extraction": {
+        "ready": true,
+        "dependencies": [
+          "fitz"
+        ]
+      },
+      "image_ocr": {
+        "ready": true,
+        "dependencies": [
+          "paddleocr",
+          "paddle",
+          "pillow"
+        ]
+      },
+      "dependencies": {
+        "fitz": {
+          "installed": true,
+          "package": "PyMuPDF",
+          "import_name": "fitz",
+          "used_for": [
+            "pdf_text_extraction"
+          ]
+        },
+        "paddleocr": {
+          "installed": true,
+          "package": "paddleocr",
+          "import_name": "paddleocr",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "paddle": {
+          "installed": true,
+          "package": "paddlepaddle",
+          "import_name": "paddle",
+          "used_for": [
+            "image_ocr"
+          ]
+        },
+        "pillow": {
+          "installed": true,
+          "package": "Pillow",
+          "import_name": "PIL",
+          "used_for": [
+            "image_ocr"
+          ]
+        }
+      }
+    }
+  },
+  "source": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\temp\\diag-text-layer.pdf",
+    "sha256": "983064965ff6156447ff39644f3ab539db48d729851f3fd74aa54683ee6eb7b2",
+    "size": 999,
+    "text_preview": "PDF diagnostic note.\nFolder is an organization object.\nKnowledge Base remains the authorization boundary.\nEvidence preview should resolve to the original PDF chunk."
+  },
+  "saved": {
+    "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-text-1785288285\\pdf\\diag-text-layer.pdf",
+    "sha256": "983064965ff6156447ff39644f3ab539db48d729851f3fd74aa54683ee6eb7b2",
+    "size": 999,
+    "text_preview": "PDF diagnostic note.\nFolder is an organization object.\nKnowledge Base remains the authorization boundary.\nEvidence preview should resolve to the original PDF chunk."
+  },
+  "checks": {
+    "source_saved_hash_match": true,
+    "saved_text_has_expected_terms": true,
+    "chat_answer_has_expected_terms": true,
+    "chat_source_has_expected_terms": true,
+    "chat_evidence_has_expected_terms": true,
+    "preview_has_expected_terms": true
+  },
+  "import_summary": {
+    "receipt_id": "kb-file-import-4253b41b503c4d47bcd7377c1eabc1ea",
+    "files": [
+      {
+        "name": "diag-text-layer.pdf",
+        "type": "application/pdf",
+        "size": 999,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-text-1785288285\\pdf\\diag-text-layer.pdf",
+        "kb_id": "diag-pdf-text-1785288285",
+        "relative_path": "pdf/diag-text-layer.pdf",
+        "folder_path": "pdf"
+      }
+    ],
+    "file_results": [
+      {
+        "name": "diag-text-layer.pdf",
+        "type": "application/pdf",
+        "size": 999,
+        "path": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\data\\diag-pdf-text-1785288285\\pdf\\diag-text-layer.pdf",
+        "kb_id": "diag-pdf-text-1785288285",
+        "status": "indexed",
+        "indexed_chunks": 1,
+        "relative_path": "pdf/diag-text-layer.pdf",
+        "folder_path": "pdf",
+        "embedded_assets": [],
+        "asset_warning_count": 0,
+        "diagnostics": {
+          "file_kind": "pdf",
+          "empty_reason": null,
+          "standalone_asset_candidate": false,
+          "skip_standalone_asset": false,
+          "ocr_attempted": false,
+          "ocr_status": null,
+          "ocr_text_length": 0,
+          "ocr_error": null,
+          "indexed_from_ocr": false,
+          "asset_registered": false,
+          "stage_timings": {
+            "file_save_ms": 342.323,
+            "persist_ms": 342.323,
+            "standalone_ocr_ms": 0.0,
+            "primary_index_ms": 66025.971,
+            "embedded_asset_extract_ms": 0.0,
+            "embedded_asset_ocr_ms": 0.0,
+            "embedded_asset_index_ms": 0.0,
+            "total_ms": 66368.294
+          },
+          "document_count": 1,
+          "empty_document_count": 0,
+          "input_text_chars": 164,
+          "node_count": 1,
+          "nodes_with_embedding_count": 1,
+          "nodes_without_embedding_count": 0,
+          "index_stage_timings": {
+            "document_load_ms": 621.387,
+            "chunking_ms": 10.449,
+            "embedding_ms": 1189.903,
+            "title_extract_ms": 1.108,
+            "vector_store_ms": 1.25,
+            "docstore_ms": 0.41,
+            "index_insert_ms": 5.121,
+            "total_ms": 1854.727
+          },
+          "failure_category": null,
+          "missing_dependency": null,
+          "dependency_status": "unknown",
+          "ocr_init_ms": 0.0,
+          "ocr_load_image_ms": 0.0,
+          "ocr_predict_ms": 0.0,
+          "ocr_postprocess_ms": 0.0,
+          "ocr_total_ms": 0.0,
+          "ocr_instance_reused": false,
+          "embedded_asset_count": 0,
+          "embedded_asset_ready_count": 0,
+          "embedded_asset_missing_count": 0,
+          "embedded_asset_invalid_count": 0,
+          "embedded_ocr_attempted_count": 0,
+          "embedded_ocr_success_count": 0,
+          "embedded_ocr_no_text_count": 0,
+          "embedded_ocr_failed_count": 0,
+          "embedded_ocr_skipped_count": 0,
+          "embedded_indexed_from_ocr_count": 0
+        }
+      }
+    ],
+    "indexed_chunks": 1,
+    "success_count": 1,
+    "failed_count": 0,
+    "empty_count": 0,
+    "kb_id": "diag-pdf-text-1785288285",
+    "import_mode": "preserve_tree",
+    "diagnostics": {
+      "total_files": 1,
+      "indexed_files": 1,
+      "empty_files": 0,
+      "failed_files": 0,
+      "standalone_asset_candidate_count": 0,
+      "embedded_asset_count": 0,
+      "embedded_asset_ready_count": 0,
+      "embedded_asset_missing_count": 0,
+      "embedded_asset_invalid_count": 0,
+      "asset_warning_count": 0,
+      "ocr_success_count": 0,
+      "ocr_no_text_count": 0,
+      "ocr_failed_count": 0,
+      "ocr_skipped_count": 0,
+      "indexed_from_ocr_count": 0,
+      "embedded_ocr_attempted_count": 0,
+      "embedded_ocr_success_count": 0,
+      "embedded_ocr_no_text_count": 0,
+      "embedded_ocr_failed_count": 0,
+      "embedded_ocr_skipped_count": 0,
+      "embedded_indexed_from_ocr_count": 0,
+      "asset_registered_count": 0,
+      "skip_standalone_asset_count": 0,
+      "empty_reason_counts": {},
+      "failure_category_counts": {},
+      "dependency_status_counts": {
+        "unknown": 1
+      },
+      "dependency_missing_count": 0,
+      "missing_dependency_counts": {},
+      "stage_timings": {
+        "ensure_models_ready_ms": 64086.252,
+        "get_index_manager_ms": 81.6,
+        "file_save_ms": 342.323,
+        "persist_ms": 342.323,
+        "standalone_ocr_ms": 0.0,
+        "primary_index_ms": 66025.971,
+        "embedded_asset_extract_ms": 0.0,
+        "embedded_asset_ocr_ms": 0.0,
+        "embedded_asset_index_ms": 0.0,
+        "index_storage_persist_ms": 4789.565,
+        "doc_count_update_ms": 30.494,
+        "register_assets_ms": 2.35,
+        "receipt_store_ms": 121.411,
+        "result_build_ms": 0.197,
+        "total_ms": 71769.316
+      },
+      "document_count": 1,
+      "empty_document_count": 0,
+      "input_text_chars": 164,
+      "node_count": 1,
+      "nodes_with_embedding_count": 1,
+      "nodes_without_embedding_count": 0,
+      "index_stage_timings": {
+        "document_load_ms": 621.387,
+        "chunking_ms": 10.449,
+        "embedding_ms": 1189.903,
+        "title_extract_ms": 1.108,
+        "vector_store_ms": 1.25,
+        "docstore_ms": 0.41,
+        "index_insert_ms": 5.121,
+        "total_ms": 1854.727
+      },
+      "storage_persist_stage_timings": {
+        "docstore_persist_ms": 4698.322,
+        "index_store_persist_ms": 8.037,
+        "graph_store_persist_ms": 15.214,
+        "property_graph_store_persist_ms": 0.0,
+        "vector_store_persist_ms": 60.521,
+        "vector_store_namespaces_ms": {
+          "default": 18.644,
+          "image": 41.877
+        },
+        "fallback_persist_ms": 0.0,
+        "total_ms": 4782.307
+      }
+    },
+    "display_summary": {
+      "source_kind": "file_import",
+      "item_label": "文件",
+      "total_items": 1,
+      "indexed_items": 1,
+      "empty_items": 0,
+      "failed_items": 0,
+      "asset_registered_count": 0,
+      "asset_registered_but_not_indexed_count": 0,
+      "asset_warning_count": 0,
+      "dependency_missing_count": 0,
+      "top_missing_dependencies": [],
+      "top_empty_reasons": [],
+      "has_blockers": false,
+      "has_dependency_issues": false,
+      "has_warnings": false,
+      "headline": "成功导入 1 个文件",
+      "user_message": "文件已完成解析并写入知识库。",
+      "next_actions": []
+    }
+  },
+  "chat_summary": {
+    "answer": "Knowledge Base remains the authorization boundary.",
+    "requested_scope_type": "single_kb",
+    "requested_kb_ids": [
+      "diag-pdf-text-1785288285"
+    ],
+    "effective_scope_type": "single_kb",
+    "effective_kb_ids": [
+      "diag-pdf-text-1785288285"
+    ],
+    "is_default_deny_applied": false,
+    "isolation_level": "logical_filter_only",
+    "first_source": {
+      "id": "ev:eyJkb2NfaWQiOiI5MjU1MTAzZC03YzliLTQ3YTMtYTA0NC04MmZkOTBlMjE2MTIiLCJrYl9pZCI6ImRpYWctcGRmLXRleHQtMTc4NTI4ODI4NSIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2I1MjU2NGQtNjlmNy00MGMzLWI4ZWQtOWI0MTUzMDZmMjMyIn19",
+      "file": "diag-text-layer.pdf",
+      "page": "N/A",
+      "score": 1.0,
+      "text": "PDF diagnostic note.\nFolder is an organization object.\nKnowledge Base remains the authorization boundary.\nEvidence preview should resolve to the original PDF chunk.",
+      "kb_id": "diag-pdf-text-1785288285",
+      "doc_id": "9255103d-7c9b-47a3-a044-82fd90e21612",
+      "preview_locator": {
+        "node_id": "cb52564d-69f7-40c3-b8ed-9b415306f232"
+      },
+      "asset_id": null
+    },
+    "first_evidence": {
+      "id": "ev:eyJkb2NfaWQiOiI5MjU1MTAzZC03YzliLTQ3YTMtYTA0NC04MmZkOTBlMjE2MTIiLCJrYl9pZCI6ImRpYWctcGRmLXRleHQtMTc4NTI4ODI4NSIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2I1MjU2NGQtNjlmNy00MGMzLWI4ZWQtOWI0MTUzMDZmMjMyIn19",
+      "title": "diag-text-layer.pdf",
+      "source": "diag-text-layer.pdf",
+      "page": "N/A",
+      "score": 1.0,
+      "excerpt": "PDF diagnostic note.\nFolder is an organization object.\nKnowledge Base remains the authorization boundary.\nEvidence preview should resolve to the original PDF chunk.",
+      "receipt_id": null,
+      "kb_id": "diag-pdf-text-1785288285",
+      "doc_id": "9255103d-7c9b-47a3-a044-82fd90e21612",
+      "preview_locator": {
+        "node_id": "cb52564d-69f7-40c3-b8ed-9b415306f232"
+      },
+      "asset_id": null
+    },
+    "preview": {
+      "title": "diag-text-layer.pdf",
+      "kb_id": "diag-pdf-text-1785288285",
+      "doc_id": "9255103d-7c9b-47a3-a044-82fd90e21612",
+      "excerpt": "PDF diagnostic note.\nFolder is an organization object.\nKnowledge Base remains the authorization boundary.\nEvidence preview should resolve to the original PDF chunk.",
+      "locator": {
+        "node_id": "cb52564d-69f7-40c3-b8ed-9b415306f232"
+      },
+      "preview_type": "text_excerpt",
+      "evidence_id": "ev:eyJkb2NfaWQiOiI5MjU1MTAzZC03YzliLTQ3YTMtYTA0NC04MmZkOTBlMjE2MTIiLCJrYl9pZCI6ImRpYWctcGRmLXRleHQtMTc4NTI4ODI4NSIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2I1MjU2NGQtNjlmNy00MGMzLWI4ZWQtOWI0MTUzMDZmMjMyIn19"
+    }
+  }
+}
