@@ -17,305 +17,9 @@
     "kb_isolation_rate": 1.0
   },
   "failure_groups": {
-    "ocr_text_quality": {
-      "count": 19,
-      "samples": [
-        {
-          "id": "grain-verified-0031",
-          "query": "《粮油储藏技术规范》选择储藏技术时应考虑哪些因素？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "standard",
-            "pdf",
-            "storage-technology"
-          ],
-          "difficulty": "medium",
-          "source_files_top5": [
-            "政府储备粮食仓储管理办法.docx",
-            "粮油仓储管理办法.docx",
-            "政府储备粮食仓储管理办法.docx",
-            "AAA粮油安全储存守则.docx",
-            "01磷化氢膜下环流熏蒸技术规程T1.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "抱歉，我不知道。提供的上下文信息中没有包含《粮油储藏技术规范》的相关内容。",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        },
-        {
-          "id": "grain-verified-0032",
-          "query": "《粮油储藏技术规范》对粮情温湿度检测周期有哪些要求？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "standard",
-            "pdf",
-            "monitoring"
-          ],
-          "difficulty": "hard",
-          "source_files_top5": [
-            "AAA粮油安全储存守则.docx",
-            "06稻谷控温储藏技术规程t6.docx",
-            "政府储备粮食仓储管理办法.docx",
-            "AAA粮油安全储存守则.docx",
-            "01磷化氢膜下环流熏蒸技术规程T1.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "根据提供的上下文信息，文中并未提及《粮油储藏技术规范》的相关内容。但根据上下文中的《粮油安全储存守则》，对粮情（粮温、水分）检测周期的要求如下：\n\n1. **粮温巡测（针对简易囤）**：\n   - 粮温在15℃以下时，5天内至少巡测一次；\n   - 粮温在15℃～25℃时，3天内至少巡测一次；\n   - 粮温超过25℃",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        },
-        {
-          "id": "grain-verified-0033",
-          "query": "《粮油储藏技术规范》中“双低、三低、四合一”分别属于什么储藏技术组合？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "standard",
-            "pdf",
-            "storage-technology",
-            "duplicate"
-          ],
-          "difficulty": "hard",
-          "source_files_top5": [
-            "08氮气气调储粮技术规程.docx",
-            "政府储备粮食仓储管理办法.docx",
-            "粮情智能分析初步调研问题列表Jessie.docx",
-            "政府储备粮食仓储管理办法.docx",
-            "AAA粮油安全储存守则.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "根据提供的上下文信息，我不知道《粮油储藏技术规范》中“双低、三低、四合一”分别属于什么储藏技术组合。",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        },
-        {
-          "id": "grain-verified-0034",
-          "query": "《粮油储藏技术规范》如何处理粮堆结露？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "standard",
-            "pdf",
-            "condensation"
-          ],
-          "difficulty": "hard",
-          "source_files_top5": [
-            "AAA粮油安全储存守则.docx",
-            "政府储备粮食仓储管理办法.docx",
-            "20超高大平房仓安全储粮技术规程.docx",
-            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
-            "01磷化氢膜下环流熏蒸技术规程T1.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "根据上下文信息，处理粮堆结露的方法如下：\n\n1. **粮堆表层结露时**：应适时通风、除湿，以及翻动粮面。\n2. **低温粮仓、地下粮仓储粮出现结露时**：如外界温度、湿度较高，严禁开仓通风，可使用谷物冷却机、除湿机或吸潮剂等处理。\n3. **粮面密封膜内结露时**：应揭开薄膜，晾干结露水，驱散粮面表层水分。\n4. *",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        },
-        {
-          "id": "grain-verified-0035",
-          "query": "《粮油储藏理论与技术》的信息检测技术章节主要包括哪些检测方向？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "research",
-            "pdf",
-            "monitoring"
-          ],
-          "difficulty": "medium",
-          "source_files_top5": [
-            "readme.md",
-            "AAA粮油安全储存守则.docx",
-            "08氮气气调储粮技术规程.docx",
-            "粮油仓储管理办法.docx",
-            "粮油仓储管理办法.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "根据提供的上下文信息，没有包含《粮油储藏理论与技术》及其信息检测技术章节的相关内容，因此我不知道该问题的答案。",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        },
-        {
-          "id": "grain-verified-0038",
-          "query": "粮情预测调研报告中提到哪些模型评价指标？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "research",
-            "pdf",
-            "prediction"
-          ],
-          "difficulty": "medium",
-          "source_files_top5": [
-            "粮情智能分析初步调研问题列表Jessie.docx",
-            "粮情智能分析初步调研问题列表Jessie.docx",
-            "粮情智能分析初步调研问题列表Jessie.docx",
-            "AAA粮油安全储存守则.docx",
-            "AAA粮油安全储存守则.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "根据上下文信息，粮情预测调研报告中提到的模型评价指标（关键绩效指标）包括：\n\n1. **储粮实时状态分析准确性**：不低于88%；\n2. **储粮未来状态预测的准确性**：不低于75%。",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        },
-        {
-          "id": "grain-verified-0039",
-          "query": "基于粮温统计特征的库存状态检测方法主要识别哪三种状态？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "monitoring",
-            "pdf",
-            "inventory-state"
-          ],
-          "difficulty": "medium",
-          "source_files_top5": [
-            "粮情智能分析初步调研问题列表Jessie.docx",
-            "AAA粮油安全储存守则.docx",
-            "粮情智能分析初步调研问题列表Jessie.docx",
-            "AAA粮油安全储存守则.docx",
-            "06稻谷控温储藏技术规程t6.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "根据提供的上下文信息，我不知道答案。上下文中未提及“基于粮温统计特征的库存状态检测方法”及其识别的三种状态。",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        },
-        {
-          "id": "grain-verified-0040",
-          "query": "基于粮温时空相关性的储粮数量监管方法如何定位异常？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "monitoring",
-            "pdf",
-            "quantity-supervision"
-          ],
-          "difficulty": "hard",
-          "source_files_top5": [
-            "粮情智能分析初步调研问题列表Jessie.docx",
-            "AAA粮油安全储存守则.docx",
-            "AAA粮油安全储存守则.docx",
-            "20超高大平房仓安全储粮技术规程.docx",
-            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.0,
-          "recall_at_5": 0,
-          "kb_isolation": 1,
-          "answer_preview": "根据提供的上下文信息，我不知道。",
-          "error": null,
-          "groups": [
-            "ocr_text_quality",
-            "source_noise"
-          ]
-        }
-      ]
-    },
-    "rank_miss": {
-      "count": 1,
-      "samples": [
-        {
-          "id": "grain-verified-0003",
-          "query": "粮食入仓前，仓储管理部门需要检查哪些仓房条件？",
-          "answerable": true,
-          "tags": [
-            "grain-knowledge-base",
-            "operations",
-            "storage-intake"
-          ],
-          "difficulty": "medium",
-          "source_files_top5": [
-            "政府储备粮食仓储管理办法.docx",
-            "粮库安全生产守则.docx",
-            "AAA粮油安全储存守则.docx",
-            "08氮气气调储粮技术规程.docx",
-            "08氮气气调储粮技术规程.docx"
-          ],
-          "source_count": 5,
-          "mrr_at_5": 0.3333,
-          "recall_at_5": 1,
-          "kb_isolation": 1,
-          "answer_preview": "根据上下文信息，粮食入仓前，承储单位应当对目标承储仓房进行空仓验收，查验仓房及相关设施设备是否完好。",
-          "error": null,
-          "groups": [
-            "rank_miss",
-            "source_noise"
-          ]
-        }
-      ]
-    },
-    "refusal_miss": {
-      "count": 1,
-      "samples": [
-        {
-          "id": "grain-verified-0080",
-          "query": "只搜索 default 知识库时，是否应该返回 grain-knowledge-base 的粮仓资料？",
-          "answerable": false,
-          "tags": [
-            "grain-knowledge-base",
-            "cross-kb",
-            "isolation",
-            "refusal"
-          ],
-          "difficulty": "easy",
-          "source_files_top5": [
-            "readme.md"
-          ],
-          "source_count": 1,
-          "mrr_at_5": 1.0,
-          "recall_at_5": 1,
-          "kb_isolation": 1,
-          "answer_preview": "否。根据上下文信息，`grain-knowledge-base` 是一个独立的、显式指定的 `kb_id`。上下文中未提及 `default` 知识库包含或关联粮仓资料，也未说明其与 `grain-knowledge-base` 存在映射、合并或默认路由关系。因此，只搜索 `default` 知识库时，不应返回 `gr",
-          "error": null,
-          "groups": [
-            "refusal_miss"
-          ]
-        }
-      ]
+    "api_error": {
+      "count": 0,
+      "samples": []
     },
     "retrieval_miss": {
       "count": 17,
@@ -541,6 +245,39 @@
           "error": null,
           "groups": [
             "retrieval_miss",
+            "source_noise"
+          ]
+        }
+      ]
+    },
+    "rank_miss": {
+      "count": 1,
+      "samples": [
+        {
+          "id": "grain-verified-0003",
+          "query": "粮食入仓前，仓储管理部门需要检查哪些仓房条件？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "operations",
+            "storage-intake"
+          ],
+          "difficulty": "medium",
+          "source_files_top5": [
+            "政府储备粮食仓储管理办法.docx",
+            "粮库安全生产守则.docx",
+            "AAA粮油安全储存守则.docx",
+            "08氮气气调储粮技术规程.docx",
+            "08氮气气调储粮技术规程.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.3333,
+          "recall_at_5": 1,
+          "kb_isolation": 1,
+          "answer_preview": "根据上下文信息，粮食入仓前，承储单位应当对目标承储仓房进行空仓验收，查验仓房及相关设施设备是否完好。",
+          "error": null,
+          "groups": [
+            "rank_miss",
             "source_noise"
           ]
         }
@@ -779,6 +516,281 @@
           "groups": [
             "ocr_text_quality",
             "source_noise"
+          ]
+        }
+      ]
+    },
+    "ocr_text_quality": {
+      "count": 19,
+      "samples": [
+        {
+          "id": "grain-verified-0031",
+          "query": "《粮油储藏技术规范》选择储藏技术时应考虑哪些因素？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "standard",
+            "pdf",
+            "storage-technology"
+          ],
+          "difficulty": "medium",
+          "source_files_top5": [
+            "政府储备粮食仓储管理办法.docx",
+            "粮油仓储管理办法.docx",
+            "政府储备粮食仓储管理办法.docx",
+            "AAA粮油安全储存守则.docx",
+            "01磷化氢膜下环流熏蒸技术规程T1.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "抱歉，我不知道。提供的上下文信息中没有包含《粮油储藏技术规范》的相关内容。",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        },
+        {
+          "id": "grain-verified-0032",
+          "query": "《粮油储藏技术规范》对粮情温湿度检测周期有哪些要求？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "standard",
+            "pdf",
+            "monitoring"
+          ],
+          "difficulty": "hard",
+          "source_files_top5": [
+            "AAA粮油安全储存守则.docx",
+            "06稻谷控温储藏技术规程t6.docx",
+            "政府储备粮食仓储管理办法.docx",
+            "AAA粮油安全储存守则.docx",
+            "01磷化氢膜下环流熏蒸技术规程T1.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "根据提供的上下文信息，文中并未提及《粮油储藏技术规范》的相关内容。但根据上下文中的《粮油安全储存守则》，对粮情（粮温、水分）检测周期的要求如下：\n\n1. **粮温巡测（针对简易囤）**：\n   - 粮温在15℃以下时，5天内至少巡测一次；\n   - 粮温在15℃～25℃时，3天内至少巡测一次；\n   - 粮温超过25℃",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        },
+        {
+          "id": "grain-verified-0033",
+          "query": "《粮油储藏技术规范》中“双低、三低、四合一”分别属于什么储藏技术组合？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "standard",
+            "pdf",
+            "storage-technology",
+            "duplicate"
+          ],
+          "difficulty": "hard",
+          "source_files_top5": [
+            "08氮气气调储粮技术规程.docx",
+            "政府储备粮食仓储管理办法.docx",
+            "粮情智能分析初步调研问题列表Jessie.docx",
+            "政府储备粮食仓储管理办法.docx",
+            "AAA粮油安全储存守则.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "根据提供的上下文信息，我不知道《粮油储藏技术规范》中“双低、三低、四合一”分别属于什么储藏技术组合。",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        },
+        {
+          "id": "grain-verified-0034",
+          "query": "《粮油储藏技术规范》如何处理粮堆结露？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "standard",
+            "pdf",
+            "condensation"
+          ],
+          "difficulty": "hard",
+          "source_files_top5": [
+            "AAA粮油安全储存守则.docx",
+            "政府储备粮食仓储管理办法.docx",
+            "20超高大平房仓安全储粮技术规程.docx",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "01磷化氢膜下环流熏蒸技术规程T1.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "根据上下文信息，处理粮堆结露的方法如下：\n\n1. **粮堆表层结露时**：应适时通风、除湿，以及翻动粮面。\n2. **低温粮仓、地下粮仓储粮出现结露时**：如外界温度、湿度较高，严禁开仓通风，可使用谷物冷却机、除湿机或吸潮剂等处理。\n3. **粮面密封膜内结露时**：应揭开薄膜，晾干结露水，驱散粮面表层水分。\n4. *",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        },
+        {
+          "id": "grain-verified-0035",
+          "query": "《粮油储藏理论与技术》的信息检测技术章节主要包括哪些检测方向？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "research",
+            "pdf",
+            "monitoring"
+          ],
+          "difficulty": "medium",
+          "source_files_top5": [
+            "readme.md",
+            "AAA粮油安全储存守则.docx",
+            "08氮气气调储粮技术规程.docx",
+            "粮油仓储管理办法.docx",
+            "粮油仓储管理办法.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "根据提供的上下文信息，没有包含《粮油储藏理论与技术》及其信息检测技术章节的相关内容，因此我不知道该问题的答案。",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        },
+        {
+          "id": "grain-verified-0038",
+          "query": "粮情预测调研报告中提到哪些模型评价指标？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "research",
+            "pdf",
+            "prediction"
+          ],
+          "difficulty": "medium",
+          "source_files_top5": [
+            "粮情智能分析初步调研问题列表Jessie.docx",
+            "粮情智能分析初步调研问题列表Jessie.docx",
+            "粮情智能分析初步调研问题列表Jessie.docx",
+            "AAA粮油安全储存守则.docx",
+            "AAA粮油安全储存守则.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "根据上下文信息，粮情预测调研报告中提到的模型评价指标（关键绩效指标）包括：\n\n1. **储粮实时状态分析准确性**：不低于88%；\n2. **储粮未来状态预测的准确性**：不低于75%。",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        },
+        {
+          "id": "grain-verified-0039",
+          "query": "基于粮温统计特征的库存状态检测方法主要识别哪三种状态？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "monitoring",
+            "pdf",
+            "inventory-state"
+          ],
+          "difficulty": "medium",
+          "source_files_top5": [
+            "粮情智能分析初步调研问题列表Jessie.docx",
+            "AAA粮油安全储存守则.docx",
+            "粮情智能分析初步调研问题列表Jessie.docx",
+            "AAA粮油安全储存守则.docx",
+            "06稻谷控温储藏技术规程t6.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "根据提供的上下文信息，我不知道答案。上下文中未提及“基于粮温统计特征的库存状态检测方法”及其识别的三种状态。",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        },
+        {
+          "id": "grain-verified-0040",
+          "query": "基于粮温时空相关性的储粮数量监管方法如何定位异常？",
+          "answerable": true,
+          "tags": [
+            "grain-knowledge-base",
+            "monitoring",
+            "pdf",
+            "quantity-supervision"
+          ],
+          "difficulty": "hard",
+          "source_files_top5": [
+            "粮情智能分析初步调研问题列表Jessie.docx",
+            "AAA粮油安全储存守则.docx",
+            "AAA粮油安全储存守则.docx",
+            "20超高大平房仓安全储粮技术规程.docx",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx"
+          ],
+          "source_count": 5,
+          "mrr_at_5": 0.0,
+          "recall_at_5": 0,
+          "kb_isolation": 1,
+          "answer_preview": "根据提供的上下文信息，我不知道。",
+          "error": null,
+          "groups": [
+            "ocr_text_quality",
+            "source_noise"
+          ]
+        }
+      ]
+    },
+    "duplicate_or_conflict": {
+      "count": 0,
+      "samples": []
+    },
+    "kb_isolation_failure": {
+      "count": 0,
+      "samples": []
+    },
+    "refusal_miss": {
+      "count": 1,
+      "samples": [
+        {
+          "id": "grain-verified-0080",
+          "query": "只搜索 default 知识库时，是否应该返回 grain-knowledge-base 的粮仓资料？",
+          "answerable": false,
+          "tags": [
+            "grain-knowledge-base",
+            "cross-kb",
+            "isolation",
+            "refusal"
+          ],
+          "difficulty": "easy",
+          "source_files_top5": [
+            "readme.md"
+          ],
+          "source_count": 1,
+          "mrr_at_5": 1.0,
+          "recall_at_5": 1,
+          "kb_isolation": 1,
+          "answer_preview": "否。根据上下文信息，`grain-knowledge-base` 是一个独立的、显式指定的 `kb_id`。上下文中未提及 `default` 知识库包含或关联粮仓资料，也未说明其与 `grain-knowledge-base` 存在映射、合并或默认路由关系。因此，只搜索 `default` 知识库时，不应返回 `gr",
+          "error": null,
+          "groups": [
+            "refusal_miss"
           ]
         }
       ]

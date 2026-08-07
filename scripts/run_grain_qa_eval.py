@@ -165,6 +165,17 @@ _STRONG_REFUSAL_MARKERS = (
     "不在本知识库",
 )
 
+FAILURE_GROUP_ORDER = (
+    "api_error",
+    "retrieval_miss",
+    "rank_miss",
+    "source_noise",
+    "ocr_text_quality",
+    "duplicate_or_conflict",
+    "kb_isolation_failure",
+    "refusal_miss",
+)
+
 # 弱拒绝标记：单凭它们不足以判定拒绝——正常部分作答里也可能出现 hedging
 # （如"未明确提及""无法确定具体数值"）。只有当答案整体很短、缺乏实质内容时，
 # 才把它们视作拒绝信号，避免把"召回到正确文档但 hedged 的长答案"误判为拒绝。
@@ -366,7 +377,7 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
 
 def build_failure_groups(results: list[dict[str, Any]], limit: int = 8) -> dict[str, Any]:
     """按失败类型聚合评测结果，并保留少量样例。"""
-    grouped: dict[str, list[dict[str, Any]]] = {}
+    grouped: dict[str, list[dict[str, Any]]] = {group: [] for group in FAILURE_GROUP_ORDER}
     for result in results:
         groups = classify_failure_groups(result)
         if not groups:
@@ -394,7 +405,7 @@ def build_failure_groups(results: list[dict[str, Any]], limit: int = 8) -> dict[
             "count": len(items),
             "samples": items[:limit],
         }
-        for group, items in sorted(grouped.items())
+        for group, items in grouped.items()
     }
 
 

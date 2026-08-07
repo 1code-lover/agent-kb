@@ -101,7 +101,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - 报告产物：`docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`
   - 2026-08-07 使用恢复后的 `阿里百联 / qwen3.7-plus` 重新生成完整报告：`total=80`、`answerable_total=77`、`unanswerable_total=3`、`error_count=0`、`Recall@5=0.5325`、`MRR@5=0.5238`、`citation_hit_rate=1.0`、`refusal_accuracy=0.6667`、`kb_isolation_rate=1.0`
   - 报告已补充 `api_base`、`timeout`、`cases_sha256`、逐条 `requested_kb_ids`、`relevant_doc_types`、`source_kb_ids` 与 `kb_id_missing_count`，避免引用来源缺失 `kb_id` 时误判隔离通过。
-  - 报告新增 `failure_groups`，当前分组为：`ocr_text_quality=19`、`retrieval_miss=17`、`source_noise=37`、`rank_miss=1`、`refusal_miss=1`。
+  - 报告新增 `failure_groups`，当前分组为：`api_error=0`、`retrieval_miss=17`、`rank_miss=1`、`source_noise=37`、`ocr_text_quality=19`、`duplicate_or_conflict=0`、`kb_isolation_failure=0`、`refusal_miss=1`。
   - 本轮 36 条 answerable 用例 Recall@5 为 0，主要集中在新增 PDF、报告、表格样例和未进入当前索引的 DOCX 规程；当前 docstore 中 `grain-knowledge-base` 只有 543 个节点，约 13 个核心文件族，缺少大量 QA 期望文件。
   - 说明：该评测不做 LLM 裁判，主要验证检索命中、引用来源、拒答和 KB 隔离。
 

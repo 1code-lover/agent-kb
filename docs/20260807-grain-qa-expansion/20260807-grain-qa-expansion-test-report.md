@@ -38,10 +38,13 @@
 
 ## 失败分组
 
-- `ocr_text_quality=19`：主要集中在 PDF、扫描件和表格样例相关问题。
+- `api_error=0`：本轮没有 API 或模型调用错误。
 - `retrieval_miss=17`：相关文件没有进入 top5。
-- `source_noise=37`：多来源、重复来源或无关相似资料较多。
 - `rank_miss=1`：`grain-verified-0003` 召回正确资料但排序靠后。
+- `source_noise=37`：多来源、重复来源或无关相似资料较多。
+- `ocr_text_quality=19`：主要集中在 PDF、扫描件和表格样例相关问题。
+- `duplicate_or_conflict=0`：本轮没有单独归入重复或冲突资料失败的用例。
+- `kb_isolation_failure=0`：本轮没有来源 KB 泄露失败。
 - `refusal_miss=1`：`grain-verified-0080` 是跨库拒答口径问题。
 
 ## 主要发现

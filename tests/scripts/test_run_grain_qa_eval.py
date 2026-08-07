@@ -208,3 +208,5 @@ def test_build_failure_groups_keeps_grouped_samples() -> None:
     assert report["retrieval_miss"]["samples"][0]["id"] == "a"
     assert report["refusal_miss"]["count"] == 1
     assert report["refusal_miss"]["samples"][0]["id"] == "b"
+    assert report["duplicate_or_conflict"]["count"] == 0
+    assert report["duplicate_or_conflict"]["samples"] == []
