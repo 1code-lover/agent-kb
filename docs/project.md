@@ -107,7 +107,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 - 当前分支：`codex/desktop-agent-stage3`
 - 远端跟踪：`origin/codex/desktop-agent-stage3`
-- 当前本地分支已完成 2026-08-07 稳定性收口提交，准备推送到远端：
+- 当前分支已完成 2026-08-07 稳定性收口提交，并已推送到远端：
   - `575ff3d fix(kb): recognize docx/office documents as importable file kind`
   - `64c402b fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes`
   - `7b0037d feat(eval): add grain KB real QA evaluation script`
@@ -116,7 +116,8 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `6f1ef56 fix(ocr): stabilize paddle runtime and diagnostics`
   - `ddf8317 refactor(web): replace router dependency with local navigation`
   - `ca34b66 docs(dev): record local kb stability closure`
-- 当前工作区状态：2026-08-07 本轮收口提交后 `git status --short --branch` 显示工作区干净；推送后以最新 `git status` 为准。
+  - `82b6cba docs(project): sync closure status before push`
+- 当前工作区状态：2026-08-07 本轮收口提交推送后，`git status --short --branch` 显示本地分支与 `origin/codex/desktop-agent-stage3` 同步且工作区干净。
 
 ---
 
@@ -223,6 +224,7 @@ cd webapp && npm run build
 | `ddf8317` | refactor(web): replace router dependency with local navigation |
 | `6f1ef56` | fix(ocr): stabilize paddle runtime and diagnostics |
 | `1520aef` | fix(kb): harden import filtering and grain qa eval |
+| `82b6cba` | docs(project): sync closure status before push |
 | `ed8368f` | docs(grain-qa): add real KB QA evaluation report artifacts |
 | `7b0037d` | feat(eval): add grain KB real QA evaluation script |
 | `64c402b` | fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes |
