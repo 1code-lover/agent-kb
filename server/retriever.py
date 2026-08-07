@@ -50,7 +50,7 @@ def filter_bm25_compatible_nodes(nodes: list[BaseNode]) -> list[BaseNode]:
 
     for node in nodes or []:
         try:
-            content = node.get_content(metadata_mode=MetadataMode.EMBED)
+            content = node.get_content(metadata_mode=MetadataMode.NONE)
             if not isinstance(content, str) or not content.strip():
                 skipped.append(getattr(node, "node_id", "<unknown>"))
                 continue

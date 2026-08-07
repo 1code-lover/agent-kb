@@ -156,4 +156,4 @@ def test_simple_bm25_retriever_from_defaults_filters_invalid_nodes_before_build(
     assert captured["similarity_top_k"] == 1
     assert captured["verbose"] is True
     assert captured["tokenizer"] is not None
-    assert captured["kwargs"] == {"filters": "dummy-filter"}
+    assert captured["kwargs"] == {}

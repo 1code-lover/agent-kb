@@ -34,6 +34,7 @@ import sys
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -71,6 +72,15 @@ def load_cases(path: str | Path) -> list[dict[str, Any]]:
             record.setdefault("_line_no", line_no)
             cases.append(record)
     return cases
+
+
+def file_sha256(path: str | Path) -> str:
+    """计算文件 SHA256，便于评测报告追溯用例版本。"""
+    digest = sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _post_json(api_base: str, path: str, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
@@ -113,6 +123,11 @@ def _extract_source_kb_ids(result: dict[str, Any]) -> list[str]:
             if isinstance(kb_id, str) and kb_id:
                 kb_ids.append(kb_id)
     return kb_ids
+
+
+def _extract_source_count(result: dict[str, Any]) -> int:
+    """返回 sources 中 dict 来源条目的数量，用于识别 kb_id 缺失。"""
+    return sum(1 for source in result.get("sources", []) or [] if isinstance(source, dict))
 
 
 # 强拒绝标记：命中任一即可判定为边界型拒绝（"超出范围 / 建议转权威渠道 / 不保证覆盖"）。
@@ -199,6 +214,7 @@ def evaluate_case(
     error_message: str | None = None
     source_files: list[str] = []
     source_kb_ids: list[str] = []
+    source_count = 0
     answer = ""
 
     if response.get("code") == 0 and isinstance(response.get("data"), dict):
@@ -206,6 +222,7 @@ def evaluate_case(
         answer = str(data.get("answer", "") or "")
         source_files = _extract_source_files(data)
         source_kb_ids = _extract_source_kb_ids(data)
+        source_count = _extract_source_count(data)
     else:
         error_message = str(response.get("message") or response)
 
@@ -222,7 +239,8 @@ def evaluate_case(
     citation_hit = 1 if (answerable and bool(source_files)) else 0
     refusal_correct = 1 if (not answerable and _answer_is_refusal_like(answer)) else 0
 
-    kb_isolation = 1 if all(kb == kb_id for kb in source_kb_ids) else (1 if not source_kb_ids else 0)
+    kb_id_missing_count = max(source_count - len(source_kb_ids), 0)
+    kb_isolation = 1 if source_count == len(source_kb_ids) and all(kb == kb_id for kb in source_kb_ids) else 0
 
     return {
         "id": case.get("id"),
@@ -232,6 +250,9 @@ def evaluate_case(
         "relevant_files": sorted(relevant_names),
         "answer_preview": answer[:160],
         "source_files_top5": top_k_view,
+        "source_count": source_count,
+        "source_kb_ids": source_kb_ids,
+        "kb_id_missing_count": kb_id_missing_count,
         "error": error_message,
         "recall_at_5": recall_at_5,
         "mrr_at_5": round(mrr_at_5, 4),
@@ -320,8 +341,11 @@ def main() -> None:
     summary = summarize(per_case)
     report = {
         "generated_at": _now_iso(),
+        "api_base": args.api_base,
+        "timeout": args.timeout,
         "kb_id": args.kb_id,
         "cases_path": args.cases,
+        "cases_sha256": file_sha256(args.cases),
         "summary": summary,
         "cases": per_case,
     }

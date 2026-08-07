@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 
 from api.schemas import DeleteDocsRequest, PreviewRequest, UrlImportRequest
 from api.schemas.kb import KBCreateRequest, KBUpdateRequest
@@ -100,16 +100,22 @@ def delete_docs(request: DeleteDocsRequest) -> dict:
 # 文件与网页导入接口。
 
 @router.post("/file/import")
-def import_files(
+async def import_files(
+    request: Request,
     files: list[UploadFile] = File(...),
     chunk_size: int = Form(2048),
     chunk_overlap: int = Form(512),
     kb_id: str = Form("default"),
-    relative_paths: list[str] | None = Form(None),
     import_mode: str = Form("preserve_tree"),
 ) -> dict:
     """导入本地文件，并支持保留目录树或拍平写入。"""
     try:
+        form = await request.form()
+        relative_paths = [
+            str(item)
+            for item in form.getlist("relative_paths")
+            if isinstance(item, str) and item.strip()
+        ] or None
         result = kb_service.import_files(
             files,
             chunk_size,
