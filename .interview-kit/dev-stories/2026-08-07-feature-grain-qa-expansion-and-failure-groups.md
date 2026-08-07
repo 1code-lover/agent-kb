@@ -14,7 +14,7 @@
 
 本次把 `data/grain-knowledge-base/qa/verified.jsonl` 扩展到 80 条，覆盖正向、负向、跨库隔离、PDF、扫描件、表格和重复资料等场景。`scripts/run_grain_qa_eval.py` 增加了逐条 `tags`、`relevant_doc_types`、`requested_kb_ids` 输出，并修正评测时优先使用用例内的 `search_kb_ids`，使跨库隔离用例可以真实请求 `default` 知识库。
 
-评测脚本新增 `classify_failure_groups()` 和 `build_failure_groups()`，把失败按 `api_error`、`retrieval_miss`、`rank_miss`、`source_noise`、`ocr_text_quality`、`duplicate_or_conflict`、`kb_isolation_failure`、`refusal_miss` 聚合。模型配置恢复后，重新跑完整 80 条 QA，生成 `qa-eval-report.json`，并把结论更新到 `docs/project.md`、`评审建议.txt` 和本次测试报告。
+评测脚本新增 `classify_failure_groups()` 和 `build_failure_groups()`，把失败按 `api_error`、`retrieval_miss`、`rank_miss`、`source_noise`、`ocr_text_quality`、`duplicate_or_conflict`、`kb_isolation_failure`、`refusal_miss` 聚合。报告会显式输出全部失败类型，即使某类本轮计数为 0，也保留空样例，方便后续看板和人工复核稳定读取。模型配置恢复后，重新跑完整 80 条 QA，生成 `qa-eval-report.json`，并把结论更新到 `docs/project.md`、`评审建议.txt` 和本次测试报告。
 
 ## 为什么选这个方案
 
@@ -35,6 +35,7 @@
 ## 验证与结果
 
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_run_grain_qa_eval.py -q`：`6 passed, 1 warning`
+- 报告结构审计：`api_error`、`retrieval_miss`、`rank_miss`、`source_noise`、`ocr_text_quality`、`duplicate_or_conflict`、`kb_isolation_failure`、`refusal_miss` 全部存在，其中 `duplicate_or_conflict=0`、`kb_isolation_failure=0`
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.run_grain_qa_eval --cases data/grain-knowledge-base/qa/verified.jsonl --api-base http://127.0.0.1:18080 --kb-id grain-knowledge-base --output docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`：80 条完整跑完，`error_count=0`
 - 评测结果：`Recall@5=0.5325`、`MRR@5=0.5238`、`citation_hit_rate=1.0`、`refusal_accuracy=0.6667`、`kb_isolation_rate=1.0`
 - 失败分组：`ocr_text_quality=19`、`retrieval_miss=17`、`source_noise=37`、`rank_miss=1`、`refusal_miss=1`
