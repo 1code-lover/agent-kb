@@ -38,6 +38,14 @@ MARKDOWN_SUFFIXES = {".md", ".markdown", ".mdown", ".mdx"}
 # 需要识别为图片资产候选的常见图片后缀。
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp"}
 
+# 可导入的 Office / 结构化文档后缀，由 SimpleDirectoryReader + 对应 reader 解析。
+# 这些格式本质是 zip 容器，必须在这里显式识别，否则会被当成 binary 提前拒绝。
+OFFICE_DOCUMENT_SUFFIXES = {".docx", ".pptx", ".xlsx", ".odt", ".odp", ".ods"}
+OFFICE_DOCUMENT_MIME_PREFIXES = (
+    "application/vnd.openxmlformats-officedocument",
+    "application/vnd.oasis.opendocument",
+)
+
 # 允许尝试 OCR 的图片后缀。
 OCR_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 
@@ -922,6 +930,14 @@ def _is_image_file(path: Path | None, content_type: str) -> bool:
     return content_type.lower().startswith("image/")
 
 
+def _is_office_document(path: Path | None, content_type: str) -> bool:
+    """判断文件是否为可导入的 Office / 结构化文档（docx/pptx/xlsx/odt 等）。"""
+    if path is not None and path.suffix.lower() in OFFICE_DOCUMENT_SUFFIXES:
+        return True
+    lower_content_type = str(content_type or "").strip().lower()
+    return lower_content_type.startswith(OFFICE_DOCUMENT_MIME_PREFIXES)
+
+
 def _decoded_text_looks_reasonable(text: str) -> bool:
     """判断解码后的文本是否仍像可索引文本，而不是控制字符噪声。"""
     if not text:
@@ -1016,6 +1032,8 @@ def _detect_file_kind(path: Path | None, content_type: str, content: bytes | Non
         return "markdown"
     if _is_image_file(path, content_type):
         return "image"
+    if _is_office_document(path, content_type):
+        return "document"
 
     lower_content_type = str(content_type or "").strip().lower()
     suffix = path.suffix.lower() if path is not None else ""
