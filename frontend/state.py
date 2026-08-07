@@ -88,8 +88,7 @@ def init_keys():
     if 'selected_files' not in st.session_state:
         st.session_state.selected_files = None
 
-# Initialize user data
-# TODO: supposed to be loaded from database
+    # Initialize legacy Streamlit user defaults.
     st.session_state.user_id = "user_1"
     st.session_state.kb_id = "kb_1"
     st.session_state.kb_name = "My knowledge base"

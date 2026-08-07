@@ -1,22 +1,31 @@
-﻿测试与评测阶段复核意见（2026-07-31，最新）
+未 push 代码复核意见（2026-08-07，最新）
 
 优点：
-1. 这轮对“答案过短”问题没有停留在报告备注层，而是先补了失败测试，再把修复落在 `api/services/chat_service.py` 的 source-backed 最小完整句补全逻辑里，做法符合 TDD 和真实问题驱动的要求。
-2. 修复验证链条完整：`tests/api/test_chat_service.py` 新增的两条用例已经覆盖“可扩写/不可扩写”两种边界，受影响问答回归 `86 passed`，没有通过放松断言来制造通过。
-3. live 证据闭环这次补齐了。`diag-utf8-after-answer-expand.json` 已确认回答从“知识库”提升为“知识库仍然是授权边界。”，而且 `chat_answer_contains_expected_snippet` 等关键 gate 全部转为 true，这说明修复不仅在单测里成立，也在真实本地服务 roundtrip 里成立。
-4. 这次修复没有破坏已有安全/契约语义：拒答裁剪、scope echo、evidence / preview 契约、semireal Markdown/PDF/图片/mixed batch 问答回归都仍然通过，说明改动边界控制得比较克制。
-5. 测试报告同步得比较及时，已经把 UTF-8 live 短答案从“当前缺口”更新成“已修复并纳入回归”，避免后续读者继续按旧结论理解现状。
+1. 本轮已经确认 macOS 下可用的项目环境是 conda `agent-kb`，解释器路径为 `/opt/miniconda3/envs/agent-kb/bin/python`，避免继续误用 Miniconda base Python 3.13 或仓库内不可用的 `.venv`。
+2. `/api/kb/file/import` 已改为从真实 multipart form 中读取 `relative_paths`，兼容单值和多值表单字段，能降低前端目录上传时路径丢失的风险。
+3. BM25 节点过滤改为按纯正文判断空节点，不再把 metadata 拼接内容误当作可检索文本，能避免空正文节点进入 BM25 构建。
+4. Office 类型识别已收窄到当前依赖真实验证过的 `.docx`，避免接口过度承诺 `pptx/xlsx/odt/ods` 等尚未验证的格式。
+5. 粮仓 QA 评测脚本补充了 `api_base`、`timeout`、`cases_sha256`、`source_count`、`source_kb_ids` 和 `kb_id_missing_count`，并把“sources 存在但缺少 kb_id”的情况判为隔离失败，评测可信度比原先更高。
+6. 已新增脚本级回归测试覆盖 KB 隔离缺失、目标 KB 正常通过和用例 hash 追踪；全量 Python、前端 Node 单测、前端构建和粮仓真实 QA 评测均已通过。
+7. conda `agent-kb` 环境已补齐 `paddleocr==3.7.0` 与 `paddlepaddle==3.2.2`，`pip check` 已无破损依赖，health capability 显示 PDF 文本解析与 image OCR 依赖均 ready。
+8. OCR 默认模型源已加固：未显式设置 PaddleX 环境变量时默认使用 ModelScope 并跳过不稳定的模型源探测；本机单图 OCR 样本已成功，识别文本长度 129。
+9. 已修复 PaddleOCR/PaddleX 污染 `langchain.text_splitter` 后导致问答 400 的运行时顺序问题：OCR 初始化前会预加载并修复 LangChain text splitter bridge；“先 OCR 后问答”的独立进程复现已通过。
+10. 图片 OCR API roundtrip 已通过：新端口服务 health 显示 OCR ready，上传图片后 `ocr_attempted=true`、`indexed_from_ocr=true`，问答和 preview 均命中 `Knowledge Base`。
+11. 扫描 PDF OCR API roundtrip 已通过：诊断 PDF 保持无文字层，导入后 `ocr_attempted=true`、`ocr_status=success`、`indexed_from_ocr=true`、`ocr_text_length=293`，问答、source、evidence 和 preview 均命中 `searchable evidence` 与 `knowledge base`。
+12. mixed batch API roundtrip 已通过：Markdown、PDF 文本层、嵌入图片 OCR、独立图片 OCR、资产注册和无证据拒答核心 gate 均通过，`run_passed=true`、`failed_files=0`。
+13. 诊断脚本已补充 macOS/Linux/Windows 字体候选，扫描 PDF 样本提高字号与画布宽度，避免 macOS 上退回 PIL 默认小字体造成 OCR 误识别。
+14. 前端依赖已执行非强制 audit fix，并升级到 `vite@8.2.1`、`@vitejs/plugin-react@6.0.5`；因当前页面只需要基础路由能力，已用项目内轻量 router 替代 `react-router-dom`，并对协议 URL、双斜杠和反斜杠导航做本地拒绝。
+15. `npm audit --json` 当前为 0 vulnerabilities；前端 Node 单测 75 个通过，Vite 构建通过。
+16. `docs/project.md` 已更新到 2026-08-07 当前状态，记录了正确虚拟环境、验证结果、剩余风险和未提交工作区状态。
 
 需要改进：
-1. `api/services/chat_service.py` 目前为兼容 shell 编码问题，部分中文文档字符串使用了 `\u` 形式写法；功能上没问题，但后续如果继续整理代码可读性，仍建议在确保 UTF-8 安全的前提下恢复为直写中文。
-2. live 诊断脚本的启动与端口管理仍略脆弱，手工拉起新服务时容易碰到端口占用或旧进程残留。后续如果继续依赖 live roundtrip 做常规验收，最好补一个统一的启动/探活/清理封装。
-3. mixed batch live 诊断与正式 eval 的 `source/evidence count` 口径差异依旧存在；这轮没有阻断，但它已经成为报告里长期重复出现的“诚实说明”，后续最好制度化收敛。
-4. 当前对“最小完整句补全”的测试仍集中在 UTF-8/Markdown 场景；如果后面继续优化答案质量，建议把 PDF / OCR 来源下的短答案场景也加入评测集，防止只修一个 fixture。
+1. mixed batch 正向用例虽然首要/目标文档、preview 与关键词均命中，但接口仍会返回多个候选 sources；`source_count_match/evidence_count_match` 精确数量检查为 false。若产品希望减少引用噪声，需要继续调 top-k、rerank 或前端证据展示策略。
+2. `.claude/settings.local.json` 是本地权限配置变更，和项目功能代码无直接关系；提交前应确认是否排除，避免把个人工具权限配置混入功能提交。
+3. 当前分支本地领先远端 4 个提交，且还有未提交工作区变更；继续开发前建议先按功能边界拆分提交并推送，降低后续 review 难度。
+4. 多知识库目前仍是共享索引加 metadata 逻辑隔离，粮仓 QA 样本为 30 条，指标全绿但不能替代更大规模真实资料验收。
 
 具体建议：
-1. 下一步研发重点可以明确转向两条：
-   - 扩展问答质量评测集，覆盖更多“答案过短 / 表达不完整 / 证据够但措辞弱”的真实场景；
-   - 继续完善 live 诊断脚本的工程化稳定性（端口、进程、artifact 命名、失败时日志采集）。
-2. 若准备继续提交当前阶段代码，先把这次新增的诊断产物与必要临时日志做一次筛选，保留正式 artifact，避免把无关 tmp 文件一并带入提交面。
-3. 在后续质量文档里，可以把“source-backed 最小完整句补全”正式登记为一条问答后处理策略，并注明触发条件：仅限非拒答、实体型问题、短答案、且 source/excerpt 能直接支撑更完整子句时触发。
-4. 后续如果要做更系统的问答质量优化，不要直接扩大启发式规则，而应优先通过评测数据集先定义缺口，再决定是继续做后处理、检索优化，还是改 prompt / answer synthesis。
+1. 提交前优先拆成三类改动：运行环境与项目进度文档、导入/检索/评测代码修复、QA 报告 artifact；`.claude/settings.local.json` 单独决定是否保留。
+2. 下一轮修复建议优先收口正向问答 sources 偏多的问题：先明确产品是否允许多证据返回，再决定是调检索 top-k、rerank 阈值，还是只在前端突出首要证据。
+3. 粮仓 QA 评测建议继续扩充 verified 用例，覆盖更多负向问题、跨库隔离问题、表格/扫描件来源问题，并在报告中持续保留 `cases_sha256`。
+4. 在 commit 前再次执行 `/opt/miniconda3/envs/agent-kb/bin/python -m pytest -q`、前端 Node 单测、`npm run build`、`npm audit --json` 和 `git diff --check`，确认文档更新后仍无格式问题。

@@ -1,5 +1,31 @@
 # AGENTS.md - 项目开发规范
 
+## 本地运行环境（macOS）
+
+> 给接手的任何 AI 助手 / 协作者：真实导入与问答链路在这个 conda 环境里跑通，请优先用它，不要再依赖系统 Python 或仓库里那个 Windows 创建的 `.venv`。
+
+- **环境名**：`agent-kb`（conda 环境）
+- **Python**：3.12（`3.12.13`）
+- **路径**：`/opt/miniconda3/envs/agent-kb`
+- **激活**：
+  ```bash
+  conda activate agent-kb
+  ```
+- **依赖**：按 `requirements.txt` 安装；关键锁版本 `llama_index==0.11.19` 且 `llama-index-core==0.11.19`（版本漂移会触发 `server/ingestion.py`、`server/retriever.py` 里已适配的私有 API 差异问题，不要随意升级）。
+- **注意（非交互脚本）**：在 shell 脚本 / 后台命令里 `conda activate` 有时不生效，`python3` 会指回系统 Python（系统 Python 没装项目依赖）。这种情况下直接用绝对路径：
+  ```bash
+  /opt/miniconda3/envs/agent-kb/bin/python
+  ```
+- **启动 API**（后台跑 `run_api.py`，端口 18080）：
+  ```bash
+  /opt/miniconda3/envs/agent-kb/bin/python run_api.py
+  ```
+- **跑测试**：
+  ```bash
+  /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"
+  ```
+- **Windows 开发机**口径不同（用系统 Python 3.12，`.venv` 是 Windows 创建的、Mac 不可用），详见 `docs/project.md`。本节特指 macOS conda 环境。
+
 ## 标准开发工作流
 
 每个功能开发必须严格遵循以下流程，每一步都需要审核通过后才能进入下一步：

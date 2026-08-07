@@ -1,22 +1,24 @@
-﻿# 项目总览 (docs/project.md)
+# 项目总览
 
-> 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构和已知问题。
-> **维护规则**：每次有意义的提交后更新本文的「最近提交」与「当前进度」「已知问题」三节；重大架构变化更新「架构」节。日期使用绝对日期。
+> 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构、验证证据和已知问题。
+> **维护规则**：每次有意义的提交后更新「当前进度」「测试与验证」「已知问题」「最近提交」四节；重大架构变化更新「架构」节。日期使用绝对日期。
 
-最近更新：2026-07-17
+最近更新：2026-08-07
 
 ---
 
 ## 1. 项目简介
 
-本项目是 **ThinkRAG**（基于 LlamaIndex + Streamlit 的本地知识库 RAG 系统）的改造分支，代号 **agent-kb** / 桌面端 **NorthAgent**。
+本项目是 **ThinkRAG** 的本地知识库 RAG 改造分支，仓库代号 **agent-kb**，桌面端产品名正在向 **NorthAgent** 收敛。
 
-在原版「单库 Streamlit 问答」基础上，当前主要有两条改造主线：
+项目已从原始的「单库 Streamlit 问答」演进为一个本地运行的 **多知识库 + 知识对象导入 + Agent 工作台 + 桌面客户端** 系统。当前主线不再是概念验证，而是围绕本地知识库助手做稳定性收口、导入/检索质量评测、粮仓知识库真实资料验收，以及桌面体验完善。
 
-1. **多知识库 + 后端化**：用 FastAPI 重写后端，支持知识库管理、导入、问答接口，React 重写 Web 前端，Electron 作为桌面壳。
-2. **Agent 化**：加入任务规划、工具注册、命令风险分级（L0-L3）、人工审批流，往「智能体 + 工具调用」方向演进。
+当前两条主线：
 
-面向国内用户的工程取向比较明确：中文文本处理、DeepSeek/Moonshot/Zhipu 等国产 LLM、BGE 中英双语嵌入模型、本地桌面运行体验。
+1. **多知识库与知识对象化**：FastAPI 后端、React 前端、Electron 桌面壳已经成型；知识库支持 CRUD、文件/网页导入、目录化原始文件存储、文件夹/资产 registry、导入回执、证据预览和 KB 范围问答。
+2. **Agent 化工作台**：`/agent` 页面提供基础聊天、限定知识库聊天和 Agent 高级模式；后端已有任务路由、工具调用、命令风险分级、人工审批、回执与 session 快照。
+
+工程取向仍然面向本地和中文资料场景：中文 splitter、BGE 嵌入模型、DeepSeek/Moonshot/Zhipu/兼容 OpenAI 的 LLM API、本地 Ollama、PDF 文本层读取与 PaddleOCR 回退。
 
 ---
 
@@ -24,137 +26,166 @@
 
 | 层 | 技术 |
 |---|---|
-| RAG 框架 | LlamaIndex |
-| 后端 API | FastAPI（`api/`）、uvicorn、日志轮转 |
-| RAG 核心 | `server/`（engine、index、retriever、splitters、stores、security、agent） |
-| 前端 Web | React 18 + Vite 5 + React Query + Zustand + React Router（`webapp/`） |
-| 桌面端 | Electron + React（`desktop/`，产品名 NorthAgent） |
-| 旧前端 | Streamlit（`frontend/` + `app.py`，作为迁移回退保留） |
-| 嵌入模型 | BAAI/bge-small-zh-v1.5（开发）/ bge-large-zh-v1.5（生产） |
-| 重排模型 | BAAI/bge-reranker-base / large |
-| PDF/OCR | PyMuPDF + PaddleOCR（扫描件回退） |
-| 本地 LLM | Ollama 0.3.3（注意：不兼容 0.4） |
+| RAG 框架 | LlamaIndex 0.11.x 口径，当前代码已做 0.11.19 内部 API 适配 |
+| 后端 API | FastAPI、uvicorn、CORS、本地日志轮转 |
+| RAG 核心 | `server/`：index、ingestion、retriever、readers、splitters、stores、security、agent |
+| API 服务层 | `api/`：routers、services、schemas、runtime |
+| Web 前端 | React 18 + Vite 8 + React Query + Zustand + 项目内轻量 router |
+| 桌面端 | Electron 31，`desktop/` 启动 Python API 后加载 Web |
+| 旧前端 | Streamlit：`app.py` + `frontend/`，保留为迁移回退，不代表当前主线体验 |
+| PDF/OCR | PyMuPDF + PaddleOCR |
+| 本地 LLM | Ollama 0.3.3；README 仍提示 0.4 与当前依赖组合不兼容 |
 
 ---
 
 ## 3. 架构
 
-```
-desktop/ (Electron 壳, NorthAgent)
-  └─ webapp/ (React + Vite, 也可独立运行)
-       └─ api/ (FastAPI 路由层)
-            ├─ routers/: agent, chat, health, kb, settings
-            ├─ services/: agent_runtime, chat_service, kb_service,
-            │              command_filter/parser, risk_assessor,
-            │              approval_service, tool_registry, session_store ...
-            └─ runtime.py (runtime_state, bootstrap)
-                 └─ server/ (RAG 核心)
-                      ├─ engine.py / index.py / retriever.py / ingestion.py
-                      ├─ text_splitter.py / splitters/
-                      ├─ readers/pdf_ocr.py        ← PDF OCR 回退
-                      ├─ kb_registry.py / kb_filter.py ← 最小多知识库基础能力
-                      ├─ agent/ (task_planner, plan_executor)
-                      ├─ security/ (命令风险分级, 硬拒绝)
-                      ├─ models/ (embedding, llm_api, ollama, reranker)
-                      └─ stores/ (config_store)
+```text
+desktop/ (Electron, NorthAgent)
+  -> webapp/ (React + Vite)
+      -> api/ (FastAPI 路由与服务层)
+          routers/: agent, chat, health, kb, settings
+          services/: agent_runtime, chat_service, kb_service,
+                     asset_service, folder_service, evidence_service,
+                     approval_service, session_store, tool_receipt_store ...
+          runtime.py: RuntimeState, 模型预热, IndexManager 缓存
+              -> server/ (RAG 核心)
+                  index.py / ingestion.py / retriever.py
+                  readers/: pdf_ocr, image_ocr, web readers
+                  splitters/: Chinese splitters, title enhance
+                  kb_registry.py / folder_registry.py / asset_registry.py
+                  stores/: config/doc/index/vector/storage context
+                  security/: path/filename/command validation
 
-frontend/ + app.py (旧 Streamlit 入口，尚未完全退场)
+app.py + frontend/ (旧 Streamlit 入口，保留)
 ```
 
-**入口**：
-- 后端 API：`python run_api.py`（端口 18080）
-- 一键联调：`.\start_dev.ps1`（拉起 API + Web）
-- 桌面联调：`.\scripts\dev-all.ps1`（API + Web + Desktop）
-- 旧 Streamlit：`streamlit run app.py`（保留作迁移回退，未达功能对等前不删）
+主要运行入口：
+
+- 后端 API：`python run_api.py`，默认 `127.0.0.1:18080`
+- Web 前端：`cd webapp && npm run dev`
+- 桌面端：`cd desktop && npm run dev`
+- 旧 Streamlit：`streamlit run app.py`
 
 ---
 
 ## 4. 当前进度
 
-### 已完成
-- **API / 桌面骨架已成型**：FastAPI 后端、React Web、Electron 桌面壳、会话持久化、配置存储、日志轮转都已落地。
-- **最小多知识库基础能力已落地**：`KBRegistry`、`KBIdFilter`、KB CRUD 路由、默认 `default` KB 启动自动创建、`QueryRequest.kb_ids` 查询入口已存在。
-- **多知识库最小闭环已补齐**（2026-07-13）：Agent `knowledge_scope.kb_id` 现已透传为 `kb_ids` 参与 KB 查询，Agent evidence 会返回真实 `kb_id`，`POST /api/kb/web/import` 也会把请求里的 `kb_id` 继续传给 `kb_service.import_urls()`。
-- **本地开发联调链路已修复**（2026-07-14）：`start_dev.ps1` 可在 Windows PowerShell 下正常解析并同时拉起 API 18080 + Web 5173；FastAPI 已放行 Vite 开发源的 CORS 预检，知识库页面不再因 `Network Error` 卡在加载失败。
-- **知识库导入与嵌入质量基线已实测**（2026-07-14）：未配置 LLM 时，独立测试库成功导入 UTF-8 中文文档并完成向量检索；20 组语义烟测结果为 Recall@1 50%、Recall@3 95%、Recall@5 100%、MRR 0.71，证明候选召回可用但首位排序仍需优化。
-- **多知识库目录化存储阶段 5 测试已通过**（2026-07-15）：`docs/20260714-kb-directory-storage/` 已形成 PRD、FRD、RTM、Plan、Test Plan 和 Test Report；代码已实现 `data/{kb_id}/` 原始文件目录化、导入前 KB active 校验、共享索引 metadata 写入、list/delete 严格隔离、空 KB 删除保护、registry 原子写与迁移脚本。正式测试覆盖核心目录化、KB/Agent 回归、非 slow 全量和覆盖率门禁，测试报告已于 2026-07-15 审核通过，当前进入阶段 6 的开发故事沉淀、commit 与 push。
-- **粮仓知识库本地资料已规范化整理**（2026-07-15）：`data/grain-knowledge-base/` 已按 `docs/01-*` 至 `docs/07-*` 主题目录组织主资料，并将重复副本隔离到 `docs/98-duplicates-to-review/`；已维护知识库级 `readme.md`、`index.md`、分类 README、`qa/` 评测资料和 `data/kb-index.md` 多知识库总索引。当前目录共 255 个原始资料文件，其中主资料 126 个、重复/隔离副本 129 个；本地 registry 中 `grain-knowledge-base` 为 active，`doc_count=25`（含 smoke/手动重复导入副本），因此目录整理完成但向量索引尚非全量导入。已新增 `scripts/import_grain_kb_batches.py` 分批导入工具，支持 dry-run 计划、DOCX/PDF 分批 apply 和 JSON 报告；2026-07-15 已完成 5 个 DOCX 的脚本化 apply smoke（120 chunks）和 5 组 HTTP 问答 smoke。
-- **粮仓知识库 smoke 问答链路已跑通**（2026-07-15）：修复 LlamaIndex 默认 OpenAI fallback、索引加载前 embedding 预热、非字符串 `file_path` metadata、陈旧向量 id KeyError 以及非 default 查询混入 default 来源的问题；最终 Q1-Q4 领域问题回答正确，Q5 实时价格越界问题能说明上下文无相关信息，sources 均限定在 `grain-knowledge-base`。
-- **导入功能独立 smoke 已通过**（2026-07-15）：为避免污染正式粮仓知识库，新增临时 KB `import-smoke-20260715-192353` 验证创建 KB、`POST /api/kb/file/import`、`data/{kb_id}/` 落盘、文档列表、问答召回和跨 KB 负向隔离；测试问题“导入功能烟测代号是什么？”在临时 KB 回答“蓝麦”，在 `grain-knowledge-base` 不泄漏该答案。报告位于 `data/grain-knowledge-base/qa/import-function-smoke-20260715-192353.json`。
-- **上传目标知识库显式选择 P1 已修复**（2026-07-16）：`/knowledge` 初始不再静默选中 `default`；只有用户显式选择已登记且 active 的 KB 后，文档列表、文件上传和网页导入才可用。知识库列表支持创建、重命名、删除，新建成功后自动选择；导入区显示目标名称、`kb_id` 和 `data/{kb_id}/`。同时修复 Axios 统一响应体二次解包导致列表误显示为空的问题，并补充上传 API 回归测试。Node 回归 18/18、前端 API/规则覆盖率 80.92%、后端定向回归 29/29、Vite 构建和浏览器 smoke 均通过。
-- **上传 400 根因已修复**（2026-07-16）：定位到 `webapp/src/api/kb.js` 与 `webapp/src/api/agent.js` 手动设置了 `Content-Type: multipart/form-data`，导致浏览器未自动补齐 multipart boundary，请求到 FastAPI 时返回 `Missing boundary in multipart.` 并报 400。现已移除该请求头，并新增 `webapp/src/api/kb.test.js` 回归验证上传调用仅传 `FormData` 与 `kb_id`，不再显式覆盖 multipart 头；定向 Node 回归、覆盖率与 `npm run build` 已通过。
-- **多知识库目录化存储已实现（`data/{kb_id}/`）**（2026-07-15，改动待提交）：导入文件/URL 前校验目标 KB 为 active；上传文件按 `kb_id` 落盘到 `data/{kb_id}/` 并传显式路径给 `IndexManager`；list/delete 对旧无 `kb_id` 节点与新节点做了隔离；新增 registry 原子写、迁移脚本 `scripts/migrate_kb_directory_storage.py`、RAG 质量 fixture 校验脚本 `scripts/validate_rag_quality_fixtures.py` 及配套测试。
-- **`/agent` 页面已重构为问题优先的单页工作区**（2026-07-17，改动待提交）：`webapp/src/pages/AgentPage.jsx` 整合出三种可用模式——基础聊天、限定知识库聊天、Agent 高级模式；同页可见对话线程、当前知识范围、模型状态和最新引用来源；KB 聊天强制要求显式选中 active 知识库。同时修复了后端阻塞性回归：历史坏维度向量和空 Markdown 节点会导致 `/api/chat/query` 返回 400，现已在 `server/retriever.py` 中于向量检索前剔除坏向量、BM25 建索引前跳过空/不可序列化节点。Node 规则测试 14/14、`pytest tests/api/test_retriever_stale_vectors.py -q` 7 passed、`npm run build` 通过，浏览器 `/agent` 实测正常返回答案和来源。详见 `docs/20260717-agent-qa-page-refactor/`。
-- **粮仓知识库批量导入脚本已新增**（2026-07-15，改动待提交）：`scripts/import_grain_kb_batches.py` 支持 dry-run 计划、DOCX/PDF 分批 apply 和 JSON 报告，配套 `tests/scripts/test_import_grain_kb_batches.py`。
-- **Agent runtime + 审批流已可用**：命令解析、风险分级 L0-L3、硬拒绝过滤、pending action 审批（approve/reject）、回执存储、session 快照持久化已接通。
-- **PDF OCR 回退已落地**（`4a10f54`）：`PDFOCRReader` 先用 PyMuPDF 读文字层，无有效文字层时回退 PaddleOCR 逐页识别；`server/index.py` 统一走 `_load_documents()`。
-- **OCR 质量评估已补齐**（`4a10f54`）：`scripts/pdf_ocr_quality.py` 可做关键词召回率评估，并有配套测试。
-- **Windows 环境稳定性显著提升**：修复 torch DLL / PATH 冲突，embedding / splitter / LLM 相关导入改为懒加载，文本分割器可按上传参数重建，启动链更稳。
+### 4.1 已完成的主干能力
 
-### 当前阶段判断
-项目已经不是“只有想法或 Demo”的阶段，而是进入了 **主干功能可运行、近期重点在稳定性收口与架构继续演进** 的阶段：
+- **API/Web/Desktop 骨架已落地**：FastAPI、React/Vite、Electron 壳、会话快照、设置存储、运行日志与本地健康检查已具备。
+- **多知识库最小闭环已完成**：KB registry、KB CRUD、`kb_id` 范围查询、Agent `knowledge_scope.kb_id` 透传、网页/文件导入目标 KB 透传、证据返回真实 `kb_id`。
+- **原始文件目录化存储已完成**：新导入文件按 `data/{kb_id}/` 保存；导入前校验 KB active；list/delete 与问答链路按 metadata 做逻辑隔离。
+- **导入对象模型已显著增强**：支持逐文件导入结果、导入回执、stage timings、文件夹树、Markdown 内嵌资产抽取、资产 registry、图片 OCR 路径、证据预览。
+- **DOCX 文档类型识别已补齐**：`api/services/kb_service.py` 已显式识别当前依赖验证可导入的 `.docx` 与对应 MIME，避免 DOCX zip 容器被当作二进制提前拒绝；`pptx/xlsx/odt/ods` 在补齐依赖和真实导入测试前仍按不支持类型处理。
+- **LlamaIndex 0.11.19 适配已推进**：`server/ingestion.py` 避免依赖缺失的私有 `_update_docstore`；`server/retriever.py` 改为通过当前版本的 `_build_node_list_from_query_result` 组装节点，并保留 stale vector id / 维度不兼容 embedding 的过滤。
+- **Knowledge Workspace 已形成当前主界面**：`/knowledge` 支持知识库选择、文件导入、网页导入、对象浏览、导入诊断、OCR 预热状态、资产/证据预览入口。
+- **`/agent` 页面已重构为问题优先工作区**：支持基础聊天、限定知识库聊天、Agent 高级模式；知识库聊天要求显式选择 active KB。
+- **前端路由依赖风险已收口**：Web 前端只使用顶层页面切换、`Link`、`useLocation` 与 `useNavigate` 的基础能力，已用项目内 `webapp/src/router.jsx` 替代 `react-router-dom`，并对协议 URL、双斜杠和反斜杠导航做本地拒绝；`npm audit --json` 当前为 0 vulnerabilities。
+- **Agent runtime + 审批流可用**：命令解析、风险分级、硬拒绝、pending action、approve/reject、工具回执、session 持久化已接通。
+- **PDF/OCR 回退链路已落地**：文本层优先，扫描件回退 PaddleOCR；图片 OCR 可进入导入与诊断路径。
+- **PaddleOCR 本地运行时已补齐并加固默认模型源**：`server/readers/image_ocr.py` 在用户未显式配置时默认使用 ModelScope 并跳过 PaddleX 不稳定的模型源探测；同时预加载 LangChain text splitter bridge，避免 PaddleOCR/PaddleX 污染 `langchain.text_splitter` 后导致问答 400。本机已完成 PP-OCRv6 检测/识别模型下载缓存，图片 OCR、扫描 PDF OCR 与 mixed batch API roundtrip 验证通过；诊断脚本已补充 macOS/Linux/Windows 字体候选，降低 macOS 默认小字体导致 OCR 样本误识别的概率。
 
-1. 主产品骨架已经具备；
-2. 最近一轮重点成果是 PDF OCR、Windows 环境修复、多知识库最小闭环补齐、多知识库目录化存储、`/agent` 页面重构与 retriever 历史坏数据加固；
-3. 当前主要矛盾已经从“接口是否打通”转为“共享单索引方案是否继续收紧与升级”；原始文件从 `data/` 根目录平铺改为 `data/{kb_id}/` 已实现并测试通过；
-4. 粮仓知识库的本地资料分类、索引和 QA 骨架已经具备，上传前显式选择目标 KB 的 P1 已解除；下一步先在专用 smoke KB 完成一次用户真实上传复验，再补齐粮仓主资料导入、阿里云/百炼配置下的嵌入质量评测，以及基于 verified QA 的问答效果报告；
-5. **当前工作树有一大批改动已 `git add` 但尚未 commit**（多知识库目录化存储、`/agent` 页面重构、retriever 加固、粮仓批量导入脚本、开发故事与规划文档），下一步是分批 commit 并 push，避免继续在未提交状态上叠加新改动。
+### 4.2 质量与评测进展
 
-### 测试
-- 快测（默认）：`python -m pytest tests/ -q -m "not slow"`
-- 2026-07-14 本地全量快测最新复跑结果：`python -m pytest tests/ -q -m "not slow"` -> `88 passed, 1 deselected, 2 warnings in 11.29s`
-- 2026-07-14 本地定向回归结果：`python -m pytest tests/api/test_app_cors.py tests/api/test_agent_runtime.py tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py -q` -> `44 passed, 2 warnings in 4.73s`
-- 2026-07-14 多知识库现状基线：`python -m pytest tests/api/test_kb_registry.py tests/api/test_kb_routes.py tests/api/test_m2_multi_kb.py tests/api/test_agent_runtime.py -q` -> `55 passed, 2 warnings in 4.54s`。该结果仅验证编码前逻辑多库链路。
-- 2026-07-15 多知识库目录化存储阶段 5 正式测试通过：语法自检通过；`git diff --check` 退出码 0 且仅有 LF/CRLF 提示；占位词检查无命中；核心目录化功能 `90 passed in 9.36s`；KB/多 KB/Agent 定向回归 `45 passed, 2 warnings in 3.70s`；API + integration + scripts + utils + QA fixture 扩展回归 `164 passed, 2 warnings in 5.18s`；默认非 slow 全量门禁 `168 passed, 1 deselected, 2 warnings in 5.74s`；目录化相关文件覆盖率最终 `84%`，高于 `>=80%` 门禁。详见 `docs/20260714-kb-directory-storage/20260714-kb-directory-storage-test-report.md`。
-- 2026-07-15 粮仓知识库资料整理校验：本地扫描 `data/grain-knowledge-base/docs/` 得到 255 个资料文件，格式为 157 个 PDF、98 个 DOCX；主资料目录唯一 SHA256 数为 126，重复/隔离区 129 个文件；已生成 `_maintenance/2026-07-15-main-duplicate-isolation/move-manifest.json` 记录 2 个主目录重复别名的隔离移动。
-- 2026-07-16 粮仓知识库 UI 基线：`/api/kb` 可见 `grain-knowledge-base`，浏览器文档列表当前显示 14 个已索引文档，路径和 `kb_id` 均限定在粮仓库；上传目标显式选择修复后，初始不选库，选择粮仓库后文件与网页导入目标提示一致。人工真实上传步骤见 `docs/20260715-grain-kb-evaluation/20260715-grain-kb-evaluation-test-guide.md`。
-- 2026-07-16 本地浏览器 smoke：`/knowledge` 初始显示“请选择知识库”，三个功能标签禁用；侧边栏展示 4 个真实 KB；选中 `grain-knowledge-base` 后显示 14 个文档以及明确的文件/网页导入目标，console error/warn 为空。服务启动与 CORS 基线仍沿用 2026-07-14 已通过结果。
-- 2026-07-14 嵌入与导入烟测：`bge-small-zh-v1.5` 可输出 512 维向量；20 组 UTF-8 中文检索 Recall@1=50%、Recall@3=95%、Recall@5=100%、MRR=0.71；测试库 `embedding-quality-smoke-20260714` 导入 1 个文件并生成 1 个分块，限定 KB 检索命中；未配置 LLM 时问答接口按设计返回 503。详见 `docs/20260714-embedding-rag-quality-evaluation/`。
-- 2026-07-17 `/agent` 页面重构与 retriever 加固验证（改动待提交）：Node 规则测试 `node --test webapp/src/domain/agentExperience.test.js webapp/src/api/response.test.js webapp/src/domain/kbSelection.test.js` -> 14/14 passed；`pytest tests/api/test_retriever_stale_vectors.py -q` -> 7 passed；`npm run build` 通过；`git diff --check` 退出码 0；直连 `POST /api/chat/query` 返回 200 且不再复现历史 400；浏览器 `http://127.0.0.1:5173/agent` smoke 通过。详见 `docs/20260717-agent-qa-page-refactor/20260717-agent-qa-page-refactor-test-report.md`。
-- 当前快测已覆盖：PDF OCR 功能 + 质量、KBRegistry、KB 路由、M2 多 KB、agent runtime、CORS 预检、command filter/parser、tool registry、receipt persistence、多知识库目录化存储、retriever 历史坏数据加固等主线能力。
-- 慢测（真实 PaddleOCR，约 12 分钟 / 样本）：`python -m pytest -q -m slow -s`，默认不跑。
-- 当前 warning 主要来自 FastAPI 的 `@app.on_event("startup")` 弃用提示，后续宜迁移到 lifespan 写法。
+- **本地多知识库助手 Stage 3 评测闭环已形成**：`docs/20260722-local-multi-kb-assistant/` 是当前正式基线，包含 PRD/FRD/RTM/spec/plan/test-plan/test-report 与 artifacts。
+- **2026-07-31 测试报告给出的当前工作树证据**：
+  - 全量 Python 回归：`667 passed, 2 warnings`
+  - `api + server` 覆盖率：`82%`，高于仓库 `>= 80%` 门禁
+  - broad ingestion + QA 回归：`354 passed, 2 warnings`
+  - 正式 QA eval：`eval_v4 54/54`、`eval_v5 72/72`、`eval_v6 78/78`
+  - live roundtrip 覆盖 Markdown、PDF 文本层、扫描 PDF OCR、图片 OCR、mixed batch
+- **粮仓知识库真实 QA 评测已新增脚本和报告**：
+  - 脚本：`scripts/run_grain_qa_eval.py`
+  - 输入：`data/grain-knowledge-base/qa/verified.jsonl`，当前 30 条人工标注用例
+  - 报告产物：`docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`
+  - 2026-08-07 重新生成报告摘要：`total=30`、`answerable_total=29`、`unanswerable_total=1`、`error_count=0`、`Recall@5=1.0`、`MRR@5=0.977`、`citation_hit_rate=1.0`、`refusal_accuracy=1.0`、`kb_isolation_rate=1.0`
+  - 报告已补充 `api_base`、`timeout`、`cases_sha256`、逐条 `source_kb_ids` 与 `kb_id_missing_count`，避免引用来源缺失 `kb_id` 时误判隔离通过。
+  - 说明：该评测不做 LLM 裁判，主要验证检索命中、引用来源、拒答和 KB 隔离。
 
----
+### 4.3 当前 Git 状态
 
-## 5. 已知问题和限制
-
-- **多知识库仍是过渡架构**：当前实现更接近“单索引 + `kb_id` metadata 过滤”，不是物理多索引隔离。`config.DEFAULT_INDEX_NAME` 仍是单个 `knowledge_base`，`RuntimeState` 也只维护一个 `IndexManager`；本轮已把新导入原始文件改为 `data/{kb_id}/`，但 `storage/` 不拆分，旧索引 metadata/query 一致性仍需通过重导或重建索引验收。
-- **旧数据兼容策略会放宽过滤**：`KBIdFilter` 目前仍保留“没有 `kb_id` metadata 的节点”，适合迁移期，但意味着旧数据可能绕过严格库过滤。
-- **Windows 环境仍然脆弱**：torch / onnxruntime 对 PATH 中其他 Python 版本的 DLL 敏感。`start_dev.ps1` 会清理 PATH 并保留 Python 3.12 与当前 Node 目录，手动跑命令也需注意。详见 `docs/troubleshooting/20260710-0953-path-conflict-torch-dll.md`。
-- **运行环境分裂**：当前依赖主要装在**系统 Python 3.12**，`.venv` 已不再可信（缺 pymupdf / paddleocr / torch 等关键依赖）。新机器建议直接用系统 py312，或重新构建新的 venv。
-- **OCR 仍然较慢**：PaddleOCR 在 CPU 上整本扫描件约 2 分钟 / 页，6 页国标样本约 12 分钟，已用 `slow` marker 隔离。
-- **OCR 质量口径仍偏基础**：目前只做关键词召回率，未覆盖 CER 字符准确率、表格结构还原、版面顺序等更细指标。
-- **嵌入首位排序质量仍需优化**：20 组项目领域合成语义测试中 Recall@3=95%、Recall@5=100%，但 Recall@1=50%、MRR=0.71，且 10/20 用例的正确段落分数低于最高干扰项；当前 `use_reranker=false`，尚未完成重排模型和 `bge-large-zh-v1.5` 对照测试。
-- **粮仓知识库还未完成全量向量化**：`data/grain-knowledge-base/` 目录已整理并建立索引，但本地 registry 当前 `doc_count=25`，且包含 smoke/手动重复导入副本，仍低于主资料 126 个文件；正式问答验收前需要按 `index.md` 的主资料清单补齐导入或重建索引，并输出检索/问答评测报告。
-- **大批改动已 add 未 commit**：多知识库目录化存储、`/agent` 页面重构、retriever 历史坏数据加固、粮仓批量导入脚本及配套文档/规划/开发故事均已 `git add`，尚未 commit/push；继续开发前应先分批提交，避免与新改动混在一起。
-- **`logs/frontend_err.log` 中的 vite 报错为历史记录，非当前问题**：日志记录的是 `/agent` 页面重构中途出现过的 `agent-page.css` 缺失和 JSX 编码错乱（乱码字符导致 babel 解析失败），均已在本轮重构中修复（`agent-page.css` 已存在，测试报告确认 `npm run build` 通过）；该日志文件本身建议后续清理或加入 `.gitignore`，避免误导后来者。
-- **空知识库下问答仍会明确失败**：默认 `default` KB 启动可见，但未导入文档时真实检索会返回 `Knowledge base is empty. Please import documents first.`；这是当前预期行为，不代表 API/Web 链路异常。
-- **文档需要联动维护**：`docs/project.md`、`docs/guide/DOCS_INDEX.md`、`docs/20260722-local-multi-kb-assistant/` 下的当前基线文档需要按最新代码口径同步；后续代码变更时仍需同步更新，避免再次漂移。
-- **Streamlit 仍在并存**：`app.py` / `frontend/` 作为迁移回退保留，功能未与后端 API 完全对等，不能再作为判断当前主线能力的唯一依据。
-- **Ollama 版本受限**：当前要求 0.3.3，0.4 与现有 LlamaIndex 组合不兼容。
+- 当前分支：`codex/desktop-agent-stage3`
+- 远端跟踪：`origin/codex/desktop-agent-stage3`
+- 当前本地分支领先远端 4 个提交：
+  - `575ff3d fix(kb): recognize docx/office documents as importable file kind`
+  - `64c402b fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes`
+  - `7b0037d feat(eval): add grain KB real QA evaluation script`
+  - `ed8368f docs(grain-qa): add real KB QA evaluation report artifacts`
+- 当前未提交工作区变更：包含本轮修复、文档更新、`AGENTS.md` macOS conda 环境说明、前端依赖安全升级、粮仓 QA 报告更新，以及本地 `.claude/settings.local.json` 配置变更；没有 staged 改动。
 
 ---
 
-## 6. 快速上手
+## 5. 测试与验证
 
-```powershell
-# 安装依赖（系统 Python 3.12）
-python -m pip install -r requirements.txt
-cd webapp; npm install; cd ..
-cd desktop; npm install; cd ..   # 桌面端可选
+### 5.1 可复用命令
 
-# 一键联调（API 18080 + Web 5173）
-.\start_dev.ps1
+```bash
+# Python 全量回归，macOS 当前推荐使用 conda agent-kb 环境
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest -q
 
-# 健康检查
-python -c "import requests;print(requests.get('http://127.0.0.1:18080/api/health',timeout=5).json())"
+# api + server 覆盖率
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api tests/readers tests/utils \
+  tests/test_rag_quality_eval_dataset.py \
+  tests/test_rag_quality_eval_dataset_v2.py \
+  tests/test_rag_quality_eval_dataset_v3.py \
+  tests/test_rag_quality_eval_dataset_v4.py \
+  tests/test_rag_quality_eval_dataset_v5.py \
+  tests/test_rag_quality_eval_dataset_v6.py \
+  tests/test_diag_roundtrip_support.py \
+  tests/test_diag_utf8_import_roundtrip.py \
+  tests/test_logging_utils.py tests/test_retriever.py tests/test_run_api.py \
+  --cov=api --cov=server
 
-# 跑测试
-python -m pytest tests/ -q -m "not slow"
+# 前端纯函数/API/store 单测
+node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js
+
+# 前端构建
+cd webapp && npm run build
+
+# 粮仓知识库真实 QA 评测，需要 API 服务已启动且目标 KB 已具备索引
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.run_grain_qa_eval \
+  --cases data/grain-knowledge-base/qa/verified.jsonl \
+  --api-base http://127.0.0.1:18080 \
+  --kb-id grain-knowledge-base \
+  --output docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json
 ```
 
-模型配置：LLM API key 可在应用界面配置，或设环境变量 `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` / `MOONSHOT_API_KEY` / `ZHIPU_API_KEY`。本地 LLM 用 Ollama 0.3.3。
+### 5.2 2026-08-07 本机复核结果
+
+本次复核使用 `/opt/miniconda3/envs/agent-kb/bin/python`（Python 3.12.13，`llama-index==0.11.19`）作为权威 Python 环境；默认 `/opt/miniconda3/bin/python` 是 base Python 3.13，不适合作为项目测试环境。
+
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest -q`：`677 passed, 35 warnings in 7.62s`
+- `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`75 passed`
+- `npm install` 后修复本地 `node_modules` 依赖；`chmod +x node_modules/.bin/vite node_modules/vite/bin/vite.js && npm run build`：通过，Vite 构建输出 `dist/`
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.run_grain_qa_eval --cases data/grain-knowledge-base/qa/verified.jsonl --api-base http://127.0.0.1:18080 --kb-id grain-knowledge-base --output docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`：30 条用例评测完成，`Recall@5=1.0`、`MRR@5=0.977`、`kb_isolation_rate=1.0`
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pip install paddleocr==3.7.0 paddlepaddle==3.2.2`：补齐 OCR 运行时依赖；`paddle==3.2.2` 与 `paddleocr==3.7.0` 可直接导入。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pip check`：`No broken requirements found.`
+- `/opt/miniconda3/envs/agent-kb/bin/python -c "from api.routers.health import _build_import_capabilities; ..."`：`pdf_text_extraction.ready=true`，`image_ocr.ready=true`，`fitz/paddleocr/paddle/pillow` 均 installed。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/readers/test_image_ocr.py -q`：`20 passed, 1 warning`
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/readers/test_image_ocr.py tests/api/test_chat_pdf_semireal.py -q`：`31 passed, 8 warnings in 2.99s`
+- `/opt/miniconda3/envs/agent-kb/bin/python - <<'PY' ... extract_image_ocr_result(data/diag-image-ocr-1785485977/images/diag-ocr.png) ... PY`：`status=success`、`text_length=129`，PP-OCRv6 模型从 ModelScope 下载并缓存到 `~/.paddlex/official_models/` 后可复用。
+- `KB_API_PORT=18083 /opt/miniconda3/envs/agent-kb/bin/python run_api.py` 后检查 `/api/health`：`embedding_warmup.state=ready`、`ocr_warmup.state=ready`、`image_ocr.ready=true`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_image_ocr_roundtrip --base-url http://127.0.0.1:18083 --kb-id diag-image-ocr-20260807-r2 --source-path temp/diag-ocr-20260807-r2.png --output-path temp/diag-image-ocr-20260807-r2-report.json --timeout 240`：通过；`ocr_attempted=true`、`indexed_from_ocr=true`、`source_saved_hash_match=true`、`chat_answer_has_expected_terms=true`、`preview_has_expected_terms=true`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_pdf_scan_roundtrip --base-url http://127.0.0.1:18083 --kb-id diag-pdf-scan-20260807-r2 --source-path temp/diag-scan-20260807-r2.pdf --output-path temp/diag-pdf-scan-20260807-r2-report.json --timeout 240`：通过；源文件和保存文件 hash 一致，PDF 文字层为空，`ocr_attempted=true`、`ocr_status=success`、`indexed_from_ocr=true`、`ocr_text_length=293`，问答、source、evidence 和 preview 均命中预期关键词。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_mixed_batch_roundtrip --base-url http://127.0.0.1:18083 --kb-id diag-mixed-batch-20260807-r2 --workspace-dir temp/diag-mixed-batch-20260807-r2 --output-path temp/diag-mixed-batch-20260807-r2-report.json --timeout 240`：通过；`run_passed=true`，文件保存 hash、嵌入图片 OCR、独立图片 OCR、PDF 文本层、资产注册和无证据拒答核心 gate 均通过；导入诊断为 `ocr_success_count=1`、`indexed_from_ocr_count=1`、`embedded_ocr_success_count=1`、`embedded_indexed_from_ocr_count=1`、`asset_registered_count=2`、`failed_files=0`。
+- `cd webapp && npm audit fix` 后继续升级 `vite` 到 `8.2.1`、`@vitejs/plugin-react` 到 `6.0.5`，并用项目内轻量 router 替代 `react-router-dom`；`npm run build` 通过，前端 Node 单测仍为 `75 passed`。
+- `cd webapp && npm audit --json`：`0 vulnerabilities`。
+- `git diff --check`：通过。
+
+---
+
+## 6. 已知问题和限制
+
+- **macOS 要使用 conda `agent-kb` 环境**：默认 `python` 仍可能指向 Miniconda base 3.13，缺项目依赖；非交互命令建议直接用 `/opt/miniconda3/envs/agent-kb/bin/python`。
+- **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
+- **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
+- **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
+- **粮仓知识库评测报告仍需注意样本边界**：当前 30 条 verified QA 报告指标全绿，且已补充运行参数和用例 hash，但样本规模仍有限，不能等同于全量资料质量验收。
+- **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
+- **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
+- **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
+- **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 
 ---
 
@@ -162,23 +193,21 @@ python -m pytest tests/ -q -m "not slow"
 
 | 文档 | 内容 |
 |---|---|
-| `AGENTS.md` | 开发流程规范（PRD→实施→测试→提交）、文档命名、评审流程 |
-| `docs/project.md` | 面向协作者的当前项目总览、进度与问题 |
-| `docs/guide/DOCS_INDEX.md` | 当前 docs 体系总索引与主文档入口 |
-| `docs/20260722-local-multi-kb-assistant/` | 本地多知识库知识助手当前正式基线（PRD/FRD/RTM/Plan/Test Plan） |
-| `docs/spec/desktop_api_contract.md` | 页面到 API 的契约映射 |
-| `docs/spec/desktop_project_design.md` | 桌面端项目设计 |
-| `docs/test/desktop_regression_checklist.md` | 桌面版回归清单 |
-| `docs/20260713-pdf-ocr-quality/` | PDF OCR 进展文档 |
-| `docs/20260714-dev-runtime-cors-startup/` | 本地开发运行链路与 CORS 修复测试报告 |
-| `docs/20260714-embedding-rag-quality-evaluation/` | 嵌入检索、真实导入和 RAG 问答前置条件测试方案与报告 |
-| `docs/20260714-kb-directory-storage/` | 多知识库目录化存储 PRD/FRD/RTM/Plan/Test Plan/Test Report |
-| `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入、嵌入检索与问答人工验收测试指南 |
-| `docs/20260716-kb-upload-target-selection/` | 上传前显式选择目标知识库的修复说明、计划、测试方案与报告 |
-| `docs/20260717-agent-qa-page-refactor/` | `/agent` 页面重构（问题优先单页工作区）与 retriever 历史坏数据加固的 FRD/PRD/Plan/RTM/Test Plan/Test Report |
-| `docs/interview/dev-stories/` | 开发故事沉淀（面试复盘材料） |
-| `docs/troubleshooting/` | 按时间戳组织的排查记录 |
-| `评审建议.txt` | 最新评审意见（仓库根） |
+| `AGENTS.md` | 仓库级开发流程规范：PRD -> Plan -> Code -> Test Plan -> Test Report -> Commit/Push |
+| `docs/project.md` | 当前项目总览、进度、验证和风险 |
+| `docs/guide/DOCS_INDEX.md` | 文档体系导航索引 |
+| `docs/20260722-local-multi-kb-assistant/` | 当前正式基线：本地多知识库助手主线 |
+| `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-test-report.md` | 2026-07-31 Stage 3 测试报告 |
+| `docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json` | 2026-08-07 粮仓知识库 QA 评测报告产物 |
+| `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
+| `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
+| `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
+| `docs/20260717-agent-qa-page-refactor/` | `/agent` 页面重构与 retriever 加固专题 |
+| `docs/spec/desktop_api_contract.md` | 页面到 API 契约 |
+| `docs/spec/desktop_project_design.md` | 桌面端设计 |
+| `docs/troubleshooting/` | 排障记录 |
+| `docs/interview/dev-stories/` | 开发故事沉淀 |
+| `评审建议.txt` | 最新评审意见 |
 
 ---
 
@@ -186,24 +215,15 @@ python -m pytest tests/ -q -m "not slow"
 
 | hash | 说明 |
 |---|---|
-| `8653d0e` | feat(kb): store uploaded files by knowledge base |
-| `97d5a65` | docs: add local runtime test report |
-| `05733e8` | docs: record local runtime startup fix |
-| `cc80145` | fix: repair local dev runtime startup and cors |
-| `35ff8bf` | fix: close multi-kb agent and web import loop |
-| `b31babe` | docs: add project overview for AI context |
-| `052cc81` | test(api): add multi-kb and agent runtime coverage |
-| `4a10f54` | feat(pdf): add OCR fallback and quality evaluation |
-| `3bce696` | fix: recreate text splitter with per-upload chunk_size/chunk_overlap so Settings actually takes effect |
-| `d1073b4` | fix: remove Python 3.10 from PATH to resolve torch DLL conflict + real BGE embedding now works |
-| `1e0bda8` | docs: restructure troubleshooting log into timestamped per-session files under docs/troubleshooting/ |
+| `ed8368f` | docs(grain-qa): add real KB QA evaluation report artifacts |
+| `7b0037d` | feat(eval): add grain KB real QA evaluation script |
+| `64c402b` | fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes |
+| `575ff3d` | fix(kb): recognize docx/office documents as importable file kind |
+| `57e6a30` | feat(kb): close local multi-kb ingestion qa loop |
+| `7d0533a` | refactor(import): add persist stage diagnostics breakdown |
+| `f7cc351` | chore: update dev story capture state |
+| `4d2abb7` | refactor: batch index persistence during kb imports |
+| `7889bc1` | feat: add knowledge workspace and import diagnostics |
+| `25dc20a` | feat(kb): add asset registry and preview api |
 
 查看完整历史：`git log --oneline -30`
-
-**注意**：上表为已 commit 的历史；`/agent` 页面重构、retriever 加固、多知识库目录化存储、粮仓批量导入脚本等改动目前只 `git add` 未 commit（见「已知问题和限制」），尚未出现在上表中。
-
-### 待提交改动补充说明（2026-07-17）
-
-- **`/agent` 页面重构 + retriever 加固**：详见「4. 当前进度」与 `docs/20260717-agent-qa-page-refactor/`。
-- **粮仓知识库 QA 集扩充**：`data/grain-knowledge-base/qa/verified.jsonl` 从 24 组扩充到 30 组；新增 `data/grain-knowledge-base/qa/draft.jsonl`（约 20-26 组，未经人工复核的候选/困难问题）；新增 `data/grain-knowledge-base/qa/question-groups.md` 对 QA 集做分组说明（区分 smoke / 已验证 verified / 待复核 hard draft）；粮仓 QA 总量当前约 56 组，尚未做最终统一校验。
-
