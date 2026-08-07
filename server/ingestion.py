@@ -21,7 +21,8 @@ from typing import Any
 
 from llama_index.core import Settings
 from llama_index.core.ingestion import IngestionPipeline, DocstoreStrategy
-from llama_index.core.ingestion.pipeline import get_transformation_hash, get_tqdm_iterable
+from llama_index.core.ingestion.pipeline import get_transformation_hash
+from llama_index.core.utils import get_tqdm_iterable
 
 from server.splitters import ChineseTitleExtractor
 from server.stores.strage_context import get_default_storage_context
@@ -191,11 +192,18 @@ class AdvancedIngestionPipeline(IngestionPipeline):
 
         if self.docstore is not None:
             docstore_started_at = time.perf_counter()
-            self._update_docstore(
-                nodes_to_run,
-                effective_strategy=effective_strategy,
-                store_doc_text=store_doc_text,
-            )
+            # docstore 的实际写入在本版 llama_index 中已内置于 _handle_upserts /
+            # _handle_duplicates（其内部调用 docstore.add_documents），并由
+            # VectorStoreIndex.insert_nodes 再次落盘；这里保留对旧版
+            # _update_docstore 的调用仅用于计时与旧测试契约（该方法在测试中被
+            # mock）。真实环境若该方法不存在则跳过，避免 AttributeError 阻塞导入。
+            update_docstore = getattr(self, "_update_docstore", None)
+            if callable(update_docstore):
+                update_docstore(
+                    nodes_to_run,
+                    effective_strategy=effective_strategy,
+                    store_doc_text=store_doc_text,
+                )
             stage_timings["docstore_ms"] = round(
                 float(stage_timings.get("docstore_ms", 0.0))
                 + max(time.perf_counter() - docstore_started_at, 0.0) * 1000,

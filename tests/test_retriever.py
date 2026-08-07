@@ -100,7 +100,7 @@ def test_safe_vector_retriever_filters_stale_ids_and_prunes_bad_embeddings() -> 
 
 
 def test_simple_bm25_retriever_from_defaults_clamps_top_k_and_passes_tokenizer(monkeypatch) -> None:
-    """BM25 工厂应使用过滤后的节点列表、中文分词器与收缩后的 top_k。"""
+    """BM25 工厂应使用过滤后的节点列表、中文分词器与收缩后的 top_k，并剥离底层不支持的 filters。"""
     doc_a = SimpleNamespace(node_id="a")
     doc_b = SimpleNamespace(node_id="b")
     index = SimpleNamespace(docstore=SimpleNamespace(docs={"a": doc_a, "b": doc_b}))
@@ -116,7 +116,9 @@ def test_simple_bm25_retriever_from_defaults_clamps_top_k_and_passes_tokenizer(m
     assert kwargs["similarity_top_k"] == 1
     assert kwargs["verbose"] is True
     assert kwargs["tokenizer"] is retriever_module.chinese_tokenizer
-    assert kwargs["filters"] == "kb-filter"
+    # BM25Retriever (bm25s) 不接受 metadata filters，应被显式剥离，
+    # kb_id 过滤改由 SimpleHybridRetriever 在融合层兜底完成。
+    assert "filters" not in kwargs
 
 
 def test_simple_hybrid_retriever_normalizes_bm25_scores_and_deduplicates() -> None:
@@ -162,7 +164,7 @@ def test_safe_vector_retriever_get_nodes_with_embeddings_fetches_missing_nodes(m
     query_bundle = SimpleNamespace(name="bundle")
     query = SimpleNamespace(query_embedding=[1.0, 2.0])
     query_result = VectorStoreQueryResult(nodes=None, similarities=[0.8], ids=["node-1"])
-    fetched_nodes = [SimpleNamespace(node_id="node-1", text="fetched")]
+    assembled = [SimpleNamespace(node=SimpleNamespace(node_id="node-1"), score=0.8)]
     captured: dict[str, object] = {}
 
     def fake_prune(embedding):
@@ -173,25 +175,17 @@ def test_safe_vector_retriever_get_nodes_with_embeddings_fetches_missing_nodes(m
         captured["query_args"] = (built_query, kwargs)
         return query_result
 
-    def fake_get_nodes(node_ids, raise_error=False):
-        captured["docstore_args"] = (node_ids, raise_error)
-        return fetched_nodes
-
     retriever._build_vector_store_query = lambda bundle: query
     retriever._prune_incompatible_vector_embeddings = fake_prune
     retriever._vector_store = SimpleNamespace(query=fake_query)
     retriever._filter_stale_query_result_ids = lambda result: result
-    retriever._determine_nodes_to_fetch = lambda result: ["node-1"]
-    retriever._docstore = SimpleNamespace(get_nodes=fake_get_nodes)
-    retriever._insert_fetched_nodes_into_query_result = lambda result, nodes: nodes
-    retriever._convert_nodes_to_scored_nodes = lambda result: [SimpleNamespace(node=result.nodes[0], score=result.similarities[0])]
+    retriever._build_node_list_from_query_result = lambda result: assembled
     monkeypatch.setattr(retriever_module, "log_vector_store_query_result", lambda result: captured.setdefault("logged", result))
 
     result = retriever._get_nodes_with_embeddings(query_bundle)
 
     assert captured["embedding"] == [1.0, 2.0]
     assert captured["query_args"] == (query, {"alpha": 1})
-    assert captured["docstore_args"] == (["node-1"], False)
     assert result[0].node.node_id == "node-1"
 
 
@@ -204,16 +198,12 @@ def test_safe_vector_retriever_aget_nodes_with_embeddings_fetches_missing_nodes(
     query_bundle = SimpleNamespace(name="bundle")
     query = SimpleNamespace(query_embedding=[1.0, 2.0])
     query_result = VectorStoreQueryResult(nodes=None, similarities=[0.6], ids=["node-1"])
-    fetched_nodes = [SimpleNamespace(node_id="node-1", text="fetched-async")]
+    assembled = [SimpleNamespace(node=SimpleNamespace(node_id="node-1"), score=0.6)]
     captured: dict[str, object] = {}
 
     async def fake_aquery(built_query, **kwargs):
         captured["query_args"] = (built_query, kwargs)
         return query_result
-
-    async def fake_aget_nodes(node_ids, raise_error=False):
-        captured["docstore_args"] = (node_ids, raise_error)
-        return fetched_nodes
 
     def fake_prune(embedding):
         captured["embedding"] = embedding
@@ -223,17 +213,13 @@ def test_safe_vector_retriever_aget_nodes_with_embeddings_fetches_missing_nodes(
     retriever._prune_incompatible_vector_embeddings = fake_prune
     retriever._vector_store = SimpleNamespace(aquery=fake_aquery)
     retriever._filter_stale_query_result_ids = lambda result: result
-    retriever._determine_nodes_to_fetch = lambda result: ["node-1"]
-    retriever._docstore = SimpleNamespace(aget_nodes=fake_aget_nodes)
-    retriever._insert_fetched_nodes_into_query_result = lambda result, nodes: nodes
-    retriever._convert_nodes_to_scored_nodes = lambda result: [SimpleNamespace(node=result.nodes[0], score=result.similarities[0])]
+    retriever._build_node_list_from_query_result = lambda result: assembled
     monkeypatch.setattr(retriever_module, "log_vector_store_query_result", lambda result: captured.setdefault("logged", result))
 
     result = asyncio.run(retriever._aget_nodes_with_embeddings(query_bundle))
 
     assert captured["embedding"] == [1.0, 2.0]
     assert captured["query_args"] == (query, {"alpha": 1})
-    assert captured["docstore_args"] == (["node-1"], False)
     assert result[0].node.node_id == "node-1"
 
 

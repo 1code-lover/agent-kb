@@ -212,42 +212,32 @@ class SafeVectorIndexRetriever(VectorIndexRetriever):
         return len(invalid_ids)
 
     def _get_nodes_with_embeddings(self, query_bundle_with_embeddings):
-        """在获取节点前先剔除失效向量 id 和不兼容 embedding，再走 LlamaIndex 原生查询流程。"""
+        """在获取节点前先剔除失效向量 id 和不兼容 embedding，再走 LlamaIndex 原生查询流程。
+
+        说明：本版 LlamaIndex 的父类 ``_get_nodes_with_embeddings`` 已通过
+        ``_build_node_list_from_query_result`` 统一完成 docstore 回填与计分。
+        这里只在其之前插入 stale-id / 不兼容 embedding 的加固过滤，然后委托父类
+        原生流程完成节点组装，避免依赖各版本内部私有方法。
+        """
         query = self._build_vector_store_query(query_bundle_with_embeddings)
         self._prune_incompatible_vector_embeddings(getattr(query, "query_embedding", None))
         query_result = self._vector_store.query(query, **self._kwargs)
         query_result = self._filter_stale_query_result_ids(query_result)
 
-        nodes_to_fetch = self._determine_nodes_to_fetch(query_result)
-        if nodes_to_fetch:
-            fetched_nodes: list[BaseNode] = self._docstore.get_nodes(
-                node_ids=nodes_to_fetch, raise_error=False
-            )
-            query_result.nodes = self._insert_fetched_nodes_into_query_result(
-                query_result, fetched_nodes
-            )
-
+        nodes = self._build_node_list_from_query_result(query_result)
         log_vector_store_query_result(query_result)
-        return self._convert_nodes_to_scored_nodes(query_result)
+        return nodes
 
     async def _aget_nodes_with_embeddings(self, query_bundle_with_embeddings):
-        """在获取节点前先剔除失效向量 id 和不兼容 embedding，再走 LlamaIndex 原生查询流程。"""
+        """异步获取节点：加固过滤后委托父类原生流程完成节点组装。"""
         query = self._build_vector_store_query(query_bundle_with_embeddings)
         self._prune_incompatible_vector_embeddings(getattr(query, "query_embedding", None))
         query_result = await self._vector_store.aquery(query, **self._kwargs)
         query_result = self._filter_stale_query_result_ids(query_result)
 
-        nodes_to_fetch = self._determine_nodes_to_fetch(query_result)
-        if nodes_to_fetch:
-            fetched_nodes: list[BaseNode] = await self._docstore.aget_nodes(
-                node_ids=nodes_to_fetch, raise_error=False
-            )
-            query_result.nodes = self._insert_fetched_nodes_into_query_result(
-                query_result, fetched_nodes
-            )
-
+        nodes = self._build_node_list_from_query_result(query_result)
         log_vector_store_query_result(query_result)
-        return self._convert_nodes_to_scored_nodes(query_result)
+        return nodes
 
 
 class SimpleBM25Retriever(BM25Retriever):
@@ -277,12 +267,18 @@ class SimpleBM25Retriever(BM25Retriever):
         corpus_size = len(nodes)
         similarity_top_k = max(1, min(int(similarity_top_k), int(corpus_size)))
 
+        # BM25Retriever 基于 bm25s 自建语料索引，不接受 metadata filters；
+        # kb_id 维度过滤由 SimpleHybridRetriever 在融合层兜底完成。
+        # 显式剥离 filters，避免透传给底层 from_defaults 触发
+        # `unexpected keyword argument 'filters'`。
+        forward_kwargs = {key: value for key, value in kwargs.items() if key != "filters"}
+
         return BM25Retriever.from_defaults(
             nodes=nodes,
             similarity_top_k=similarity_top_k,
             verbose=True,
             tokenizer=chinese_tokenizer,
-            **kwargs
+            **forward_kwargs,
         )
 
 
