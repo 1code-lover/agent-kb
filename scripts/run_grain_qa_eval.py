@@ -130,6 +130,25 @@ def _extract_source_count(result: dict[str, Any]) -> int:
     return sum(1 for source in result.get("sources", []) or [] if isinstance(source, dict))
 
 
+def _extract_relevant_doc_types(case: dict[str, Any]) -> list[str]:
+    """抽取用例中相关文档的文件类型，便于按 PDF / 表格 / 线索类分组。"""
+    types: list[str] = []
+    for doc in case.get("relevant_documents", []) or []:
+        if not isinstance(doc, dict):
+            continue
+        file_name = doc.get("file_name")
+        if isinstance(file_name, str) and file_name:
+            suffix = Path(file_name).suffix.lower()
+            if suffix:
+                types.append(suffix)
+        file_path = doc.get("file_path")
+        if isinstance(file_path, str) and file_path:
+            suffix = Path(file_path).suffix.lower()
+            if suffix:
+                types.append(suffix)
+    return types
+
+
 # 强拒绝标记：命中任一即可判定为边界型拒绝（"超出范围 / 建议转权威渠道 / 不保证覆盖"）。
 # 这些措辞只在系统明确放弃回答时出现，不会在正常作答里误命中。
 _STRONG_REFUSAL_MARKERS = (
@@ -193,11 +212,18 @@ def evaluate_case(
 ) -> dict[str, Any]:
     """对单条用例发起问答并计算检索/引用指标。"""
     question = case["query"]
+    requested_kb_ids = case.get("search_kb_ids") or [kb_id]
+    if not isinstance(requested_kb_ids, list) or not requested_kb_ids:
+        requested_kb_ids = [kb_id]
+    tags = case.get("tags", [])
+    if not isinstance(tags, list):
+        tags = [str(tags)]
     relevant_names = {
         _normalize_file_name(os.path.basename(doc.get("file_name", "")))
         for doc in case.get("relevant_documents", [])
         if doc.get("file_name")
     }
+    relevant_doc_types = _extract_relevant_doc_types(case)
     answerable = bool(case.get("answerable", True))
 
     response = _post_json(
@@ -206,7 +232,7 @@ def evaluate_case(
         {
             "question": question,
             "session_id": f"grain-eval::{case.get('id', case.get('_line_no'))}",
-            "kb_ids": [kb_id],
+            "kb_ids": requested_kb_ids,
         },
         timeout=timeout,
     )
@@ -240,14 +266,22 @@ def evaluate_case(
     refusal_correct = 1 if (not answerable and _answer_is_refusal_like(answer)) else 0
 
     kb_id_missing_count = max(source_count - len(source_kb_ids), 0)
-    kb_isolation = 1 if source_count == len(source_kb_ids) and all(kb == kb_id for kb in source_kb_ids) else 0
+    allowed_kb_ids = {str(item) for item in requested_kb_ids if item}
+    kb_isolation = (
+        1
+        if source_count == len(source_kb_ids) and all(kb in allowed_kb_ids for kb in source_kb_ids)
+        else 0
+    )
 
     return {
         "id": case.get("id"),
         "query": question,
+        "requested_kb_ids": requested_kb_ids,
         "answerable": answerable,
         "difficulty": case.get("difficulty"),
+        "tags": tags,
         "relevant_files": sorted(relevant_names),
+        "relevant_doc_types": sorted(set(relevant_doc_types)),
         "answer_preview": answer[:160],
         "source_files_top5": top_k_view,
         "source_count": source_count,
@@ -260,6 +294,47 @@ def evaluate_case(
         "refusal_correct": refusal_correct,
         "kb_isolation": kb_isolation,
     }
+
+
+def classify_failure_groups(result: dict[str, Any]) -> list[str]:
+    """基于评测结果给单条用例打失败分组标签。"""
+    if result.get("error"):
+        return ["api_error"]
+
+    groups: list[str] = []
+    answerable = bool(result.get("answerable", True))
+    tags = set(result.get("tags", []) or [])
+    relevant_types = set(result.get("relevant_doc_types", []) or [])
+
+    if not answerable:
+        if not result.get("refusal_correct"):
+            groups.append("refusal_miss")
+        if not result.get("kb_isolation"):
+            groups.append("kb_isolation_failure")
+        return groups
+
+    if not result.get("kb_isolation"):
+        groups.append("kb_isolation_failure")
+
+    if not result.get("recall_at_5"):
+        if {"pdf", "scan", "ocr"} & tags or ".pdf" in relevant_types:
+            groups.append("ocr_text_quality")
+        elif {"duplicate", "conflict", "repeat"} & tags:
+            groups.append("duplicate_or_conflict")
+        else:
+            groups.append("retrieval_miss")
+    elif result.get("mrr_at_5", 0.0) < 1.0:
+        groups.append("rank_miss")
+
+    source_count = int(result.get("source_count", 0) or 0)
+    source_files = result.get("source_files_top5", []) or []
+    unique_sources = len({name for name in source_files if name})
+    if source_count >= 4 and (not result.get("recall_at_5") or result.get("mrr_at_5", 0.0) < 1.0):
+        groups.append("source_noise")
+    elif unique_sources >= 4 and not result.get("recall_at_5"):
+        groups.append("source_noise")
+
+    return groups
 
 
 def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
@@ -286,6 +361,40 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "citation_hit_rate": round(_mean(answerable, "citation_hit"), 4),
         "refusal_accuracy": round(_mean(unanswerable, "refusal_correct"), 4) if unanswerable else None,
         "kb_isolation_rate": round(_mean(results, "kb_isolation"), 4),
+    }
+
+
+def build_failure_groups(results: list[dict[str, Any]], limit: int = 8) -> dict[str, Any]:
+    """按失败类型聚合评测结果，并保留少量样例。"""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for result in results:
+        groups = classify_failure_groups(result)
+        if not groups:
+            continue
+        enriched = {
+            "id": result.get("id"),
+            "query": result.get("query"),
+            "answerable": result.get("answerable"),
+            "tags": result.get("tags", []),
+            "difficulty": result.get("difficulty"),
+            "source_files_top5": result.get("source_files_top5", []),
+            "source_count": result.get("source_count", 0),
+            "mrr_at_5": result.get("mrr_at_5", 0.0),
+            "recall_at_5": result.get("recall_at_5", 0),
+            "kb_isolation": result.get("kb_isolation", 0),
+            "answer_preview": result.get("answer_preview", ""),
+            "error": result.get("error"),
+            "groups": groups,
+        }
+        for group in groups:
+            grouped.setdefault(group, []).append(enriched)
+
+    return {
+        group: {
+            "count": len(items),
+            "samples": items[:limit],
+        }
+        for group, items in sorted(grouped.items())
     }
 
 
@@ -339,6 +448,7 @@ def main() -> None:
         )
 
     summary = summarize(per_case)
+    failure_groups = build_failure_groups(per_case)
     report = {
         "generated_at": _now_iso(),
         "api_base": args.api_base,
@@ -347,6 +457,7 @@ def main() -> None:
         "cases_path": args.cases,
         "cases_sha256": file_sha256(args.cases),
         "summary": summary,
+        "failure_groups": failure_groups,
         "cases": per_case,
     }
 
@@ -356,6 +467,9 @@ def main() -> None:
 
     print("\n=== 评测汇总 ===")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+    if failure_groups:
+        print("\n=== 失败分组 ===")
+        print(json.dumps(failure_groups, ensure_ascii=False, indent=2))
     print(f"\n报告已写入: {output_path}")
 
 

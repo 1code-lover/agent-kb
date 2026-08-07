@@ -95,12 +95,14 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - broad ingestion + QA 回归：`354 passed, 2 warnings`
   - 正式 QA eval：`eval_v4 54/54`、`eval_v5 72/72`、`eval_v6 78/78`
   - live roundtrip 覆盖 Markdown、PDF 文本层、扫描 PDF OCR、图片 OCR、mixed batch
-- **粮仓知识库真实 QA 评测已新增脚本和报告**：
+- **粮仓知识库真实 QA 评测已扩展到 80 条 verified 用例**：
   - 脚本：`scripts/run_grain_qa_eval.py`
-  - 输入：`data/grain-knowledge-base/qa/verified.jsonl`，当前 30 条人工标注用例
+  - 输入：`data/grain-knowledge-base/qa/verified.jsonl`，当前 80 条人工标注用例
   - 报告产物：`docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`
-  - 2026-08-07 重新生成报告摘要：`total=30`、`answerable_total=29`、`unanswerable_total=1`、`error_count=0`、`Recall@5=1.0`、`MRR@5=0.977`、`citation_hit_rate=1.0`、`refusal_accuracy=1.0`、`kb_isolation_rate=1.0`
-  - 报告已补充 `api_base`、`timeout`、`cases_sha256`、逐条 `source_kb_ids` 与 `kb_id_missing_count`，避免引用来源缺失 `kb_id` 时误判隔离通过。
+  - 2026-08-07 使用恢复后的 `阿里百联 / qwen3.7-plus` 重新生成完整报告：`total=80`、`answerable_total=77`、`unanswerable_total=3`、`error_count=0`、`Recall@5=0.5325`、`MRR@5=0.5238`、`citation_hit_rate=1.0`、`refusal_accuracy=0.6667`、`kb_isolation_rate=1.0`
+  - 报告已补充 `api_base`、`timeout`、`cases_sha256`、逐条 `requested_kb_ids`、`relevant_doc_types`、`source_kb_ids` 与 `kb_id_missing_count`，避免引用来源缺失 `kb_id` 时误判隔离通过。
+  - 报告新增 `failure_groups`，当前分组为：`ocr_text_quality=19`、`retrieval_miss=17`、`source_noise=37`、`rank_miss=1`、`refusal_miss=1`。
+  - 本轮 36 条 answerable 用例 Recall@5 为 0，主要集中在新增 PDF、报告、表格样例和未进入当前索引的 DOCX 规程；当前 docstore 中 `grain-knowledge-base` 只有 543 个节点，约 13 个核心文件族，缺少大量 QA 期望文件。
   - 说明：该评测不做 LLM 裁判，主要验证检索命中、引用来源、拒答和 KB 隔离。
 
 ### 4.3 当前 Git 状态
@@ -121,10 +123,10 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 ### 4.4 下一步建议
 
-- **先扩测试，再做优化**：当前 `verified.jsonl` 只有 30 条，且已全绿，说明核心链路稳定，但还不足以代表整个知识库质量。
-- **优先补齐真实评测集**：先把 `draft.jsonl` 里可转正的题补成 `verified`，再按正向、负向、跨库隔离、PDF、扫描件、表格、重复资料几个维度把题池扩到至少 80 条。
-- **把评测结果做成分组失败清单**：后续 `run_grain_qa_eval.py` 需要按“召回失败 / 排序差 / sources 过多 / OCR 质量差 / 资料冲突 / 超范围应拒答”输出样例，方便按问题类型治理。
-- **再针对失败项做优化**：等评测集足够大后，再决定是调 chunk、rerank、top-k、OCR，还是前端证据展示，而不是先凭感觉改参数。
+- **先修索引覆盖，再调检索参数**：80 条评测显示失败主因是当前索引只覆盖一小部分粮仓资料，许多本地存在的 PDF/DOCX 没有进入 docstore 或没有可检索 metadata；不应先盲调 top-k/rerank。
+- **重建粮仓知识库导入闭环**：优先补齐 `data/grain-knowledge-base/docs/` 下正式目录的批量导入、导入回执、asset registry 和 docstore metadata，确保 QA 期望文件全部进入 `grain-knowledge-base`。
+- **补一轮导入覆盖诊断**：对 36 条 Recall@5=0 的期望文件逐个输出“本地存在 / asset registry 存在 / docstore 节点存在 / top5 是否召回”，形成可重复的索引覆盖 gate。
+- **再处理排序和噪声**：索引覆盖修复后，复跑 80 条 eval，再决定是否做去重、rerank、source 合并和拒答阈值优化。
 
 ---
 
@@ -170,7 +172,8 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest -q`：`677 passed, 35 warnings in 7.62s`
 - `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`75 passed`
 - `npm install` 后修复本地 `node_modules` 依赖；`chmod +x node_modules/.bin/vite node_modules/vite/bin/vite.js && npm run build`：通过，Vite 构建输出 `dist/`
-- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.run_grain_qa_eval --cases data/grain-knowledge-base/qa/verified.jsonl --api-base http://127.0.0.1:18080 --kb-id grain-knowledge-base --output docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`：30 条用例评测完成，`Recall@5=1.0`、`MRR@5=0.977`、`kb_isolation_rate=1.0`
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.run_grain_qa_eval --cases data/grain-knowledge-base/qa/verified.jsonl --api-base http://127.0.0.1:18080 --kb-id grain-knowledge-base --output docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`：80 条用例评测完成，`error_count=0`、`Recall@5=0.5325`、`MRR@5=0.5238`、`citation_hit_rate=1.0`、`refusal_accuracy=0.6667`、`kb_isolation_rate=1.0`
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_run_grain_qa_eval.py -q`：`6 passed, 1 warning`
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pip install paddleocr==3.7.0 paddlepaddle==3.2.2`：补齐 OCR 运行时依赖；`paddle==3.2.2` 与 `paddleocr==3.7.0` 可直接导入。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pip check`：`No broken requirements found.`
 - `/opt/miniconda3/envs/agent-kb/bin/python -c "from api.routers.health import _build_import_capabilities; ..."`：`pdf_text_extraction.ready=true`，`image_ocr.ready=true`，`fitz/paddleocr/paddle/pillow` 均 installed。
@@ -193,7 +196,7 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库评测报告仍需注意样本边界**：当前 30 条 verified QA 报告指标全绿，且已补充运行参数和用例 hash，但样本规模仍有限，不能等同于全量资料质量验收。
+- **粮仓知识库当前索引覆盖不足**：80 条 verified QA 中有 36 条 answerable 用例 Recall@5=0；本地资料目录存在大量 PDF/DOCX，但当前 docstore 中 `grain-knowledge-base` 只覆盖约 13 个核心文件族，asset registry 为空。下一步应优先修复导入覆盖和索引重建，而不是先调检索参数。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
