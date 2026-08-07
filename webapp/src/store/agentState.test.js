@@ -15,7 +15,7 @@ test("createWorkspaceState should return the target desktop workspace shape", ()
   const state = createWorkspaceState();
 
   assert.equal(state.currentMode, "agent");
-  assert.equal(state.knowledgeScope.kb_name, "NorthAgent Workspace");
+  assert.equal(state.knowledgeScope.kb_name, "默认知识库");
   assert.deepEqual(state.receipts, []);
   assert.equal(state.lastAnswer, "");
 });

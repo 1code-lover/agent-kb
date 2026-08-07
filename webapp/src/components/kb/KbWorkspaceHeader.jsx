@@ -3,7 +3,7 @@
  * - Knowledge Workspace 头部，聚合当前知识库摘要、OCR 运行状态与核心动作入口。
  */
 
-import { Link } from 'react-router-dom';
+import { Link } from '../../router';
 import { buildKnowledgeAgentLink } from '../../domain/kbNavigation';
 import { KB_WORKSPACE_ACTION_MODES } from '../../domain/knowledgeWorkspace';
 

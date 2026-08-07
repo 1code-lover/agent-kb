@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "./router";
 import ShellLayout from "./components/ShellLayout";
 import AgentPage from "./pages/AgentPage";
 import KnowledgePage from "./pages/KnowledgePage";
@@ -10,22 +11,33 @@ import KbManagePage from "./pages/KbManagePage";
 import StoragePage from "./pages/StoragePage";
 import AdvancedPage from "./pages/AdvancedPage";
 
+const ROUTES = {
+  "/": AgentPage,
+  "/agent": AgentPage,
+  "/knowledge": KnowledgePage,
+  "/kb-file": KbFilePage,
+  "/settings": SettingsPage,
+  "/models": ModelsPage,
+  "/kb-web": KbWebPage,
+  "/kb-manage": KbManagePage,
+  "/storage": StoragePage,
+  "/advanced": AdvancedPage,
+};
+
 export default function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const Page = ROUTES[location.pathname] || AgentPage;
+
+  useEffect(() => {
+    if (!ROUTES[location.pathname]) {
+      navigate("/", { replace: true });
+    }
+  }, [location.pathname, navigate]);
+
   return (
-    <Routes>
-      <Route path="/" element={<ShellLayout />}>
-        <Route index element={<AgentPage />} />
-        <Route path="agent" element={<AgentPage />} />
-        <Route path="knowledge" element={<KnowledgePage />} />
-        <Route path="kb-file" element={<KbFilePage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="models" element={<ModelsPage />} />
-        <Route path="kb-web" element={<KbWebPage />} />
-        <Route path="kb-manage" element={<KbManagePage />} />
-        <Route path="storage" element={<StoragePage />} />
-        <Route path="advanced" element={<AdvancedPage />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <ShellLayout>
+      <Page />
+    </ShellLayout>
   );
 }

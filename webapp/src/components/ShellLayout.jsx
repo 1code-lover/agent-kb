@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, useLocation } from "../router";
 
 const navs = [
   { to: "/agent", label: "问答" },
@@ -9,7 +9,7 @@ const navs = [
   { to: "/advanced", label: "高级" },
 ];
 
-export default function ShellLayout() {
+export default function ShellLayout({ children }) {
   const location = useLocation();
 
   return (
@@ -41,7 +41,7 @@ export default function ShellLayout() {
       </aside>
 
       <main className="content content-minimal">
-        <Outlet />
+        {children}
       </main>
     </div>
   );

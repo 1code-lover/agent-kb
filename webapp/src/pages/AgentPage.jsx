@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "../router";
 import AgentApprovalPanel from "../components/agent/AgentApprovalPanel";
 import AgentEvidencePanel from "../components/agent/AgentEvidencePanel";
 import AgentInputPanel from "../components/agent/AgentInputPanel";

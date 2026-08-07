@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from '../router';
 import { getHealthStatus } from '../api/health';
 import { getLatestImportReceipt } from '../api/kb';
 import { readApiData } from '../api/response';
