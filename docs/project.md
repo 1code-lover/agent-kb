@@ -119,6 +119,13 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `82b6cba docs(project): sync closure status before push`
 - 当前工作区状态：2026-08-07 本轮收口提交推送后，`git status --short --branch` 显示本地分支与 `origin/codex/desktop-agent-stage3` 同步且工作区干净。
 
+### 4.4 下一步建议
+
+- **先扩测试，再做优化**：当前 `verified.jsonl` 只有 30 条，且已全绿，说明核心链路稳定，但还不足以代表整个知识库质量。
+- **优先补齐真实评测集**：先把 `draft.jsonl` 里可转正的题补成 `verified`，再按正向、负向、跨库隔离、PDF、扫描件、表格、重复资料几个维度把题池扩到至少 80 条。
+- **把评测结果做成分组失败清单**：后续 `run_grain_qa_eval.py` 需要按“召回失败 / 排序差 / sources 过多 / OCR 质量差 / 资料冲突 / 超范围应拒答”输出样例，方便按问题类型治理。
+- **再针对失败项做优化**：等评测集足够大后，再决定是调 chunk、rerank、top-k、OCR，还是前端证据展示，而不是先凭感觉改参数。
+
 ---
 
 ## 5. 测试与验证

@@ -1,31 +1,16 @@
-未 push 代码复核意见（2026-08-07，最新）
+最新评审建议（2026-08-07）
 
 优点：
-1. 本轮已经确认 macOS 下可用的项目环境是 conda `agent-kb`，解释器路径为 `/opt/miniconda3/envs/agent-kb/bin/python`，避免继续误用 Miniconda base Python 3.13 或仓库内不可用的 `.venv`。
-2. `/api/kb/file/import` 已改为从真实 multipart form 中读取 `relative_paths`，兼容单值和多值表单字段，能降低前端目录上传时路径丢失的风险。
-3. BM25 节点过滤改为按纯正文判断空节点，不再把 metadata 拼接内容误当作可检索文本，能避免空正文节点进入 BM25 构建。
-4. Office 类型识别已收窄到当前依赖真实验证过的 `.docx`，避免接口过度承诺 `pptx/xlsx/odt/ods` 等尚未验证的格式。
-5. 粮仓 QA 评测脚本补充了 `api_base`、`timeout`、`cases_sha256`、`source_count`、`source_kb_ids` 和 `kb_id_missing_count`，并把“sources 存在但缺少 kb_id”的情况判为隔离失败，评测可信度比原先更高。
-6. 已新增脚本级回归测试覆盖 KB 隔离缺失、目标 KB 正常通过和用例 hash 追踪；全量 Python、前端 Node 单测、前端构建和粮仓真实 QA 评测均已通过。
-7. conda `agent-kb` 环境已补齐 `paddleocr==3.7.0` 与 `paddlepaddle==3.2.2`，`pip check` 已无破损依赖，health capability 显示 PDF 文本解析与 image OCR 依赖均 ready。
-8. OCR 默认模型源已加固：未显式设置 PaddleX 环境变量时默认使用 ModelScope 并跳过不稳定的模型源探测；本机单图 OCR 样本已成功，识别文本长度 129。
-9. 已修复 PaddleOCR/PaddleX 污染 `langchain.text_splitter` 后导致问答 400 的运行时顺序问题：OCR 初始化前会预加载并修复 LangChain text splitter bridge；“先 OCR 后问答”的独立进程复现已通过。
-10. 图片 OCR API roundtrip 已通过：新端口服务 health 显示 OCR ready，上传图片后 `ocr_attempted=true`、`indexed_from_ocr=true`，问答和 preview 均命中 `Knowledge Base`。
-11. 扫描 PDF OCR API roundtrip 已通过：诊断 PDF 保持无文字层，导入后 `ocr_attempted=true`、`ocr_status=success`、`indexed_from_ocr=true`、`ocr_text_length=293`，问答、source、evidence 和 preview 均命中 `searchable evidence` 与 `knowledge base`。
-12. mixed batch API roundtrip 已通过：Markdown、PDF 文本层、嵌入图片 OCR、独立图片 OCR、资产注册和无证据拒答核心 gate 均通过，`run_passed=true`、`failed_files=0`。
-13. 诊断脚本已补充 macOS/Linux/Windows 字体候选，扫描 PDF 样本提高字号与画布宽度，避免 macOS 上退回 PIL 默认小字体造成 OCR 误识别。
-14. 前端依赖已执行非强制 audit fix，并升级到 `vite@8.2.1`、`@vitejs/plugin-react@6.0.5`；因当前页面只需要基础路由能力，已用项目内轻量 router 替代 `react-router-dom`，并对协议 URL、双斜杠和反斜杠导航做本地拒绝。
-15. `npm audit --json` 当前为 0 vulnerabilities；前端 Node 单测 75 个通过，Vite 构建通过。
-16. `docs/project.md` 已更新到 2026-08-07 当前状态，记录了正确虚拟环境、验证结果、剩余风险和未提交工作区状态。
+1. 当前分支已经与远端同步，工作区干净，没有待 push 的提交。
+2. 粮仓知识库真实 QA 评测脚本和报告已经可用，基础检索、引用、拒答和 KB 隔离都能被量化验证。
+3. 现有 30 条 verified 用例全绿，说明核心链路稳定，适合作为后续扩测的基线。
 
-需要改进：
-1. mixed batch 正向用例虽然首要/目标文档、preview 与关键词均命中，但接口仍会返回多个候选 sources；`source_count_match/evidence_count_match` 精确数量检查为 false。若产品希望减少引用噪声，需要继续调 top-k、rerank 或前端证据展示策略。
-2. `.claude/settings.local.json` 是本地权限配置变更，和项目功能代码无直接关系；提交前应确认是否排除，避免把个人工具权限配置混入功能提交。
-3. 当前分支本地领先远端 4 个提交，且还有未提交工作区变更；继续开发前建议先按功能边界拆分提交并推送，降低后续 review 难度。
-4. 多知识库目前仍是共享索引加 metadata 逻辑隔离，粮仓 QA 样本为 30 条，指标全绿但不能替代更大规模真实资料验收。
+需要改进的地方：
+1. 现有真实评测集规模仍偏小，30 条 verified 不能代表整个知识库的覆盖面。
+2. 目前评测主要看总指标，还缺少按失败类型归类的输出，不利于快速定位问题。
+3. 现阶段如果直接调检索参数，容易在样本不足的前提下过拟合局部问题。
 
 具体建议：
-1. 提交前优先拆成三类改动：运行环境与项目进度文档、导入/检索/评测代码修复、QA 报告 artifact；`.claude/settings.local.json` 单独决定是否保留。
-2. 下一轮修复建议优先收口正向问答 sources 偏多的问题：先明确产品是否允许多证据返回，再决定是调检索 top-k、rerank 阈值，还是只在前端突出首要证据。
-3. 粮仓 QA 评测建议继续扩充 verified 用例，覆盖更多负向问题、跨库隔离问题、表格/扫描件来源问题，并在报告中持续保留 `cases_sha256`。
-4. 在 commit 前再次执行 `/opt/miniconda3/envs/agent-kb/bin/python -m pytest -q`、前端 Node 单测、`npm run build`、`npm audit --json` 和 `git diff --check`，确认文档更新后仍无格式问题。
+1. 先把 `draft.jsonl` 中可转正的题补进 `verified.jsonl`，把真实评测集扩到至少 80 条。
+2. 新增或完善失败分组：召回失败、排序差、sources 过多、OCR 质量差、资料冲突、超范围拒答。
+3. 等评测集足够大以后，再按失败分布决定优化顺序，优先考虑 chunk、rerank、top-k、OCR 和证据展示策略。
