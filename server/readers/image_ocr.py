@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import importlib
+import os
 import re
+import sys
 import threading
 import time
 from datetime import datetime, timezone
@@ -44,6 +47,20 @@ _OCR_WARMUP_STATUS: dict[str, Any] = {
     "finished_at": None,
 }
 _OCR_WARMUP_LOCK = threading.RLock()
+
+
+def _configure_default_paddlex_model_source() -> None:
+    """为国内本地环境设置更稳定的 PaddleX 模型下载默认源。"""
+    os.environ.setdefault("PADDLE_PDX_MODEL_SOURCE", "modelscope")
+    os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
+
+
+def _ensure_langchain_text_splitter_bridge() -> None:
+    """预加载 LangChain 兼容桥，避免 PaddleX 覆盖同名模块。"""
+    module = sys.modules.get("langchain.text_splitter")
+    if module is not None and not hasattr(module, "TextSplitter"):
+        sys.modules.pop("langchain.text_splitter", None)
+    importlib.import_module("langchain.text_splitter")
 
 
 def _utc_now_iso() -> str:
@@ -267,6 +284,8 @@ def _get_ocr(timing_metrics: dict[str, Any] | None = None):
 
         init_started_at = time.perf_counter()
         try:
+            _configure_default_paddlex_model_source()
+            _ensure_langchain_text_splitter_bridge()
             from paddleocr import PaddleOCR
 
             _OCR_INSTANCE = PaddleOCR(**_OCR_RUNTIME_CONFIG)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 from typing import Any
 
 import pytest
@@ -481,6 +481,40 @@ def test_get_ocr_returns_cached_instance_and_marks_reused() -> None:
     assert result is sentinel
     assert timing_metrics["ocr_instance_reused"] is True
     assert timing_metrics["ocr_init_ms"] == 0.0
+
+
+def test_configure_default_paddlex_model_source_sets_domestic_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
+    """未显式配置 PaddleX 模型源时，应默认使用更稳定的国内模型源。"""
+    monkeypatch.delenv("PADDLE_PDX_MODEL_SOURCE", raising=False)
+    monkeypatch.delenv("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", raising=False)
+
+    image_ocr._configure_default_paddlex_model_source()
+
+    assert image_ocr.os.environ["PADDLE_PDX_MODEL_SOURCE"] == "modelscope"
+    assert image_ocr.os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] == "True"
+
+
+def test_configure_default_paddlex_model_source_respects_existing_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """用户已经显式配置模型源时，默认配置不应覆盖。"""
+    monkeypatch.setenv("PADDLE_PDX_MODEL_SOURCE", "bos")
+    monkeypatch.setenv("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "False")
+
+    image_ocr._configure_default_paddlex_model_source()
+
+    assert image_ocr.os.environ["PADDLE_PDX_MODEL_SOURCE"] == "bos"
+    assert image_ocr.os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] == "False"
+
+
+def test_ensure_langchain_text_splitter_bridge_repairs_polluted_module(monkeypatch: pytest.MonkeyPatch) -> None:
+    """PaddleX 污染同名模块时，应恢复 LangChain 真实兼容桥。"""
+    polluted = ModuleType("langchain.text_splitter")
+    monkeypatch.setitem(image_ocr.sys.modules, "langchain.text_splitter", polluted)
+
+    image_ocr._ensure_langchain_text_splitter_bridge()
+
+    repaired = image_ocr.sys.modules["langchain.text_splitter"]
+    assert repaired is not polluted
+    assert hasattr(repaired, "TextSplitter")
 
 
 class _AliveThread:

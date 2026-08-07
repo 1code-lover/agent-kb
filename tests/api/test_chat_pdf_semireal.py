@@ -19,6 +19,12 @@ from tests.api.chat_qa_metrics import build_chat_case_report, summarize_chat_cas
 
 
 FONT_CANDIDATES = [
+    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+    Path("/System/Library/Fonts/Supplemental/Verdana.ttf"),
+    Path("/System/Library/Fonts/Helvetica.ttc"),
+    Path("/Library/Fonts/Arial.ttf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
     Path("C:/Windows/Fonts/msyh.ttc"),
     Path("C:/Windows/Fonts/simhei.ttf"),
     Path("C:/Windows/Fonts/arial.ttf"),

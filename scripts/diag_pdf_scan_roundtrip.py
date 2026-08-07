@@ -35,6 +35,12 @@ SCAN_PAGES = [
 QUESTION = "In the scanned diagnostic PDF, what should the scanned content become in the active knowledge base?"
 EXPECTED_TERMS = ["searchable evidence", "knowledge base"]
 FONT_CANDIDATES = [
+    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+    Path("/System/Library/Fonts/Supplemental/Verdana.ttf"),
+    Path("/System/Library/Fonts/Helvetica.ttc"),
+    Path("/Library/Fonts/Arial.ttf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
     Path("C:/Windows/Fonts/arial.ttf"),
     Path("C:/Windows/Fonts/calibri.ttf"),
     Path("C:/Windows/Fonts/msyh.ttc"),
@@ -103,18 +109,18 @@ def _extract_pdf_text(path: Path) -> str:
 
 def _create_scanned_pdf(path: Path) -> dict[str, Any]:
     """创建无文字层的扫描 PDF 诊断样本。"""
-    font, font_label = _pick_font(size=32)
+    font, font_label = _pick_font(size=44)
     temp_images: list[Path] = []
     path.parent.mkdir(parents=True, exist_ok=True)
     document = fitz.open()
     try:
         for index, lines in enumerate(SCAN_PAGES, start=1):
-            image = Image.new("RGB", (1600, 1200), color="white")
+            image = Image.new("RGB", (1800, 1200), color="white")
             draw = ImageDraw.Draw(image)
             y = 120
             for line in lines:
                 draw.text((96, y), line, fill="black", font=font)
-                y += 92
+                y += 116
             image_path = path.with_name(f"{path.stem}-page-{index}.png")
             image.save(image_path)
             temp_images.append(image_path)

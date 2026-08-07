@@ -23,6 +23,12 @@ DEFAULT_TIMEOUT = 240.0
 DEFAULT_CHUNK_SIZE = 256
 DEFAULT_CHUNK_OVERLAP = 16
 FONT_CANDIDATES = [
+    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+    Path("/System/Library/Fonts/Supplemental/Verdana.ttf"),
+    Path("/System/Library/Fonts/Helvetica.ttc"),
+    Path("/Library/Fonts/Arial.ttf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
     Path("C:/Windows/Fonts/arial.ttf"),
     Path("C:/Windows/Fonts/calibri.ttf"),
     Path("C:/Windows/Fonts/msyh.ttc"),

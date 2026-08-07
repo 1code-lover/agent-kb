@@ -28,6 +28,12 @@ IMAGE_LINES = [
 QUESTION = "In the OCR diagnostic image, what is the authorization boundary?"
 EXPECTED_TERMS = ["knowledge base", "authorization boundary"]
 FONT_CANDIDATES = [
+    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+    Path("/System/Library/Fonts/Supplemental/Verdana.ttf"),
+    Path("/System/Library/Fonts/Helvetica.ttc"),
+    Path("/Library/Fonts/Arial.ttf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
     Path("C:/Windows/Fonts/arial.ttf"),
     Path("C:/Windows/Fonts/calibri.ttf"),
     Path("C:/Windows/Fonts/msyh.ttc"),
