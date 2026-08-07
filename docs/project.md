@@ -107,12 +107,16 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 - 当前分支：`codex/desktop-agent-stage3`
 - 远端跟踪：`origin/codex/desktop-agent-stage3`
-- 当前本地分支领先远端 4 个提交：
+- 当前本地分支已完成 2026-08-07 稳定性收口提交，准备推送到远端：
   - `575ff3d fix(kb): recognize docx/office documents as importable file kind`
   - `64c402b fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes`
   - `7b0037d feat(eval): add grain KB real QA evaluation script`
   - `ed8368f docs(grain-qa): add real KB QA evaluation report artifacts`
-- 当前未提交工作区变更：包含本轮修复、文档更新、`AGENTS.md` macOS conda 环境说明、前端依赖安全升级、粮仓 QA 报告更新，以及本地 `.claude/settings.local.json` 配置变更；没有 staged 改动。
+  - `1520aef fix(kb): harden import filtering and grain qa eval`
+  - `6f1ef56 fix(ocr): stabilize paddle runtime and diagnostics`
+  - `ddf8317 refactor(web): replace router dependency with local navigation`
+  - `ca34b66 docs(dev): record local kb stability closure`
+- 当前工作区状态：2026-08-07 本轮收口提交后 `git status --short --branch` 显示工作区干净；推送后以最新 `git status` 为准。
 
 ---
 
@@ -215,6 +219,10 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `ca34b66` | docs(dev): record local kb stability closure |
+| `ddf8317` | refactor(web): replace router dependency with local navigation |
+| `6f1ef56` | fix(ocr): stabilize paddle runtime and diagnostics |
+| `1520aef` | fix(kb): harden import filtering and grain qa eval |
 | `ed8368f` | docs(grain-qa): add real KB QA evaluation report artifacts |
 | `7b0037d` | feat(eval): add grain KB real QA evaluation script |
 | `64c402b` | fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes |
