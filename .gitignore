@@ -210,3 +210,6 @@ tmp_unicode_test.txt
 /temp_*
 /docs/20260722-local-multi-kb-assistant/artifacts/temp/
 /docs/20260722-local-multi-kb-assistant/artifacts/tmp*/
+
+# 本地 API 临时进程文件
+temp-live-api.pid
