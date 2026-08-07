@@ -214,6 +214,8 @@ cd webapp && npm run build
 | `docs/20260722-local-multi-kb-assistant/` | 当前正式基线：本地多知识库助手主线 |
 | `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-test-report.md` | 2026-07-31 Stage 3 测试报告 |
 | `docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json` | 2026-08-07 粮仓知识库 QA 评测报告产物 |
+| `docs/20260807-grain-qa-expansion/` | 粮仓 QA 80 条扩测与失败分组报告 |
+| `docs/20260807-grain-index-coverage-repair/` | 粮仓知识库索引覆盖修复计划 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
