@@ -6,6 +6,11 @@ const { logRuntime } = require("./runtime-log");
 let pythonProcess = null;
 
 function resolvePythonCommand(projectRoot) {
+  const explicitPython = process.env.NORTHAGENT_PYTHON || process.env.THINKRAG_PYTHON || process.env.FOXGLOVE_PYTHON;
+  if (explicitPython) {
+    return explicitPython;
+  }
+
   const candidates =
     process.platform === "win32"
       ? [
@@ -14,6 +19,7 @@ function resolvePythonCommand(projectRoot) {
           "python"
         ]
       : [
+          "/opt/miniconda3/envs/agent-kb/bin/python",
           path.join(projectRoot, ".venv", "bin", "python"),
           path.join(projectRoot, "venv", "bin", "python"),
           "python3"

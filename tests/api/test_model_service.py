@@ -108,6 +108,7 @@ def test_select_model_uses_provider_defaults_and_updates_session(monkeypatch: py
     store = _DummyStore()
     session_updates: list[tuple[str, dict[str, Any]]] = []
     monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-10T00:00:00Z")
     monkeypatch.setattr(
         model_service,
         "_find_provider",
@@ -123,6 +124,8 @@ def test_select_model_uses_provider_defaults_and_updates_session(monkeypatch: py
     assert payload["api_key"] == "sk-provider"
     assert payload["api_key_valid"] is True
     assert store.values["current_llm_info"]["model"] == "gpt-test"
+    assert store.values["model_health_status"]["state"] == "healthy"
+    assert store.values["model_health_status"]["current_model"] == "gpt-test"
     assert session_updates == [
         (
             "sess-1",
@@ -381,6 +384,99 @@ def test_check_openai_compatible_covers_success_http_error_and_exception(monkeyp
     assert (ok, detail) == (False, "timeout")
     assert meta["result"] == "exception"
     assert meta["exception_type"] == "TimeoutError"
+
+
+def test_classify_model_error_covers_quota_auth_forbidden_and_unavailable() -> None:
+    """模型错误分类应覆盖额度、权限、不可用和网络问题。"""
+
+    assert model_service.classify_model_error("Free quota exhausted AllocationQuota.FreeTierOnly") == "quota_exhausted"
+    assert model_service.classify_model_error("bad key", status_code=401) == "unauthorized"
+    assert model_service.classify_model_error("Error code: 403 forbidden") == "forbidden"
+    assert model_service.classify_model_error("model not found") == "model_unavailable"
+    assert model_service.classify_model_error("request timeout") == "network_error"
+    assert model_service.classify_model_error("other") == "unknown"
+
+
+def test_attempt_model_fallback_selects_first_reachable_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """fallback 应跳过当前模型并选择首个探活成功候选。"""
+
+    store = _DummyStore(
+        {
+            "current_llm_info": {
+                "service_provider": "Acme",
+                "model": "bad-chat",
+                "api_base": "https://acme.example/v1",
+                "api_key": "bad-key",
+            },
+            "custom_llm_providers": [
+                {
+                    "name": "Acme",
+                    "provider": "Acme",
+                    "api_base": "https://acme.example/v1",
+                    "models": ["bad-chat", "good-chat"],
+                    "api_key": "acme-key",
+                },
+                {
+                    "name": "Other",
+                    "provider": "Other",
+                    "api_base": "https://other.example/v1",
+                    "models": ["other-chat"],
+                    "api_key": "other-key",
+                },
+            ],
+        }
+    )
+    checks: list[tuple[str, str]] = []
+    session_updates: list[tuple[str, dict[str, Any]]] = []
+    monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(model_service.config, "LLM_API_LIST", {}, raising=False)
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-10T01:00:00Z")
+    monkeypatch.setattr(model_service, "new_trace_id", lambda _prefix: "fallback-trace")
+    monkeypatch.setattr(model_service, "update_session", lambda session_id, payload: session_updates.append((session_id, payload)))
+
+    def fake_check(model_name: str, api_base: str, api_key: str, trace_id: str):
+        checks.append((model_name, api_base))
+        return model_name == "good-chat", "reachable" if model_name == "good-chat" else "http_403", {}
+
+    monkeypatch.setattr(model_service, "_check_openai_compatible", fake_check)
+
+    result = model_service.attempt_model_fallback("Free quota exhausted", session_id="sess-fallback")
+
+    assert result["applied"] is True
+    assert result["selected"]["model"] == "good-chat"
+    assert checks[0] == ("good-chat", "https://acme.example/v1")
+    assert store.values["current_llm_info"]["model"] == "good-chat"
+    assert store.values["model_health_status"]["state"] == "fallback_applied"
+    assert store.values["model_health_status"]["last_error_kind"] == "quota_exhausted"
+    assert store.values["model_health_status"]["fallback_to"]["model"] == "good-chat"
+    assert session_updates[0][0] == "sess-fallback"
+
+
+def test_attempt_model_fallback_records_unavailable_when_no_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """没有候选模型可用时，应记录 unavailable 状态并返回未切换。"""
+
+    store = _DummyStore(
+        {
+            "current_llm_info": {"service_provider": "Acme", "model": "bad-chat", "api_base": "https://acme.example/v1", "api_key": "k"},
+            "custom_llm_providers": [
+                {"name": "Acme", "provider": "Acme", "api_base": "https://acme.example/v1", "models": ["bad-chat"], "api_key": "k"}
+            ],
+        }
+    )
+    monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(model_service.config, "LLM_API_LIST", {}, raising=False)
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-10T01:30:00Z")
+
+    result = model_service.attempt_model_fallback("Error code: 403", session_id="sess")
+
+    assert result == {
+        "applied": False,
+        "reason": "no_reachable_candidate",
+        "error_kind": "forbidden",
+        "candidate_count": 0,
+        "health": store.values["model_health_status"],
+    }
+    assert store.values["model_health_status"]["state"] == "unavailable"
 
 
 def test_test_custom_provider_connection_rejects_missing_api_key_and_logs(monkeypatch: pytest.MonkeyPatch) -> None:

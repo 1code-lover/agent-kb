@@ -149,6 +149,33 @@ def test_query_does_not_record_history_when_disabled(chat_service_module, monkey
     normalize_evidence.assert_called_once_with(sources)
 
 
+def test_query_fallbacks_model_once_and_retries(chat_service_module, monkeypatch, single_kb_scope):
+    """模型调用失败时，chat query 应触发 fallback 并用新引擎重试一次。"""
+    first_engine = MagicMock()
+    first_engine.query.side_effect = RuntimeError("Free quota exhausted")
+    second_engine = MagicMock()
+    second_engine.query.return_value = SimpleNamespace(response="fallback answer", source_nodes=[])
+    build_query_engine = MagicMock(side_effect=[first_engine, second_engine])
+    fallback = MagicMock(return_value={"applied": True, "selected": {"model": "good-chat"}})
+    invalidate_llm = MagicMock()
+
+    monkeypatch.setattr(chat_service_module, "resolve_chat_query_scope", MagicMock(return_value=single_kb_scope))
+    monkeypatch.setattr(chat_service_module.runtime_state, "ensure_index_loaded", MagicMock(return_value=True))
+    monkeypatch.setattr(chat_service_module.runtime_state, "build_query_engine", build_query_engine)
+    monkeypatch.setattr(chat_service_module.runtime_state, "invalidate_llm", invalidate_llm)
+    monkeypatch.setattr(chat_service_module.model_service, "attempt_model_fallback", fallback)
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=[]))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(_build_request(), record_history=False)
+
+    assert result["answer"] == "fallback answer"
+    assert build_query_engine.call_count == 2
+    fallback.assert_called_once()
+    invalidate_llm.assert_called_once_with()
+    second_engine.query.assert_called_once_with("What is the GPU memory requirement?")
+
+
 def test_query_records_history_and_prunes_refusal_sources(chat_service_module, monkeypatch, single_kb_scope):
     """拒答回答应裁剪无关来源，并按用户/助手顺序记录历史。"""
     _stub_query_runtime(

@@ -324,6 +324,17 @@ class RuntimeState:
                 self.llm_fingerprint = fingerprint
             return True
 
+    def invalidate_llm(self) -> None:
+        """清理已缓存 LLM，使下一次请求按最新配置重新加载。"""
+        try:
+            from llama_index.core import Settings
+
+            setattr(Settings, "_llm", None)
+        except Exception:
+            pass
+        with self.lock:
+            self.llm_fingerprint = None
+
     def ensure_index_loaded(self, kb_id: str | None = None) -> bool:
         """确保指定知识库的索引已加载。
 

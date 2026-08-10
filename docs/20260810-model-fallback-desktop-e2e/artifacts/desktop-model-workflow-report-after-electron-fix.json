@@ -1,0 +1,400 @@
+{
+  "base_url": "http://127.0.0.1:18080",
+  "kb_id": "diag-desktop-e2e-1786353063",
+  "isolation_kb_id": "default",
+  "question": "What is the unique desktop workflow passcode in the diagnostic document?",
+  "source": {
+    "path": "/Users/zhaojianyong/python/agent-kb/temp/desktop-model-workflow.md",
+    "sha256": "fb34b580f627268e48986b42dfa8d5065c1a718f4b9ccf91d05a3ab1d9129a6c",
+    "size": 324,
+    "unique_code": "northagent-desktop-e2e-1786353063",
+    "text_preview": "# Desktop model workflow diagnostic\n\nThis document verifies the NorthAgent desktop workflow.\nThe unique desktop workflow passcode is northagent-desktop-e2e-1786353063.\nThe selected knowledge base is the authorization boundary for this diagnostic document.\nEvidence preview must resolve this file after chat returns sources.\n"
+  },
+  "model": {
+    "requested": {
+      "service_provider": "阿里百联",
+      "model": "qwen-plus-2025-07-28",
+      "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    },
+    "selected": {
+      "service_provider": "阿里百联",
+      "model": "qwen-plus-2025-07-28",
+      "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "api_key_valid": true
+    },
+    "test": {
+      "reachable": true,
+      "detail": "reachable",
+      "trace_id": "modeltest-90906b171bf8"
+    },
+    "health": {
+      "state": "healthy",
+      "current_provider": "阿里百联",
+      "current_model": "qwen-plus-2025-07-28",
+      "last_error_kind": null,
+      "last_error": null,
+      "last_checked_at": "2026-08-10T09:11:03.357670+00:00",
+      "last_fallback_at": null,
+      "fallback_from": null,
+      "fallback_to": null,
+      "candidate_count": 0
+    }
+  },
+  "checks": {
+    "runtime_ready": true,
+    "model_options_loaded": true,
+    "model_health_loaded": true,
+    "model_selected": true,
+    "model_test_reachable": true,
+    "file_imported": true,
+    "chat_answer_has_unique_code": true,
+    "chat_sources_present": true,
+    "chat_sources_have_unique_code": true,
+    "chat_evidence_present": true,
+    "preview_returned": true,
+    "preview_has_unique_code": true,
+    "cross_kb_did_not_leak_target_kb": true,
+    "cross_kb_did_not_leak_unique_code": true,
+    "run_passed": true
+  },
+  "api": {
+    "health": {
+      "status": "ok",
+      "runtime": {
+        "pid": 29867,
+        "python_executable": "/opt/miniconda3/envs/agent-kb/bin/python",
+        "python_version": "3.12.13",
+        "python_implementation": "CPython",
+        "cwd": "/Users/zhaojianyong/python/agent-kb"
+      },
+      "embedding_warmup": {
+        "state": "ready",
+        "attempt_count": 1,
+        "last_error": null,
+        "last_duration_ms": 19458.269,
+        "started_at": "2026-08-10T09:10:31.050073+00:00",
+        "finished_at": "2026-08-10T09:10:50.508440+00:00",
+        "current_model": "bge-small-zh-v1.5",
+        "loaded_model": "bge-small-zh-v1.5",
+        "is_ready": true
+      },
+      "ocr_warmup": {
+        "state": "ready",
+        "attempt_count": 1,
+        "last_error": null,
+        "last_duration_ms": 6800.312,
+        "started_at": "2026-08-10T09:10:31.050199+00:00",
+        "finished_at": "2026-08-10T09:10:37.850590+00:00",
+        "is_ready": true
+      },
+      "import_capabilities": {
+        "pdf_text_extraction": {
+          "ready": true,
+          "dependencies": [
+            "fitz"
+          ]
+        },
+        "image_ocr": {
+          "ready": true,
+          "dependencies": [
+            "paddleocr",
+            "paddle",
+            "pillow"
+          ]
+        },
+        "dependencies": {
+          "fitz": {
+            "installed": true,
+            "package": "PyMuPDF",
+            "import_name": "fitz",
+            "used_for": [
+              "pdf_text_extraction"
+            ]
+          },
+          "paddleocr": {
+            "installed": true,
+            "package": "paddleocr",
+            "import_name": "paddleocr",
+            "used_for": [
+              "image_ocr"
+            ]
+          },
+          "paddle": {
+            "installed": true,
+            "package": "paddlepaddle",
+            "import_name": "paddle",
+            "used_for": [
+              "image_ocr"
+            ]
+          },
+          "pillow": {
+            "installed": true,
+            "package": "Pillow",
+            "import_name": "PIL",
+            "used_for": [
+              "image_ocr"
+            ]
+          }
+        }
+      }
+    },
+    "ensure_kb": {
+      "kb_id": "diag-desktop-e2e-1786353063",
+      "kb_name": "Desktop Model Workflow Diagnostic",
+      "created_at": "2026-08-10T09:11:06.157537+00:00",
+      "updated_at": "2026-08-10T09:11:06.157537+00:00",
+      "status": "active",
+      "doc_count": 0
+    },
+    "import_summary": {
+      "receipt_id": "kb-file-import-1b249b2ebc7545ec922601d720ccd025",
+      "files": [
+        {
+          "name": "desktop-model-workflow.md",
+          "type": "text/markdown",
+          "size": 324,
+          "path": "/Users/zhaojianyong/python/agent-kb/data/diag-desktop-e2e-1786353063/desktop-e2e/desktop-model-workflow.md",
+          "kb_id": "diag-desktop-e2e-1786353063",
+          "relative_path": "desktop-e2e/desktop-model-workflow.md",
+          "folder_path": "desktop-e2e"
+        }
+      ],
+      "file_results": [
+        {
+          "name": "desktop-model-workflow.md",
+          "type": "text/markdown",
+          "size": 324,
+          "path": "/Users/zhaojianyong/python/agent-kb/data/diag-desktop-e2e-1786353063/desktop-e2e/desktop-model-workflow.md",
+          "kb_id": "diag-desktop-e2e-1786353063",
+          "status": "indexed",
+          "indexed_chunks": 1,
+          "relative_path": "desktop-e2e/desktop-model-workflow.md",
+          "folder_path": "desktop-e2e",
+          "embedded_assets": [],
+          "asset_warning_count": 0,
+          "diagnostics": {
+            "file_kind": "markdown",
+            "empty_reason": null,
+            "standalone_asset_candidate": false,
+            "skip_standalone_asset": false,
+            "file_retained_on_disk": true,
+            "ocr_attempted": false,
+            "ocr_status": null,
+            "ocr_text_length": 0,
+            "ocr_error": null,
+            "indexed_from_ocr": false,
+            "asset_registered": false,
+            "stage_timings": {
+              "file_save_ms": 0.382,
+              "persist_ms": 0.382,
+              "standalone_ocr_ms": 0.0,
+              "primary_index_ms": 502.6,
+              "embedded_asset_extract_ms": 0.177,
+              "embedded_asset_ocr_ms": 0.0,
+              "embedded_asset_index_ms": 0.0,
+              "total_ms": 503.159
+            },
+            "document_count": 1,
+            "empty_document_count": 0,
+            "input_text_chars": 323,
+            "node_count": 1,
+            "nodes_with_embedding_count": 1,
+            "nodes_without_embedding_count": 0,
+            "index_stage_timings": {
+              "document_load_ms": 1.851,
+              "chunking_ms": 5.478,
+              "embedding_ms": 484.832,
+              "title_extract_ms": 0.554,
+              "vector_store_ms": 0.073,
+              "docstore_ms": 0.005,
+              "index_insert_ms": 1.473,
+              "total_ms": 495.113
+            },
+            "failure_category": null,
+            "missing_dependency": null,
+            "dependency_status": "unknown",
+            "ocr_init_ms": 0.0,
+            "ocr_load_image_ms": 0.0,
+            "ocr_predict_ms": 0.0,
+            "ocr_postprocess_ms": 0.0,
+            "ocr_total_ms": 0.0,
+            "ocr_instance_reused": false,
+            "embedded_asset_count": 0,
+            "embedded_asset_ready_count": 0,
+            "embedded_asset_missing_count": 0,
+            "embedded_asset_invalid_count": 0,
+            "embedded_ocr_attempted_count": 0,
+            "embedded_ocr_success_count": 0,
+            "embedded_ocr_no_text_count": 0,
+            "embedded_ocr_failed_count": 0,
+            "embedded_ocr_skipped_count": 0,
+            "embedded_indexed_from_ocr_count": 0
+          }
+        }
+      ],
+      "indexed_chunks": 1,
+      "success_count": 1,
+      "failed_count": 0,
+      "empty_count": 0,
+      "kb_id": "diag-desktop-e2e-1786353063",
+      "import_mode": "preserve_tree",
+      "diagnostics": {
+        "total_files": 1,
+        "indexed_files": 1,
+        "empty_files": 0,
+        "failed_files": 0,
+        "standalone_asset_candidate_count": 0,
+        "embedded_asset_count": 0,
+        "embedded_asset_ready_count": 0,
+        "embedded_asset_missing_count": 0,
+        "embedded_asset_invalid_count": 0,
+        "asset_warning_count": 0,
+        "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "asset_registered_count": 0,
+        "skip_standalone_asset_count": 0,
+        "empty_reason_counts": {},
+        "failure_category_counts": {},
+        "dependency_status_counts": {
+          "unknown": 1
+        },
+        "dependency_missing_count": 0,
+        "missing_dependency_counts": {},
+        "stage_timings": {
+          "ensure_models_ready_ms": 0.039,
+          "get_index_manager_ms": 7.31,
+          "file_save_ms": 0.382,
+          "persist_ms": 0.382,
+          "standalone_ocr_ms": 0.0,
+          "primary_index_ms": 502.6,
+          "embedded_asset_extract_ms": 0.177,
+          "embedded_asset_ocr_ms": 0.0,
+          "embedded_asset_index_ms": 0.0,
+          "index_storage_persist_ms": 1.461,
+          "doc_count_update_ms": 1.032,
+          "register_assets_ms": 0.419,
+          "receipt_store_ms": 0.463,
+          "result_build_ms": 0.023,
+          "total_ms": 508.481
+        },
+        "document_count": 1,
+        "empty_document_count": 0,
+        "input_text_chars": 323,
+        "node_count": 1,
+        "nodes_with_embedding_count": 1,
+        "nodes_without_embedding_count": 0,
+        "index_stage_timings": {
+          "document_load_ms": 1.851,
+          "chunking_ms": 5.478,
+          "embedding_ms": 484.832,
+          "title_extract_ms": 0.554,
+          "vector_store_ms": 0.073,
+          "docstore_ms": 0.005,
+          "index_insert_ms": 1.473,
+          "total_ms": 495.113
+        },
+        "storage_persist_stage_timings": {
+          "docstore_persist_ms": 0.285,
+          "index_store_persist_ms": 0.097,
+          "graph_store_persist_ms": 0.105,
+          "property_graph_store_persist_ms": 0.0,
+          "vector_store_persist_ms": 0.837,
+          "vector_store_namespaces_ms": {
+            "default": 0.749,
+            "image": 0.088
+          },
+          "fallback_persist_ms": 0.0,
+          "total_ms": 1.335
+        }
+      },
+      "display_summary": {
+        "source_kind": "file_import",
+        "item_label": "文件",
+        "total_items": 1,
+        "indexed_items": 1,
+        "empty_items": 0,
+        "failed_items": 0,
+        "asset_registered_count": 0,
+        "asset_registered_but_not_indexed_count": 0,
+        "asset_warning_count": 0,
+        "dependency_missing_count": 0,
+        "top_missing_dependencies": [],
+        "top_empty_reasons": [],
+        "has_blockers": false,
+        "has_dependency_issues": false,
+        "has_warnings": false,
+        "headline": "成功导入 1 个文件",
+        "user_message": "文件已完成解析并写入知识库。",
+        "next_actions": []
+      }
+    },
+    "chat_summary": {
+      "answer": "The unique desktop workflow passcode in the diagnostic document is northagent-desktop-e2e-1786353063.",
+      "sources_count": 1,
+      "evidence_count": 1,
+      "requested_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "effective_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "first_source": {
+        "id": "ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19",
+        "file": "desktop-model-workflow.md",
+        "page": "N/A",
+        "score": 1.5333333333333332,
+        "text": "# Desktop model workflow diagnostic\n\nThis document verifies the NorthAgent desktop workflow.\nThe unique desktop workflow passcode is northagent-desktop-e2e-1786353063.\nThe selected knowledge base is the authorization boundary for this diagnostic document.\nEvidence preview must resolve this file after chat returns sources.",
+        "kb_id": "diag-desktop-e2e-1786353063",
+        "doc_id": "839e00d3-5952-4aa7-9738-8c770e53d105",
+        "preview_locator": {
+          "node_id": "cbfe03b3-9eb8-49b9-bcc4-c78d330c8659"
+        },
+        "asset_id": null
+      },
+      "first_evidence": {
+        "id": "ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19",
+        "title": "desktop-model-workflow.md",
+        "source": "desktop-model-workflow.md",
+        "page": "N/A",
+        "score": 1.5333333333333332,
+        "excerpt": "# Desktop model workflow diagnostic\n\nThis document verifies the NorthAgent desktop workflow.\nThe unique desktop workflow passcode is northagent-desktop-e2e-1786353063.\nThe selected knowledge base is the authorization boundary for this diagnostic document.\nEvidence preview must resolve this file after chat returns sources.",
+        "receipt_id": null,
+        "kb_id": "diag-desktop-e2e-1786353063",
+        "doc_id": "839e00d3-5952-4aa7-9738-8c770e53d105",
+        "preview_locator": {
+          "node_id": "cbfe03b3-9eb8-49b9-bcc4-c78d330c8659"
+        },
+        "asset_id": null
+      }
+    },
+    "preview": {
+      "title": "desktop-model-workflow.md",
+      "kb_id": "diag-desktop-e2e-1786353063",
+      "doc_id": "839e00d3-5952-4aa7-9738-8c770e53d105",
+      "excerpt": "# Desktop model workflow diagnostic\n\nThis document verifies the NorthAgent desktop workflow.\nThe unique desktop workflow passcode is northagent-desktop-e2e-1786353063.\nThe selected knowledge base is the authorization boundary for this diagnostic document.\nEvidence preview must resolve this file after chat returns sources.",
+      "locator": {
+        "node_id": "cbfe03b3-9eb8-49b9-bcc4-c78d330c8659"
+      },
+      "preview_type": "text_excerpt",
+      "evidence_id": "ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19"
+    },
+    "isolation": {
+      "http_status": 200,
+      "answer": "Empty Response",
+      "sources_count": 0,
+      "evidence_count": 0,
+      "sources": [],
+      "evidence": [],
+      "error": "ok"
+    }
+  }
+}

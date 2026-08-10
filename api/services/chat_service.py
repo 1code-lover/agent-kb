@@ -8,6 +8,7 @@ from typing import Any
 from api.runtime import runtime_state
 from api.schemas import QueryRequest
 from api.services.evidence_service import normalize_evidence, normalize_source_nodes
+from api.services import model_service
 from api.services.query_scope import resolve_chat_query_scope
 from api.services.session_store import append_chat_message, clear_chat_messages, list_chat_messages
 
@@ -355,9 +356,17 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
     if not runtime_state.ensure_index_loaded():
         raise ValueError("Knowledge base is empty. Please import documents first.")
 
-    engine = runtime_state.build_query_engine(kb_ids=scope.effective_kb_ids)
     grounded_question = _build_history_grounded_question(request.question, request.session_id)
-    answer = engine.query(grounded_question)
+    engine = runtime_state.build_query_engine(kb_ids=scope.effective_kb_ids)
+    try:
+        answer = engine.query(grounded_question)
+    except Exception as exc:
+        fallback = model_service.attempt_model_fallback(exc, session_id=request.session_id)
+        if not fallback.get("applied"):
+            raise
+        runtime_state.invalidate_llm()
+        engine = runtime_state.build_query_engine(kb_ids=scope.effective_kb_ids)
+        answer = engine.query(grounded_question)
     answer_text = getattr(answer, "response", str(answer))
     sources = _dedupe_sources_by_file(_normalize_sources(answer))
     if _answer_is_refusal_like(answer_text):

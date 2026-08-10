@@ -111,22 +111,24 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 - 当前分支：`codex/desktop-agent-stage3`
 - 远端跟踪：`origin/codex/desktop-agent-stage3`
-- 当前分支已完成 2026-08-07 稳定性收口提交，并已推送到远端：
-  - `575ff3d fix(kb): recognize docx/office documents as importable file kind`
-  - `64c402b fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes`
-  - `7b0037d feat(eval): add grain KB real QA evaluation script`
-  - `ed8368f docs(grain-qa): add real KB QA evaluation report artifacts`
-  - `1520aef fix(kb): harden import filtering and grain qa eval`
-  - `6f1ef56 fix(ocr): stabilize paddle runtime and diagnostics`
-  - `ddf8317 refactor(web): replace router dependency with local navigation`
-  - `ca34b66 docs(dev): record local kb stability closure`
+- 最近已推送提交：
+  - `b2deaf9 fix(retrieval): improve grain source ranking`
+  - `bde25b0 feat(grain): repair coverage gate and qa recall`
+  - `ddd506f chore: update eval dev story`
+  - `ebef6ad fix(eval): include empty failure groups`
+  - `9273780 docs(grain): plan index coverage repair`
+  - `fa282a6 chore: update dev story capture state`
+  - `f5a84a8 feat(eval): expand grain qa coverage`
+  - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
+  - `3d3e010 docs(project): mark closure pushed`
   - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 正在收口粮仓知识库索引覆盖修复、source 去重和 QA 复评改动，待最终验证后提交推送。
+- 当前工作区状态：2026-08-10 正在收口模型配置韧性、评测断点续跑、桌面端真实工作流 E2E 与 macOS Electron 公证撤销启动修复，待最终回归后提交推送。
 
 ### 4.4 下一步建议
 
-- **下一步从覆盖修复转向检索质量微调**：索引覆盖 gate 已建立并通过，后续重点是 2 条剩余漏召回、11 条 rank_miss 的 reranker/top-k 对比，以及前端证据展示体验。
-- **保留覆盖诊断作为回归门禁**：后续导入或重建索引后，应先跑 `scripts/diagnose_grain_qa_coverage.py`，确认 QA 期望文档仍为 `docstore=82/82`、`kb_id=82/82`。
+- **下一阶段目标切到模型韧性和桌面端体验验证**：优先保障额度耗尽、403、401、模型不可用时能自动切换到已配置可用模型，并在 API/UI 中明确显示当前模型健康状态。
+- **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应验证桌面端启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
+- **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
 
 ---
 
@@ -192,6 +194,17 @@ cd webapp && npm run build
 - `cd webapp && npm audit --json`：`0 vulnerabilities`。
 - `git diff --check`：通过。
 
+### 5.3 2026-08-10 模型韧性与桌面 E2E 复核结果
+
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"`：`709 passed, 1 deselected, 35 warnings`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py tests/scripts/test_run_grain_qa_eval.py -q`：`65 passed, 8 warnings`。
+- `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`80 passed`，新增模型健康状态映射回归。
+- `node --test desktop/src/python-process.test.js`：`2 passed`，确认桌面端优先使用 `NORTHAGENT_PYTHON` 或 `/opt/miniconda3/envs/agent-kb/bin/python`。
+- `cd webapp && npm run build`：通过，桌面端可加载 `webapp/dist/index.html`。
+- `electron@31.7.7` 在 macOS 上触发 `notarization indicates this code has been revoked`，表现为 `Electron.app` 被系统移除；已升级到 `electron@43.3.0` 后复核通过。
+- `ELECTRON_ENABLE_LOGGING=1 NORTHAGENT_PYTHON=/opt/miniconda3/envs/agent-kb/bin/python npm run dev`：桌面端干净启动成功，runtime log 记录 `desktop_app_ready`、`python_api_starting`、`python_api_ready`、`renderer_resolved source=dist`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_desktop_model_workflow --base-url http://127.0.0.1:18080 --output-path docs/20260810-model-fallback-desktop-e2e/artifacts/desktop-model-workflow-report-after-electron-fix.json`：`run_passed=true`；验证模型选择/探活/健康状态、文件导入、定向 KB 问答、引用来源、preview 与 `default` 跨 KB 隔离。
+
 ---
 
 ## 6. 已知问题和限制
@@ -204,6 +217,7 @@ cd webapp && npm run build
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
+- **桌面端依赖安全仍需独立收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，但 `desktop` 依赖树仍有 `8 vulnerabilities`，需要后续单独做 `electron-builder` 等构建依赖升级评估。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 
 ---
@@ -221,6 +235,7 @@ cd webapp && npm run build
 | `docs/20260807-grain-qa-expansion/` | 粮仓 QA 80 条扩测与失败分组报告 |
 | `docs/20260807-grain-index-coverage-repair/` | 粮仓知识库索引覆盖修复计划 |
 | `docs/20260810-grain-retrieval-quality-tuning/` | 粮仓检索排序质量调优、实验矩阵和最终测试报告 |
+| `docs/20260810-model-fallback-desktop-e2e/` | 模型 fallback、模型健康状态、评测断点续跑和桌面端 E2E 验证 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |

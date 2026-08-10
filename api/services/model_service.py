@@ -19,6 +19,30 @@ from api.services.session_store import update_session
 from utils.logging_utils import MODEL_TEST_LOG_FILE, append_json_log, new_trace_id, now_iso
 
 CUSTOM_PROVIDER_STORE_KEY = "custom_llm_providers"
+MODEL_HEALTH_STORE_KEY = "model_health_status"
+RECOVERABLE_MODEL_ERROR_KINDS = {
+    "quota_exhausted",
+    "forbidden",
+    "unauthorized",
+    "model_unavailable",
+    "network_error",
+}
+
+
+def _default_model_health() -> dict[str, Any]:
+    """创建模型健康状态默认快照。"""
+    return {
+        "state": "unknown",
+        "current_provider": "",
+        "current_model": "",
+        "last_error_kind": None,
+        "last_error": None,
+        "last_checked_at": None,
+        "last_fallback_at": None,
+        "fallback_from": None,
+        "fallback_to": None,
+        "candidate_count": 0,
+    }
 
 
 def _get_config_store():
@@ -65,6 +89,7 @@ def get_model_options() -> dict[str, Any]:
         "reranker_models": list(config.RERANKER_MODEL_PATH.keys()),
         "current_llm_info": config_store.get("current_llm_info"),
         "current_llm_settings": config_store.get("current_llm_settings"),
+        "model_health": get_model_health(),
     }
 
 
@@ -81,6 +106,14 @@ def select_model(request: ModelSelectRequest) -> dict[str, Any]:
     payload["api_key"] = payload.get("api_key") or ""
     payload["api_key_valid"] = True if payload["api_key"] or request.service_provider == "Ollama" else False
     config_store.put("current_llm_info", payload)
+    update_model_health(
+        state="healthy" if payload["api_key_valid"] else "unknown",
+        current_provider=payload["service_provider"],
+        current_model=payload["model"],
+        last_error_kind=None,
+        last_error=None,
+        last_checked_at=now_iso(),
+    )
     update_session(
         request.session_id,
         {
@@ -114,6 +147,183 @@ def _get_custom_providers() -> list[dict[str, Any]]:
     if isinstance(providers, list):
         return providers
     return []
+
+
+def get_model_health() -> dict[str, Any]:
+    """读取模型健康状态，并补齐当前模型快照。"""
+    config_store = _get_config_store()
+    current = config_store.get("current_llm_info") or {}
+    saved = config_store.get(MODEL_HEALTH_STORE_KEY)
+    status = _default_model_health()
+    if isinstance(saved, dict):
+        status.update(saved)
+    status["current_provider"] = current.get("service_provider", status.get("current_provider") or "")
+    status["current_model"] = current.get("model", status.get("current_model") or "")
+    return status
+
+
+def update_model_health(**changes: Any) -> dict[str, Any]:
+    """合并写入模型健康状态。"""
+    config_store = _get_config_store()
+    status = get_model_health()
+    status.update(changes)
+    config_store.put(MODEL_HEALTH_STORE_KEY, status)
+    return status
+
+
+def classify_model_error(error: Any, status_code: int | None = None) -> str:
+    """把模型调用异常或 HTTP 错误文本归类为稳定错误类型。"""
+    text = str(error or "")
+    lowered = text.lower()
+    if status_code == 401 or "http_401" in lowered or "401 unauthorized" in lowered or "invalid_api_key" in lowered:
+        return "unauthorized"
+    if (
+        "free quota exhausted" in lowered
+        or "quota exhausted" in lowered
+        or "allocationquota" in lowered
+        or "insufficient_quota" in lowered
+        or "rate limit" in lowered
+    ):
+        return "quota_exhausted"
+    if status_code == 403 or "http_403" in lowered or "error code: 403" in lowered or "403 forbidden" in lowered:
+        return "forbidden"
+    if (
+        "model not found" in lowered
+        or "model_not_found" in lowered
+        or "does not exist" in lowered
+        or "unsupported model" in lowered
+        or "model unavailable" in lowered
+    ):
+        return "model_unavailable"
+    if any(marker in lowered for marker in ("timed out", "timeout", "connection refused", "connection reset", "network")):
+        return "network_error"
+    return "unknown"
+
+
+def is_recoverable_model_error(error: Any) -> bool:
+    """判断异常是否适合触发自动 fallback。"""
+    return classify_model_error(error) in RECOVERABLE_MODEL_ERROR_KINDS
+
+
+def _iter_provider_candidates(current_info: dict[str, Any]) -> list[dict[str, Any]]:
+    """按优先级枚举 OpenAI 兼容模型候选。"""
+    providers: list[dict[str, Any]] = []
+    for name, provider in config.LLM_API_LIST.items():
+        item = dict(provider)
+        item["name"] = name
+        providers.append(item)
+    providers.extend(dict(item) for item in _get_custom_providers())
+
+    current_provider = current_info.get("service_provider")
+    current_model = current_info.get("model")
+
+    def provider_priority(provider: dict[str, Any]) -> tuple[int, str]:
+        return (0 if provider.get("name") == current_provider else 1, str(provider.get("name") or ""))
+
+    candidates: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for provider in sorted(providers, key=provider_priority):
+        provider_name = str(provider.get("name") or provider.get("provider") or "").strip()
+        api_base = str(provider.get("api_base") or "").strip().rstrip("/")
+        api_key = provider.get("api_key") or ""
+        if provider_name == "Ollama" or not api_base or not api_key:
+            continue
+        for model_name in provider.get("models", []) or []:
+            model = str(model_name or "").strip()
+            if not model:
+                continue
+            if provider_name == current_provider and model == current_model:
+                continue
+            key = (provider_name, api_base, model)
+            if key in seen:
+                continue
+            seen.add(key)
+            candidates.append(
+                {
+                    "service_provider": provider_name,
+                    "model": model,
+                    "api_base": api_base,
+                    "api_key": api_key,
+                }
+            )
+    return candidates
+
+
+def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> dict[str, Any]:
+    """遇到可恢复模型错误时，探测并切换到首个可用候选模型。"""
+    config_store = _get_config_store()
+    current_info = config_store.get("current_llm_info") or {}
+    error_kind = classify_model_error(error)
+    candidates = _iter_provider_candidates(current_info)
+    base_status = {
+        "state": "degraded" if error_kind in RECOVERABLE_MODEL_ERROR_KINDS else "unavailable",
+        "current_provider": current_info.get("service_provider", ""),
+        "current_model": current_info.get("model", ""),
+        "last_error_kind": error_kind,
+        "last_error": str(error)[:500],
+        "last_checked_at": now_iso(),
+        "candidate_count": len(candidates),
+        "fallback_from": {
+            "service_provider": current_info.get("service_provider", ""),
+            "model": current_info.get("model", ""),
+            "api_base": current_info.get("api_base", ""),
+        },
+    }
+    update_model_health(**base_status)
+
+    if error_kind not in RECOVERABLE_MODEL_ERROR_KINDS:
+        return {"applied": False, "reason": "non_recoverable", "error_kind": error_kind, "candidate_count": len(candidates)}
+
+    trace_id = new_trace_id("fallback")
+    for candidate in candidates:
+        reachable, detail, _meta = _check_openai_compatible(
+            candidate["model"],
+            candidate["api_base"],
+            candidate["api_key"],
+            trace_id,
+        )
+        if not reachable:
+            continue
+        selected = select_model(
+            ModelSelectRequest(
+                service_provider=candidate["service_provider"],
+                model=candidate["model"],
+                api_base=candidate["api_base"],
+                api_key=candidate["api_key"],
+                session_id=session_id,
+            )
+        )
+        status = update_model_health(
+            state="fallback_applied",
+            current_provider=selected["service_provider"],
+            current_model=selected["model"],
+            last_error_kind=error_kind,
+            last_error=str(error)[:500],
+            last_checked_at=now_iso(),
+            last_fallback_at=now_iso(),
+            fallback_to={
+                "service_provider": selected["service_provider"],
+                "model": selected["model"],
+                "api_base": selected.get("api_base", ""),
+            },
+            candidate_count=len(candidates),
+        )
+        return {
+            "applied": True,
+            "error_kind": error_kind,
+            "selected": selected,
+            "candidate_count": len(candidates),
+            "health": status,
+        }
+
+    status = update_model_health(state="unavailable", last_checked_at=now_iso(), candidate_count=len(candidates))
+    return {
+        "applied": False,
+        "reason": "no_reachable_candidate",
+        "error_kind": error_kind,
+        "candidate_count": len(candidates),
+        "health": status,
+    }
 
 
 def _save_custom_providers(providers: list[dict[str, Any]]) -> None:

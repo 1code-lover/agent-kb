@@ -40,6 +40,7 @@ import {
   buildChatSessionId,
   buildExperienceSummary,
 } from "../domain/agentExperience";
+import { buildModelHealthSummary } from "../domain/modelHealth";
 import useAppStore from "../store/appStore";
 import "./agent-page.css";
 
@@ -329,6 +330,7 @@ function QaWorkbench(props) {
     kbLoading,
     onSelectKb,
     currentModelLabel,
+    modelHealthSummary,
     modelReady,
     question,
     onQuestionChange,
@@ -364,6 +366,7 @@ function QaWorkbench(props) {
           </div>
           <div className="qa-hero-meta">
             <span className="qa-badge">{"当前模型：" + currentModelLabel}</span>
+            <span className="qa-badge">{modelHealthSummary?.chipLabel || "状态未知"}</span>
             <span className="qa-badge">
               {"当前范围：" + (experience === "knowledge" ? (selectedKb?.kb_name || "未选择知识库") : "全部知识范围")}
             </span>
@@ -456,7 +459,11 @@ function QaWorkbench(props) {
               </div>
               <div className="qa-summary-item">
                 <span>模型状态</span>
-                <strong>{modelReady ? "已就绪" : "待配置"}</strong>
+                <strong>{modelHealthSummary?.title || (modelReady ? "已就绪" : "待配置")}</strong>
+              </div>
+              <div className="qa-summary-item">
+                <span>健康详情</span>
+                <strong>{modelHealthSummary?.detail || (modelReady ? "最近未发现异常" : "请先配置模型")}</strong>
               </div>
               <div className="qa-summary-item">
                 <span>知识库范围</span>
@@ -557,6 +564,10 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
   });
 
   const currentModel = modelOptionsQuery.data?.current_llm_info || null;
+  const modelHealthSummary = useMemo(
+    () => buildModelHealthSummary(modelOptionsQuery.data?.model_health || null),
+    [modelOptionsQuery.data?.model_health],
+  );
   const sessionProvider = sessionQuery.data?.snapshot?.workspace?.provider || null;
   const providers = modelOptionsQuery.data?.providers || {};
 
@@ -917,6 +928,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
           </div>
           <div className="qa-hero-meta">
             <span className="qa-badge">{"当前模型：" + currentModelLabel}</span>
+            <span className="qa-badge">{modelHealthSummary.chipLabel}</span>
             <span className="qa-badge">{"运行状态：" + runState}</span>
             <span className="qa-badge">{"上传目标：" + uploadTargetText}</span>
           </div>
@@ -941,6 +953,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
         <header className="agent-chat-toolbar">
           <div className="agent-chat-toolbar-left">
             <span className="toolbar-pill">{currentModelLabel}</span>
+            <span className="toolbar-pill subtle">{modelHealthSummary.chipLabel}</span>
             <span className="toolbar-pill subtle">{"状态：" + runState}</span>
           </div>
           <div className="agent-chat-toolbar-right">
@@ -1099,6 +1112,10 @@ function AgentPageContent() {
   }, [experience, isRouteIntentPending, location.pathname, location.search, navigate, selectedKbId]);
 
   const currentModel = modelOptionsQuery.data?.current_llm_info || null;
+  const modelHealthSummary = useMemo(
+    () => buildModelHealthSummary(modelOptionsQuery.data?.model_health || null),
+    [modelOptionsQuery.data?.model_health],
+  );
   const currentModelLabel =
     currentModel?.service_provider && currentModel?.model
       ? currentModel.service_provider + " / " + currentModel.model
@@ -1257,6 +1274,7 @@ function AgentPageContent() {
         kbLoading={kbLoading}
         onSelectKb={selectKb}
         currentModelLabel={currentModelLabel}
+        modelHealthSummary={modelHealthSummary}
         modelReady={modelReady}
         question={chatQuestion}
         onQuestionChange={setChatQuestion}

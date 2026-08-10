@@ -416,6 +416,137 @@ def build_failure_groups(results: list[dict[str, Any]], limit: int = 8) -> dict[
     }
 
 
+def _load_resume_results(output_path: Path, cases_sha: str) -> dict[str, dict[str, Any]]:
+    """读取已有报告中可安全复用的成功 case 结果。"""
+    if not output_path.exists():
+        return {}
+    try:
+        report = json.loads(output_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    if report.get("cases_sha256") != cases_sha:
+        return {}
+    reusable: dict[str, dict[str, Any]] = {}
+    for item in report.get("cases", []) or []:
+        if not isinstance(item, dict) or item.get("error"):
+            continue
+        case_id = item.get("id")
+        if isinstance(case_id, str) and case_id:
+            reusable[case_id] = item
+    return reusable
+
+
+def _write_report(
+    *,
+    output_path: Path,
+    api_base: str,
+    timeout: float,
+    kb_id: str,
+    cases_path: str,
+    cases_sha: str,
+    per_case: list[dict[str, Any]],
+    resume_meta: dict[str, Any],
+) -> dict[str, Any]:
+    """写出完整或部分评测报告。"""
+    summary = summarize(per_case)
+    failure_groups = build_failure_groups(per_case)
+    report = {
+        "generated_at": _now_iso(),
+        "api_base": api_base,
+        "timeout": timeout,
+        "kb_id": kb_id,
+        "cases_path": cases_path,
+        "cases_sha256": cases_sha,
+        "resume": resume_meta,
+        "summary": summary,
+        "failure_groups": failure_groups,
+        "cases": per_case,
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return report
+
+
+def run_evaluation(
+    *,
+    cases_path: str,
+    api_base: str,
+    kb_id: str,
+    timeout: float,
+    output: str,
+    resume: bool = False,
+    stop_on_api_error: bool = False,
+) -> tuple[dict[str, Any], int]:
+    """执行评测并返回报告与进程退出码。"""
+    cases = load_cases(cases_path)
+    if not cases:
+        print(f"未读取到评测用例: {cases_path}", file=sys.stderr)
+        return {"summary": {"total": 0}}, 2
+
+    output_path = Path(output)
+    cases_sha = file_sha256(cases_path)
+    reusable = _load_resume_results(output_path, cases_sha) if resume else {}
+    reused_count = 0
+    executed_count = 0
+    per_case: list[dict[str, Any]] = []
+
+    print(f"加载 {len(cases)} 条评测用例，目标 KB={kb_id}")
+    for index, case in enumerate(cases, start=1):
+        case_id = str(case.get("id") or case.get("_line_no"))
+        if case_id in reusable:
+            result = reusable[case_id]
+            reused_count += 1
+            per_case.append(result)
+            print(f"[{index}/{len(cases)}] ↻ {result['id']} reused -> {result['source_files_top5'][:2]}")
+            continue
+
+        result = evaluate_case(case, api_base, kb_id, timeout)
+        executed_count += 1
+        per_case.append(result)
+        hit_mark = "✓" if result["recall_at_5"] else "✗"
+        print(
+            f"[{index}/{len(cases)}] {hit_mark} {result['id']} "
+            f"recall@5={result['recall_at_5']} mrr={result['mrr_at_5']} "
+            f"-> {result['source_files_top5'][:2]}"
+        )
+        if stop_on_api_error and result.get("error"):
+            report = _write_report(
+                output_path=output_path,
+                api_base=api_base,
+                timeout=timeout,
+                kb_id=kb_id,
+                cases_path=cases_path,
+                cases_sha=cases_sha,
+                per_case=per_case,
+                resume_meta={
+                    "enabled": resume,
+                    "reused_count": reused_count,
+                    "executed_count": executed_count,
+                    "stopped_on_api_error": True,
+                    "completed": False,
+                },
+            )
+            return report, 1
+
+    report = _write_report(
+        output_path=output_path,
+        api_base=api_base,
+        timeout=timeout,
+        kb_id=kb_id,
+        cases_path=cases_path,
+        cases_sha=cases_sha,
+        per_case=per_case,
+        resume_meta={
+            "enabled": resume,
+            "reused_count": reused_count,
+            "executed_count": executed_count,
+            "stopped_on_api_error": False,
+            "completed": True,
+        },
+    )
+    return report, 0
+
+
 def main() -> None:
     """脚本入口：解析参数、逐条评测、输出报告。"""
     parser = argparse.ArgumentParser(description="粮仓知识库真实问答评测")
@@ -445,50 +576,29 @@ def main() -> None:
         default="data/grain-knowledge-base/qa/qa-eval-report.json",
         help="评测报告输出路径",
     )
+    parser.add_argument("--resume", action="store_true", help="复用已有报告中无 API error 的 case 结果")
+    parser.add_argument("--stop-on-api-error", action="store_true", help="遇到 API error 时写出部分报告并退出")
     args = parser.parse_args()
 
-    cases = load_cases(args.cases)
-    if not cases:
-        print(f"未读取到评测用例: {args.cases}", file=sys.stderr)
-        raise SystemExit(2)
-
-    print(f"加载 {len(cases)} 条评测用例，目标 KB={args.kb_id}")
-
-    per_case: list[dict[str, Any]] = []
-    for index, case in enumerate(cases, start=1):
-        result = evaluate_case(case, args.api_base, args.kb_id, args.timeout)
-        per_case.append(result)
-        hit_mark = "✓" if result["recall_at_5"] else "✗"
-        print(
-            f"[{index}/{len(cases)}] {hit_mark} {result['id']} "
-            f"recall@5={result['recall_at_5']} mrr={result['mrr_at_5']} "
-            f"-> {result['source_files_top5'][:2]}"
-        )
-
-    summary = summarize(per_case)
-    failure_groups = build_failure_groups(per_case)
-    report = {
-        "generated_at": _now_iso(),
-        "api_base": args.api_base,
-        "timeout": args.timeout,
-        "kb_id": args.kb_id,
-        "cases_path": args.cases,
-        "cases_sha256": file_sha256(args.cases),
-        "summary": summary,
-        "failure_groups": failure_groups,
-        "cases": per_case,
-    }
-
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    report, exit_code = run_evaluation(
+        cases_path=args.cases,
+        api_base=args.api_base,
+        kb_id=args.kb_id,
+        timeout=args.timeout,
+        output=args.output,
+        resume=args.resume,
+        stop_on_api_error=args.stop_on_api_error,
+    )
 
     print("\n=== 评测汇总 ===")
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    print(json.dumps(report.get("summary", {}), ensure_ascii=False, indent=2))
+    failure_groups = report.get("failure_groups", {})
     if failure_groups:
         print("\n=== 失败分组 ===")
         print(json.dumps(failure_groups, ensure_ascii=False, indent=2))
-    print(f"\n报告已写入: {output_path}")
+    print(f"\n报告已写入: {Path(args.output)}")
+    if exit_code:
+        raise SystemExit(exit_code)
 
 
 if __name__ == "__main__":

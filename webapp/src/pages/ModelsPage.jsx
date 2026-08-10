@@ -9,6 +9,7 @@ import {
   selectModel,
   testCustomProvider
 } from "../api/models";
+import { buildModelHealthSummary } from "../domain/modelHealth";
 
 const DASHSCOPE_PRESET = {
   name: "阿里百炼",
@@ -68,6 +69,7 @@ export default function ModelsPage() {
   const providers = payload.providers || {};
   const customProviderNames = payload.custom_provider_names || [];
   const currentInfo = payload.current_llm_info || null;
+  const modelHealthSummary = useMemo(() => buildModelHealthSummary(payload.model_health || null), [payload.model_health]);
   const savedProviders = customProviderNames.map((name) => providers[name]).filter(Boolean);
 
   const [customName, setCustomName] = useState(DASHSCOPE_PRESET.name);
@@ -296,6 +298,10 @@ export default function ModelsPage() {
               : "还没有启用模型"}
           </h3>
           <p className="simple-note">{currentInfo?.api_base || "先在下面保存一个供应商。"}</p>
+          <p className="simple-note">{modelHealthSummary.title}</p>
+          <p className="simple-note">
+            {modelHealthSummary.detail}
+          </p>
         </div>
         <div className="agent-topbar-actions">
           <button type="button" className="secondary-button" onClick={applyPreset}>

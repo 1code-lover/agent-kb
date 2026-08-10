@@ -50,6 +50,17 @@ def test_model_options_route_returns_service_payload() -> None:
     mock_get.assert_called_once_with()
 
 
+def test_model_health_route_returns_service_payload() -> None:
+    """模型健康路由应返回服务层健康状态。"""
+    payload = {"state": "fallback_applied", "current_model": "qwen-plus"}
+    with patch("api.routers.settings.model_service.get_model_health", return_value=payload) as mock_get:
+        resp = client.get("/api/model/health")
+
+    assert resp.status_code == 200
+    assert resp.json()["data"] == payload
+    mock_get.assert_called_once_with()
+
+
 def test_select_model_route_returns_service_payload() -> None:
     """模型切换路由应返回服务层切换结果。"""
     payload = {"service_provider": "custom", "model": "deepseek-chat"}

@@ -256,3 +256,97 @@ def test_build_failure_groups_keeps_grouped_samples() -> None:
     assert report["refusal_miss"]["samples"][0]["id"] == "b"
     assert report["duplicate_or_conflict"]["count"] == 0
     assert report["duplicate_or_conflict"]["samples"] == []
+
+
+def test_run_evaluation_resume_reuses_success_and_retries_errors(tmp_path: Path, monkeypatch) -> None:
+    """resume 应复用无错误 case，并重新执行旧报告中的 API error case。"""
+    cases_path = tmp_path / "verified.jsonl"
+    rows = [
+        {"id": "a", "query": "qa", "answerable": True, "relevant_documents": [{"file_name": "a.docx"}]},
+        {"id": "b", "query": "qb", "answerable": True, "relevant_documents": [{"file_name": "b.docx"}]},
+    ]
+    cases_path.write_text("\n".join(json.dumps(item, ensure_ascii=False) for item in rows) + "\n", encoding="utf-8")
+    output_path = tmp_path / "report.json"
+    output_path.write_text(
+        json.dumps(
+            {
+                "cases_sha256": grain_eval.file_sha256(cases_path),
+                "cases": [
+                    {
+                        "id": "a",
+                        "query": "qa",
+                        "answerable": True,
+                        "tags": [],
+                        "relevant_doc_types": [],
+                        "source_files_top5": ["a.docx"],
+                        "source_count": 1,
+                        "source_kb_ids": ["grain-knowledge-base"],
+                        "kb_id_missing_count": 0,
+                        "error": None,
+                        "recall_at_5": 1,
+                        "mrr_at_5": 1.0,
+                        "citation_hit": 1,
+                        "refusal_correct": 0,
+                        "kb_isolation": 1,
+                        "answer_preview": "old",
+                    },
+                    {"id": "b", "error": "old api error"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    calls: list[str] = []
+
+    def fake_post_json(_api_base, _path, payload, timeout):
+        calls.append(payload["question"])
+        return {"code": 0, "data": {"answer": "new", "sources": [{"file": "b.docx", "kb_id": "grain-knowledge-base"}]}}
+
+    monkeypatch.setattr(grain_eval, "_post_json", fake_post_json)
+
+    report, exit_code = grain_eval.run_evaluation(
+        cases_path=str(cases_path),
+        api_base="http://127.0.0.1:18080",
+        kb_id="grain-knowledge-base",
+        timeout=1.0,
+        output=str(output_path),
+        resume=True,
+    )
+
+    assert exit_code == 0
+    assert calls == ["qb"]
+    assert report["resume"]["reused_count"] == 1
+    assert report["resume"]["executed_count"] == 1
+    assert [item["id"] for item in report["cases"]] == ["a", "b"]
+    assert report["summary"]["recall_at_5"] == 1.0
+
+
+def test_run_evaluation_stop_on_api_error_writes_partial_report(tmp_path: Path, monkeypatch) -> None:
+    """stop_on_api_error 应写出部分报告并返回非 0。"""
+    cases_path = tmp_path / "verified.jsonl"
+    cases_path.write_text(
+        json.dumps(
+            {"id": "a", "query": "qa", "answerable": True, "relevant_documents": [{"file_name": "a.docx"}]},
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    output_path = tmp_path / "partial.json"
+    monkeypatch.setattr(grain_eval, "_post_json", lambda *_args, **_kwargs: {"code": 400, "message": "Free quota exhausted"})
+
+    report, exit_code = grain_eval.run_evaluation(
+        cases_path=str(cases_path),
+        api_base="http://127.0.0.1:18080",
+        kb_id="grain-knowledge-base",
+        timeout=1.0,
+        output=str(output_path),
+        stop_on_api_error=True,
+    )
+
+    saved = json.loads(output_path.read_text(encoding="utf-8"))
+    assert exit_code == 1
+    assert report["resume"]["stopped_on_api_error"] is True
+    assert saved["resume"]["completed"] is False
+    assert saved["summary"]["error_count"] == 1

@@ -34,6 +34,11 @@ def model_options() -> dict:
     return success_response(model_service.get_model_options())
 
 
+@router.get("/model/health")
+def model_health() -> dict:
+    return success_response(model_service.get_model_health())
+
+
 @router.post("/model/select")
 def select_model(request: ModelSelectRequest) -> dict:
     try:
