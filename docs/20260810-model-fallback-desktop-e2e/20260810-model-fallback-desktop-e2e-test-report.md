@@ -150,7 +150,7 @@ cd webapp && npm run build
 node desktop/scripts/release-preflight.js
 ```
 
-结果：非严格模式通过，Electron bundle 存在；提示缺少 Apple 签名/公证环境变量。
+结果：非严格模式通过，Electron bundle 存在；提示缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
 
 ```bash
 cd desktop && npm run build:mac && npm run verify:package

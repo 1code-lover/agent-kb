@@ -122,14 +122,14 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
   - `3d3e010 docs(project): mark closure pushed`
   - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；工作区正在做增量收口，包含 Ollama 本地模型 fallback 候选、fallback 切换提示、Electron CSP、macOS release preflight、entitlements、打包产物校验和跨 KB 泛化诊断脚本。增量单测、前端构建、桌面单测、macOS 打包内容校验、跨域真实评测和 preflight 非严格模式已通过，待整理提交。
+- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；工作区正在做增量收口，包含 Ollama 本地模型 fallback 候选、fallback 切换提示、Electron CSP、macOS release preflight、entitlements、打包产物校验和跨 KB 泛化诊断脚本。release preflight 已能额外检查 Developer ID Application 证书和 `notarytool` 可用性。增量单测、前端构建、桌面单测、macOS 打包内容校验、跨域真实评测和 preflight 非严格模式已通过，待整理提交。
 
 ### 4.4 下一步建议
 
 - **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量补齐 Ollama 候选和更明确的 UI 切换提示。
 - **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应继续验证桌面端安装后启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
 - **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
-- **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；下一步补齐 Apple Developer 签名/公证环境变量和 Developer ID 证书后，跑严格 release preflight、签名、公证、安装后启动回归。
+- **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；release preflight 现在还能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`。下一步补齐凭证和证书后，跑严格 release preflight、签名、公证、安装后启动回归。
 - **跨领域验证已经有最小门禁，下一步扩样本**：`scripts/diag_cross_domain_kb_eval.py` 已覆盖粮仓、桌面诊断和 UTF-8 边界诊断 3 个 KB 的正/负向隔离用例；后续应扩到 2-3 个更真实的非粮仓资料集。
 
 ---
@@ -218,7 +218,7 @@ cd webapp && npm run build
 - `cd desktop && npm run build:mac && npm run verify:package`：通过，产物包括 `desktop/dist/NorthAgent-0.1.0-arm64.dmg` 和 `desktop/dist/NorthAgent-0.1.0-arm64-mac.zip`；packaged resources 包含 `webapp/dist`、`run_api.py`、`config.py`、`requirements.txt`、`api/`、`server/` 和 `utils/`。
 - 直接从 packaged app resources 启动 API 并检查 `/api/health`、`/api/model/options`：通过。
 - packaged app 主进程启动验证：通过，加载 packaged `webapp/dist/index.html`，前端请求 `/api/model/options`、`/api/kb`、`/api/chat/history`。
-- `node desktop/scripts/release-preflight.js`：通过非严格预检，确认 Electron bundle 存在；当前本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`，严格签名/公证预检需补齐凭证后再跑。
+- `node desktop/scripts/release-preflight.js`：通过非严格预检，确认 Electron bundle 存在；当前本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书，但 `notarytool` 可用，严格签名/公证预检需补齐凭证后再跑。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report.json`：`6/6 passed`；覆盖 `grain-knowledge-base`、`diag-desktop-e2e-1786353063`、`diag-kb-utf8-1785505921` 三个 KB 的正向回答和负向隔离。UTF-8 边界问题打到粮仓 KB 时允许 grain 自身相似边界内容，但禁止 `文件夹只承担组织作用` 等精确短语和来源泄漏。
 - `cd desktop && npm audit fix` 后 `npm audit --json`：剩余 `8 vulnerabilities`，其中 `7 high`、`1 critical`；主要需要单独评估 `electron-builder` 大版本升级。
 - `git diff --check`：通过。
@@ -235,7 +235,7 @@ cd webapp && npm run build
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
-- **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包和 packaged app 启动验证，但本机尚未配置 Apple Developer 签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
+- **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包和 packaged app 启动验证；preflight 已能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
 - **桌面端依赖安全仍需独立收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，但 `desktop` 依赖树仍有 `8 vulnerabilities`，需要后续单独做 `electron-builder` 等构建依赖升级评估。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 

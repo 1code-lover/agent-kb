@@ -7,6 +7,7 @@ const projectRoot = path.resolve(__dirname, "..", "..");
 const electronAppPath = path.join(projectRoot, "desktop", "node_modules", "electron", "dist", "Electron.app");
 const appBuilderBinaryPath = path.join(projectRoot, "desktop", "node_modules", "app-builder-bin", "mac", "app-builder_arm64");
 const strictMode = process.argv.includes("--strict");
+const requiredReleaseEnv = ["APPLE_ID", "APPLE_APP_SPECIFIC_PASSWORD", "APPLE_TEAM_ID"];
 
 function runXattr(args) {
   const result = spawnSync("xattr", args, { stdio: "pipe" });
@@ -26,6 +27,10 @@ function fail(message) {
   process.exit(1);
 }
 
+function getMissingReleaseEnv(env = process.env) {
+  return requiredReleaseEnv.filter((name) => !env[name]);
+}
+
 function ensureExecutable(targetPath, logger = report) {
   if (!fs.existsSync(targetPath)) {
     return { ok: false, reason: "missing" };
@@ -40,8 +45,39 @@ function ensureExecutable(targetPath, logger = report) {
   return { ok: true, repaired: false };
 }
 
+function findDeveloperIdApplicationIdentities(spawn = spawnSync) {
+  const result = spawn("security", ["find-identity", "-v", "-p", "codesigning"], { stdio: "pipe" });
+  const stdout = result.stdout ? result.stdout.toString("utf8") : "";
+  if (result.status !== 0) {
+    return { ok: false, identities: [], detail: result.stderr ? result.stderr.toString("utf8").trim() : stdout.trim() };
+  }
+  const identities = stdout
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.includes("Developer ID Application:"))
+    .map((line) => {
+      const match = line.match(/"([^"]+)"/);
+      return match ? match[1] : line;
+    });
+  return { ok: identities.length > 0, identities, detail: stdout.trim() };
+}
+
+function checkNotaryTool(spawn = spawnSync) {
+  const result = spawn("xcrun", ["--find", "notarytool"], { stdio: "pipe" });
+  const stdout = result.stdout ? result.stdout.toString("utf8").trim() : "";
+  const stderr = result.stderr ? result.stderr.toString("utf8").trim() : "";
+  return {
+    ok: result.status === 0 && Boolean(stdout),
+    path: stdout,
+    detail: stderr,
+  };
+}
+
 function runPreflight(options = {}) {
   const isDarwin = options.platform || process.platform;
+  const env = options.env || process.env;
+  const strict = options.strict ?? strictMode;
+  const spawn = options.spawn || spawnSync;
 
   if (!fs.existsSync(electronAppPath)) {
     fail(`Electron.app not found at ${electronAppPath}`);
@@ -62,16 +98,37 @@ function runPreflight(options = {}) {
       }
     }
 
-    const requiredReleaseEnv = ["APPLE_ID", "APPLE_APP_SPECIFIC_PASSWORD", "APPLE_TEAM_ID"];
-    const missingReleaseEnv = requiredReleaseEnv.filter((name) => !process.env[name]);
+    const missingReleaseEnv = getMissingReleaseEnv(env);
     if (missingReleaseEnv.length > 0) {
       const message = `mac release signing/notarization env missing: ${missingReleaseEnv.join(", ")}`;
-      if (strictMode) {
+      if (strict) {
         fail(message);
       }
       report(message);
     } else {
       report("mac signing/notarization env looks ready");
+    }
+
+    const identityCheck = findDeveloperIdApplicationIdentities(spawn);
+    if (!identityCheck.ok) {
+      const message = "Developer ID Application signing identity missing";
+      if (strict) {
+        fail(message);
+      }
+      report(message);
+    } else {
+      report(`Developer ID Application identity ready: ${identityCheck.identities[0]}`);
+    }
+
+    const notaryTool = checkNotaryTool(spawn);
+    if (!notaryTool.ok) {
+      const message = "xcrun notarytool not available";
+      if (strict) {
+        fail(message);
+      }
+      report(message);
+    } else {
+      report(`notarytool ready: ${notaryTool.path}`);
     }
   }
 
@@ -83,6 +140,9 @@ if (require.main === module) {
 }
 
 module.exports = {
+  checkNotaryTool,
   ensureExecutable,
+  findDeveloperIdApplicationIdentities,
+  getMissingReleaseEnv,
   runPreflight,
 };

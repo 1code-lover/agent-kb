@@ -1,7 +1,7 @@
 最新评审建议（2026-08-10）
 
 优点：
-1. 桌面发布准备已明显前进：Electron 升级到 43.3.0，补齐 CSP、asar、压缩、macOS hardened runtime、entitlements、release preflight、notarize hook 和 packaged resources 校验。
+1. 桌面发布准备已明显前进：Electron 升级到 43.3.0，补齐 CSP、asar、压缩、macOS hardened runtime、entitlements、release preflight、notarize hook 和 packaged resources 校验；release preflight 现在还能检查 Developer ID Application 证书和 `notarytool`。
 2. macOS dmg/zip 已能成功生成，`verify:package` 已确认 `webapp/dist`、Python API、server、utils、`run_api.py`、`config.py` 和 `requirements.txt` 会进入 packaged app resources，且 `app.asar` 不包含测试文件。
 3. packaged app 已完成启动复核：主进程能使用 conda `agent-kb` Python 拉起 API，渲染进程能加载 packaged `webapp/dist/index.html` 并请求模型、知识库和聊天历史接口。
 4. 模型 fallback 已从 OpenAI-compatible 供应商扩展到本地 Ollama：Ollama 候选允许无 API Key，并可在未配置模型列表时读取 `/api/tags` 发现本机模型。
@@ -10,7 +10,7 @@
 7. 本轮关键验证通过：模型服务单测、跨域诊断脚本单测、前端完整 Node 单测、桌面 Node 单测、Vite build、macOS 打包内容校验和 `git diff --check` 均通过。
 
 需要改进的地方：
-1. macOS 严格签名/公证还未完成；当前本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和有效 Developer ID 证书，只能确认发布配置、预检和打包链路，不能宣称正式公证发布完成。
+1. macOS 严格签名/公证还未完成；当前本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和有效 Developer ID 证书，虽然 `notarytool` 已可用，但只能确认发布配置、预检和打包链路，不能宣称正式公证发布完成。
 2. Electron CSP 已在 packaged app 启动和首页 API 请求中复核，但签名/公证后的安装包仍需继续验证文件上传、evidence preview、图片/PDF 资源和 dev/prod 两种入口。
 3. `desktop` 依赖树仍有 npm audit 风险，剩余 `8 vulnerabilities`（`7 high`、`1 critical`），主要需要单独评估 `electron-builder` 大版本升级。
 4. Ollama fallback 当前验证到模型发现和候选探活；仍需要在本机实际安装 Ollama 模型后做桌面问答 E2E，确认生成链路不只停在 `/api/tags`。
