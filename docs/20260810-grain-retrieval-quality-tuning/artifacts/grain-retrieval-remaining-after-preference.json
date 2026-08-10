@@ -1,0 +1,349 @@
+{
+  "generated_at": "2026-08-10T07:42:24.303079+00:00",
+  "kb_id": "grain-knowledge-base",
+  "cases_path": "data/grain-knowledge-base/qa/verified.jsonl",
+  "focus_case_ids": [
+    "grain-verified-0004",
+    "grain-verified-0010",
+    "grain-verified-0011",
+    "grain-verified-0034",
+    "grain-verified-0079"
+  ],
+  "experiments": [
+    {
+      "config": {
+        "top_k": 5,
+        "mode": "dist_based_score",
+        "use_reranker": false,
+        "top_n": 5,
+        "name": "top5-dist_based_score-no-rerank"
+      },
+      "summary": {
+        "total": 5,
+        "answerable_total": 5,
+        "recall_at_5": 1.0,
+        "mrr_at_5": 0.9,
+        "retrieval_miss_count": 0,
+        "rank_miss_count": 1,
+        "source_noise_count": 0,
+        "retrieval_miss_ids": [],
+        "rank_miss_ids": [
+          "grain-verified-0079"
+        ],
+        "source_noise_ids": []
+      },
+      "cases": [
+        {
+          "id": "grain-verified-0004",
+          "query": "入仓粮食的水分和杂质含量控制要求是什么？",
+          "answerable": true,
+          "relevant_files": [
+            "AAA粮油安全储存守则.docx"
+          ],
+          "source_files_top5": [
+            "AAA粮油安全储存守则.docx",
+            "不同储粮生态区域粮油储藏技术规范-总则.docx",
+            "粮油储藏技术规范-最新版.pdf",
+            "GBT29890-2013粮油储藏技术规范.pdf",
+            "20超高大平房仓安全储粮技术规程.docx"
+          ],
+          "source_count": 5,
+          "hit_rank": 1,
+          "recall_at_5": 1,
+          "mrr_at_5": 1.0,
+          "source_noise": 0
+        },
+        {
+          "id": "grain-verified-0010",
+          "query": "《简易仓囤储粮异常粮情应急处置操作规范》规定了哪些内容？",
+          "answerable": true,
+          "relevant_files": [
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx"
+          ],
+          "source_files_top5": [
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "简易仓囤储粮异常粮情应急处置操作规范-团体标准.pdf"
+          ],
+          "source_count": 2,
+          "hit_rank": 1,
+          "recall_at_5": 1,
+          "mrr_at_5": 1.0,
+          "source_noise": 0
+        },
+        {
+          "id": "grain-verified-0011",
+          "query": "《简易仓囤储粮异常粮情应急处置操作规范》适用于什么场景？",
+          "answerable": true,
+          "relevant_files": [
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx"
+          ],
+          "source_files_top5": [
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "简易仓囤储粮异常粮情应急处置操作规范-团体标准.pdf"
+          ],
+          "source_count": 2,
+          "hit_rank": 1,
+          "recall_at_5": 1,
+          "mrr_at_5": 1.0,
+          "source_noise": 0
+        },
+        {
+          "id": "grain-verified-0034",
+          "query": "《粮油储藏技术规范》如何处理粮堆结露？",
+          "answerable": true,
+          "relevant_files": [
+            "粮油储藏技术规范-最新版.pdf"
+          ],
+          "source_files_top5": [
+            "粮油储藏技术规范-最新版.pdf",
+            "GBT29890-2013粮油储藏技术规范.pdf",
+            "不同储粮生态区域粮油储藏技术规范-总则.docx",
+            "15露天储粮操作规程t15.docx",
+            "23内环流标准.pdf"
+          ],
+          "source_count": 5,
+          "hit_rank": 1,
+          "recall_at_5": 1,
+          "mrr_at_5": 1.0,
+          "source_noise": 0
+        },
+        {
+          "id": "grain-verified-0079",
+          "query": "磷化氢熏蒸技术规程如何描述环流熏蒸和常规熏蒸？",
+          "answerable": true,
+          "relevant_files": [
+            "18磷化氢熏蒸蒸技术规程20160819.docx"
+          ],
+          "source_files_top5": [
+            "01磷化氢膜下环流熏蒸技术规程T1.docx",
+            "18磷化氢熏蒸蒸技术规程20160819.docx"
+          ],
+          "source_count": 2,
+          "hit_rank": 2,
+          "recall_at_5": 1,
+          "mrr_at_5": 0.5,
+          "source_noise": 0
+        }
+      ],
+      "diagnostics": {
+        "grain-verified-0004": [
+          {
+            "rank": 1,
+            "score": 0.49443396406145534,
+            "file_name": "AAA粮油安全储存守则.docx",
+            "raw_file_name": "AAA粮油安全储存守则_0119014f.docx",
+            "excerpt": "已感染害虫的粮食应单独存放，并根据虫粮等级按规定处理。 入仓作业要求 入仓作业流程主要包括质检扦样、检斤称重、布设通风地上笼（横向通风无需布设）、卸粮清杂、质量抽检、输送入仓。 入仓过程中，提高机械化进仓水平，采取有效措施减少自动分级（浅圆仓、立筒仓入仓时采用布料器、减压管等）和防止测温电缆移位。做好防虫、防鼠、防雀工作，加强对全流程的除尘防尘工作，保护环境"
+          },
+          {
+            "rank": 2,
+            "score": 0.44578870224495304,
+            "file_name": "不同储粮生态区域粮油储藏技术规范-总则.docx",
+            "raw_file_name": "不同储粮生态区域粮油储藏技术规范-总则_912a1a0a.docx",
+            "excerpt": "进行粮仓气密性检测，确保气密性符合5.1.1的规定。 装粮用麻袋应符合GB/T 24904的规定，编织袋应符合GB/T 8946的规定；面粉袋应符合GB/T 24905的规定。 进仓粮食与油料的质量要求 进仓粮油质量应符合国家粮油质量标准的规定，杂质含量大于1.0%时应进行除杂处理；水分含量应符合中储粮〔2005〕31号文规定，入仓后能及时处理到安全水分的，"
+          },
+          {
+            "rank": 3,
+            "score": 0.4398743701258345,
+            "file_name": "粮油储藏技术规范-最新版.pdf",
+            "raw_file_name": "粮油储藏技术规范-最新版_a712b2a4.pdf",
+            "excerpt": "其他装粮用袋符合食品安全相关规定。 6.2 入仓粮油质量要求 6.2.1 水分含量宜符合安全储存水分要求。 6.2.2 长期储藏的粮食、油料的常规质量指标应符合相关国家质量标准规定，储存品质指标应符合 GB/T 20569、GB/T 20570、GB/T 20571、GB/T 31785 的宜存标准及相关规定。 6.3 入仓要求 6.3.1 粮食和油料应按种"
+          },
+          {
+            "rank": 4,
+            "score": 0.42725870096610846,
+            "file_name": "GBT29890-2013粮油储藏技术规范.pdf",
+            "raw_file_name": "GBT29890-2013粮油储藏技术规范_70ac78c8.pdf",
+            "excerpt": "5m处的百叶箱内。 7.1.3 水分含量检测 7.1.3.1 检测周期 7.1.3.1.1 安全水分粮食、油料每季度至少检测1次。 7.1.3.1.2 半安全水分粮食、油料每月至少检测1次。 7.1.3.1.3危险水分粮食、油料应根据粮温每3天~5天检测1次，发现粮温升高时应随时扦样检测。 7.1.3.2 水分含量检测点的设置 应在水分含量容易变化的地方设置"
+          },
+          {
+            "rank": 5,
+            "score": 0.2687340947760179,
+            "file_name": "20超高大平房仓安全储粮技术规程.docx",
+            "raw_file_name": "20超高大平房仓安全储粮技术规程_c802a581.docx",
+            "excerpt": "粮食分批入仓且间隔时间较长时，应及时布设测温电缆或测温探杆检测粮情，并根据粮情采取相应处理措施。 定期检查设备运转情况，应做好设备防雨雪和防漏电工作，确保生产作业安全。 粮温相差超过5℃的不同批次的粮食堆存在一起时，应及时采取通风措施均衡粮温。 出仓要求 出仓的安全操作与管理按LS 1206的规定执行。 出粮时，先打开挡粮门上的卸粮口，再自上而下逐层打开挡粮"
+          }
+        ],
+        "grain-verified-0010": [
+          {
+            "rank": 1,
+            "score": 1.3550148912766646,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "excerpt": "简易仓囤储粮异常粮情应急处置操作规范 范围 本标准规定了简易仓囤异常粮情的定义和分类、各类异常粮情操作的流程和处置措施。 本标准适用于简易仓囤异常粮情处置操作，其他仓型异常粮情处理可参照执行。 规范性引用文件 下列文件对于本文件的应用是必不可少的。凡是注日期的引用文件，仅注日期的版本适用于本文件。凡是不注日期的引用文件，其最新版本（包括所有的修改单）适用于本"
+          },
+          {
+            "rank": 2,
+            "score": 1.2683546324980106,
+            "file_name": "简易仓囤储粮异常粮情应急处置操作规范-团体标准.pdf",
+            "raw_file_name": "简易仓囤储粮异常粮情应急处置操作规范-团体标准_c43a47e1.pdf",
+            "excerpt": "I 团 体 标 准 T/CCOA ×××—×××× 简易仓囤储粮异常粮情应急处置操作规范 Emergency operation regulations for abnormal condition of stored-grain in temporary facility 20XX-╳ ╳-╳ ╳ 发布 20X×-╳ ╳-╳ ╳实施 中国粮油学会 发布 I"
+          },
+          {
+            "rank": 3,
+            "score": 1.3072582094722611,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "excerpt": "ICS 65.020.01 B 20 团 体 标 准 T/CCOA 12—2020 简易仓囤储粮异常粮情应急处置操作规范 Emergency operation regulations for abnormal condition of stored-grain in temporary facilities 2020-02-19 发布 2020-04-01"
+          },
+          {
+            "rank": 4,
+            "score": 1.223090401631445,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_13053fea.docx",
+            "excerpt": "ICS 65.020.01 B 20 团 体 标 准 T/CCOA 12—2020 简易仓囤储粮异常粮情应急处置操作规范 Emergency operation regulations for abnormal condition of stored-grain in temporary facilities 2020-02-19 发布 2020-04-01"
+          },
+          {
+            "rank": 5,
+            "score": 1.176045369863073,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "excerpt": "3.2 异常粮情 abnormal condition of stored-grain 储粮发生结露、结块、虫害、发热、霉变的情形。 3.3 粮堆结露 dewfall of grain mass 粮堆中水汽达到饱和状态，开始在粮粒、仓墙等物体出现凝结水的现象。 3.4 严重结露severe dewfall condensation 粮食吸附结露的冷凝水，粮食"
+          }
+        ],
+        "grain-verified-0011": [
+          {
+            "rank": 1,
+            "score": 1.3667141266788845,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "excerpt": "简易仓囤储粮异常粮情应急处置操作规范 范围 本标准规定了简易仓囤异常粮情的定义和分类、各类异常粮情操作的流程和处置措施。 本标准适用于简易仓囤异常粮情处置操作，其他仓型异常粮情处理可参照执行。 规范性引用文件 下列文件对于本文件的应用是必不可少的。凡是注日期的引用文件，仅注日期的版本适用于本文件。凡是不注日期的引用文件，其最新版本（包括所有的修改单）适用于本"
+          },
+          {
+            "rank": 2,
+            "score": 1.2434219165103648,
+            "file_name": "简易仓囤储粮异常粮情应急处置操作规范-团体标准.pdf",
+            "raw_file_name": "简易仓囤储粮异常粮情应急处置操作规范-团体标准_c43a47e1.pdf",
+            "excerpt": "I 团 体 标 准 T/CCOA ×××—×××× 简易仓囤储粮异常粮情应急处置操作规范 Emergency operation regulations for abnormal condition of stored-grain in temporary facility 20XX-╳ ╳-╳ ╳ 发布 20X×-╳ ╳-╳ ╳实施 中国粮油学会 发布 I"
+          },
+          {
+            "rank": 3,
+            "score": 1.2902168790147257,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "excerpt": "ICS 65.020.01 B 20 团 体 标 准 T/CCOA 12—2020 简易仓囤储粮异常粮情应急处置操作规范 Emergency operation regulations for abnormal condition of stored-grain in temporary facilities 2020-02-19 发布 2020-04-01"
+          },
+          {
+            "rank": 4,
+            "score": 1.2317467867303085,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_13053fea.docx",
+            "excerpt": "ICS 65.020.01 B 20 团 体 标 准 T/CCOA 12—2020 简易仓囤储粮异常粮情应急处置操作规范 Emergency operation regulations for abnormal condition of stored-grain in temporary facilities 2020-02-19 发布 2020-04-01"
+          },
+          {
+            "rank": 5,
+            "score": 1.1906232932095016,
+            "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+            "raw_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "excerpt": "3.2 异常粮情 abnormal condition of stored-grain 储粮发生结露、结块、虫害、发热、霉变的情形。 3.3 粮堆结露 dewfall of grain mass 粮堆中水汽达到饱和状态，开始在粮粒、仓墙等物体出现凝结水的现象。 3.4 严重结露severe dewfall condensation 粮食吸附结露的冷凝水，粮食"
+          }
+        ],
+        "grain-verified-0034": [
+          {
+            "rank": 1,
+            "score": 1.1382495272310456,
+            "file_name": "粮油储藏技术规范-最新版.pdf",
+            "raw_file_name": "粮油储藏技术规范-最新版_a712b2a4.pdf",
+            "excerpt": "6.2.2 因后熟作用引起的粮堆发热，应采用机械通风降温。 8.6.2.3 因害虫和螨类活动引起的粮堆发热，应先适当通风降温至30℃以下后熏蒸杀灭害虫和螨类， 再进行通风降温。 8.6.2.4 因局部杂质过多引起的粮堆发热，宜清除杂质或进行单管通风处理。 8.6.2.5 油料发热要立即采取机械通风、谷物冷却机等措施降低粮温，并采取摊晾等措施降低水分含 量。 "
+          },
+          {
+            "rank": 2,
+            "score": 1.0924457714413651,
+            "file_name": "GBT29890-2013粮油储藏技术规范.pdf",
+            "raw_file_name": "GBT29890-2013粮油储藏技术规范_70ac78c8.pdf",
+            "excerpt": "8.7.2.4 因局部杂质过多引起的粮堆发热，应清除杂质。 8.7.2.5 油料发热要立即采取机械通风、用谷物冷却机等措施降低粮温，并采取摊晾等措施降低水分 含量。 8.7.3 粮堆结露的处理 8.7.3.1表层粮堆发生轻微结露时，应翻动粮面，开启门窗自然通风，散湿、散热；出现明显水滴的粮堆 结露应采取机械通风消除结露，或将表层粮食、油料出仓进行干燥处理。 "
+          },
+          {
+            "rank": 3,
+            "score": 0.8083540097562343,
+            "file_name": "不同储粮生态区域粮油储藏技术规范-总则.docx",
+            "raw_file_name": "不同储粮生态区域粮油储藏技术规范-总则_912a1a0a.docx",
+            "excerpt": "发热粮的处理 因水分过高引起的粮堆发热，应先采取机械通风、仓内翻倒、机械倒仓或用谷物冷却机等措施降低粮温，再采取就仓通风干燥或出仓晾晒、烘干等措施降低水分。 因后熟作用引起的粮堆发热，应采用机械通风降温。 因害虫和螨类活动引起的粮堆发热，应先杀灭害虫和螨类，再进行通风降温。 因局部杂质过多引起的粮堆发热，应清除杂质。 粮堆结露的处理 表层粮堆发生轻微结露时，"
+          },
+          {
+            "rank": 4,
+            "score": 0.6416981057797145,
+            "file_name": "15露天储粮操作规程t15.docx",
+            "raw_file_name": "15露天储粮操作规程t15_023c817d.docx",
+            "excerpt": "水分检测 结合测温点的布置或专门扦样口，分层扦取样品测定粮食水分。表层、上层粮食水分应适当增加检测点。 表层粮食水分每周检测一次。中、上层粮食水分每月至少检测一次。 在季节转换尤其是夏秋和冬春季节转换时，应随时扦样检查粮堆表层的水分变化。发现结露，应及时采用通风等方法处理。 日常检查以现场采用快速检测仪器检侧为主，每月普查时用标准法测定。 害虫密度检测 储藏"
+          },
+          {
+            "rank": 5,
+            "score": 0.6284448108069751,
+            "file_name": "23内环流标准.pdf",
+            "raw_file_name": "23内环流标准_e25719b3.pdf",
+            "excerpt": "选用风机的风量和风压应略大于通风系统计算的风量和风压。风机噪声限值应 满足 JB/T 8690 的要求。 4.2.3.3 风机的工作特性要求参见LS/T1202《储粮机械通风技术规程》的相关要求。 4.2.4 环流管道和风机及通风道之间的连接应不漏气。 4.2.5 温度采集器 应增加仓房空间温度检测措施，以满足夏季内环流应用期间对仓间温度的检测。数字温度传感"
+          }
+        ],
+        "grain-verified-0079": [
+          {
+            "rank": 1,
+            "score": 0.979263505196481,
+            "file_name": "01磷化氢膜下环流熏蒸技术规程T1.docx",
+            "raw_file_name": "01磷化氢膜下环流熏蒸技术规程T1_64659a7c.docx",
+            "excerpt": "6.2.2 采用其它施药方法必须确保熏蒸作业的安全性。 7.施药前准备 7.1 熏蒸人员 7.1.1 熏蒸负责人：必须掌握磷化氢熏蒸的基本理论知识，受过磷化氢熏蒸技术培训，能够制定规范的熏蒸方案，组织和指导磷化铝或磷化氢熏蒸作业，具有储粮害虫防治专业技能； 7.1.2 熏蒸操作人员：必须受过磷化氢熏蒸技术培训，熟悉本技术规程，能熟练操作有关熏蒸仪器设备； 7"
+          },
+          {
+            "rank": 2,
+            "score": 0.8841791766295781,
+            "file_name": "18磷化氢熏蒸蒸技术规程20160819.docx",
+            "raw_file_name": "18磷化氢熏蒸蒸技术规程20160819_97270947.docx",
+            "excerpt": "熏蒸过程控制与检查 浓度检测时间 采用仓外磷化氢发生器或磷化氢与二氧化碳钢瓶混合气施药时，膜下竖向环流熏蒸和横向环流熏蒸在施药结束2 h后开始检测粮堆中磷化氢气体浓度；整仓环流在施药结束10h 后开始对环流管道和粮堆中磷化氢气体浓度进行检测；采用自然潮解施药时，施药结束2d 后开始磷化氢气体浓度检测。 浓度检测次数 磷化氢浓度检测时间在浓度未均匀前每4 h~"
+          },
+          {
+            "rank": 3,
+            "score": 0.8703418667944112,
+            "file_name": "18磷化氢熏蒸蒸技术规程20160819.docx",
+            "raw_file_name": "18磷化氢熏蒸蒸技术规程20160819_97270947.docx",
+            "excerpt": "整仓环流熏蒸可在粮面的施药盘上施药，或采用磷化氢发生器或磷化氢钢瓶施药装置经环流熏蒸系统施药口施药。 帐幕环流熏蒸时在帐幕内用施药盘施药，或采用磷化氢发生器或磷化氢钢瓶施药装置经环流熏蒸系统施药口施药。 膜下环流熏蒸可采用在膜下用施药袋埋藏施药或探管法施药。 局部熏蒸宜采用磷化氢发生器或磷化氢钢瓶施药装置施药，或采用探管法施药（应注意设置浓度检测装置）。 采"
+          },
+          {
+            "rank": 4,
+            "score": 0.8653770934728883,
+            "file_name": "01磷化氢膜下环流熏蒸技术规程T1.docx",
+            "raw_file_name": "01磷化氢膜下环流熏蒸技术规程T1_64659a7c.docx",
+            "excerpt": "Q/ZCL T1—2007 Q/ZCL T1-2007 Q/××× ××××—×××× Q/ZCL T1-2007 中国储备粮管理总公司 2007-03-12发布 2007-03-12实施 2007-02-01实施 磷化氢膜下环流熏蒸技术规程 Regulation of phosphine recirculation fumigation under pla"
+          },
+          {
+            "rank": 5,
+            "score": 0.8616818198938906,
+            "file_name": "18磷化氢熏蒸蒸技术规程20160819.docx",
+            "raw_file_name": "18磷化氢熏蒸蒸技术规程20160819_97270947.docx",
+            "excerpt": "非环流熏蒸采用磷化氢发生器施药或混合熏蒸时，应先行在粮堆（垛）内设置熏蒸气体导引管道确保其分布均匀。 环流装置准备 接通环流风机电源，待风机正常运转后，用风速仪分别测量仓外各环流支管路的风速，并通过调整调节阀使各支管路的风速相同。 将检漏液涂于环流管路有关连接部位和有可能漏气的部位检漏，如有漏气应采取补漏措施。 膜下环流熏蒸和帐幕熏蒸时，除检测密封环境的气密"
+          }
+        ]
+      }
+    }
+  ],
+  "recommended": {
+    "top_k": 5,
+    "mode": "dist_based_score",
+    "use_reranker": false,
+    "top_n": 5,
+    "name": "top5-dist_based_score-no-rerank"
+  },
+  "leaderboard": [
+    {
+      "config": {
+        "top_k": 5,
+        "mode": "dist_based_score",
+        "use_reranker": false,
+        "top_n": 5,
+        "name": "top5-dist_based_score-no-rerank"
+      },
+      "summary": {
+        "total": 5,
+        "answerable_total": 5,
+        "recall_at_5": 1.0,
+        "mrr_at_5": 0.9,
+        "retrieval_miss_count": 0,
+        "rank_miss_count": 1,
+        "source_noise_count": 0,
+        "retrieval_miss_ids": [],
+        "rank_miss_ids": [
+          "grain-verified-0079"
+        ],
+        "source_noise_ids": []
+      }
+    }
+  ]
+}

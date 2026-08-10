@@ -153,6 +153,7 @@ def _extract_relevant_doc_types(case: dict[str, Any]) -> list[str]:
 # 这些措辞只在系统明确放弃回答时出现，不会在正常作答里误命中。
 _STRONG_REFUSAL_MARKERS = (
     "无法提供",
+    "无法根据现有信息",
     "超出",
     "覆盖范围",
     "范围内",
@@ -161,6 +162,7 @@ _STRONG_REFUSAL_MARKERS = (
     "权威渠道",
     "建议咨询",
     "建议查阅",
+    "未包含",
     "不在当前知识库",
     "不在本知识库",
     "不应返回",

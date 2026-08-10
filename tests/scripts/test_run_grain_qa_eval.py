@@ -157,6 +157,13 @@ def test_answer_is_refusal_like_accepts_empty_response() -> None:
     assert grain_eval._answer_is_refusal_like("Empty Response") is True
 
 
+def test_answer_is_refusal_like_accepts_kb_missing_context_response() -> None:
+    """知识库未覆盖的兜底长句也应计为拒答。"""
+    answer = "粮仓知识库中未包含关于企业内部未公开合同条款的相关规定，因此无法根据现有信息提供具体回答。"
+
+    assert grain_eval._answer_is_refusal_like(answer) is True
+
+
 def test_file_sha256_tracks_case_file_content(tmp_path: Path) -> None:
     """报告可通过 cases_sha256 追溯评测用例版本。"""
     cases = tmp_path / "verified.jsonl"

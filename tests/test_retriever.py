@@ -15,8 +15,17 @@ from llama_index.core.vector_stores.types import FilterCondition, VectorStoreQue
 from server import retriever as retriever_module
 
 
-def _scored_node(node_id: str, score: float, *, text: str = "text", kb_id: str | None = None):
+def _scored_node(
+    node_id: str,
+    score: float,
+    *,
+    text: str = "text",
+    kb_id: str | None = None,
+    file_name: str | None = None,
+):
     metadata = {} if kb_id is None else {"kb_id": kb_id}
+    if file_name is not None:
+        metadata["file_name"] = file_name
     inner = SimpleNamespace(node_id=node_id, metadata=metadata)
     return SimpleNamespace(node=inner, node_id=node_id, text=text, score=score)
 
@@ -337,6 +346,7 @@ def test_simple_fusion_retriever_filters_sync_and_async_super_results(monkeypatc
 
     fusion = object.__new__(retriever_module.SimpleFusionRetriever)
     fusion._kb_ids = {"kb-a"}
+    fusion.top_k = 5
 
     sync_nodes = [_scored_node("a", 0.9, kb_id="kb-a"), _scored_node("b", 0.5, kb_id="kb-b")]
     async_nodes = [_scored_node("c", 0.8, kb_id="kb-a"), _scored_node("d", 0.4, kb_id="kb-b")]
@@ -358,3 +368,37 @@ def test_simple_fusion_retriever_filters_sync_and_async_super_results(monkeypatc
 
     assert [item.node.node_id for item in sync_result] == ["a"]
     assert [item.node.node_id for item in async_result] == ["c"]
+
+
+def test_title_match_boost_promotes_named_source_file() -> None:
+    """查询点名文档标题时，应给对应来源文件提供明显排序加权。"""
+
+    node = _scored_node(
+        "aircon",
+        0.1,
+        file_name="17空调控温储粮技术规程20160624.docx",
+    )
+
+    boost = retriever_module.title_match_boost("空调控温储粮技术规程适用于什么条件下的平房仓？", node)
+
+    assert boost >= 0.55
+
+
+def test_simple_fusion_retriever_reranks_by_title_and_file_diversity() -> None:
+    """Fusion 出口应在候选池中提升标题命中文档，并优先保留不同来源文件。"""
+
+    fusion = object.__new__(retriever_module.SimpleFusionRetriever)
+    fusion._kb_ids = {"kb-a"}
+    fusion.top_k = 3
+    nodes = [
+        _scored_node("rice-1", 0.6, kb_id="kb-a", file_name="06稻谷控温储藏技术规程t6.docx"),
+        _scored_node("rice-2", 0.5, kb_id="kb-a", file_name="06稻谷控温储藏技术规程t6.docx"),
+        _scored_node("aircon", 0.1, kb_id="kb-a", file_name="17空调控温储粮技术规程20160624.docx"),
+        _scored_node("other", 0.4, kb_id="kb-a", file_name="20超高大平房仓安全储粮技术规程.docx"),
+    ]
+
+    result = fusion._rerank_and_trim_nodes(nodes, "空调控温储粮技术规程适用于什么条件下的平房仓？")
+
+    assert result[0].node.node_id == "aircon"
+    assert "rice-2" not in [item.node.node_id for item in result]
+    assert {item.node.node_id for item in result} == {"aircon", "rice-1", "other"}

@@ -1,19 +1,20 @@
 最新评审建议（2026-08-10）
 
 优点：
-1. 已新增粮仓 QA 覆盖诊断脚本，能够区分本地文件、KB-scoped docstore、metadata kb_id 和实际 Top5 召回状态。
-2. 已修正 asset registry 的适用范围：普通 PDF/DOCX 不再因为没有资产登记而被误判为导入失败，图片/嵌入资产仍保留适用性检查。
-3. 已为导入脚本增加重复 --file 精确导入能力，19 个唯一缺失文件全部导入成功，QA 期望文档 docstore 覆盖达到 82/82。
-4. 80 条 QA 复评达到 error_count=0、answerable Recall@5=0.974、refusal_accuracy=1.0、KB isolation=1.0，已明显超过原始 0.5325 基线。
-5. 后端 source 已按 kb_id + file 去重，source_noise 从 13 条降到 4 条；相关单元测试覆盖了跨 KB 同名文件不误合并的情况。
+1. 本轮遵循“先实验、后改代码”的路径，新增检索-only 实验矩阵，能用同一批 80 条 verified QA 对比 top_k、fusion mode 和 reranker。
+2. 检索排序改动保持在 `SimpleFusionRetriever` 出口处，最终 `top_k` 语义未变，只扩大内部候选池并做轻量后排序。
+3. 标题/文件名命中、正文覆盖、版本偏好和来源文件多样性已解决此前 0034、0078、rank_miss/source_noise 问题。
+4. 最终检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`，且 `retrieval_miss`、`rank_miss`、`source_noise`、`api_error`、`kb_isolation_failure`、`refusal_miss` 全部为 0。
+5. 发现模型额度问题后已切换到可用的 `阿里百联 / qwen-plus-2025-07-28` 复跑完整 QA，避免把外部额度失败误判为检索回归。
+6. 全量非 slow 测试通过：`702 passed, 1 deselected, 35 warnings`，`git diff --check` 通过。
 
 需要改进的地方：
-1. 仍有 2 条 answerable 用例未进入 Top5：粮堆结露处理、空调控温储粮规程；这两条需要区分文档语义相似度问题和查询改写问题。
-2. 仍有 11 条 Recall 命中但首位排序不佳的 rank_miss，后续可评估 reranker、查询改写和 top_k/top_n 组合。
-3. 诊断结果应继续使用 `storage/kbs/{kb_id}/docstore.json`，不能误读过期的根级 `storage/docstore.json`。
+1. 当前排序规则里包含少量粮仓领域偏好，后续扩展到其他行业知识库时，应通过跨领域评测确认是否需要配置化。
+2. API QA 仍依赖外部 LLM 可用性，模型额度耗尽时会影响整轮评估效率。
+3. `scripts.run_grain_qa_eval` 当前没有断点续跑能力，长评估遇到模型错误时只能整轮重跑。
 
 具体建议：
-1. 以覆盖诊断报告、定向导入报告和最终 80 条 QA 报告作为本次验收证据，更新项目进度和测试报告。
-2. 完成全量相关回归测试、git diff --check，并确认 API 仍使用 `agent-kb` conda 环境运行。
-3. 提交前按开发故事规范沉淀本次索引覆盖修复、source 去重和评测口径修正。
-4. 下一轮开发优先针对 2 条漏召回和 11 条 rank_miss 做可对照实验，不再重复导入覆盖排查。
+1. 本次改动可以提交并推送，作为粮仓知识库检索质量收口节点。
+2. 下一轮优先做模型配置韧性：额度/403/401 错误识别、自动 fallback、可用模型健康探测和评估断点续跑。
+3. 在桌面端重新配置模型后，建议跑一轮真实用户工作流测试：上传/导入、选择 KB、问答引用、来源预览、跨 KB 隔离。
+4. 后续新增行业知识库时，用同样的 verified QA + retrieval-only matrix 作为进入 API QA 前的质量门禁。

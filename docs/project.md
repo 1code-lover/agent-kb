@@ -175,8 +175,9 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.run_grain_qa_eval --cases data/grain-knowledge-base/qa/verified.jsonl --api-base http://127.0.0.1:18080 --kb-id grain-knowledge-base --output docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json`：80 条用例评测完成，`error_count=0`、`Recall@5=0.5325`、`MRR@5=0.5238`、`citation_hit_rate=1.0`、`refusal_accuracy=0.6667`、`kb_isolation_rate=1.0`
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diagnose_grain_qa_coverage --cases data/grain-knowledge-base/qa/verified.jsonl --kb-id grain-knowledge-base --storage-dir storage --data-root data/grain-knowledge-base --output docs/20260807-grain-index-coverage-repair/artifacts/grain-coverage-diagnostic.json`：覆盖诊断通过，`local=82/82`、`docstore=82/82`、`kb_id=82/82`、`top5=78/82`；未命中项包含不可回答的隔离用例，不影响 answerable Recall gate。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diagnose_grain_qa_coverage.py tests/scripts/test_import_grain_kb_batches.py tests/scripts/test_run_grain_qa_eval.py tests/api/test_chat_service.py -q`：相关回归 `50 passed`。
-- 2026-08-10 复跑粮仓 80 条 QA：`error_count=0`、`Recall@5=0.974`、`MRR@5=0.8961`、`citation_hit_rate=1.0`、`refusal_accuracy=1.0`、`kb_isolation_rate=1.0`；source 去重后 `source_noise` 降至 4 条。
-- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_run_grain_qa_eval.py -q`：`6 passed, 1 warning`
+- 2026-08-10 粮仓检索质量调优完成：检索-only 最终矩阵 `top5-dist_based_score-no-rerank` 达到 `answerable_total=77`、`Recall@5=1.0`、`MRR@5=1.0`、`retrieval_miss=0`、`rank_miss=0`、`source_noise=0`。
+- 2026-08-10 切换可用模型 `阿里百联 / qwen-plus-2025-07-28` 后复跑粮仓 80 条 API QA：`error_count=0`、`Recall@5=1.0`、`MRR@5=1.0`、`citation_hit_rate=1.0`、`refusal_accuracy=1.0`、`kb_isolation_rate=1.0`；`retrieval_miss/rank_miss/source_noise/refusal_miss` 全部为 0。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"`：`702 passed, 1 deselected, 35 warnings`。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pip install paddleocr==3.7.0 paddlepaddle==3.2.2`：补齐 OCR 运行时依赖；`paddle==3.2.2` 与 `paddleocr==3.7.0` 可直接导入。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pip check`：`No broken requirements found.`
 - `/opt/miniconda3/envs/agent-kb/bin/python -c "from api.routers.health import _build_import_capabilities; ..."`：`pdf_text_extraction.ready=true`，`image_ocr.ready=true`，`fitz/paddleocr/paddle/pillow` 均 installed。
@@ -199,7 +200,7 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库索引覆盖已修复，仍有少量检索排序问题**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；80 条复评还剩 2 条 answerable 漏召回和 11 条 rank_miss，后续应做 reranker/top-k 对比和查询改写策略验证。
+- **粮仓知识库检索质量已收口，下一步转向韧性和体验**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。后续重点应转向模型额度/故障自动 fallback、评测断点续跑、桌面端真实工作流体验和跨领域知识库泛化验证。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
@@ -219,6 +220,7 @@ cd webapp && npm run build
 | `docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json` | 2026-08-07 粮仓知识库 QA 评测报告产物 |
 | `docs/20260807-grain-qa-expansion/` | 粮仓 QA 80 条扩测与失败分组报告 |
 | `docs/20260807-grain-index-coverage-repair/` | 粮仓知识库索引覆盖修复计划 |
+| `docs/20260810-grain-retrieval-quality-tuning/` | 粮仓检索排序质量调优、实验矩阵和最终测试报告 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
