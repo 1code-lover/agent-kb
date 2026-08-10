@@ -479,6 +479,57 @@ def test_attempt_model_fallback_records_unavailable_when_no_candidate(monkeypatc
     assert store.values["model_health_status"]["state"] == "unavailable"
 
 
+def test_attempt_model_fallback_can_select_ollama_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """fallback 应支持无 API Key 的 Ollama 本地模型候选。"""
+
+    store = _DummyStore(
+        {
+            "current_llm_info": {
+                "service_provider": "OpenAI",
+                "model": "bad-chat",
+                "api_base": "https://api.example/v1",
+                "api_key": "bad-key",
+            },
+        }
+    )
+    checks: list[tuple[str, str]] = []
+    session_updates: list[tuple[str, dict[str, Any]]] = []
+    monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(
+        model_service.config,
+        "LLM_API_LIST",
+        {
+            "Ollama": {
+                "provider": "Ollama",
+                "api_base": "http://localhost:11434",
+                "models": [],
+            }
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-10T02:00:00Z")
+    monkeypatch.setattr(model_service, "new_trace_id", lambda prefix: prefix + "-trace")
+    monkeypatch.setattr(model_service, "update_session", lambda session_id, payload: session_updates.append((session_id, payload)))
+    monkeypatch.setattr(model_service, "_list_ollama_models", lambda api_base, trace_id: (["qwen2.5:7b"], {"trace_id": trace_id}))
+
+    def fake_check(model_name: str, api_base: str, trace_id: str):
+        checks.append((model_name, api_base))
+        return True, "reachable", {"trace_id": trace_id}
+
+    monkeypatch.setattr(model_service, "_check_ollama_model", fake_check)
+
+    result = model_service.attempt_model_fallback("model not found", session_id="ollama-fallback")
+
+    assert result["applied"] is True
+    assert result["selected"]["service_provider"] == "Ollama"
+    assert result["selected"]["model"] == "qwen2.5:7b"
+    assert result["selected"]["api_key"] == ""
+    assert result["selected"]["api_key_valid"] is True
+    assert checks == [("qwen2.5:7b", "http://localhost:11434")]
+    assert store.values["model_health_status"]["fallback_to"]["service_provider"] == "Ollama"
+    assert session_updates[0][0] == "ollama-fallback"
+
+
 def test_test_custom_provider_connection_rejects_missing_api_key_and_logs(monkeypatch: pytest.MonkeyPatch) -> None:
     """\u8fde\u63a5\u6d4b\u8bd5\u5728\u6ca1\u6709 API Key \u65f6\u5e94\u76f4\u63a5\u62d2\u7edd\u5e76\u5199\u65e5\u5fd7\u3002"""
 

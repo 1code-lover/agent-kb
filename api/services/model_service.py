@@ -205,8 +205,78 @@ def is_recoverable_model_error(error: Any) -> bool:
     return classify_model_error(error) in RECOVERABLE_MODEL_ERROR_KINDS
 
 
+def _ollama_tags_url(api_base: str) -> str:
+    """返回 Ollama 本地模型列表接口地址。"""
+    return f"{(api_base or config.OLLAMA_API_URL).strip().rstrip('/')}/api/tags"
+
+
+def _extract_ollama_model_names(payload: dict[str, Any]) -> list[str]:
+    """从 Ollama /api/tags 响应中提取模型名。"""
+    models = payload.get("models")
+    if not isinstance(models, list):
+        return []
+    names: list[str] = []
+    for item in models:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name") or item.get("model") or "").strip()
+        if name and name not in names:
+            names.append(name)
+    return names
+
+
+def _list_ollama_models(api_base: str, trace_id: str) -> tuple[list[str], dict[str, Any]]:
+    """读取本地 Ollama 已安装模型列表。"""
+    url = _ollama_tags_url(api_base)
+    request = urllib.request.Request(url, method="GET")
+    meta: dict[str, Any] = {
+        "trace_id": trace_id,
+        "tested_at": now_iso(),
+        "api_base": api_base,
+        "request_url": url,
+        "api_key_present": False,
+    }
+    try:
+        with urllib.request.urlopen(request, timeout=5) as response:
+            body = response.read().decode("utf-8", errors="ignore")
+            payload = json.loads(body or "{}")
+            names = _extract_ollama_model_names(payload if isinstance(payload, dict) else {})
+            meta["status_code"] = response.status
+            meta["result"] = "reachable"
+            meta["models"] = names[:50]
+            return names, meta
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        meta["status_code"] = exc.code
+        meta["result"] = "http_error"
+        meta["detail"] = detail[:800]
+        return [], meta
+    except Exception as exc:
+        meta["result"] = "exception"
+        meta["exception_type"] = type(exc).__name__
+        meta["detail"] = str(exc)
+        return [], meta
+
+
+def _check_ollama_model(model_name: str, api_base: str, trace_id: str) -> tuple[bool, str, dict[str, Any]]:
+    """判断本地 Ollama 服务是否存在目标模型。"""
+    names, meta = _list_ollama_models(api_base, trace_id)
+    if model_name in names:
+        meta["model"] = model_name
+        meta["result"] = "reachable"
+        return True, "reachable", meta
+    meta["model"] = model_name
+    meta["result"] = "model_missing" if names else meta.get("result", "no_models")
+    return False, "model_not_found" if names else "ollama_unreachable", meta
+
+
+def _candidate_is_ollama(candidate: dict[str, Any]) -> bool:
+    """判断候选是否为 Ollama 本地模型。"""
+    return str(candidate.get("service_provider") or "").strip() == "Ollama"
+
+
 def _iter_provider_candidates(current_info: dict[str, Any]) -> list[dict[str, Any]]:
-    """按优先级枚举 OpenAI 兼容模型候选。"""
+    """按优先级枚举 OpenAI 兼容与 Ollama 本地模型候选。"""
     providers: list[dict[str, Any]] = []
     for name, provider in config.LLM_API_LIST.items():
         item = dict(provider)
@@ -224,11 +294,16 @@ def _iter_provider_candidates(current_info: dict[str, Any]) -> list[dict[str, An
     seen: set[tuple[str, str, str]] = set()
     for provider in sorted(providers, key=provider_priority):
         provider_name = str(provider.get("name") or provider.get("provider") or "").strip()
-        api_base = str(provider.get("api_base") or "").strip().rstrip("/")
+        api_base = str(provider.get("api_base") or (config.OLLAMA_API_URL if provider_name == "Ollama" else "")).strip().rstrip("/")
         api_key = provider.get("api_key") or ""
-        if provider_name == "Ollama" or not api_base or not api_key:
+        if not api_base:
             continue
-        for model_name in provider.get("models", []) or []:
+        provider_models = [str(item or "").strip() for item in (provider.get("models", []) or []) if str(item or "").strip()]
+        if provider_name == "Ollama" and not provider_models:
+            provider_models, _meta = _list_ollama_models(api_base, new_trace_id("ollama"))
+        if provider_name != "Ollama" and not api_key:
+            continue
+        for model_name in provider_models:
             model = str(model_name or "").strip()
             if not model:
                 continue
@@ -276,12 +351,15 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
 
     trace_id = new_trace_id("fallback")
     for candidate in candidates:
-        reachable, detail, _meta = _check_openai_compatible(
-            candidate["model"],
-            candidate["api_base"],
-            candidate["api_key"],
-            trace_id,
-        )
+        if _candidate_is_ollama(candidate):
+            reachable, detail, _meta = _check_ollama_model(candidate["model"], candidate["api_base"], trace_id)
+        else:
+            reachable, detail, _meta = _check_openai_compatible(
+                candidate["model"],
+                candidate["api_base"],
+                candidate["api_key"],
+                trace_id,
+            )
         if not reachable:
             continue
         selected = select_model(

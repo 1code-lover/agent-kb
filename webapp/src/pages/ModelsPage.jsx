@@ -299,9 +299,11 @@ export default function ModelsPage() {
           </h3>
           <p className="simple-note">{currentInfo?.api_base || "先在下面保存一个供应商。"}</p>
           <p className="simple-note">{modelHealthSummary.title}</p>
+          <p className="simple-note">{modelHealthSummary.actionHint}</p>
           <p className="simple-note">
             {modelHealthSummary.detail}
           </p>
+          {modelHealthSummary.transitionLabel ? <p className="simple-note">{modelHealthSummary.transitionLabel}</p> : null}
         </div>
         <div className="agent-topbar-actions">
           <button type="button" className="secondary-button" onClick={applyPreset}>

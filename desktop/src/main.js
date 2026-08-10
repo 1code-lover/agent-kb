@@ -4,9 +4,56 @@ const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const { startPythonApi, stopPythonApi, waitForApiReady } = require("./python-process");
 const { getLogFile, logRuntime } = require("./runtime-log");
 
-const projectRoot = path.resolve(__dirname, "..", "..");
+const projectRoot = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, "..", "..");
 const distIndexPath = path.join(projectRoot, "webapp", "dist", "index.html");
-const desktopIconPath = path.join(projectRoot, "desktop", "resources", "icon.png");
+const desktopIconCandidates = [
+  path.join(projectRoot, "desktop", "resources", "icon.png"),
+  path.join(__dirname, "..", "resources", "icon.png"),
+];
+
+function resolveUrlOrigin(value) {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return "";
+  }
+}
+
+function buildContentSecurityPolicy(rendererEntry) {
+  const rendererOrigin = rendererEntry.type === "url" ? resolveUrlOrigin(rendererEntry.value) : "";
+  const connectSources = [
+    "'self'",
+    "http://127.0.0.1:18080",
+    "http://localhost:18080",
+    "ws://127.0.0.1:5173",
+    "ws://localhost:5173",
+    rendererOrigin,
+  ].filter(Boolean);
+
+  return [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: file:",
+    "font-src 'self' data:",
+    "media-src 'self' blob: file:",
+    `connect-src ${connectSources.join(" ")}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'"
+  ].join("; ");
+}
+
+function applySecurityHeaders(win, rendererEntry) {
+  const csp = buildContentSecurityPolicy(rendererEntry);
+  win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const responseHeaders = {
+      ...details.responseHeaders,
+      "Content-Security-Policy": [csp]
+    };
+    callback({ responseHeaders });
+  });
+}
 
 function resolveRendererEntry() {
   if (process.env.NORTHAGENT_WEB_URL || process.env.FOXGLOVE_WEB_URL || process.env.THINKRAG_WEB_URL) {
@@ -33,10 +80,11 @@ function resolveRendererEntry() {
 }
 
 function createWindow() {
+  const desktopIconPath = desktopIconCandidates.find((candidate) => fs.existsSync(candidate));
   const win = new BrowserWindow({
     width: 1366,
     height: 900,
-    icon: fs.existsSync(desktopIconPath) ? desktopIconPath : undefined,
+    icon: desktopIconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -46,6 +94,7 @@ function createWindow() {
 
   const rendererEntry = resolveRendererEntry();
   logRuntime(projectRoot, "renderer_resolved", rendererEntry);
+  applySecurityHeaders(win, rendererEntry);
 
   if (rendererEntry.type === "file") {
     win.loadFile(rendererEntry.value);

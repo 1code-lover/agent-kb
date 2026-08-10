@@ -36,6 +36,8 @@ test("buildModelHealthSummary 会展示自动 fallback 的来源和目标", () =
   assert.match(summary.detail, /OpenAI \/ gpt-4o/);
   assert.match(summary.detail, /阿里百炼 \/ qwen-plus/);
   assert.match(summary.detail, /额度耗尽/);
+  assert.match(summary.actionHint, /已自动切换到可用模型/);
+  assert.equal(summary.transitionLabel, "OpenAI / gpt-4o → 阿里百炼 / qwen-plus");
 });
 
 test("buildModelHealthSummary 会把 degraded 映射为异常提示", () => {
@@ -50,6 +52,7 @@ test("buildModelHealthSummary 会把 degraded 映射为异常提示", () => {
   assert.equal(summary.state, "degraded");
   assert.equal(summary.tone, "warning");
   assert.equal(summary.chipLabel, "模型异常");
+  assert.match(summary.actionHint, /检查额度、权限或网络/);
   assert.match(summary.detail, /403 禁止访问/);
   assert.match(summary.detail, /Error code: 403/);
 });
@@ -64,6 +67,7 @@ test("buildModelHealthSummary 会把 unavailable 映射为不可用提示", () =
   assert.equal(summary.state, "unavailable");
   assert.equal(summary.tone, "danger");
   assert.equal(summary.chipLabel, "无可用模型");
+  assert.match(summary.actionHint, /补齐可用供应商/);
   assert.match(summary.detail, /模型不可用/);
   assert.match(summary.detail, /候选数：3/);
 });
@@ -75,4 +79,5 @@ test("buildModelHealthSummary 缺少状态时会回退为未知", () => {
   assert.equal(summary.tone, "muted");
   assert.equal(summary.chipLabel, "状态未知");
   assert.equal(summary.title, "模型状态未知");
+  assert.match(summary.actionHint, /重新探活/);
 });

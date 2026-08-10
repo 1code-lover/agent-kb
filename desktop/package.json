@@ -8,25 +8,81 @@
   "scripts": {
     "dev": "electron .",
     "start": "electron .",
-    "build": "node scripts/build-target.js",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac"
+    "build": "npm run build:web && node scripts/build-target.js",
+    "build:web": "cd ../webapp && npm run build",
+    "build:preflight": "node scripts/release-preflight.js",
+    "release:preflight": "node scripts/release-preflight.js --strict",
+    "verify:package": "node scripts/verify-package.js",
+    "release:mac": "npm run build:web && npm run release:preflight && NORTHAGENT_REQUIRE_NOTARIZE=1 node ./node_modules/electron-builder/cli.js --mac",
+    "build:win": "npm run build:web && node ./node_modules/electron-builder/cli.js --win",
+    "build:mac": "npm run build:web && npm run build:preflight && node ./node_modules/electron-builder/cli.js --mac"
   },
   "build": {
     "appId": "com.northagent.desktop",
     "productName": "NorthAgent",
+    "afterSign": "scripts/notarize-mac.js",
+    "asar": true,
+    "compression": "maximum",
     "icon": "resources/icon.png",
     "files": [
       "src/**/*",
+      "!src/*.test.js",
       "resources/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../webapp/dist",
+        "to": "webapp/dist",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../api",
+        "to": "api",
+        "filter": [
+          "**/*.py"
+        ]
+      },
+      {
+        "from": "../server",
+        "to": "server",
+        "filter": [
+          "**/*.py"
+        ]
+      },
+      {
+        "from": "../utils",
+        "to": "utils",
+        "filter": [
+          "**/*.py"
+        ]
+      },
+      {
+        "from": "../config.py",
+        "to": "config.py"
+      },
+      {
+        "from": "../run_api.py",
+        "to": "run_api.py"
+      },
+      {
+        "from": "../requirements.txt",
+        "to": "requirements.txt"
+      }
     ],
     "directories": {
       "buildResources": "resources"
     },
     "mac": {
       "icon": "resources/icon.png",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "resources/entitlements.mac.plist",
+      "entitlementsInherit": "resources/entitlements.mac.inherit.plist",
       "target": [
-        "dmg"
+        "dmg",
+        "zip"
       ]
     },
     "win": {
@@ -37,6 +93,7 @@
     }
   },
   "devDependencies": {
+    "@electron/notarize": "^2.2.1",
     "electron": "^43.3.0",
     "electron-builder": "^24.13.3"
   }

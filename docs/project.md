@@ -31,7 +31,7 @@
 | RAG 核心 | `server/`：index、ingestion、retriever、readers、splitters、stores、security、agent |
 | API 服务层 | `api/`：routers、services、schemas、runtime |
 | Web 前端 | React 18 + Vite 8 + React Query + Zustand + 项目内轻量 router |
-| 桌面端 | Electron 31，`desktop/` 启动 Python API 后加载 Web |
+| 桌面端 | Electron 43，`desktop/` 启动 Python API 后加载 Web |
 | 旧前端 | Streamlit：`app.py` + `frontend/`，保留为迁移回退，不代表当前主线体验 |
 | PDF/OCR | PyMuPDF + PaddleOCR |
 | 本地 LLM | Ollama 0.3.3；README 仍提示 0.4 与当前依赖组合不兼容 |
@@ -122,13 +122,15 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
   - `3d3e010 docs(project): mark closure pushed`
   - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 正在收口模型配置韧性、评测断点续跑、桌面端真实工作流 E2E 与 macOS Electron 公证撤销启动修复，待最终回归后提交推送。
+- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；工作区正在做增量收口，包含 Ollama 本地模型 fallback 候选、fallback 切换提示、Electron CSP、macOS release preflight、entitlements、打包产物校验和跨 KB 泛化诊断脚本。增量单测、前端构建、桌面单测、macOS 打包内容校验、跨域真实评测和 preflight 非严格模式已通过，待整理提交。
 
 ### 4.4 下一步建议
 
-- **下一阶段目标切到模型韧性和桌面端体验验证**：优先保障额度耗尽、403、401、模型不可用时能自动切换到已配置可用模型，并在 API/UI 中明确显示当前模型健康状态。
-- **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应验证桌面端启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
+- **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量补齐 Ollama 候选和更明确的 UI 切换提示。
+- **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应继续验证桌面端安装后启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
 - **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
+- **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；下一步补齐 Apple Developer 签名/公证环境变量和 Developer ID 证书后，跑严格 release preflight、签名、公证、安装后启动回归。
+- **跨领域验证已经有最小门禁，下一步扩样本**：`scripts/diag_cross_domain_kb_eval.py` 已覆盖粮仓、桌面诊断和 UTF-8 边界诊断 3 个 KB 的正/负向隔离用例；后续应扩到 2-3 个更真实的非粮仓资料集。
 
 ---
 
@@ -205,6 +207,22 @@ cd webapp && npm run build
 - `ELECTRON_ENABLE_LOGGING=1 NORTHAGENT_PYTHON=/opt/miniconda3/envs/agent-kb/bin/python npm run dev`：桌面端干净启动成功，runtime log 记录 `desktop_app_ready`、`python_api_starting`、`python_api_ready`、`renderer_resolved source=dist`。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_desktop_model_workflow --base-url http://127.0.0.1:18080 --output-path docs/20260810-model-fallback-desktop-e2e/artifacts/desktop-model-workflow-report-after-electron-fix.json`：`run_passed=true`；验证模型选择/探活/健康状态、文件导入、定向 KB 问答、引用来源、preview 与 `default` 跨 KB 隔离。
 
+### 5.4 2026-08-10 桌面发布预检与 Ollama fallback 增量验证
+
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py -q`：`17 passed, 2 warnings`，新增覆盖无 API Key 的 Ollama 本地模型 fallback 候选。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`5 passed, 1 warning`，覆盖跨 KB 正向命中、禁止精确泄漏、相似但允许的目标 KB 内容、来源 kb_id 缺失失败和报告落盘。
+- `node --test webapp/src/domain/modelHealth.test.js`：`5 passed`，覆盖 fallback action hint 与 `source -> target` 切换标签。
+- `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`80 passed`。
+- `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`8 passed`。
+- `cd webapp && npm run build`：通过。
+- `cd desktop && npm run build:mac && npm run verify:package`：通过，产物包括 `desktop/dist/NorthAgent-0.1.0-arm64.dmg` 和 `desktop/dist/NorthAgent-0.1.0-arm64-mac.zip`；packaged resources 包含 `webapp/dist`、`run_api.py`、`config.py`、`requirements.txt`、`api/`、`server/` 和 `utils/`。
+- 直接从 packaged app resources 启动 API 并检查 `/api/health`、`/api/model/options`：通过。
+- packaged app 主进程启动验证：通过，加载 packaged `webapp/dist/index.html`，前端请求 `/api/model/options`、`/api/kb`、`/api/chat/history`。
+- `node desktop/scripts/release-preflight.js`：通过非严格预检，确认 Electron bundle 存在；当前本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`，严格签名/公证预检需补齐凭证后再跑。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report.json`：`6/6 passed`；覆盖 `grain-knowledge-base`、`diag-desktop-e2e-1786353063`、`diag-kb-utf8-1785505921` 三个 KB 的正向回答和负向隔离。UTF-8 边界问题打到粮仓 KB 时允许 grain 自身相似边界内容，但禁止 `文件夹只承担组织作用` 等精确短语和来源泄漏。
+- `cd desktop && npm audit fix` 后 `npm audit --json`：剩余 `8 vulnerabilities`，其中 `7 high`、`1 critical`；主要需要单独评估 `electron-builder` 大版本升级。
+- `git diff --check`：通过。
+
 ---
 
 ## 6. 已知问题和限制
@@ -213,10 +231,11 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向韧性和体验**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。后续重点应转向模型额度/故障自动 fallback、评测断点续跑、桌面端真实工作流体验和跨领域知识库泛化验证。
+- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有 3 个 KB、6 条正/负向用例的最小门禁，后续需要扩大非粮仓真实资料集和更复杂问题类型。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
+- **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包和 packaged app 启动验证，但本机尚未配置 Apple Developer 签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
 - **桌面端依赖安全仍需独立收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，但 `desktop` 依赖树仍有 `8 vulnerabilities`，需要后续单独做 `electron-builder` 等构建依赖升级评估。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 
@@ -236,6 +255,7 @@ cd webapp && npm run build
 | `docs/20260807-grain-index-coverage-repair/` | 粮仓知识库索引覆盖修复计划 |
 | `docs/20260810-grain-retrieval-quality-tuning/` | 粮仓检索排序质量调优、实验矩阵和最终测试报告 |
 | `docs/20260810-model-fallback-desktop-e2e/` | 模型 fallback、模型健康状态、评测断点续跑和桌面端 E2E 验证 |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report.json` | 跨知识库、跨领域真实问答和隔离诊断报告 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
@@ -252,6 +272,10 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `3d679d7` | chore: update dev story capture state |
+| `9415547` | feat(model): add fallback health and desktop e2e |
+| `b2deaf9` | fix(retrieval): improve grain source ranking |
+| `bde25b0` | feat(grain): repair coverage gate and qa recall |
 | `ca34b66` | docs(dev): record local kb stability closure |
 | `ddf8317` | refactor(web): replace router dependency with local navigation |
 | `6f1ef56` | fix(ocr): stabilize paddle runtime and diagnostics |

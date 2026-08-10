@@ -372,6 +372,7 @@ function QaWorkbench(props) {
             </span>
             <span className="qa-badge">{"可用知识库：" + kbList.length + " 个"}</span>
           </div>
+          <p className="qa-inline-tip">{modelHealthSummary?.actionHint || "问答会沿用当前模型配置。"}</p>
         </div>
         <div className="qa-hero-actions">
           <Link className="secondary-button link-button" to={buildKnowledgeWorkspaceLink(selectedKbId)}>
@@ -464,6 +465,10 @@ function QaWorkbench(props) {
               <div className="qa-summary-item">
                 <span>健康详情</span>
                 <strong>{modelHealthSummary?.detail || (modelReady ? "最近未发现异常" : "请先配置模型")}</strong>
+              </div>
+              <div className="qa-summary-item">
+                <span>切换提示</span>
+                <strong>{modelHealthSummary?.transitionLabel || modelHealthSummary?.actionHint || "暂无自动切换"}</strong>
               </div>
               <div className="qa-summary-item">
                 <span>知识库范围</span>
@@ -932,6 +937,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
             <span className="qa-badge">{"运行状态：" + runState}</span>
             <span className="qa-badge">{"上传目标：" + uploadTargetText}</span>
           </div>
+          <p className="qa-inline-tip">{modelHealthSummary.actionHint || "当前模型可继续使用。"}</p>
         </div>
         <div className="qa-hero-actions">
           <Link className="secondary-button link-button" to={buildKnowledgeWorkspaceLink(selectedKbId)}>

@@ -74,6 +74,7 @@ export function buildModelHealthSummary(modelHealth) {
       chipLabel: "已自动切换",
       title: "模型已自动切换",
       summary: currentLabel ? `当前正在使用 ${currentLabel}` : "当前正在使用备用模型",
+      actionHint: "已自动切换到可用模型，后续请求会继续沿用当前配置。",
       detail:
         [fallbackFrom ? `已从 ${fallbackFrom} 切换` : "", fallbackTo ? `到 ${fallbackTo}` : "", reason ? `原因：${reason}` : ""]
           .filter(Boolean)
@@ -81,6 +82,7 @@ export function buildModelHealthSummary(modelHealth) {
       currentLabel,
       fallbackFrom,
       fallbackTo,
+      transitionLabel: fallbackFrom || fallbackTo ? `${fallbackFrom || "未知来源"} → ${fallbackTo || "未知目标"}` : "",
     };
   }
 
@@ -91,6 +93,7 @@ export function buildModelHealthSummary(modelHealth) {
       chipLabel: "模型异常",
       title: "模型出现异常",
       summary: currentLabel ? `当前启用 ${currentLabel}` : "当前模型出现异常",
+      actionHint: "请检查额度、权限或网络，必要时手动切换到可用模型。",
       detail:
         [reason ? `最近错误类型：${reason}` : "", lastError ? `最近错误：${lastError}` : ""]
           .filter(Boolean)
@@ -106,6 +109,7 @@ export function buildModelHealthSummary(modelHealth) {
       chipLabel: "无可用模型",
       title: "当前无可用模型",
       summary: "未找到可直接切换的可用模型，请先检查配置或补齐供应商。",
+      actionHint: "先补齐可用供应商或修复当前模型，再重试问答。",
       detail:
         [reason ? `最近错误类型：${reason}` : "", lastError ? `最近错误：${lastError}` : "", candidateCount ? `候选数：${candidateCount}` : ""]
           .filter(Boolean)
@@ -120,6 +124,7 @@ export function buildModelHealthSummary(modelHealth) {
     chipLabel: "状态未知",
     title: "模型状态未知",
     summary: currentLabel ? `当前启用 ${currentLabel}` : "尚未读取到可用模型状态",
+    actionHint: "先按当前配置继续使用，必要时到模型配置页重新探活。",
     detail: "还没有写入健康检查结果，先按当前配置继续使用。",
     currentLabel,
   };
