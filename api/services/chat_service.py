@@ -110,6 +110,27 @@ def _normalize_sources(response: Any) -> list[dict[str, Any]]:
     return normalize_source_nodes(response)
 
 
+def _dedupe_sources_by_file(sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """\u6309 kb_id + file \u5408\u5e76\u91cd\u590d\u6765\u6e90\uff0c\u4fdd\u7559\u6392\u5e8f\u6700\u9760\u524d\u7684 chunk\u3002"""
+    deduped: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for source in sources:
+        if not isinstance(source, dict):
+            deduped.append(source)
+            continue
+        kb_id = str(source.get("kb_id") or "default").strip() or "default"
+        file_name = str(source.get("file") or source.get("file_name") or source.get("title") or "").strip()
+        if not file_name:
+            deduped.append(source)
+            continue
+        key = (kb_id, file_name)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(source)
+    return deduped
+
+
 def _answer_is_refusal_like(answer_text: str) -> bool:
     """\u5224\u65ad\u56de\u7b54\u662f\u5426\u5c5e\u4e8e\u65e0\u6cd5\u786e\u8ba4\u4fe1\u606f\u7684\u62d2\u7b54\u7c7b\u8868\u8ff0\u3002"""
     lowered = str(answer_text or "").lower()
@@ -338,7 +359,7 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
     grounded_question = _build_history_grounded_question(request.question, request.session_id)
     answer = engine.query(grounded_question)
     answer_text = getattr(answer, "response", str(answer))
-    sources = _normalize_sources(answer)
+    sources = _dedupe_sources_by_file(_normalize_sources(answer))
     if _answer_is_refusal_like(answer_text):
         sources = _prune_sources_for_refusal(request.question, sources)
     else:

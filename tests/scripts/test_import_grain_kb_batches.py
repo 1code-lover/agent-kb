@@ -74,6 +74,26 @@ def test_discover_files_honors_extension_filter(tmp_path: Path) -> None:
     assert {item.extension for item in files} == {".docx"}
 
 
+def test_discover_explicit_files_uses_exact_paths_and_deduplicates(tmp_path: Path) -> None:
+    root = _make_kb_root(tmp_path)
+    source = root / "docs" / "99-other" / "other.docx"
+
+    files = importer.discover_explicit_files(root, [str(source), str(source)])
+
+    assert len(files) == 1
+    assert files[0].file_name == "other.docx"
+    assert files[0].category == "99-other"
+    assert files[0].path == str(source.resolve())
+
+
+def test_discover_explicit_files_rejects_unsupported_extension(tmp_path: Path) -> None:
+    root = _make_kb_root(tmp_path)
+    source = root / "docs" / "01-standards-regulations" / "unsupported.xlsx"
+
+    with pytest.raises(ValueError, match="不支持的导入文件类型"):
+        importer.discover_explicit_files(root, [str(source)])
+
+
 def test_build_batches_groups_by_category_and_respects_batch_size() -> None:
     files = [
         importer.ImportFile("/tmp/a1.docx", "02-b", "a1.docx", ".docx", 1),
@@ -112,8 +132,32 @@ def test_build_plan_reports_counts_and_skip_policy(tmp_path: Path) -> None:
     assert plan["kb_id"] == "grain-knowledge-base"
     assert plan["file_count"] == 3
     assert plan["batch_count"] == 2
-    assert plan["skip_policy"] == {"duplicates": True, "other": True, "readme_files": True}
+    assert plan["skip_policy"] == {
+        "duplicates": True,
+        "other": True,
+        "readme_files": True,
+        "explicit_files": False,
+    }
     assert plan["categories"] == ["01-standards-regulations", "02-storage-operations"]
+
+
+def test_build_plan_uses_explicit_files_instead_of_directory_filters(tmp_path: Path) -> None:
+    root = _make_kb_root(tmp_path)
+    source = root / "docs" / "99-other" / "other.docx"
+
+    plan = importer.build_plan(
+        kb_root=root,
+        kb_id="grain-knowledge-base",
+        chunk_size=512,
+        chunk_overlap=50,
+        batch_size=2,
+        file_paths=[str(source)],
+    )
+
+    assert plan["file_count"] == 1
+    assert plan["categories"] == ["99-other"]
+    assert plan["skip_policy"]["explicit_files"] is True
+    assert plan["batches"][0]["files"][0]["file_name"] == "other.docx"
 
 
 def test_build_multipart_body_contains_fields_and_file_content(tmp_path: Path) -> None:

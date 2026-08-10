@@ -99,6 +99,20 @@ def test_prune_sources_for_refusal_keeps_only_grounded_sources(chat_service_modu
     assert pruned == [sources[0]]
 
 
+def test_dedupe_sources_by_file_keeps_first_chunk_per_kb_file(chat_service_module):
+    """sources 应按 kb_id + file 去重，但保留不同 KB 的同名文件。"""
+    sources = [
+        {"file": "policy.docx", "kb_id": "kb-a", "text": "first"},
+        {"file": "policy.docx", "kb_id": "kb-a", "text": "second"},
+        {"file": "policy.docx", "kb_id": "kb-b", "text": "other kb"},
+        {"file": "manual.pdf", "kb_id": "kb-a", "text": "manual"},
+    ]
+
+    deduped = chat_service_module._dedupe_sources_by_file(sources)
+
+    assert deduped == [sources[0], sources[2], sources[3]]
+
+
 def test_query_raises_when_index_is_empty(chat_service_module, monkeypatch, single_kb_scope):
     """索引未就绪时，query 应直接拒绝而不是继续构建引擎。"""
     monkeypatch.setattr(chat_service_module, "resolve_chat_query_scope", MagicMock(return_value=single_kb_scope))
@@ -180,6 +194,27 @@ def test_query_keeps_sources_for_non_refusal_answer(chat_service_module, monkeyp
 
     assert result["sources"] == sources
     normalize_evidence.assert_called_once_with(sources)
+
+
+def test_query_dedupes_sources_before_evidence(chat_service_module, monkeypatch, single_kb_scope):
+    """正常回答返回前应合并同一 KB 同一文件的重复 chunks。"""
+    _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="GPU memory requirement is 8GB.")
+    sources = [
+        {"file": "mobile-build-guide.md", "kb_id": "kb-a", "text": "GPU memory requirement is 8GB."},
+        {"file": "mobile-build-guide.md", "kb_id": "kb-a", "text": "GPU memory requirement is 8GB again."},
+        {"file": "faq.md", "kb_id": "kb-a", "text": "Supported devices include the mobile build target."},
+    ]
+    expected_sources = [sources[0], sources[2]]
+    normalize_evidence = MagicMock(return_value=[{"id": "ev-2"}])
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+    monkeypatch.setattr(chat_service_module, "normalize_evidence", normalize_evidence)
+
+    result = chat_service_module.query(_build_request(), record_history=False)
+
+    assert result["sources"] == expected_sources
+    normalize_evidence.assert_called_once_with(expected_sources)
 
 
 def test_query_expands_brief_entity_answer_with_grounded_source_clause(chat_service_module, monkeypatch, single_kb_scope):
@@ -390,4 +425,3 @@ def test_query_follow_up_semireal_can_recover_subject_from_same_session(chat_ser
     assert "Li Qing" in result["answer"]
     assert result["sources"]
     assert result["sources"][0]["file"] == "rollback-packet.md"
-

@@ -1,21 +1,19 @@
-最新评审建议（2026-08-07）
+最新评审建议（2026-08-10）
 
 优点：
-1. 粮仓知识库 verified QA 已从 30 条扩展到 80 条，覆盖正向、负向、跨库隔离、PDF、扫描件、表格和重复资料等场景。
-2. `scripts/run_grain_qa_eval.py` 已能输出 `failure_groups`，并记录每条用例的标签、期望文档类型和请求 KB 范围，便于后续定位问题。
-3. 恢复模型配置后完整跑完 80 条评测，`error_count=0`，本次报告可以替代此前因 LLM 额度耗尽导致的不完整报告。
-4. KB 隔离指标为 `1.0`，说明当前跨库过滤在本轮用例中没有出现来源泄露。
+1. 已新增粮仓 QA 覆盖诊断脚本，能够区分本地文件、KB-scoped docstore、metadata kb_id 和实际 Top5 召回状态。
+2. 已修正 asset registry 的适用范围：普通 PDF/DOCX 不再因为没有资产登记而被误判为导入失败，图片/嵌入资产仍保留适用性检查。
+3. 已为导入脚本增加重复 --file 精确导入能力，19 个唯一缺失文件全部导入成功，QA 期望文档 docstore 覆盖达到 82/82。
+4. 80 条 QA 复评达到 error_count=0、answerable Recall@5=0.974、refusal_accuracy=1.0、KB isolation=1.0，已明显超过原始 0.5325 基线。
+5. 后端 source 已按 kb_id + file 去重，source_noise 从 13 条降到 4 条；相关单元测试覆盖了跨 KB 同名文件不误合并的情况。
 
 需要改进的地方：
-1. 80 条评测的 `Recall@5=0.5325`、`MRR@5=0.5238`，距离可用验收还有明显差距。
-2. 当前 36 条 answerable 用例 Recall@5 为 0，主要不是回答生成失败，而是期望文件没有进入 top5。
-3. 当前 docstore 中 `grain-knowledge-base` 只覆盖约 13 个核心文件族，缺少大量本地已存在的 PDF/DOCX 资料；`storage/kb_assets/grain-knowledge-base.json` 为空，资产 registry 与当前索引状态不一致。
-4. sources 重复和噪声较多，报告中 `source_noise=37`，但该问题应在索引覆盖修复后再集中治理。
-5. `grain-verified-0080` 暴露拒答口径问题：无答案问题不应因为期望隔离说明中列出粮仓资料而被当作召回命中。
+1. 仍有 2 条 answerable 用例未进入 Top5：粮堆结露处理、空调控温储粮规程；这两条需要区分文档语义相似度问题和查询改写问题。
+2. 仍有 11 条 Recall 命中但首位排序不佳的 rank_miss，后续可评估 reranker、查询改写和 top_k/top_n 组合。
+3. 诊断结果应继续使用 `storage/kbs/{kb_id}/docstore.json`，不能误读过期的根级 `storage/docstore.json`。
 
 具体建议：
-1. 下一步优先做粮仓知识库导入覆盖诊断，而不是先调 top-k 或 rerank。
-2. 对 36 条 Recall@5=0 的期望文件逐个检查：本地文件是否存在、asset registry 是否登记、docstore 是否有节点、节点 metadata 是否包含正确 `kb_id`、检索 top5 是否命中。
-3. 重建或补导入 `data/grain-knowledge-base/docs/` 下正式资料目录，尤其是 PDF、表格样例、法律法规和 03-18 号作业规程。
-4. 覆盖修复后复跑 80 条 QA，再根据新 failure_groups 决定是否做 source 去重、rerank、召回扩展和拒答阈值优化。
-5. 将本次 80 条扩测报告纳入项目进度文档，避免后续继续依据 30 条全绿样本误判项目质量。
+1. 以覆盖诊断报告、定向导入报告和最终 80 条 QA 报告作为本次验收证据，更新项目进度和测试报告。
+2. 完成全量相关回归测试、git diff --check，并确认 API 仍使用 `agent-kb` conda 环境运行。
+3. 提交前按开发故事规范沉淀本次索引覆盖修复、source 去重和评测口径修正。
+4. 下一轮开发优先针对 2 条漏召回和 11 条 rank_miss 做可对照实验，不再重复导入覆盖排查。

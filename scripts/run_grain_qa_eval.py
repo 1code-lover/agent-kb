@@ -163,6 +163,9 @@ _STRONG_REFUSAL_MARKERS = (
     "建议查阅",
     "不在当前知识库",
     "不在本知识库",
+    "不应返回",
+    "不应该返回",
+    "不应当返回",
 )
 
 FAILURE_GROUP_ORDER = (
@@ -206,6 +209,8 @@ def _answer_is_refusal_like(answer: str) -> bool:
     if not answer:
         return True
     text = answer.strip()
+    if text.lower() in {"empty response", "no response"}:
+        return True
     if any(marker in text for marker in _STRONG_REFUSAL_MARKERS):
         return True
     if len(text) <= _WEAK_REFUSAL_MAX_LEN and any(

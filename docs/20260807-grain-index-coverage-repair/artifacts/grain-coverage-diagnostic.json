@@ -1,0 +1,1619 @@
+{
+  "generated_at": "2026-08-10T01:27:59.051589+00:00",
+  "kb_id": "grain-knowledge-base",
+  "cases_path": "data/grain-knowledge-base/qa/verified.jsonl",
+  "storage_dir": "storage",
+  "docstore_path": "storage/kbs/grain-knowledge-base/docstore.json",
+  "data_root": "data/grain-knowledge-base",
+  "eval_report_path": "docs/20260722-local-multi-kb-assistant/artifacts/grain-qa/qa-eval-report.json",
+  "summary": {
+    "total_expected_documents": 82,
+    "local_exists_count": 82,
+    "asset_registry_applicable_count": 0,
+    "asset_registry_hit_count": 0,
+    "docstore_hit_count": 82,
+    "docstore_kb_id_hit_count": 82,
+    "eval_case_present_count": 82,
+    "top5_hit_count": 78,
+    "failure_reason_counts": {
+      "missing_local_file": 0,
+      "missing_asset_registry": 0,
+      "missing_docstore_nodes": 0,
+      "missing_or_wrong_kb_id": 0,
+      "retrieval_not_top5": 4,
+      "ok": 78
+    }
+  },
+  "records": [
+    {
+      "case_id": "grain-verified-0001",
+      "query": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+      "answerable": true,
+      "file_name": "AAA粮油安全储存守则.docx",
+      "normalized_file_name": "AAA粮油安全储存守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/AAA粮油安全储存守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 44,
+      "docstore_kb_id_count": 42,
+      "metadata_file_name_variants": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "AAA粮油安全储存守则_a68a17f8.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0002",
+      "query": "《粮油安全储存守则》适用于哪些单位？",
+      "answerable": true,
+      "file_name": "AAA粮油安全储存守则.docx",
+      "normalized_file_name": "AAA粮油安全储存守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/AAA粮油安全储存守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 44,
+      "docstore_kb_id_count": 42,
+      "metadata_file_name_variants": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "AAA粮油安全储存守则_a68a17f8.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0003",
+      "query": "粮食入仓前，仓储管理部门需要检查哪些仓房条件？",
+      "answerable": true,
+      "file_name": "AAA粮油安全储存守则.docx",
+      "normalized_file_name": "AAA粮油安全储存守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/AAA粮油安全储存守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 44,
+      "docstore_kb_id_count": 42,
+      "metadata_file_name_variants": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "AAA粮油安全储存守则_a68a17f8.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0004",
+      "query": "入仓粮食的水分和杂质含量控制要求是什么？",
+      "answerable": true,
+      "file_name": "AAA粮油安全储存守则.docx",
+      "normalized_file_name": "AAA粮油安全储存守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/AAA粮油安全储存守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 44,
+      "docstore_kb_id_count": 42,
+      "metadata_file_name_variants": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "AAA粮油安全储存守则_a68a17f8.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0005",
+      "query": "《中央储备粮管理条例》中中央储备粮的定义是什么？",
+      "answerable": true,
+      "file_name": "中央储备粮管理条例.docx",
+      "normalized_file_name": "中央储备粮管理条例.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/中央储备粮管理条例.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 30,
+      "docstore_kb_id_count": 28,
+      "metadata_file_name_variants": [
+        "中央储备粮管理条例_427dfb7a.docx",
+        "中央储备粮管理条例_68832958.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0006",
+      "query": "中央储备粮管理应确保哪些目标？",
+      "answerable": true,
+      "file_name": "中央储备粮管理条例.docx",
+      "normalized_file_name": "中央储备粮管理条例.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/中央储备粮管理条例.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 30,
+      "docstore_kb_id_count": 28,
+      "metadata_file_name_variants": [
+        "中央储备粮管理条例_427dfb7a.docx",
+        "中央储备粮管理条例_68832958.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0007",
+      "query": "《粮库安全生产守则》遵循什么安全生产理念和方针？",
+      "answerable": true,
+      "file_name": "粮库安全生产守则.docx",
+      "normalized_file_name": "粮库安全生产守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮库安全生产守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 47,
+      "docstore_kb_id_count": 45,
+      "metadata_file_name_variants": [
+        "粮库安全生产守则_434562c6.docx",
+        "粮库安全生产守则_55486fad.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0008",
+      "query": "《粮库安全生产守则》的适用对象是什么？",
+      "answerable": true,
+      "file_name": "粮库安全生产守则.docx",
+      "normalized_file_name": "粮库安全生产守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮库安全生产守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 47,
+      "docstore_kb_id_count": 45,
+      "metadata_file_name_variants": [
+        "粮库安全生产守则_434562c6.docx",
+        "粮库安全生产守则_55486fad.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0009",
+      "query": "《粮油仓储管理办法》的制定目的是什么？",
+      "answerable": true,
+      "file_name": "粮油仓储管理办法.docx",
+      "normalized_file_name": "粮油仓储管理办法.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮油仓储管理办法.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 16,
+      "docstore_kb_id_count": 14,
+      "metadata_file_name_variants": [
+        "粮油仓储管理办法_72d6b5db.docx",
+        "粮油仓储管理办法_b02e72b6.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0010",
+      "query": "《简易仓囤储粮异常粮情应急处置操作规范》规定了哪些内容？",
+      "answerable": true,
+      "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+      "normalized_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 19,
+      "docstore_kb_id_count": 17,
+      "metadata_file_name_variants": [
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_13053fea.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0011",
+      "query": "《简易仓囤储粮异常粮情应急处置操作规范》适用于什么场景？",
+      "answerable": true,
+      "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+      "normalized_file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 19,
+      "docstore_kb_id_count": 17,
+      "metadata_file_name_variants": [
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_13053fea.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0012",
+      "query": "《氮气气调储粮技术规程》适用于哪些粮种？",
+      "answerable": true,
+      "file_name": "08氮气气调储粮技术规程.docx",
+      "normalized_file_name": "08氮气气调储粮技术规程.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/08氮气气调储粮技术规程.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 29,
+      "docstore_kb_id_count": 27,
+      "metadata_file_name_variants": [
+        "08氮气气调储粮技术规程_6a71f357.docx",
+        "08氮气气调储粮技术规程_d0acc6e5.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0013",
+      "query": "什么是氮气气调储粮？",
+      "answerable": true,
+      "file_name": "08氮气气调储粮技术规程.docx",
+      "normalized_file_name": "08氮气气调储粮技术规程.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/08氮气气调储粮技术规程.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 29,
+      "docstore_kb_id_count": 27,
+      "metadata_file_name_variants": [
+        "08氮气气调储粮技术规程_6a71f357.docx",
+        "08氮气气调储粮技术规程_d0acc6e5.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0014",
+      "query": "《磷化氢膜下环流熏蒸技术规程》主要覆盖哪些章节内容？",
+      "answerable": true,
+      "file_name": "01磷化氢膜下环流熏蒸技术规程T1.docx",
+      "normalized_file_name": "01磷化氢膜下环流熏蒸技术规程T1.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/01磷化氢膜下环流熏蒸技术规程T1.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 35,
+      "docstore_kb_id_count": 33,
+      "metadata_file_name_variants": [
+        "01磷化氢膜下环流熏蒸技术规程T1_64659a7c.docx",
+        "01磷化氢膜下环流熏蒸技术规程T1_cb31a2cb.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0015",
+      "query": "《机械通风降温储粮技术规程》涉及哪些通风降温术语？",
+      "answerable": true,
+      "file_name": "02机械通风降温储粮技术规程T2.docx",
+      "normalized_file_name": "02机械通风降温储粮技术规程T2.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/02机械通风降温储粮技术规程T2.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 23,
+      "docstore_kb_id_count": 21,
+      "metadata_file_name_variants": [
+        "02机械通风降温储粮技术规程T2_2833749f.docx",
+        "02机械通风降温储粮技术规程T2_851352f2.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0016",
+      "query": "《稻谷控温储藏技术规程》是针对哪些储粮生态区制定的？",
+      "answerable": true,
+      "file_name": "06稻谷控温储藏技术规程t6.docx",
+      "normalized_file_name": "06稻谷控温储藏技术规程t6.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/06稻谷控温储藏技术规程t6.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 33,
+      "docstore_kb_id_count": 31,
+      "metadata_file_name_variants": [
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "06稻谷控温储藏技术规程t6_7a0554a1.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0017",
+      "query": "非直属企业“一卡通”系统适用于哪些收储库点？",
+      "answerable": true,
+      "file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "normalized_file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行).docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行)_0880c2cd.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0018",
+      "query": "“一卡通”系统的核心能力是什么？",
+      "answerable": true,
+      "file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "normalized_file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行).docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行)_0880c2cd.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0019",
+      "query": "高寒干燥储粮区的主要储粮措施有哪些？",
+      "answerable": true,
+      "file_name": "中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+      "normalized_file_name": "中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 3,
+      "docstore_kb_id_count": 2,
+      "metadata_file_name_variants": [
+        "中国储粮生态区域划分、生态特点及主要储粮措施_89e4d6e6.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0020",
+      "query": "粮情数据分析系统应具备哪些数据获取与清洗能力？",
+      "answerable": true,
+      "file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "normalized_file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮情智能分析初步调研问题列表Jessie.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "粮情智能分析初步调研问题列表Jessie_1391ec28.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0021",
+      "query": "粮情数据分析系统有哪些粮仓数值计算能力？",
+      "answerable": true,
+      "file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "normalized_file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮情智能分析初步调研问题列表Jessie.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "粮情智能分析初步调研问题列表Jessie_1391ec28.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0022",
+      "query": "粮情数据分析系统有哪些粮情分析能力？",
+      "answerable": true,
+      "file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "normalized_file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮情智能分析初步调研问题列表Jessie.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "粮情智能分析初步调研问题列表Jessie_1391ec28.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0023",
+      "query": "《政府储备粮食仓储管理办法》是在什么时间审议通过并印发的？",
+      "answerable": true,
+      "file_name": "政府储备粮食仓储管理办法.docx",
+      "normalized_file_name": "政府储备粮食仓储管理办法.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/政府储备粮食仓储管理办法.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 21,
+      "docstore_kb_id_count": 19,
+      "metadata_file_name_variants": [
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0024",
+      "query": "如果用户问实时粮食市场价格，粮仓知识库应如何处理？",
+      "answerable": false,
+      "file_name": "readme.md",
+      "normalized_file_name": "readme.md",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/readme.md",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 2,
+      "docstore_kb_id_count": 1,
+      "metadata_file_name_variants": [
+        "readme_f4b82287.md"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0025",
+      "query": "超高大平房仓安全储粮技术规程适用于多大堆粮高度的仓房？",
+      "answerable": true,
+      "file_name": "20超高大平房仓安全储粮技术规程.docx",
+      "normalized_file_name": "20超高大平房仓安全储粮技术规程.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/20超高大平房仓安全储粮技术规程.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 19,
+      "docstore_kb_id_count": 17,
+      "metadata_file_name_variants": [
+        "20超高大平房仓安全储粮技术规程_65a6a213.docx",
+        "20超高大平房仓安全储粮技术规程_c802a581.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0026",
+      "query": "超高大平房仓应配备哪些粮情检测、机械通风与熏蒸设备？",
+      "answerable": true,
+      "file_name": "20超高大平房仓安全储粮技术规程.docx",
+      "normalized_file_name": "20超高大平房仓安全储粮技术规程.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/20超高大平房仓安全储粮技术规程.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 19,
+      "docstore_kb_id_count": 17,
+      "metadata_file_name_variants": [
+        "20超高大平房仓安全储粮技术规程_65a6a213.docx",
+        "20超高大平房仓安全储粮技术规程_c802a581.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0027",
+      "query": "千吨囤出粮作业前需要做哪些安全准备？",
+      "answerable": true,
+      "file_name": "21千吨囤安全储粮作业技术要求.docx",
+      "normalized_file_name": "21千吨囤安全储粮作业技术要求.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/21千吨囤安全储粮作业技术要求.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 11,
+      "docstore_kb_id_count": 9,
+      "metadata_file_name_variants": [
+        "21千吨囤安全储粮作业技术要求_95c0c514.docx",
+        "21千吨囤安全储粮作业技术要求_efba7c72.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0028",
+      "query": "千吨囤出粮作业现场至少需要配置哪些人员？",
+      "answerable": true,
+      "file_name": "21千吨囤安全储粮作业技术要求.docx",
+      "normalized_file_name": "21千吨囤安全储粮作业技术要求.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/21千吨囤安全储粮作业技术要求.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 11,
+      "docstore_kb_id_count": 9,
+      "metadata_file_name_variants": [
+        "21千吨囤安全储粮作业技术要求_95c0c514.docx",
+        "21千吨囤安全储粮作业技术要求_efba7c72.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0029",
+      "query": "一卡通系统启用前需要对哪些信息进行初始化？",
+      "answerable": true,
+      "file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "normalized_file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行).docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行)_0880c2cd.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0030",
+      "query": "第七储粮生态区域（高温高湿储粮区）的主要储粮措施有哪些？",
+      "answerable": true,
+      "file_name": "中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+      "normalized_file_name": "中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 3,
+      "docstore_kb_id_count": 2,
+      "metadata_file_name_variants": [
+        "中国储粮生态区域划分、生态特点及主要储粮措施_89e4d6e6.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0031",
+      "query": "《粮油储藏技术规范》选择储藏技术时应考虑哪些因素？",
+      "answerable": true,
+      "file_name": "粮油储藏技术规范-最新版.pdf",
+      "normalized_file_name": "粮油储藏技术规范-最新版.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/粮油储藏技术规范-最新版.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 79,
+      "docstore_kb_id_count": 78,
+      "metadata_file_name_variants": [
+        "粮油储藏技术规范-最新版_a712b2a4.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0032",
+      "query": "《粮油储藏技术规范》对粮情温湿度检测周期有哪些要求？",
+      "answerable": true,
+      "file_name": "粮油储藏技术规范-最新版.pdf",
+      "normalized_file_name": "粮油储藏技术规范-最新版.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/粮油储藏技术规范-最新版.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 79,
+      "docstore_kb_id_count": 78,
+      "metadata_file_name_variants": [
+        "粮油储藏技术规范-最新版_a712b2a4.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0033",
+      "query": "《粮油储藏技术规范》中“双低、三低、四合一”分别属于什么储藏技术组合？",
+      "answerable": true,
+      "file_name": "粮油储藏技术规范-最新版.pdf",
+      "normalized_file_name": "粮油储藏技术规范-最新版.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/粮油储藏技术规范-最新版.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 79,
+      "docstore_kb_id_count": 78,
+      "metadata_file_name_variants": [
+        "粮油储藏技术规范-最新版_a712b2a4.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0034",
+      "query": "《粮油储藏技术规范》如何处理粮堆结露？",
+      "answerable": true,
+      "file_name": "粮油储藏技术规范-最新版.pdf",
+      "normalized_file_name": "粮油储藏技术规范-最新版.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/粮油储藏技术规范-最新版.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 79,
+      "docstore_kb_id_count": 78,
+      "metadata_file_name_variants": [
+        "粮油储藏技术规范-最新版_a712b2a4.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": false,
+      "failure_reason": "retrieval_not_top5"
+    },
+    {
+      "case_id": "grain-verified-0035",
+      "query": "《粮油储藏理论与技术》的信息检测技术章节主要包括哪些检测方向？",
+      "answerable": true,
+      "file_name": "粮油储藏理论与技术.pdf",
+      "normalized_file_name": "粮油储藏理论与技术.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/粮油储藏理论与技术.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "粮油储藏理论与技术_c5569a05.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0036",
+      "query": "粮情数据分析系统应如何获取和清洗粮情数据？",
+      "answerable": true,
+      "file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "normalized_file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮情智能分析初步调研问题列表Jessie.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "粮情智能分析初步调研问题列表Jessie_1391ec28.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0037",
+      "query": "储粮安全水分分析辅助软件中的“仓温超标统计”要展示哪些结果？",
+      "answerable": true,
+      "file_name": "20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告.docx",
+      "normalized_file_name": "20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 34,
+      "docstore_kb_id_count": 33,
+      "metadata_file_name_variants": [
+        "20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告_153d074e.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0038",
+      "query": "粮情预测调研报告中提到哪些模型评价指标？",
+      "answerable": true,
+      "file_name": "粮情调研报告v3.pdf",
+      "normalized_file_name": "粮情调研报告v3.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/粮情调研报告v3.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 25,
+      "docstore_kb_id_count": 24,
+      "metadata_file_name_variants": [
+        "粮情调研报告v3_029dd852.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0039",
+      "query": "基于粮温统计特征的库存状态检测方法主要识别哪三种状态？",
+      "answerable": true,
+      "file_name": "基于粮温统计特征的粮仓库存状态检测方法.pdf",
+      "normalized_file_name": "基于粮温统计特征的粮仓库存状态检测方法.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于粮温统计特征的粮仓库存状态检测方法.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 65,
+      "docstore_kb_id_count": 64,
+      "metadata_file_name_variants": [
+        "基于粮温统计特征的粮仓库存状态检测方法_78b90fe8.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0040",
+      "query": "基于粮温时空相关性的储粮数量监管方法如何定位异常？",
+      "answerable": true,
+      "file_name": "基于粮温时空相关性的储粮数量监管方法研究_崔宏伟.pdf",
+      "normalized_file_name": "基于粮温时空相关性的储粮数量监管方法研究_崔宏伟.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于粮温时空相关性的储粮数量监管方法研究_崔宏伟.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 44,
+      "docstore_kb_id_count": 43,
+      "metadata_file_name_variants": [
+        "基于粮温时空相关性的储粮数量监管方法研究_崔宏伟_c6d8f31a.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0041",
+      "query": "成熟粮情分析预警算法中，粮堆局部发热初步如何判定？",
+      "answerable": true,
+      "file_name": "成熟粮情分析预警算法.pdf",
+      "normalized_file_name": "成熟粮情分析预警算法.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/成熟粮情分析预警算法.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 9,
+      "docstore_kb_id_count": 8,
+      "metadata_file_name_variants": [
+        "成熟粮情分析预警算法_0f0dda8f.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0042",
+      "query": "稻谷粮堆温湿度场云图研究如何定义粮堆结露？",
+      "answerable": true,
+      "file_name": "基于温湿度场云图的稻谷粮堆状态和结露风险分析.pdf",
+      "normalized_file_name": "基于温湿度场云图的稻谷粮堆状态和结露风险分析.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于温湿度场云图的稻谷粮堆状态和结露风险分析.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 26,
+      "docstore_kb_id_count": 25,
+      "metadata_file_name_variants": [
+        "基于温湿度场云图的稻谷粮堆状态和结露风险分析_2df82bbb.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0043",
+      "query": "温湿度场耦合重现分析对小麦浅圆仓在季节变化下得出了什么结论？",
+      "answerable": true,
+      "file_name": "基于温湿度场耦合的粮堆离散测点温度场重现分析_尹君.pdf",
+      "normalized_file_name": "基于温湿度场耦合的粮堆离散测点温度场重现分析_尹君.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于温湿度场耦合的粮堆离散测点温度场重现分析_尹君.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 26,
+      "docstore_kb_id_count": 25,
+      "metadata_file_name_variants": [
+        "基于温湿度场耦合的粮堆离散测点温度场重现分析_尹君_11982fa5.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0044",
+      "query": "不同仓型粮堆温度场重现研究对浅圆仓和平房仓有什么发现？",
+      "answerable": true,
+      "file_name": "不同仓型的粮堆温度场重现及对比分析.pdf",
+      "normalized_file_name": "不同仓型的粮堆温度场重现及对比分析.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/不同仓型的粮堆温度场重现及对比分析.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 30,
+      "docstore_kb_id_count": 29,
+      "metadata_file_name_variants": [
+        "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0045",
+      "query": "GappyPOD 温度场重构方法解决了什么问题？",
+      "answerable": true,
+      "file_name": "基于降维算法从少量测量数据中重构温度场.pdf",
+      "normalized_file_name": "基于降维算法从少量测量数据中重构温度场.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于降维算法从少量测量数据中重构温度场.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 31,
+      "docstore_kb_id_count": 30,
+      "metadata_file_name_variants": [
+        "基于降维算法从少量测量数据中重构温度场_0844c71f.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0046",
+      "query": "相邻粮层温差法补充说明中异众比率如何解释？",
+      "answerable": true,
+      "file_name": "相邻粮层温差法补充说明.pdf",
+      "normalized_file_name": "相邻粮层温差法补充说明.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/99-other/相邻粮层温差法补充说明.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 3,
+      "docstore_kb_id_count": 2,
+      "metadata_file_name_variants": [
+        "相邻粮层温差法补充说明_6e4f9ace.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0047",
+      "query": "库外监管平台数据互联互通技术规范主要包含哪些接口与安全章节？",
+      "answerable": true,
+      "file_name": "与库外监管平台对接-数据类互联互通技术规范20250521.docx",
+      "normalized_file_name": "与库外监管平台对接-数据类互联互通技术规范20250521.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/与库外监管平台对接-数据类互联互通技术规范20250521.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 19,
+      "docstore_kb_id_count": 18,
+      "metadata_file_name_variants": [
+        "与库外监管平台对接-数据类互联互通技术规范20250521_f711554a.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0048",
+      "query": "非直属企业储粮智慧监管平台数据接入技术规范的数据内容包括哪些类别？",
+      "answerable": true,
+      "file_name": "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范.pdf",
+      "normalized_file_name": "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 84,
+      "docstore_kb_id_count": 83,
+      "metadata_file_name_variants": [
+        "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范_92ca8dfb.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0049",
+      "query": "储备粮数字监管系统可以实现哪些粮情分析功能？",
+      "answerable": true,
+      "file_name": "储备粮数字监管方法及应用.pdf",
+      "normalized_file_name": "储备粮数字监管方法及应用.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/储备粮数字监管方法及应用.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 27,
+      "docstore_kb_id_count": 26,
+      "metadata_file_name_variants": [
+        "储备粮数字监管方法及应用_b0b57361.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0050",
+      "query": "机理/数据联合驱动储备粮数字监管方法指出当前储粮信息系统有哪些问题？",
+      "answerable": true,
+      "file_name": "机理_数据联合驱动储备粮数字监管智能方法_吴文福.pdf",
+      "normalized_file_name": "机理_数据联合驱动储备粮数字监管智能方法_吴文福.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/机理_数据联合驱动储备粮数字监管智能方法_吴文福.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 26,
+      "docstore_kb_id_count": 25,
+      "metadata_file_name_variants": [
+        "机理_数据联合驱动储备粮数字监管智能方法_吴文福_f754cdb2.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0051",
+      "query": "“一卡通”出入库系统通过哪些手段实现流程可追溯和数据共享？",
+      "answerable": true,
+      "file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "normalized_file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行).docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行)_0880c2cd.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0052",
+      "query": "“一卡通”系统正式启用前需要初始化哪些信息？",
+      "answerable": true,
+      "file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "normalized_file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行).docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 5,
+      "docstore_kb_id_count": 4,
+      "metadata_file_name_variants": [
+        "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行)_0880c2cd.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0053",
+      "query": "新建粮库预置智能化设备管线技术规范列出了哪些智能化作业类型和预埋线种类？",
+      "answerable": true,
+      "file_name": "中储粮[2014]311号-新建粮库(仓)预置智能化设备管线技术规范.docx",
+      "normalized_file_name": "中储粮[2014]311号-新建粮库(仓)预置智能化设备管线技术规范.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮[2014]311号-新建粮库(仓)预置智能化设备管线技术规范.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 15,
+      "docstore_kb_id_count": 14,
+      "metadata_file_name_variants": [
+        "中储粮[2014]311号-新建粮库(仓)预置智能化设备管线技术规范_12a2c4ba.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0054",
+      "query": "平房仓粮情报表样例 1 包含哪些汇总指标和签字栏？",
+      "answerable": true,
+      "file_name": "粮库粮情报表样例1-平房仓.pdf",
+      "normalized_file_name": "粮库粮情报表样例1-平房仓.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮库粮情报表样例1-平房仓.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 6,
+      "docstore_kb_id_count": 5,
+      "metadata_file_name_variants": [
+        "粮库粮情报表样例1-平房仓_5a2653c3.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0055",
+      "query": "浅圆仓粮情报表样例 3 的标题和汇总环境指标是什么？",
+      "answerable": true,
+      "file_name": "粮库粮情报表样例3-浅圆仓.pdf",
+      "normalized_file_name": "粮库粮情报表样例3-浅圆仓.pdf",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮库粮情报表样例3-浅圆仓.pdf",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 4,
+      "docstore_kb_id_count": 3,
+      "metadata_file_name_variants": [
+        "粮库粮情报表样例3-浅圆仓_aa3a2320.pdf"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0056",
+      "query": "如果用户要求查询企业内部未公开合同条款，粮仓知识库应如何回答？",
+      "answerable": false,
+      "file_name": "readme.md",
+      "normalized_file_name": "readme.md",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/readme.md",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 2,
+      "docstore_kb_id_count": 1,
+      "metadata_file_name_variants": [
+        "readme_f4b82287.md"
+      ],
+      "eval_case_present": true,
+      "top5_hit": false,
+      "failure_reason": "retrieval_not_top5"
+    },
+    {
+      "case_id": "grain-verified-0057",
+      "query": "《粮油仓储管理办法》和《政府储备粮食仓储管理办法》在库存安全目标上有什么共同点？",
+      "answerable": true,
+      "file_name": "粮油仓储管理办法.docx",
+      "normalized_file_name": "粮油仓储管理办法.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮油仓储管理办法.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 16,
+      "docstore_kb_id_count": 14,
+      "metadata_file_name_variants": [
+        "粮油仓储管理办法_72d6b5db.docx",
+        "粮油仓储管理办法_b02e72b6.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0057",
+      "query": "《粮油仓储管理办法》和《政府储备粮食仓储管理办法》在库存安全目标上有什么共同点？",
+      "answerable": true,
+      "file_name": "政府储备粮食仓储管理办法.docx",
+      "normalized_file_name": "政府储备粮食仓储管理办法.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/政府储备粮食仓储管理办法.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 21,
+      "docstore_kb_id_count": 19,
+      "metadata_file_name_variants": [
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0058",
+      "query": "《中央储备粮管理条例》和《政府储备粮食仓储管理办法》共同强调哪些管理要求？",
+      "answerable": true,
+      "file_name": "中央储备粮管理条例.docx",
+      "normalized_file_name": "中央储备粮管理条例.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/中央储备粮管理条例.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 30,
+      "docstore_kb_id_count": 28,
+      "metadata_file_name_variants": [
+        "中央储备粮管理条例_427dfb7a.docx",
+        "中央储备粮管理条例_68832958.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0058",
+      "query": "《中央储备粮管理条例》和《政府储备粮食仓储管理办法》共同强调哪些管理要求？",
+      "answerable": true,
+      "file_name": "政府储备粮食仓储管理办法.docx",
+      "normalized_file_name": "政府储备粮食仓储管理办法.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/政府储备粮食仓储管理办法.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 21,
+      "docstore_kb_id_count": 19,
+      "metadata_file_name_variants": [
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0059",
+      "query": "《粮食流通管理条例》适用于哪些粮食经营活动？",
+      "answerable": true,
+      "file_name": "粮食流通管理条例.docx",
+      "normalized_file_name": "粮食流通管理条例.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮食流通管理条例.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 22,
+      "docstore_kb_id_count": 21,
+      "metadata_file_name_variants": [
+        "粮食流通管理条例_38d13bc7.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0060",
+      "query": "《粮食安全保障法》规定的国家粮食安全战略是什么？",
+      "answerable": true,
+      "file_name": "粮食安全保障法.docx",
+      "normalized_file_name": "粮食安全保障法.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮食安全保障法.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 30,
+      "docstore_kb_id_count": 29,
+      "metadata_file_name_variants": [
+        "粮食安全保障法_abc7a213.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0061",
+      "query": "《粮库安全生产守则》对粮仓设计和装粮有什么安全要求？",
+      "answerable": true,
+      "file_name": "粮库安全生产守则.docx",
+      "normalized_file_name": "粮库安全生产守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮库安全生产守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 47,
+      "docstore_kb_id_count": 45,
+      "metadata_file_name_variants": [
+        "粮库安全生产守则_434562c6.docx",
+        "粮库安全生产守则_55486fad.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0062",
+      "query": "粮库车辆装卸作业有哪些安全要求？",
+      "answerable": true,
+      "file_name": "粮库安全生产守则.docx",
+      "normalized_file_name": "粮库安全生产守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮库安全生产守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 47,
+      "docstore_kb_id_count": 45,
+      "metadata_file_name_variants": [
+        "粮库安全生产守则_434562c6.docx",
+        "粮库安全生产守则_55486fad.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0063",
+      "query": "粮食入仓前应如何检查和处理仓房？",
+      "answerable": true,
+      "file_name": "AAA粮油安全储存守则.docx",
+      "normalized_file_name": "AAA粮油安全储存守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/AAA粮油安全储存守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 44,
+      "docstore_kb_id_count": 42,
+      "metadata_file_name_variants": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "AAA粮油安全储存守则_a68a17f8.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0064",
+      "query": "《粮油安全储存守则》要求粮情检查和报告的频次是什么？",
+      "answerable": true,
+      "file_name": "AAA粮油安全储存守则.docx",
+      "normalized_file_name": "AAA粮油安全储存守则.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/AAA粮油安全储存守则.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 44,
+      "docstore_kb_id_count": 42,
+      "metadata_file_name_variants": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "AAA粮油安全储存守则_a68a17f8.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0065",
+      "query": "机械通风降温储粮技术规程规定了哪些内容、适用于什么场景？",
+      "answerable": true,
+      "file_name": "02机械通风降温储粮技术规程T2.docx",
+      "normalized_file_name": "02机械通风降温储粮技术规程T2.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/02机械通风降温储粮技术规程T2.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 23,
+      "docstore_kb_id_count": 21,
+      "metadata_file_name_variants": [
+        "02机械通风降温储粮技术规程T2_2833749f.docx",
+        "02机械通风降温储粮技术规程T2_851352f2.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0066",
+      "query": "仓房和粮堆隔热技术规程主要规定什么？",
+      "answerable": true,
+      "file_name": "03仓房和粮堆隔热技术规程T3.docx",
+      "normalized_file_name": "03仓房和粮堆隔热技术规程T3.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/03仓房和粮堆隔热技术规程T3.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 23,
+      "docstore_kb_id_count": 22,
+      "metadata_file_name_variants": [
+        "03仓房和粮堆隔热技术规程T3_c6bbe003.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0067",
+      "query": "谷物冷却机经济运行技术规程适用于哪些冷却作业？",
+      "answerable": true,
+      "file_name": "04谷物冷却机经济运行技术规程T4.docx",
+      "normalized_file_name": "04谷物冷却机经济运行技术规程T4.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/04谷物冷却机经济运行技术规程T4.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 35,
+      "docstore_kb_id_count": 34,
+      "metadata_file_name_variants": [
+        "04谷物冷却机经济运行技术规程T4_da3312d6.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0068",
+      "query": "谷物冷却机一机三仓冷却通风技术的适用条件和目标是什么？",
+      "answerable": true,
+      "file_name": "05谷物冷却机一机三仓冷却通风储粮技术规程t5.docx",
+      "normalized_file_name": "05谷物冷却机一机三仓冷却通风储粮技术规程t5.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/05谷物冷却机一机三仓冷却通风储粮技术规程t5.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 13,
+      "docstore_kb_id_count": 12,
+      "metadata_file_name_variants": [
+        "05谷物冷却机一机三仓冷却通风储粮技术规程t5_848b8a90.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0069",
+      "query": "稻谷控温储藏技术规程适用于哪些区域？",
+      "answerable": true,
+      "file_name": "06稻谷控温储藏技术规程t6.docx",
+      "normalized_file_name": "06稻谷控温储藏技术规程t6.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/06稻谷控温储藏技术规程t6.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 33,
+      "docstore_kb_id_count": 31,
+      "metadata_file_name_variants": [
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "06稻谷控温储藏技术规程t6_7a0554a1.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0070",
+      "query": "平房仓膜下环流通风技术规程的适用前提是什么？",
+      "answerable": true,
+      "file_name": "07平房仓膜下环流通风技术规程T7.docx",
+      "normalized_file_name": "07平房仓膜下环流通风技术规程T7.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/07平房仓膜下环流通风技术规程T7.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 24,
+      "docstore_kb_id_count": 23,
+      "metadata_file_name_variants": [
+        "07平房仓膜下环流通风技术规程T7_80569bdf.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0071",
+      "query": "氮气气调储粮技术规程中供气系统由哪些部分组成？",
+      "answerable": true,
+      "file_name": "08氮气气调储粮技术规程.docx",
+      "normalized_file_name": "08氮气气调储粮技术规程.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/08氮气气调储粮技术规程.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 29,
+      "docstore_kb_id_count": 27,
+      "metadata_file_name_variants": [
+        "08氮气气调储粮技术规程_6a71f357.docx",
+        "08氮气气调储粮技术规程_d0acc6e5.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0072",
+      "query": "氮气气调储粮工程设计规范对供气方式和制氮设备有什么优先建议？",
+      "answerable": true,
+      "file_name": "09氮气气调储粮工程设计规范（试行）.docx",
+      "normalized_file_name": "09氮气气调储粮工程设计规范(试行).docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/09氮气气调储粮工程设计规范（试行）.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 15,
+      "docstore_kb_id_count": 14,
+      "metadata_file_name_variants": [
+        "09氮气气调储粮工程设计规范(试行)_97788fab.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0073",
+      "query": "气调储粮安全标志包括哪四大类型？",
+      "answerable": true,
+      "file_name": "10气调储粮安全标志.docx",
+      "normalized_file_name": "10气调储粮安全标志.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/10气调储粮安全标志.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 8,
+      "docstore_kb_id_count": 7,
+      "metadata_file_name_variants": [
+        "10气调储粮安全标志_8bbce688.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0074",
+      "query": "智能通风自动控制硬件和软件系统分别包括什么？",
+      "answerable": true,
+      "file_name": "11智能通风技术规程（2011）.docx",
+      "normalized_file_name": "11智能通风技术规程(2011).docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/11智能通风技术规程（2011）.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 18,
+      "docstore_kb_id_count": 17,
+      "metadata_file_name_variants": [
+        "11智能通风技术规程(2011)_bfd66ab3.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0075",
+      "query": "北方连续式粮食干燥机技术条件适用于哪些环节？",
+      "answerable": true,
+      "file_name": "12北方连续式粮食干燥机技术条件.docx",
+      "normalized_file_name": "12北方连续式粮食干燥机技术条件.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/12北方连续式粮食干燥机技术条件.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 53,
+      "docstore_kb_id_count": 52,
+      "metadata_file_name_variants": [
+        "12北方连续式粮食干燥机技术条件_c874a0ad.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0076",
+      "query": "露天储粮操作规程覆盖哪些管理环节？",
+      "answerable": true,
+      "file_name": "15露天储粮操作规程t15.docx",
+      "normalized_file_name": "15露天储粮操作规程t15.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/15露天储粮操作规程t15.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 40,
+      "docstore_kb_id_count": 39,
+      "metadata_file_name_variants": [
+        "15露天储粮操作规程t15_023c817d.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0077",
+      "query": "氮气气调储粮智能控制系统主要由哪些子系统组成？",
+      "answerable": true,
+      "file_name": "16氮气气调储粮智能控制技术规程T16.docx",
+      "normalized_file_name": "16氮气气调储粮智能控制技术规程T16.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/16氮气气调储粮智能控制技术规程T16.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 8,
+      "docstore_kb_id_count": 7,
+      "metadata_file_name_variants": [
+        "16氮气气调储粮智能控制技术规程T16_d0e98e4f.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0078",
+      "query": "空调控温储粮技术规程适用于什么条件下的平房仓？",
+      "answerable": true,
+      "file_name": "17空调控温储粮技术规程20160624.docx",
+      "normalized_file_name": "17空调控温储粮技术规程20160624.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/17空调控温储粮技术规程20160624.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 28,
+      "docstore_kb_id_count": 27,
+      "metadata_file_name_variants": [
+        "17空调控温储粮技术规程20160624_02bed855.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": false,
+      "failure_reason": "retrieval_not_top5"
+    },
+    {
+      "case_id": "grain-verified-0079",
+      "query": "磷化氢熏蒸技术规程如何描述环流熏蒸和常规熏蒸？",
+      "answerable": true,
+      "file_name": "18磷化氢熏蒸蒸技术规程20160819.docx",
+      "normalized_file_name": "18磷化氢熏蒸蒸技术规程20160819.docx",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/18磷化氢熏蒸蒸技术规程20160819.docx",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 37,
+      "docstore_kb_id_count": 36,
+      "metadata_file_name_variants": [
+        "18磷化氢熏蒸蒸技术规程20160819_97270947.docx"
+      ],
+      "eval_case_present": true,
+      "top5_hit": true,
+      "failure_reason": "ok"
+    },
+    {
+      "case_id": "grain-verified-0080",
+      "query": "只搜索 default 知识库时，是否应该返回 grain-knowledge-base 的粮仓资料？",
+      "answerable": false,
+      "file_name": "readme.md",
+      "normalized_file_name": "readme.md",
+      "expected_path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/readme.md",
+      "local_exists": true,
+      "asset_registry_applicable": false,
+      "asset_registry_hit": false,
+      "docstore_node_count": 2,
+      "docstore_kb_id_count": 1,
+      "metadata_file_name_variants": [
+        "readme_f4b82287.md"
+      ],
+      "eval_case_present": true,
+      "top5_hit": false,
+      "failure_reason": "retrieval_not_top5"
+    }
+  ]
+}

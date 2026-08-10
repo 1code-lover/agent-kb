@@ -118,6 +118,45 @@ def test_evaluate_case_uses_case_search_kb_ids(monkeypatch) -> None:
     assert result["kb_isolation"] == 1
 
 
+def test_evaluate_case_counts_negative_cross_kb_answer_as_refusal(monkeypatch) -> None:
+    """跨库隔离问题中，“不应返回”应计为正确边界回答。"""
+
+    def fake_post_json(api_base, path, payload, timeout):
+        return {
+            "code": 0,
+            "data": {
+                "answer": "否。只搜索 default 知识库时，不应返回 grain-knowledge-base 的粮仓资料。",
+                "sources": [
+                    {
+                        "file": "readme.md",
+                        "kb_id": "grain-knowledge-base",
+                    }
+                ],
+            },
+        }
+
+    monkeypatch.setattr(grain_eval, "_post_json", fake_post_json)
+    result = grain_eval.evaluate_case(
+        {
+            "id": "case-cross-kb",
+            "query": "只搜索 default 知识库时，是否应该返回 grain-knowledge-base 的粮仓资料？",
+            "search_kb_ids": ["grain-knowledge-base"],
+            "answerable": False,
+            "relevant_documents": [{"file_name": "readme.md"}],
+        },
+        api_base="http://127.0.0.1:18080",
+        kb_id="grain-knowledge-base",
+        timeout=1.0,
+    )
+
+    assert result["refusal_correct"] == 1
+
+
+def test_answer_is_refusal_like_accepts_empty_response() -> None:
+    """无检索结果时的框架兜底文本应计为拒答。"""
+    assert grain_eval._answer_is_refusal_like("Empty Response") is True
+
+
 def test_file_sha256_tracks_case_file_content(tmp_path: Path) -> None:
     """报告可通过 cases_sha256 追溯评测用例版本。"""
     cases = tmp_path / "verified.jsonl"

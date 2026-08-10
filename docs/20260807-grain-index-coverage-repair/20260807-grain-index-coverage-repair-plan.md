@@ -4,7 +4,7 @@
 
 2026-08-07 粮仓知识库 80 条 verified QA 完整评测已经跑完，`error_count=0`，但 `Recall@5=0.5325`、`MRR@5=0.5238`。失败清单显示 36 条可回答问题 Recall@5 为 0，其中 19 条期望文档为 PDF，17 条为 DOCX。
 
-进一步抽查 `storage/docstore.json` 发现，当前 `grain-knowledge-base` 只有 543 个节点，约 13 个核心文件族；`storage/kb_assets/grain-knowledge-base.json` 为空。大量本地已存在于 `data/grain-knowledge-base/docs/` 的资料没有进入当前索引或没有形成可追踪 asset 记录。
+进一步抽查 KB-scoped `storage/kbs/grain-knowledge-base/docstore.json` 发现，当前索引只有约 13 个核心文件族；`storage/kb_assets/grain-knowledge-base.json` 为空。后续确认 asset registry 主要登记图片和嵌入资产，普通 PDF/DOCX 不应以 asset registry 作为导入成功条件；真正的问题是大量本地资料没有进入 docstore。
 
 因此下一阶段优化项按优先级排列如下：先修导入覆盖和索引一致性，再处理排序、噪声和拒答阈值。
 
@@ -31,6 +31,7 @@
   - `file_name`
   - `expected_path`
   - `local_exists`
+  - `asset_registry_applicable`
   - `asset_registry_hit`
   - `docstore_node_count`
   - `docstore_kb_id_count`
@@ -51,7 +52,8 @@
 - 覆盖场景：
   - 本地文件存在但 docstore 缺节点。
   - docstore 有节点但 `kb_id` 缺失或错误。
-  - asset registry 为空时输出 `missing_asset_registry`。
+  - 普通 PDF/DOCX 的 asset registry 为空时仍能按 docstore/top5 正确判定。
+  - 图片类资产的 asset registry 为空时输出 `missing_asset_registry`。
   - 文件名存在 hash 后缀或全角/半角括号差异时仍能归一匹配。
   - top5 命中但 registry 缺失时同时保留多个诊断信号。
 
@@ -62,12 +64,13 @@
   - `docs/01-standards-regulations/`
   - `docs/02-storage-operations/`
   - `docs/03-monitoring-analysis/`
-  - `docs/04-platform-supervision/`
+  - `docs/04-regulation-platform/`
   - `docs/07-templates-samples/`
+- 对诊断出的缺失文件支持 `--file` 精确导入；本轮补入 19 个唯一文件，包含 QA 必需的 `docs/99-other/相邻粮层温差法补充说明.pdf`。
 - 对 `docs/98-duplicates-to-review/` 暂不默认导入到正式索引，先用于重复/冲突样本验证。
 - 导入完成后要求：
-  - `storage/kb_assets/grain-knowledge-base.json` 不为空。
-  - `storage/docstore.json` 中 QA 期望文件均存在节点。
+  - 普通 PDF/DOCX 不要求出现在 asset registry；图片/嵌入资产按适用性检查。
+  - `storage/kbs/grain-knowledge-base/docstore.json` 中 QA 期望文件均存在节点。
   - 新节点 metadata 包含 `kb_id=grain-knowledge-base`。
   - `storage/kb_registry.json` 的 `doc_count` 与导入后实际文档数接近。
 
@@ -101,6 +104,15 @@
 - 若拒答失败仍存在：
   - 区分“检索应无结果”和“用例期望文档仅用于隔离说明”的评测口径。
   - 修正 unanswerable 用例的 recall 计算，避免把不应返回的资料当作正向相关文件。
+
+### 已实施结果（2026-08-10）
+
+- 覆盖诊断脚本、单元测试和 KB-scoped docstore 读取已完成。
+- 导入脚本新增重复 `--file` 参数，19 个唯一缺失文件定向导入全部成功。
+- QA 期望文档覆盖达到 `local=82/82`、`docstore=82/82`、正确 `kb_id=82/82`。
+- 80 条 QA 复评达到 `answerable Recall@5=0.974`、`MRR@5=0.8961`、`error_count=0`、`citation_hit_rate=1.0`、`refusal_accuracy=1.0`、`kb_isolation_rate=1.0`。
+- 后端已按 `kb_id + file` 合并重复 source，`source_noise` 从 13 条降至 4 条。
+- 当前剩余问题是 2 个 answerable 漏召回和 11 个命中但首位排序不佳；它们已不再是索引覆盖问题。
 
 ## 验证命令
 

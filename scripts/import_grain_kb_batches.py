@@ -117,6 +117,55 @@ def discover_files(
     return discovered
 
 
+def _import_file_from_path(path: Path, kb_root: Path, allowed_extensions: set[str]) -> ImportFile:
+    """从精确路径构建导入文件描述。"""
+    file_path = path.expanduser().resolve()
+    if not file_path.exists():
+        raise FileNotFoundError(f"待导入文件不存在: {file_path}")
+    if not _is_supported_file(file_path):
+        raise ValueError(f"不支持的导入文件类型: {file_path}")
+    extension = file_path.suffix.lower()
+    if extension not in allowed_extensions:
+        raise ValueError(f"文件扩展名不在允许范围内: {file_path}")
+
+    docs_root = kb_root / "docs"
+    try:
+        relative_to_docs = file_path.relative_to(docs_root)
+        category = relative_to_docs.parts[0] if len(relative_to_docs.parts) > 1 else docs_root.name
+    except ValueError:
+        category = file_path.parent.name
+    return ImportFile(
+        path=str(file_path),
+        category=category,
+        file_name=file_path.name,
+        extension=extension,
+        size=file_path.stat().st_size,
+    )
+
+
+def discover_explicit_files(
+    kb_root: str | Path,
+    file_paths: list[str],
+    *,
+    extensions: set[str] | None = None,
+) -> list[ImportFile]:
+    """按用户显式传入的文件路径构建导入列表。"""
+    root = Path(kb_root).resolve()
+    allowed_extensions = {ext.lower() for ext in (extensions or SUPPORTED_EXTENSIONS)}
+    discovered: list[ImportFile] = []
+    seen: set[Path] = set()
+    for raw_path in file_paths:
+        candidate = Path(raw_path)
+        if not candidate.is_absolute():
+            candidate = Path.cwd() / candidate
+        file_path = candidate.resolve()
+        if file_path in seen:
+            continue
+        discovered.append(_import_file_from_path(file_path, root, allowed_extensions))
+        seen.add(file_path)
+    return discovered
+
+
 def build_batches(files: list[ImportFile], batch_size: int) -> list[ImportBatch]:
     """按分类和 batch_size 构建导入批次。"""
     if batch_size <= 0:
@@ -151,15 +200,20 @@ def build_plan(
     include_duplicates: bool = False,
     extensions: set[str] | None = None,
     limit: int | None = None,
+    file_paths: list[str] | None = None,
 ) -> dict[str, Any]:
     """生成导入计划。"""
-    files = discover_files(
-        kb_root,
-        categories=categories,
-        include_other=include_other,
-        include_duplicates=include_duplicates,
-        extensions=extensions,
-    )
+    explicit_files = bool(file_paths)
+    if file_paths:
+        files = discover_explicit_files(kb_root, file_paths, extensions=extensions)
+    else:
+        files = discover_files(
+            kb_root,
+            categories=categories,
+            include_other=include_other,
+            include_duplicates=include_duplicates,
+            extensions=extensions,
+        )
     if limit is not None:
         files = files[:limit]
     batches = build_batches(files, batch_size)
@@ -178,6 +232,7 @@ def build_plan(
             "duplicates": not include_duplicates,
             "other": not include_other,
             "readme_files": True,
+            "explicit_files": explicit_files,
         },
         "batches": [
             {
@@ -351,6 +406,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=5)
     parser.add_argument("--category", action="append", dest="categories")
     parser.add_argument("--extension", action="append", dest="extensions")
+    parser.add_argument("--file", action="append", dest="file_paths")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--include-other", action="store_true")
     parser.add_argument("--include-duplicates", action="store_true")
@@ -375,6 +431,7 @@ def main() -> None:
         include_duplicates=args.include_duplicates,
         extensions=extensions,
         limit=args.limit,
+        file_paths=args.file_paths,
     )
     if args.apply:
         report = run_import(

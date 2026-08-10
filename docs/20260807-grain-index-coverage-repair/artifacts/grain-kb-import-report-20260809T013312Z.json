@@ -1,0 +1,1021 @@
+{
+  "mode": "dry-run",
+  "generated_at": "2026-08-09T01:33:12.553213+00:00",
+  "kb_id": "grain-knowledge-base",
+  "kb_root": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base",
+  "chunk_size": 512,
+  "chunk_overlap": 50,
+  "batch_size": 8,
+  "file_count": 125,
+  "batch_count": 17,
+  "categories": [
+    "01-standards-regulations",
+    "02-storage-operations",
+    "03-monitoring-analysis",
+    "04-regulation-platform",
+    "05-patents",
+    "06-research-reports",
+    "07-templates-samples"
+  ],
+  "skip_policy": {
+    "duplicates": true,
+    "other": true,
+    "readme_files": true
+  },
+  "batches": [
+    {
+      "batch_no": 1,
+      "category": "01-standards-regulations",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/23内环流标准.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "23内环流标准.pdf",
+          "extension": ".pdf",
+          "size": 2157177
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/AAA粮油安全储存守则.docx",
+          "category": "01-standards-regulations",
+          "file_name": "AAA粮油安全储存守则.docx",
+          "extension": ".docx",
+          "size": 63143
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+          "category": "01-standards-regulations",
+          "file_name": "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范.docx",
+          "extension": ".docx",
+          "size": 55457
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/中央储备粮管理条例.docx",
+          "category": "01-standards-regulations",
+          "file_name": "中央储备粮管理条例.docx",
+          "extension": ".docx",
+          "size": 24417
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/大豆GB1352-2023.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "大豆GB1352-2023.pdf",
+          "extension": ".pdf",
+          "size": 352071
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/大豆储存品质判定标准GBT31785-2015.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "大豆储存品质判定标准GBT31785-2015.pdf",
+          "extension": ".pdf",
+          "size": 8689923
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/小麦GB1351-2023.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "小麦GB1351-2023.pdf",
+          "extension": ".pdf",
+          "size": 279545
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/小麦储存品质判定标准GBT20571-2006.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "小麦储存品质判定标准GBT20571-2006.pdf",
+          "extension": ".pdf",
+          "size": 274987
+        }
+      ]
+    },
+    {
+      "batch_no": 2,
+      "category": "01-standards-regulations",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/政府储备粮食仓储管理办法.docx",
+          "category": "01-standards-regulations",
+          "file_name": "政府储备粮食仓储管理办法.docx",
+          "extension": ".docx",
+          "size": 27253
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/玉米GB1353-2018.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "玉米GB1353-2018.pdf",
+          "extension": ".pdf",
+          "size": 3937512
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/玉米储存品质判定规则GBT20570-2015.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "玉米储存品质判定规则GBT20570-2015.pdf",
+          "extension": ".pdf",
+          "size": 6834007
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/稻谷GB1350-2009.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "稻谷GB1350-2009.pdf",
+          "extension": ".pdf",
+          "size": 332567
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/稻谷储存品质判定规则GBT20569-2006.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "稻谷储存品质判定规则GBT20569-2006.pdf",
+          "extension": ".pdf",
+          "size": 215449
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/简易仓囤储粮异常粮情应急处置操作规范-团体标准.pdf",
+          "category": "01-standards-regulations",
+          "file_name": "简易仓囤储粮异常粮情应急处置操作规范-团体标准.pdf",
+          "extension": ".pdf",
+          "size": 275025
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮库安全生产守则.docx",
+          "category": "01-standards-regulations",
+          "file_name": "粮库安全生产守则.docx",
+          "extension": ".docx",
+          "size": 41558
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮油仓储管理办法.docx",
+          "category": "01-standards-regulations",
+          "file_name": "粮油仓储管理办法.docx",
+          "extension": ".docx",
+          "size": 16888
+        }
+      ]
+    },
+    {
+      "batch_no": 3,
+      "category": "01-standards-regulations",
+      "file_count": 3,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮油储存安全责任暂行规定.docx",
+          "category": "01-standards-regulations",
+          "file_name": "粮油储存安全责任暂行规定.docx",
+          "extension": ".docx",
+          "size": 25274
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮食安全保障法.docx",
+          "category": "01-standards-regulations",
+          "file_name": "粮食安全保障法.docx",
+          "extension": ".docx",
+          "size": 26037
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/01-standards-regulations/粮食流通管理条例.docx",
+          "category": "01-standards-regulations",
+          "file_name": "粮食流通管理条例.docx",
+          "extension": ".docx",
+          "size": 25739
+        }
+      ]
+    },
+    {
+      "batch_no": 4,
+      "category": "02-storage-operations",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/01磷化氢膜下环流熏蒸技术规程T1.docx",
+          "category": "02-storage-operations",
+          "file_name": "01磷化氢膜下环流熏蒸技术规程T1.docx",
+          "extension": ".docx",
+          "size": 52651
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/02机械通风降温储粮技术规程T2.docx",
+          "category": "02-storage-operations",
+          "file_name": "02机械通风降温储粮技术规程T2.docx",
+          "extension": ".docx",
+          "size": 45811
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/03仓房和粮堆隔热技术规程T3.docx",
+          "category": "02-storage-operations",
+          "file_name": "03仓房和粮堆隔热技术规程T3.docx",
+          "extension": ".docx",
+          "size": 46430
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/04谷物冷却机经济运行技术规程T4.docx",
+          "category": "02-storage-operations",
+          "file_name": "04谷物冷却机经济运行技术规程T4.docx",
+          "extension": ".docx",
+          "size": 82817
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/05谷物冷却机一机三仓冷却通风储粮技术规程t5.docx",
+          "category": "02-storage-operations",
+          "file_name": "05谷物冷却机一机三仓冷却通风储粮技术规程t5.docx",
+          "extension": ".docx",
+          "size": 38669
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/06稻谷控温储藏技术规程t6.docx",
+          "category": "02-storage-operations",
+          "file_name": "06稻谷控温储藏技术规程t6.docx",
+          "extension": ".docx",
+          "size": 418673
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/07平房仓膜下环流通风技术规程T7.docx",
+          "category": "02-storage-operations",
+          "file_name": "07平房仓膜下环流通风技术规程T7.docx",
+          "extension": ".docx",
+          "size": 58349
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/08氮气气调储粮技术规程.docx",
+          "category": "02-storage-operations",
+          "file_name": "08氮气气调储粮技术规程.docx",
+          "extension": ".docx",
+          "size": 44292
+        }
+      ]
+    },
+    {
+      "batch_no": 5,
+      "category": "02-storage-operations",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/09氮气气调储粮工程设计规范（试行）.docx",
+          "category": "02-storage-operations",
+          "file_name": "09氮气气调储粮工程设计规范（试行）.docx",
+          "extension": ".docx",
+          "size": 36315
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/10气调储粮安全标志.docx",
+          "category": "02-storage-operations",
+          "file_name": "10气调储粮安全标志.docx",
+          "extension": ".docx",
+          "size": 1214714
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/11智能通风技术规程（2011）.docx",
+          "category": "02-storage-operations",
+          "file_name": "11智能通风技术规程（2011）.docx",
+          "extension": ".docx",
+          "size": 42108
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/12北方连续式粮食干燥机技术条件.docx",
+          "category": "02-storage-operations",
+          "file_name": "12北方连续式粮食干燥机技术条件.docx",
+          "extension": ".docx",
+          "size": 80883
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/14粮食干燥成套设备检测验收技术规范.docx",
+          "category": "02-storage-operations",
+          "file_name": "14粮食干燥成套设备检测验收技术规范.docx",
+          "extension": ".docx",
+          "size": 56118
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/15露天储粮操作规程t15.docx",
+          "category": "02-storage-operations",
+          "file_name": "15露天储粮操作规程t15.docx",
+          "extension": ".docx",
+          "size": 60396
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/16氮气气调储粮智能控制技术规程T16.docx",
+          "category": "02-storage-operations",
+          "file_name": "16氮气气调储粮智能控制技术规程T16.docx",
+          "extension": ".docx",
+          "size": 32755
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/17空调控温储粮技术规程20160624.docx",
+          "category": "02-storage-operations",
+          "file_name": "17空调控温储粮技术规程20160624.docx",
+          "extension": ".docx",
+          "size": 66695
+        }
+      ]
+    },
+    {
+      "batch_no": 6,
+      "category": "02-storage-operations",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/18磷化氢熏蒸蒸技术规程20160819.docx",
+          "category": "02-storage-operations",
+          "file_name": "18磷化氢熏蒸蒸技术规程20160819.docx",
+          "extension": ".docx",
+          "size": 58680
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/19《粮食干燥机复合燃烧锅炉技术要求》20161128.docx",
+          "category": "02-storage-operations",
+          "file_name": "19《粮食干燥机复合燃烧锅炉技术要求》20161128.docx",
+          "extension": ".docx",
+          "size": 34861
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/20超高大平房仓安全储粮技术规程.docx",
+          "category": "02-storage-operations",
+          "file_name": "20超高大平房仓安全储粮技术规程.docx",
+          "extension": ".docx",
+          "size": 41213
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/21千吨囤安全储粮作业技术要求.docx",
+          "category": "02-storage-operations",
+          "file_name": "21千吨囤安全储粮作业技术要求.docx",
+          "extension": ".docx",
+          "size": 38151
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/22粮面压盖标准.pdf",
+          "category": "02-storage-operations",
+          "file_name": "22粮面压盖标准.pdf",
+          "extension": ".pdf",
+          "size": 6407198
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/24进口大豆安全储藏技术规范（试行）.pdf",
+          "category": "02-storage-operations",
+          "file_name": "24进口大豆安全储藏技术规范（试行）.pdf",
+          "extension": ".pdf",
+          "size": 1836838
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/GBT29890-2013粮油储藏技术规范.pdf",
+          "category": "02-storage-operations",
+          "file_name": "GBT29890-2013粮油储藏技术规范.pdf",
+          "extension": ".pdf",
+          "size": 12945936
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-总则.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-总则.docx",
+          "extension": ".docx",
+          "size": 459122
+        }
+      ]
+    },
+    {
+      "batch_no": 7,
+      "category": "02-storage-operations",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-第一区.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-第一区.docx",
+          "extension": ".docx",
+          "size": 46503
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-第七区.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-第七区.docx",
+          "extension": ".docx",
+          "size": 49394
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-第三区.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-第三区.docx",
+          "extension": ".docx",
+          "size": 43719
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-第二区.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-第二区.docx",
+          "extension": ".docx",
+          "size": 46084
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-第五区.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-第五区.docx",
+          "extension": ".docx",
+          "size": 50581
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-第六区.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-第六区.docx",
+          "extension": ".docx",
+          "size": 47771
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范-第四区.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范-第四区.docx",
+          "extension": ".docx",
+          "size": 48256
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/不同储粮生态区域粮油储藏技术规范－植物油脂储藏.docx",
+          "category": "02-storage-operations",
+          "file_name": "不同储粮生态区域粮油储藏技术规范－植物油脂储藏.docx",
+          "extension": ".docx",
+          "size": 47504
+        }
+      ]
+    },
+    {
+      "batch_no": 8,
+      "category": "02-storage-operations",
+      "file_count": 7,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/储粮机械通风技术规程2002.pdf",
+          "category": "02-storage-operations",
+          "file_name": "储粮机械通风技术规程2002.pdf",
+          "extension": ".pdf",
+          "size": 656977
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/关于印发《仓房气密性处理技术指引（试行）》的通知.pdf",
+          "category": "02-storage-operations",
+          "file_name": "关于印发《仓房气密性处理技术指引（试行）》的通知.pdf",
+          "extension": ".pdf",
+          "size": 102921
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/粮堆生物场与多场相互作用研究-吴子丹.pdf",
+          "category": "02-storage-operations",
+          "file_name": "粮堆生物场与多场相互作用研究-吴子丹.pdf",
+          "extension": ".pdf",
+          "size": 589584
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/粮油储藏技术规范-最新版.pdf",
+          "category": "02-storage-operations",
+          "file_name": "粮油储藏技术规范-最新版.pdf",
+          "extension": ".pdf",
+          "size": 664796
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/粮食安全储存水分及配套储藏技术操作规程(试行).docx",
+          "category": "02-storage-operations",
+          "file_name": "粮食安全储存水分及配套储藏技术操作规程(试行).docx",
+          "extension": ".docx",
+          "size": 30057
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/附件1：仓房气密性处理技术指引（试行）.docx",
+          "category": "02-storage-operations",
+          "file_name": "附件1：仓房气密性处理技术指引（试行）.docx",
+          "extension": ".docx",
+          "size": 34618
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/02-storage-operations/附件2：仓房气密性处理指导图册.pdf",
+          "category": "02-storage-operations",
+          "file_name": "附件2：仓房气密性处理指导图册.pdf",
+          "extension": ".pdf",
+          "size": 7871156
+        }
+      ]
+    },
+    {
+      "batch_no": 9,
+      "category": "03-monitoring-analysis",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/LST 1809-2017 粮油储藏 粮情测控通用技术要求.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "LST 1809-2017 粮油储藏 粮情测控通用技术要求.pdf",
+          "extension": ".pdf",
+          "size": 940693
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/LST 1810-2017 粮油储藏 粮情测控分机技术要求.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "LST 1810-2017 粮油储藏 粮情测控分机技术要求.pdf",
+          "extension": ".pdf",
+          "size": 510957
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/LST 1811-2017 粮油储藏 粮情测控软件技术要求.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "LST 1811-2017 粮油储藏 粮情测控软件技术要求.pdf",
+          "extension": ".pdf",
+          "size": 1010301
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/LST 1812-2017 粮油储藏 粮情测控信息交换接口协议技术要求.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "LST 1812-2017 粮油储藏 粮情测控信息交换接口协议技术要求.pdf",
+          "extension": ".pdf",
+          "size": 1157085
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/LST 1813-2017 粮油储藏 粮情测控数字测温电缆技术要求.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "LST 1813-2017 粮油储藏 粮情测控数字测温电缆技术要求.pdf",
+          "extension": ".pdf",
+          "size": 609856
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/不同仓型的粮堆温度场重现及对比分析.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "不同仓型的粮堆温度场重现及对比分析.pdf",
+          "extension": ".pdf",
+          "size": 3346073
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/地下仓小麦粮堆局部发热与结露研究_秦苗苗.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "地下仓小麦粮堆局部发热与结露研究_秦苗苗.pdf",
+          "extension": ".pdf",
+          "size": 7510927
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于NMR的粮仓多场耦合图形化探测系统研究-吴文福.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于NMR的粮仓多场耦合图形化探测系统研究-吴文福.pdf",
+          "extension": ".pdf",
+          "size": 12239402
+        }
+      ]
+    },
+    {
+      "batch_no": 10,
+      "category": "03-monitoring-analysis",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于温湿度场云图的小麦粮堆霉变与温湿度耦合分析.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于温湿度场云图的小麦粮堆霉变与温湿度耦合分析.pdf",
+          "extension": ".pdf",
+          "size": 3258655
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于温湿度场云图的稻谷粮堆状态和结露风险分析.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于温湿度场云图的稻谷粮堆状态和结露风险分析.pdf",
+          "extension": ".pdf",
+          "size": 8088714
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于温湿度场耦合的粮堆离散测点温度场重现分析_尹君.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于温湿度场耦合的粮堆离散测点温度场重现分析_尹君.pdf",
+          "extension": ".pdf",
+          "size": 711920
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于粮温时空相关性的储粮数量监管方法研究_崔宏伟.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于粮温时空相关性的储粮数量监管方法研究_崔宏伟.pdf",
+          "extension": ".pdf",
+          "size": 873764
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于粮温统计特征的粮仓库存状态检测方法.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于粮温统计特征的粮仓库存状态检测方法.pdf",
+          "extension": ".pdf",
+          "size": 1806097
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于绝对水势图的储粮通风作业管理初探-吴文福.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于绝对水势图的储粮通风作业管理初探-吴文福.pdf",
+          "extension": ".pdf",
+          "size": 780928
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/基于降维算法从少量测量数据中重构温度场.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "基于降维算法从少量测量数据中重构温度场.pdf",
+          "extension": ".pdf",
+          "size": 408847
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/小麦粮堆多场耦合模型及结露预测研究_尹君.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "小麦粮堆多场耦合模型及结露预测研究_尹君.pdf",
+          "extension": ".pdf",
+          "size": 4237215
+        }
+      ]
+    },
+    {
+      "batch_no": 11,
+      "category": "03-monitoring-analysis",
+      "file_count": 7,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/成熟粮情分析预警算法.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "成熟粮情分析预警算法.pdf",
+          "extension": ".pdf",
+          "size": 1168838
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/粮堆平衡绝对湿度和露点温度的查定方法_李兴军.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "粮堆平衡绝对湿度和露点温度的查定方法_李兴军.pdf",
+          "extension": ".pdf",
+          "size": 1553007
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/粮情云图动态分析软件系统研发与应用-张忠杰.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "粮情云图动态分析软件系统研发与应用-张忠杰.pdf",
+          "extension": ".pdf",
+          "size": 1659030
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/粮情检测数据分析系统开发应用--批复.docx",
+          "category": "03-monitoring-analysis",
+          "file_name": "粮情检测数据分析系统开发应用--批复.docx",
+          "extension": ".docx",
+          "size": 84373
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/粮情检测数据分析系统开发应用（ZCL20140044-CC）--验收材料.docx",
+          "category": "03-monitoring-analysis",
+          "file_name": "粮情检测数据分析系统开发应用（ZCL20140044-CC）--验收材料.docx",
+          "extension": ".docx",
+          "size": 14530877
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/计算机粮情数据分析系统开发 上报付印.docx",
+          "category": "03-monitoring-analysis",
+          "file_name": "计算机粮情数据分析系统开发 上报付印.docx",
+          "extension": ".docx",
+          "size": 89338
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/03-monitoring-analysis/锂离子电池三维温度场在线重构研究-李伟.pdf",
+          "category": "03-monitoring-analysis",
+          "file_name": "锂离子电池三维温度场在线重构研究-李伟.pdf",
+          "extension": ".pdf",
+          "size": 7520432
+        }
+      ]
+    },
+    {
+      "batch_no": 12,
+      "category": "04-regulation-platform",
+      "file_count": 7,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/与库外监管平台对接-数据类互联互通技术规范20250521.docx",
+          "category": "04-regulation-platform",
+          "file_name": "与库外监管平台对接-数据类互联互通技术规范20250521.docx",
+          "extension": ".docx",
+          "size": 106461
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮[2014]311号-新建粮库(仓)预置智能化设备管线技术规范.docx",
+          "category": "04-regulation-platform",
+          "file_name": "中储粮[2014]311号-新建粮库(仓)预置智能化设备管线技术规范.docx",
+          "extension": ".docx",
+          "size": 32206
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+          "category": "04-regulation-platform",
+          "file_name": "中储粮非直属企业“一卡通”出入库系统应用管理办法（暂行）.docx",
+          "extension": ".docx",
+          "size": 35460
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范.pdf",
+          "category": "04-regulation-platform",
+          "file_name": "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范.pdf",
+          "extension": ".pdf",
+          "size": 1353592
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范_1.pdf",
+          "category": "04-regulation-platform",
+          "file_name": "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范_1.pdf",
+          "extension": ".pdf",
+          "size": 1352931
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/储备粮数字监管方法及应用.pdf",
+          "category": "04-regulation-platform",
+          "file_name": "储备粮数字监管方法及应用.pdf",
+          "extension": ".pdf",
+          "size": 2574782
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/04-regulation-platform/机理_数据联合驱动储备粮数字监管智能方法_吴文福.pdf",
+          "category": "04-regulation-platform",
+          "file_name": "机理_数据联合驱动储备粮数字监管智能方法_吴文福.pdf",
+          "extension": ".pdf",
+          "size": 2378276
+        }
+      ]
+    },
+    {
+      "batch_no": 13,
+      "category": "05-patents",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN104007776B一种基于温度湿度场耦合的粮堆结露预警防控系统及方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN104007776B一种基于温度湿度场耦合的粮堆结露预警防控系统及方法.pdf",
+          "extension": ".pdf",
+          "size": 282480
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN106802164A一种适用于粮情监测的绝对水势计算方法及云图生成方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN106802164A一种适用于粮情监测的绝对水势计算方法及云图生成方法.pdf",
+          "extension": ".pdf",
+          "size": 153272
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN107389746B.PDF",
+          "category": "05-patents",
+          "file_name": "CN107389746B.PDF",
+          "extension": ".pdf",
+          "size": 413238
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN107389746B粮堆含水率在线检测方法及系统.pdf",
+          "category": "05-patents",
+          "file_name": "CN107389746B粮堆含水率在线检测方法及系统.pdf",
+          "extension": ".pdf",
+          "size": 411970
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN108040622A.PDF",
+          "category": "05-patents",
+          "file_name": "CN108040622A.PDF",
+          "extension": ".pdf",
+          "size": 135941
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN110261551B一种粮食安全储存时间的预测方法及装置.pdf",
+          "category": "05-patents",
+          "file_name": "CN110261551B一种粮食安全储存时间的预测方法及装置.pdf",
+          "extension": ".pdf",
+          "size": 392381
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN110286144B一种粮堆结露预测方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN110286144B一种粮堆结露预测方法.pdf",
+          "extension": ".pdf",
+          "size": 580858
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN110704512B一种基于历史粮情数据的粮仓通风时段判断方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN110704512B一种基于历史粮情数据的粮仓通风时段判断方法.pdf",
+          "extension": ".pdf",
+          "size": 737423
+        }
+      ]
+    },
+    {
+      "batch_no": 14,
+      "category": "05-patents",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN110766791B.PDF",
+          "category": "05-patents",
+          "file_name": "CN110766791B.PDF",
+          "extension": ".pdf",
+          "size": 918179
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN111307866B一种粮食结露临界参数判断方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN111307866B一种粮食结露临界参数判断方法.pdf",
+          "extension": ".pdf",
+          "size": 631639
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN112232343B一种粮食霉变粒识别神经网络和识别方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN112232343B一种粮食霉变粒识别神经网络和识别方法.pdf",
+          "extension": ".pdf",
+          "size": 2020660
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN112304856A.PDF",
+          "category": "05-patents",
+          "file_name": "CN112304856A.PDF",
+          "extension": ".pdf",
+          "size": 544507
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN113303107B.PDF",
+          "category": "05-patents",
+          "file_name": "CN113303107B.PDF",
+          "extension": ".pdf",
+          "size": 700586
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN114996905A一种基于粮情数据的粮食储藏品质变化规律的研究方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN114996905A一种基于粮情数据的粮食储藏品质变化规律的研究方法.pdf",
+          "extension": ".pdf",
+          "size": 1159733
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN115046653A.PDF",
+          "category": "05-patents",
+          "file_name": "CN115046653A.PDF",
+          "extension": ".pdf",
+          "size": 628720
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN115112264A一种基于改进的GRU粮堆单点温度预测方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN115112264A一种基于改进的GRU粮堆单点温度预测方法.pdf",
+          "extension": ".pdf",
+          "size": 1121672
+        }
+      ]
+    },
+    {
+      "batch_no": 15,
+      "category": "05-patents",
+      "file_count": 8,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN115825136A.PDF",
+          "category": "05-patents",
+          "file_name": "CN115825136A.PDF",
+          "extension": ".pdf",
+          "size": 1151583
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN116718592A一种粮食水分检测方法、系统、设备以及存储介质.pdf",
+          "category": "05-patents",
+          "file_name": "CN116718592A一种粮食水分检测方法、系统、设备以及存储介质.pdf",
+          "extension": ".pdf",
+          "size": 2107141
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN116773046B一种基于粮仓温度的发热判定方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN116773046B一种基于粮仓温度的发热判定方法.pdf",
+          "extension": ".pdf",
+          "size": 592518
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN116818835B一种基于粮仓温度的结露判定方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN116818835B一种基于粮仓温度的结露判定方法.pdf",
+          "extension": ".pdf",
+          "size": 783290
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN117870905A.PDF",
+          "category": "05-patents",
+          "file_name": "CN117870905A.PDF",
+          "extension": ".pdf",
+          "size": 2663979
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN118067770B-一种基于低场磁共振技术的粮仓水分监测装置与方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN118067770B-一种基于低场磁共振技术的粮仓水分监测装置与方法.pdf",
+          "extension": ".pdf",
+          "size": 700049
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN118607571A基于图神经网络和循环神经网络的粮库粮堆温度预测方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN118607571A基于图神经网络和循环神经网络的粮库粮堆温度预测方法.pdf",
+          "extension": ".pdf",
+          "size": 1592395
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/05-patents/CN_118013888_A-一种基于机理与数据双驱动的热湿多场耦合数值模拟方法.pdf",
+          "category": "05-patents",
+          "file_name": "CN_118013888_A-一种基于机理与数据双驱动的热湿多场耦合数值模拟方法.pdf",
+          "extension": ".pdf",
+          "size": 2168047
+        }
+      ]
+    },
+    {
+      "batch_no": 16,
+      "category": "06-research-reports",
+      "file_count": 7,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告.docx",
+          "category": "06-research-reports",
+          "file_name": "20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告.docx",
+          "extension": ".docx",
+          "size": 27750
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+          "category": "06-research-reports",
+          "file_name": "中国储粮生态区域划分、生态特点及主要储粮措施.docx",
+          "extension": ".docx",
+          "size": 19866
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/加速行业智能化白皮书-华为.pdf",
+          "category": "06-research-reports",
+          "file_name": "加速行业智能化白皮书-华为.pdf",
+          "extension": ".pdf",
+          "size": 21587881
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/图形化储粮粮情智能分析方法与系统的研究_陈龙.pdf",
+          "category": "06-research-reports",
+          "file_name": "图形化储粮粮情智能分析方法与系统的研究_陈龙.pdf",
+          "extension": ".pdf",
+          "size": 9256242
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/粮情调研报告v3.pdf",
+          "category": "06-research-reports",
+          "file_name": "粮情调研报告v3.pdf",
+          "extension": ".pdf",
+          "size": 1635383
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/粮油储藏学cl22.pdf",
+          "category": "06-research-reports",
+          "file_name": "粮油储藏学cl22.pdf",
+          "extension": ".pdf",
+          "size": 91255019
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/06-research-reports/粮油储藏理论与技术.pdf",
+          "category": "06-research-reports",
+          "file_name": "粮油储藏理论与技术.pdf",
+          "extension": ".pdf",
+          "size": 85102166
+        }
+      ]
+    },
+    {
+      "batch_no": 17,
+      "category": "07-templates-samples",
+      "file_count": 6,
+      "files": [
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮库粮情报表样例1-平房仓.pdf",
+          "category": "07-templates-samples",
+          "file_name": "粮库粮情报表样例1-平房仓.pdf",
+          "extension": ".pdf",
+          "size": 302461
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮库粮情报表样例2-平房仓.pdf",
+          "category": "07-templates-samples",
+          "file_name": "粮库粮情报表样例2-平房仓.pdf",
+          "extension": ".pdf",
+          "size": 445644
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮库粮情报表样例3-浅圆仓.pdf",
+          "category": "07-templates-samples",
+          "file_name": "粮库粮情报表样例3-浅圆仓.pdf",
+          "extension": ".pdf",
+          "size": 230035
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮情智能分析初步调研问题列表Jessie.docx",
+          "category": "07-templates-samples",
+          "file_name": "粮情智能分析初步调研问题列表Jessie.docx",
+          "extension": ".docx",
+          "size": 5101506
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮情智能分析基础数据手册的开发_卢延辉.pdf",
+          "category": "07-templates-samples",
+          "file_name": "粮情智能分析基础数据手册的开发_卢延辉.pdf",
+          "extension": ".pdf",
+          "size": 2031359
+        },
+        {
+          "path": "/Users/zhaojianyong/python/agent-kb/data/grain-knowledge-base/docs/07-templates-samples/粮食行业科研机构信息统计表.pdf",
+          "category": "07-templates-samples",
+          "file_name": "粮食行业科研机构信息统计表.pdf",
+          "extension": ".pdf",
+          "size": 8742806
+        }
+      ]
+    }
+  ]
+}
