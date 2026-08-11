@@ -1,0 +1,75 @@
+{
+  "name": "cross-domain extra source grounding cases v4",
+  "description": "Additional real cases that assert source file grounding in addition to answer terms and KB isolation.",
+  "cases": [
+    {
+      "id": "extra-v4-grain-source-file-safety-policy",
+      "focus": "grain-source",
+      "kind": "positive",
+      "tags": ["source-grounding", "single-kb"],
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+      "expected_terms": ["预防为主", "综合防治"],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_files": ["AAA粮油安全储存守则"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v4-desktop-source-file-workflow",
+      "focus": "desktop-source",
+      "kind": "positive",
+      "tags": ["source-grounding", "desktop"],
+      "kb_ids": ["diag-desktop-e2e-1786353063"],
+      "question": "What is the unique desktop workflow passcode in the diagnostic document?",
+      "expected_terms": ["northagent-desktop-e2e-1786353063"],
+      "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+      "required_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+      "required_source_files": ["desktop-model-workflow.md"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v4-pdf-source-file-scan-fallback",
+      "focus": "pdf-scan-source",
+      "kind": "positive",
+      "tags": ["source-grounding", "scan"],
+      "kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "expected_terms": ["OCR fallback must merge every predict batch per page"],
+      "allowed_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "required_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "required_source_files": ["diag-scan-fallback.pdf"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v4-image-source-file-ocr-boundary",
+      "focus": "image-ocr-source",
+      "kind": "positive",
+      "tags": ["source-grounding", "ocr"],
+      "kb_ids": ["diag-image-ocr-20260807-r2"],
+      "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+      "expected_terms": ["folder is for organization only", "knowledge base is the authorization boundary"],
+      "allowed_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+      "required_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+      "required_source_files": ["diag-ocr.png"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v4-mixed-source-file-cutover",
+      "focus": "mixed-batch-source",
+      "kind": "positive",
+      "tags": ["source-grounding", "mixed-batch"],
+      "kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "expected_any_term_groups": [
+        ["平台值班主管", "最终的回滚批准"],
+        ["platform duty lead", "final rollback approval"]
+      ],
+      "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "required_source_files": ["cutover.md"],
+      "forbidden_source_files": ["diag-scan-fallback.pdf", "desktop-model-workflow.md"],
+      "top_k": 8
+    }
+  ]
+}

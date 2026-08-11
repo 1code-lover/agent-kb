@@ -404,3 +404,37 @@ node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/stor
 ```
 
 结果：`725 passed, 1 deselected, 35 warnings`。
+
+## 2026-08-11 来源文件级跨领域评测
+
+这次继续补跨领域评测的 grounding 强度：脚本新增 `required_source_files` 和 `forbidden_source_files`，在校验答案词、source KB 和禁止泄漏词之外，再要求来源文件名命中或避开指定片段。报告同步输出 `source_files`，方便失败时定位到底引用到了哪个文件。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`16 passed, 1 warning`。新增覆盖 required source file 命中和 forbidden source file 失败。
+
+新增外部样本文件：
+
+- `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json`：粮仓守则、桌面 workflow、扫描 PDF、图片 OCR 和 mixed batch cutover 的来源文件落点。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v9.json
+```
+
+结果：`41/41 passed`，逐轮 `44/44 passed`。默认基线 `23/23`，v1 外部样本 `4/4`，v2 外部样本 `6/6`，v3 多轮样本 `3/3`，v4 来源文件级样本 `5/5`；`source-grounding` tag 切片为 `100%`。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"
+```
+
+结果：`727 passed, 1 deselected, 35 warnings`。

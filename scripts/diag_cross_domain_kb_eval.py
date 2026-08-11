@@ -382,6 +382,29 @@ def _extract_source_kb_ids(data: dict[str, Any]) -> tuple[list[str], int]:
     return kb_ids, len(records)
 
 
+def _extract_source_files(data: dict[str, Any]) -> list[str]:
+    """从 sources 和 evidence 中抽取可读来源文件名。"""
+    records = _extract_records(data, "sources") + _extract_records(data, "evidence")
+    files: list[str] = []
+    for item in records:
+        for key in ("file", "source", "title", "doc_id"):
+            value = item.get(key)
+            if isinstance(value, str) and value:
+                files.append(value)
+                break
+    return files
+
+
+def _source_file_terms_hit(source_files: list[str], terms: list[str]) -> bool:
+    """检查每个期望来源文件片段都能命中至少一个来源。"""
+    return all(any(term in source_file for source_file in source_files) for term in terms)
+
+
+def _source_file_terms_clean(source_files: list[str], terms: list[str]) -> bool:
+    """检查来源文件名不包含禁止片段。"""
+    return not any(term in source_file for source_file in source_files for term in terms)
+
+
 def _payload_text(data: dict[str, Any]) -> str:
     """合并 answer、sources 和 evidence，用于精确泄漏词检测。"""
     answer = str(data.get("answer") or "")
@@ -466,10 +489,13 @@ def _evaluate_single_turn(
     allowed_source_kb_ids = set(_as_list(case.get("allowed_source_kb_ids")))
     required_source_kb_ids = set(_as_list(case.get("required_source_kb_ids")))
     forbidden_source_kb_ids = set(_as_list(case.get("forbidden_source_kb_ids")))
+    required_source_files = _as_list(case.get("required_source_files"))
+    forbidden_source_files = _as_list(case.get("forbidden_source_files"))
 
     answer = str(data.get("answer") or "")
     combined_text = _payload_text(data)
     source_kb_ids, source_record_count = _extract_source_kb_ids(data)
+    source_files = _extract_source_files(data)
     source_kb_set = set(source_kb_ids)
     source_kb_id_missing_count = max(source_record_count - len(source_kb_ids), 0)
 
@@ -483,6 +509,8 @@ def _evaluate_single_turn(
             "source_kb_allowed": True,
             "required_source_kb_hit": True,
             "forbidden_source_kb_clean": True,
+            "required_source_file_hit": True,
+            "forbidden_source_file_clean": True,
             "expected_terms_hit": True,
             "forbidden_terms_clean": True,
         }
@@ -500,6 +528,12 @@ def _evaluate_single_turn(
         forbidden_source_kb_clean = not bool(source_kb_set & forbidden_source_kb_ids)
         expected_terms_hit = _contains_expected_terms(answer, expected_terms, expected_any_term_groups)
         forbidden_terms_clean = not _contains_any(combined_text, forbidden_terms)
+        required_source_file_hit = (
+            _source_file_terms_hit(source_files, required_source_files) if required_source_files else True
+        )
+        forbidden_source_file_clean = (
+            _source_file_terms_clean(source_files, forbidden_source_files) if forbidden_source_files else True
+        )
 
         checks = {
             "http_status_ok": status_ok,
@@ -510,6 +544,8 @@ def _evaluate_single_turn(
             "source_kb_allowed": source_kb_allowed,
             "required_source_kb_hit": required_source_kb_hit,
             "forbidden_source_kb_clean": forbidden_source_kb_clean,
+            "required_source_file_hit": required_source_file_hit,
+            "forbidden_source_file_clean": forbidden_source_file_clean,
         }
         passed = all(checks.values())
 
@@ -530,9 +566,12 @@ def _evaluate_single_turn(
         "allowed_source_kb_ids": sorted(allowed_source_kb_ids),
         "required_source_kb_ids": sorted(required_source_kb_ids),
         "forbidden_source_kb_ids": sorted(forbidden_source_kb_ids),
+        "required_source_files": required_source_files,
+        "forbidden_source_files": forbidden_source_files,
         "answer_preview": answer[:240],
         "source_record_count": source_record_count,
         "source_kb_ids": source_kb_ids,
+        "source_files": source_files,
         "source_kb_id_missing_count": source_kb_id_missing_count,
         "http_status": http_status,
         "response_message": response_message,
@@ -595,10 +634,12 @@ def _evaluate_multi_turn_case(case: dict[str, Any], api_base: str, timeout: floa
     tags = _as_list(case.get("tags"))
     kb_ids = _as_list(case.get("kb_ids"))
     source_kb_ids: list[str] = []
+    source_files: list[str] = []
     source_kb_id_missing_count = 0
     source_record_count = 0
     for item in results:
         source_kb_ids.extend(_as_list(item.get("source_kb_ids")))
+        source_files.extend(_as_list(item.get("source_files")))
         source_kb_id_missing_count += int(item.get("source_kb_id_missing_count") or 0)
         source_record_count += int(item.get("source_record_count") or 0)
 
@@ -616,6 +657,7 @@ def _evaluate_multi_turn_case(case: dict[str, Any], api_base: str, timeout: floa
         "failed_turn_ids": [str(item.get("turn_id")) for item in failed_turns],
         "source_record_count": source_record_count,
         "source_kb_ids": source_kb_ids,
+        "source_files": source_files,
         "source_kb_id_missing_count": source_kb_id_missing_count,
         "checks": {
             "turns_passed": not failed_turns,

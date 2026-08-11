@@ -78,6 +78,77 @@ def test_evaluate_positive_case_accepts_any_expected_term_group(monkeypatch) -> 
     assert result["expected_any_term_groups"][1] == ["platform duty lead", "final rollback approval"]
 
 
+def test_evaluate_positive_case_checks_required_source_files(monkeypatch) -> None:
+    """正向用例可要求来源文件名命中指定片段。"""
+
+    monkeypatch.setattr(
+        cross_eval,
+        "_post_json",
+        lambda *_args: {
+            "code": 0,
+            "data": {
+                "answer": "安全储粮方针是预防为主、综合防治。",
+                "sources": [
+                    {
+                        "kb_id": "grain-knowledge-base",
+                        "file": "AAA粮油安全储存守则_0119014f.docx",
+                    }
+                ],
+            },
+        },
+    )
+
+    result = cross_eval.evaluate_case(
+        {
+            "id": "grain-source-file",
+            "kind": "positive",
+            "kb_ids": ["grain-knowledge-base"],
+            "question": "方针是什么？",
+            "expected_terms": ["预防为主", "综合防治"],
+            "allowed_source_kb_ids": ["grain-knowledge-base"],
+            "required_source_files": ["AAA粮油安全储存守则"],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is True
+    assert result["checks"]["required_source_file_hit"] is True
+    assert result["source_files"] == ["AAA粮油安全储存守则_0119014f.docx"]
+
+
+def test_evaluate_case_fails_on_forbidden_source_files(monkeypatch) -> None:
+    """来源文件命中禁止片段时必须失败。"""
+
+    monkeypatch.setattr(
+        cross_eval,
+        "_post_json",
+        lambda *_args: {
+            "code": 0,
+            "data": {
+                "answer": "未找到相关信息。",
+                "sources": [{"kb_id": "grain-knowledge-base", "file": "desktop-model-workflow.md"}],
+            },
+        },
+    )
+
+    result = cross_eval.evaluate_case(
+        {
+            "id": "forbidden-source-file",
+            "kind": "negative",
+            "kb_ids": ["grain-knowledge-base"],
+            "question": "desktop passcode?",
+            "forbidden_source_files": ["desktop-model-workflow.md"],
+            "allowed_source_kb_ids": ["grain-knowledge-base"],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is False
+    assert result["checks"]["forbidden_source_file_clean"] is False
+
+
 def test_evaluate_negative_case_fails_on_exact_forbidden_evidence_leak(monkeypatch) -> None:
     """负向隔离用例中，evidence 泄漏精确禁止词必须失败。"""
 
