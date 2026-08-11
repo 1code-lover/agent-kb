@@ -47,6 +47,16 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "required_source_kb_ids": ["diag-desktop-e2e-1786353063"],
     },
     {
+        "id": "desktop-positive-passcode-older",
+        "focus": "desktop",
+        "kind": "positive",
+        "kb_ids": ["diag-desktop-e2e-1786352564"],
+        "question": "What is the unique desktop workflow passcode in the older diagnostic document?",
+        "expected_terms": ["northagent-desktop-e2e-1786352564"],
+        "allowed_source_kb_ids": ["diag-desktop-e2e-1786352564"],
+        "required_source_kb_ids": ["diag-desktop-e2e-1786352564"],
+    },
+    {
         "id": "desktop-positive-preview",
         "focus": "desktop",
         "kind": "positive",
@@ -128,6 +138,19 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "expected_terms": ["Knowledge Base remains the authorization boundary"],
         "allowed_source_kb_ids": ["diag-exttext-readme-utf8-1785506464"],
         "required_source_kb_ids": ["diag-exttext-readme-utf8-1785506464"],
+    },
+    {
+        "id": "exttext-positive-extensionless-utf8-folder",
+        "focus": "exttext",
+        "kind": "positive",
+        "kb_ids": ["diag-kb-extensionless-text-readme-utf8-1785506975"],
+        "question": "What does the extensionless UTF-8 README say about the folder?",
+        "expected_any_term_groups": [
+            ["organization object only"],
+            ["organization only"],
+        ],
+        "allowed_source_kb_ids": ["diag-kb-extensionless-text-readme-utf8-1785506975"],
+        "required_source_kb_ids": ["diag-kb-extensionless-text-readme-utf8-1785506975"],
     },
     {
         "id": "exttext-positive-readme-utf16",

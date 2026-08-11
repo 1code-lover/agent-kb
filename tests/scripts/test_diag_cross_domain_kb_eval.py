@@ -277,5 +277,7 @@ def test_load_cases_default_suite_includes_extended_references() -> None:
 
     assert "grain-positive-safety-production" in case_ids
     assert "desktop-positive-preview" in case_ids
+    assert "desktop-positive-passcode-older" in case_ids
+    assert "exttext-positive-extensionless-utf8-folder" in case_ids
     assert "utf16-positive-folder-boundary" in case_ids
     assert "desktop-negative-older-passcode" in case_ids

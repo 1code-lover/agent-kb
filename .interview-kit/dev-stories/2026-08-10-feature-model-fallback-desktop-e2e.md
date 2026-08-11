@@ -24,6 +24,8 @@
 
 同一天又把 fallback 的边角提示再收紧了一点：如果最终切到的是 Ollama，本地候选会在页面上直接写明，避免用户只看到“已切换”却不知道其实是本机模型。
 
+后面又顺手把跨 KB 评测扩成 23 条，把旧 desktop passcode、extensionless UTF-8 folder boundary 和更多真实跨域组合补进去。这里的一个小经验是，真实文档的表述会有词形波动，评测应该盯住“是否表达了正确边界”，不要死卡某个字面模板。
+
 桌面端修复了两个运行时问题。第一，`desktop/src/python-process.js` 优先使用 `NORTHAGENT_PYTHON` 或 macOS conda `agent-kb` 解释器，避免回落到系统 Python。第二，`electron@31.7.7` 在本机 macOS 上被系统报告 `notarization indicates this code has been revoked`，启动后 `Electron.app` 会被移除；升级到 `electron@43.3.0` 后桌面端可正常进入主进程和渲染进程。
 
 新增 `scripts/diag_desktop_model_workflow.py` 作为桌面真实工作流诊断脚本，覆盖模型 options/health、模型选择与探活、文件导入、定向知识库问答、来源/evidence、preview 和 `default` 跨 KB 隔离。
@@ -39,6 +41,7 @@
 - `cd webapp && npm run build`：通过，ModelsPage 和 AgentPage 都能显示 fallback 探测摘要。
 - `cd webapp && npm run build`：通过，Ollama fallback 时会提示“本地候选模型”。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json`：`21/21 passed`，补进 grain 安全生产、desktop evidence preview、UTF-16 边界和旧 desktop passcode 隔离样本。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json`：`23/23 passed`，继续补强旧 desktop passcode、extensionless UTF-8 folder boundary 和跨域组合。
 
 ## 取舍
 
@@ -47,6 +50,7 @@
 - 桌面端本轮优先解决开发态启动和真实工作流验证；正式打包签名、公证、CSP 和 `electron-builder` 依赖安全升级留给后续发布收口。
 - fallback 探测摘要先以文本形式落到页面，后续如果还要继续增强，可再做展开式明细或时间线事件。
 - 跨领域评测用例继续沿着真实资料扩容，优先用现成文档里的稳定句子做正向和隔离门禁。
+- 跨领域评测里碰到真实表述波动时，优先收紧“语义边界”，不要把样本写成对单一短语的脆弱依赖。
 
 ## 后续
 

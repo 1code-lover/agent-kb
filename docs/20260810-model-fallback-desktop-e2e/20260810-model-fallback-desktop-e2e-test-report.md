@@ -229,6 +229,26 @@ git diff --check
 
 结果：`21/21 passed`。`utf16-positive-folder-boundary` 先前会把“knowledge base”简化成“base”，已根据真实答复兼容双表述后稳定通过。
 
+## 2026-08-11 跨 KB 泛化再扩容 v5
+
+这次继续补强旧 desktop passcode、extensionless UTF-8 folder boundary 和更多跨域组合，让真实评测样本从 21 条扩到 23 条。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`9 passed, 1 warning`
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json
+```
+
+结果：`23/23 passed`。新增的 extensionless UTF-8 样本最初命中了“organization object only”而不是更字面的“folder remains organization only.”，已改为按真实表述接受后稳定通过。
+
 
 ## 2026-08-11 发布预检边界加固
 
