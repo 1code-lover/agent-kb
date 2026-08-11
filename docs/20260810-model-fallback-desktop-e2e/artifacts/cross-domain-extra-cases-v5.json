@@ -1,0 +1,65 @@
+{
+  "name": "cross-domain extra evidence text cases v5",
+  "description": "Additional real cases that assert the retrieved source/evidence text contains the grounding phrase, not only the final answer.",
+  "cases": [
+    {
+      "id": "extra-v5-desktop-evidence-text-preview",
+      "focus": "desktop-evidence",
+      "kind": "positive",
+      "tags": ["evidence-text", "source-grounding", "desktop"],
+      "kb_ids": ["diag-desktop-e2e-1786353063"],
+      "question": "What should evidence preview resolve after chat returns sources?",
+      "expected_terms": ["resolve this file after chat returns sources"],
+      "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+      "required_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+      "required_source_files": ["desktop-model-workflow.md"],
+      "required_source_text_terms": ["Evidence preview must resolve this file after chat returns sources."],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v5-pdf-evidence-text-fallback",
+      "focus": "pdf-scan-evidence",
+      "kind": "positive",
+      "tags": ["evidence-text", "source-grounding", "scan"],
+      "kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "expected_terms": ["OCR fallback must merge every predict batch per page"],
+      "allowed_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "required_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "required_source_files": ["diag-scan-fallback.pdf"],
+      "required_source_text_terms": ["OCR fallback must merge every predict batch per page"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v5-image-evidence-text-boundary",
+      "focus": "image-ocr-evidence",
+      "kind": "positive",
+      "tags": ["evidence-text", "source-grounding", "ocr"],
+      "kb_ids": ["diag-image-ocr-20260807-r2"],
+      "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+      "expected_terms": ["folder is for organization only", "knowledge base is the authorization boundary"],
+      "allowed_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+      "required_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+      "required_source_files": ["diag-ocr.png"],
+      "required_source_text_terms": ["Folder is organization only", "Knowledge Base is the authorization boundary"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v5-mixed-evidence-text-approval",
+      "focus": "mixed-batch-evidence",
+      "kind": "positive",
+      "tags": ["evidence-text", "source-grounding", "mixed-batch"],
+      "kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "expected_any_term_groups": [
+        ["平台值班主管", "最终的回滚批准"],
+        ["platform duty lead", "final rollback approval"]
+      ],
+      "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "required_source_files": ["cutover.md"],
+      "required_source_text_terms": ["platform duty lead", "final rollback approval"],
+      "top_k": 8
+    }
+  ]
+}

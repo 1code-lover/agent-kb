@@ -149,6 +149,82 @@ def test_evaluate_case_fails_on_forbidden_source_files(monkeypatch) -> None:
     assert result["checks"]["forbidden_source_file_clean"] is False
 
 
+def test_evaluate_positive_case_checks_required_source_text(monkeypatch) -> None:
+    """正向用例可要求 evidence/source 正文命中依据片段。"""
+
+    monkeypatch.setattr(
+        cross_eval,
+        "_post_json",
+        lambda *_args: {
+            "code": 0,
+            "data": {
+                "answer": "Evidence preview must resolve this file after chat returns sources.",
+                "sources": [
+                    {
+                        "kb_id": "diag-desktop",
+                        "file": "desktop-model-workflow.md",
+                        "text": "Evidence preview must resolve this file after chat returns sources.",
+                    }
+                ],
+            },
+        },
+    )
+
+    result = cross_eval.evaluate_case(
+        {
+            "id": "desktop-source-text",
+            "kind": "positive",
+            "kb_ids": ["diag-desktop"],
+            "question": "What should evidence preview resolve?",
+            "expected_terms": ["resolve this file after chat returns sources"],
+            "required_source_text_terms": ["Evidence preview must resolve this file after chat returns sources."],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is True
+    assert result["checks"]["required_source_text_hit"] is True
+    assert "Evidence preview must resolve" in result["source_text_preview"]
+
+
+def test_evaluate_case_fails_on_forbidden_source_text(monkeypatch) -> None:
+    """来源正文包含禁止片段时必须失败，即使答案没有复述。"""
+
+    monkeypatch.setattr(
+        cross_eval,
+        "_post_json",
+        lambda *_args: {
+            "code": 0,
+            "data": {
+                "answer": "未找到相关信息。",
+                "sources": [
+                    {
+                        "kb_id": "grain-knowledge-base",
+                        "file": "scope.md",
+                        "text": "The unique desktop workflow passcode is northagent-desktop-e2e-1786353063.",
+                    }
+                ],
+            },
+        },
+    )
+
+    result = cross_eval.evaluate_case(
+        {
+            "id": "forbidden-source-text",
+            "kind": "negative",
+            "kb_ids": ["grain-knowledge-base"],
+            "question": "desktop passcode?",
+            "forbidden_source_text_terms": ["northagent-desktop-e2e-1786353063"],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is False
+    assert result["checks"]["forbidden_source_text_clean"] is False
+
+
 def test_evaluate_negative_case_fails_on_exact_forbidden_evidence_leak(monkeypatch) -> None:
     """负向隔离用例中，evidence 泄漏精确禁止词必须失败。"""
 

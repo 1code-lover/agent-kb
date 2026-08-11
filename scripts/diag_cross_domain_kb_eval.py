@@ -405,12 +405,17 @@ def _source_file_terms_clean(source_files: list[str], terms: list[str]) -> bool:
     return not any(term in source_file for source_file in source_files for term in terms)
 
 
+def _source_payload_text(data: dict[str, Any]) -> str:
+    """合并 sources 和 evidence 正文，用于证据文本检查。"""
+    sources = _extract_records(data, "sources")
+    evidence = _extract_records(data, "evidence")
+    return json.dumps({"sources": sources, "evidence": evidence}, ensure_ascii=False)
+
+
 def _payload_text(data: dict[str, Any]) -> str:
     """合并 answer、sources 和 evidence，用于精确泄漏词检测。"""
     answer = str(data.get("answer") or "")
-    sources = _extract_records(data, "sources")
-    evidence = _extract_records(data, "evidence")
-    return answer + "\n" + json.dumps({"sources": sources, "evidence": evidence}, ensure_ascii=False)
+    return answer + "\n" + _source_payload_text(data)
 
 
 def _resolve_http_status(response: dict[str, Any]) -> int:
@@ -491,9 +496,12 @@ def _evaluate_single_turn(
     forbidden_source_kb_ids = set(_as_list(case.get("forbidden_source_kb_ids")))
     required_source_files = _as_list(case.get("required_source_files"))
     forbidden_source_files = _as_list(case.get("forbidden_source_files"))
+    required_source_text_terms = _as_list(case.get("required_source_text_terms"))
+    forbidden_source_text_terms = _as_list(case.get("forbidden_source_text_terms"))
 
     answer = str(data.get("answer") or "")
     combined_text = _payload_text(data)
+    source_text = _source_payload_text(data)
     source_kb_ids, source_record_count = _extract_source_kb_ids(data)
     source_files = _extract_source_files(data)
     source_kb_set = set(source_kb_ids)
@@ -511,6 +519,8 @@ def _evaluate_single_turn(
             "forbidden_source_kb_clean": True,
             "required_source_file_hit": True,
             "forbidden_source_file_clean": True,
+            "required_source_text_hit": True,
+            "forbidden_source_text_clean": True,
             "expected_terms_hit": True,
             "forbidden_terms_clean": True,
         }
@@ -534,6 +544,12 @@ def _evaluate_single_turn(
         forbidden_source_file_clean = (
             _source_file_terms_clean(source_files, forbidden_source_files) if forbidden_source_files else True
         )
+        required_source_text_hit = (
+            _contains_all(source_text, required_source_text_terms) if required_source_text_terms else True
+        )
+        forbidden_source_text_clean = (
+            not _contains_any(source_text, forbidden_source_text_terms) if forbidden_source_text_terms else True
+        )
 
         checks = {
             "http_status_ok": status_ok,
@@ -546,6 +562,8 @@ def _evaluate_single_turn(
             "forbidden_source_kb_clean": forbidden_source_kb_clean,
             "required_source_file_hit": required_source_file_hit,
             "forbidden_source_file_clean": forbidden_source_file_clean,
+            "required_source_text_hit": required_source_text_hit,
+            "forbidden_source_text_clean": forbidden_source_text_clean,
         }
         passed = all(checks.values())
 
@@ -568,7 +586,10 @@ def _evaluate_single_turn(
         "forbidden_source_kb_ids": sorted(forbidden_source_kb_ids),
         "required_source_files": required_source_files,
         "forbidden_source_files": forbidden_source_files,
+        "required_source_text_terms": required_source_text_terms,
+        "forbidden_source_text_terms": forbidden_source_text_terms,
         "answer_preview": answer[:240],
+        "source_text_preview": source_text[:240],
         "source_record_count": source_record_count,
         "source_kb_ids": source_kb_ids,
         "source_files": source_files,
