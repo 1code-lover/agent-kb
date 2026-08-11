@@ -137,7 +137,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight`，`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁。2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条真实业务追加样本合计 `33/33 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight`，`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条真实业务追加样本合计 `33/33 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 

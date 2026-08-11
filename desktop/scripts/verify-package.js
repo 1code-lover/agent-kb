@@ -51,6 +51,10 @@ function findExistingArtifactPath({ arch, distDir, extension, fsModule = fs, pro
   if (fsModule.existsSync(expected)) {
     return expected;
   }
+  const noArch = path.join(distDir, `${productName}-${version}${suffix}${extension}`);
+  if (fsModule.existsSync(noArch)) {
+    return noArch;
+  }
   if (!fsModule.existsSync(distDir)) {
     return expected;
   }
@@ -58,9 +62,12 @@ function findExistingArtifactPath({ arch, distDir, extension, fsModule = fs, pro
   const escapedVersion = version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const escapedSuffix = suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const pattern = new RegExp(`^${escapedProduct}-${escapedVersion}(?:-.+)?${escapedSuffix}${extension.replace(".", "\\.")}$`);
+  const otherArchPattern = new RegExp(
+    `^${escapedProduct}-${escapedVersion}-(?:arm64|x64|universal)${escapedSuffix}${extension.replace(".", "\\.")}$`
+  );
   const found = fsModule
     .readdirSync(distDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && pattern.test(entry.name))
+    .filter((entry) => entry.isFile() && pattern.test(entry.name) && !otherArchPattern.test(entry.name))
     .map((entry) => path.join(distDir, entry.name))
     .sort();
   return found[0] || expected;
