@@ -258,6 +258,8 @@ git diff --check
 - `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`24 passed`，新增 `desktop/src/csp.test.js` 覆盖 CSP 连接源与 URL origin 解析，`desktop/scripts/verify-release-config.test.js` 覆盖 notarize hook、hardened runtime、entitlements、mac target 和 packaged runtime resources。
 - `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
 - `cd desktop && npm run build:preflight`：非严格模式通过；`verify-release-config` 确认 release config ready，随后提示本机仍缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
+- `desktop/package.json` 的 `release:mac` 已串起 `build:preflight` + 严格 `release:preflight`；`desktop/scripts/build-target.js` 也已在 macOS `npm run build` 路径里先执行 `verify-release-config.js` 和 `release-preflight.js`，避免本机打包入口绕过发布配置校验。
+- `node --test desktop/scripts/*.test.js`：`23 passed`，新增 `build-target.test.js` 覆盖 macOS build 入口的配置预检顺序、预检失败提前停止，以及非 macOS 平台只走对应 electron-builder target。
 
 ## 2026-08-11 release candidate 清单
 
