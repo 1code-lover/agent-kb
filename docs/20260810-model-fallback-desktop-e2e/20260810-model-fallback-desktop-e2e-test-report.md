@@ -209,6 +209,26 @@ git diff --check
 - 本轮给正向用例补充 `expected_any_term_groups`，避免同一证据在中英文回答之间波动时误报失败。
 - 报告产物 `cross-domain-kb-eval-report-v3.json` 已写入 artifacts，供后续扩展更多真实业务 KB 时复跑对比。
 
+## 2026-08-11 跨 KB 泛化再扩容
+
+这次再补了 grain 安全生产、desktop evidence preview、UTF-16 边界和旧 desktop passcode 隔离样本，把真实评测面继续往外推了一层。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`9 passed, 1 warning`
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json
+```
+
+结果：`21/21 passed`。`utf16-positive-folder-boundary` 先前会把“knowledge base”简化成“base”，已根据真实答复兼容双表述后稳定通过。
+
 
 ## 2026-08-11 发布预检边界加固
 

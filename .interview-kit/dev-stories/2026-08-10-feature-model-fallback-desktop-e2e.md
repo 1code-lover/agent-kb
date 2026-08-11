@@ -22,6 +22,8 @@
 
 2026-08-11 又补了一层诊断可见性：后端在 fallback health 里记录 `fallback_attempts`，每个候选都带 `service_provider`、`model`、`api_base`、`reachable` 和 `detail`；前端在 ModelsPage 和 AgentPage 同步展示 `probeSummary`，让用户能看见这次探测了几个候选、最近一次结果是什么。
 
+同一天又把 fallback 的边角提示再收紧了一点：如果最终切到的是 Ollama，本地候选会在页面上直接写明，避免用户只看到“已切换”却不知道其实是本机模型。
+
 桌面端修复了两个运行时问题。第一，`desktop/src/python-process.js` 优先使用 `NORTHAGENT_PYTHON` 或 macOS conda `agent-kb` 解释器，避免回落到系统 Python。第二，`electron@31.7.7` 在本机 macOS 上被系统报告 `notarization indicates this code has been revoked`，启动后 `Electron.app` 会被移除；升级到 `electron@43.3.0` 后桌面端可正常进入主进程和渲染进程。
 
 新增 `scripts/diag_desktop_model_workflow.py` 作为桌面真实工作流诊断脚本，覆盖模型 options/health、模型选择与探活、文件导入、定向知识库问答、来源/evidence、preview 和 `default` 跨 KB 隔离。
@@ -35,6 +37,8 @@
 - `ELECTRON_ENABLE_LOGGING=1 NORTHAGENT_PYTHON=/opt/miniconda3/envs/agent-kb/bin/python npm run dev`：桌面端独立启动成功，runtime log 记录使用 conda Python、API ready、加载 `webapp/dist/index.html`。
 - `scripts.diag_desktop_model_workflow` 在桌面拉起的 API 上生成 `desktop-model-workflow-report-after-electron-fix.json`，`run_passed=true`。
 - `cd webapp && npm run build`：通过，ModelsPage 和 AgentPage 都能显示 fallback 探测摘要。
+- `cd webapp && npm run build`：通过，Ollama fallback 时会提示“本地候选模型”。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json`：`21/21 passed`，补进 grain 安全生产、desktop evidence preview、UTF-16 边界和旧 desktop passcode 隔离样本。
 
 ## 取舍
 
@@ -42,6 +46,7 @@
 - chat query 只重试一次，防止模型错误造成循环切换或重复写历史。
 - 桌面端本轮优先解决开发态启动和真实工作流验证；正式打包签名、公证、CSP 和 `electron-builder` 依赖安全升级留给后续发布收口。
 - fallback 探测摘要先以文本形式落到页面，后续如果还要继续增强，可再做展开式明细或时间线事件。
+- 跨领域评测用例继续沿着真实资料扩容，优先用现成文档里的稳定句子做正向和隔离门禁。
 
 ## 后续
 

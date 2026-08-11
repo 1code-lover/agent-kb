@@ -44,6 +44,7 @@ test("buildModelHealthSummary 会展示自动 fallback 的来源和目标", () =
   assert.equal(summary.transitionLabel, "OpenAI / gpt-4o → 阿里百炼 / qwen-plus");
   assert.match(summary.probeSummary, /已探测 2 个候选/);
   assert.match(summary.probeSummary, /Ollama \/ qwen2.5:7b/);
+  assert.match(summary.probeSummary, /本地 Ollama 候选/);
 });
 
 test("buildModelHealthSummary 会把 degraded 映射为异常提示", () => {
@@ -101,4 +102,19 @@ test("buildModelHealthSummary 会在不可用状态展示候选探测摘要", ()
   assert.equal(summary.state, "unavailable");
   assert.match(summary.probeSummary, /已探测 2 个候选/);
   assert.match(summary.probeSummary, /OpenAI \/ gpt-4o/);
+});
+
+test("buildModelHealthSummary 会在 Ollama fallback 时提示本地候选模型", () => {
+  const summary = buildModelHealthSummary({
+    state: "fallback_applied",
+    fallback_to: { service_provider: "Ollama", model: "qwen2.5:7b" },
+    fallback_attempts: [
+      { service_provider: "OpenAI", model: "gpt-4o", reachable: false, detail: "http_401" },
+      { service_provider: "Ollama", model: "qwen2.5:7b", reachable: true, detail: "reachable" },
+    ],
+  });
+
+  assert.equal(summary.state, "fallback_applied");
+  assert.match(summary.actionHint, /本地 Ollama 候选模型/);
+  assert.match(summary.probeSummary, /本地 Ollama 候选/);
 });

@@ -55,10 +55,12 @@ function formatFallbackAttempts(attempts) {
   const attemptedCount = attempts.length;
   const lastLabel = formatModelLabel(lastAttempt);
   const lastStatus = lastAttempt.reachable ? "可用" : lastAttempt.detail || "不可用";
+  const hasOllamaCandidate = attempts.some((item) => item?.service_provider === "Ollama");
+  const ollamaHint = hasOllamaCandidate ? "，包含本地 Ollama 候选" : "";
   if (!lastLabel) {
-    return `已探测 ${attemptedCount} 个候选，最近一次结果：${lastStatus}`;
+    return `已探测 ${attemptedCount} 个候选${ollamaHint}，最近一次结果：${lastStatus}`;
   }
-  return `已探测 ${attemptedCount} 个候选，最近一次：${lastLabel}（${lastStatus}）`;
+  return `已探测 ${attemptedCount} 个候选${ollamaHint}，最近一次：${lastLabel}（${lastStatus}）`;
 }
 
 export function buildModelHealthSummary(modelHealth) {
@@ -85,13 +87,18 @@ export function buildModelHealthSummary(modelHealth) {
   }
 
   if (state === "fallback_applied") {
+    const fallbackToProvider = typeof modelHealth?.fallback_to?.service_provider === "string" ? modelHealth.fallback_to.service_provider : "";
+    const fallbackHint =
+      fallbackToProvider === "Ollama"
+        ? "已自动切换到本地 Ollama 候选模型，后续请求会继续沿用当前配置。"
+        : "已自动切换到可用模型，后续请求会继续沿用当前配置。";
     return {
       state,
       tone: "warning",
       chipLabel: "已自动切换",
       title: "模型已自动切换",
       summary: currentLabel ? `当前正在使用 ${currentLabel}` : "当前正在使用备用模型",
-      actionHint: "已自动切换到可用模型，后续请求会继续沿用当前配置。",
+      actionHint: fallbackHint,
       detail:
         [fallbackFrom ? `已从 ${fallbackFrom} 切换` : "", fallbackTo ? `到 ${fallbackTo}` : "", reason ? `原因：${reason}` : ""]
           .filter(Boolean)

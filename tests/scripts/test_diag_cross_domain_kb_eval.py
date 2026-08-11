@@ -267,3 +267,15 @@ def test_summarize_includes_focus_groups() -> None:
     assert report["contract_total"] == 1
     assert report["focus_summary"]["grain"]["pass_rate"] == 1.0
     assert report["focus_summary"]["contract"]["passed"] == 1
+
+
+def test_load_cases_default_suite_includes_extended_references() -> None:
+    """默认跨域评测集应包含新增的桌面、粮仓和 UTF-16 参考样本。"""
+
+    cases = cross_eval.load_cases()
+    case_ids = {str(item.get("id")) for item in cases}
+
+    assert "grain-positive-safety-production" in case_ids
+    assert "desktop-positive-preview" in case_ids
+    assert "utf16-positive-folder-boundary" in case_ids
+    assert "desktop-negative-older-passcode" in case_ids
