@@ -113,6 +113,8 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 - 远端跟踪：`origin/codex/desktop-agent-stage3`
 - 同步状态：2026-08-11 复核 `HEAD...@{u}` 为 `0 0`，当前工作区干净且已推送到远端。
 - 最近已推送提交：
+  - `e482db2 chore: update dev story capture state`
+  - `c43bf1e feat(model): add structured fallback probe summary`
   - `4565955 chore: update dev story capture state`
   - `88044b7 feat(desktop): verify release config gates`
   - `b065cc7 chore: update release story state`
@@ -343,6 +345,8 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `e482db2` | chore: update dev story capture state |
+| `c43bf1e` | feat(model): add structured fallback probe summary |
 | `e6f5c41` | feat(eval): support extra cross-domain cases |
 | `d85bcae` | chore: update dev story capture state |
 | `3a7df45` | fix(desktop): upgrade builder release preflight |
