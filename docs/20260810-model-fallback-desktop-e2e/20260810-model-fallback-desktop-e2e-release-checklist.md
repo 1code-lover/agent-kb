@@ -37,6 +37,12 @@ cd desktop && npm run release:preflight
 通过标准：严格预检通过，release env、Developer ID Application、`notarytool` 和 Electron bundle 均 ready。
 
 ```bash
+cd desktop && npm run build:preflight
+```
+
+通过标准：`verify-release-config` 通过，确认 `afterSign`、hardened runtime、entitlements、`dmg/zip` target、notarization requirement 和 packaged runtime resources 未被破坏；非严格环境预检只允许继续提示本机缺少 Apple 凭证或 Developer ID。
+
+```bash
 cd desktop && npm run release:mac
 ```
 
@@ -73,7 +79,7 @@ cd desktop && npm run verify:package
 node --test desktop/src/*.test.js desktop/scripts/*.test.js
 ```
 
-通过标准：桌面 Python runtime、release preflight、notarize hook 和 CSP 单测全部通过。
+通过标准：桌面 Python runtime、release preflight、notarize hook、release config verifier 和 CSP 单测全部通过。
 
 ```bash
 cd webapp && npm run build
@@ -86,6 +92,7 @@ cd webapp && npm run build
 只有同时满足以下证据，才能把 macOS release candidate 标记为通过：
 
 - 严格 `release:preflight` 通过。
+- `build:preflight` 的 release config verifier 通过。
 - `release:mac` 完成签名和公证，未跳过 notarization。
 - `verify:package` 通过。
 - 签名/公证后的 app 能安装并启动。

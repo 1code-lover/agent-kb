@@ -10,7 +10,7 @@
     "start": "electron .",
     "build": "npm run build:web && node scripts/build-target.js",
     "build:web": "cd ../webapp && npm run build",
-    "build:preflight": "node scripts/release-preflight.js",
+    "build:preflight": "node scripts/verify-release-config.js && node scripts/release-preflight.js",
     "release:preflight": "node scripts/release-preflight.js --strict",
     "verify:package": "node scripts/verify-package.js",
     "release:mac": "npm run build:web && npm run release:preflight && NORTHAGENT_REQUIRE_NOTARIZE=1 node ./node_modules/electron-builder/cli.js --mac",

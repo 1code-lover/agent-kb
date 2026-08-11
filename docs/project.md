@@ -234,8 +234,8 @@ cd webapp && npm run build
 - `node --test desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js`：`15 passed`，新增覆盖非严格缺项摘要、严格缺凭证失败、严格全量 gate 通过、Electron bundle 缺失失败、Developer ID 解析和 `notarytool` 探测。
 - `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`17 passed`。
 - `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
-- `cd desktop && npm run build:preflight`：非严格模式通过；提示本机缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
-- `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`21 passed`，新增 `desktop/src/csp.test.js` 覆盖 CSP 连接源与 URL origin 解析。
+- `cd desktop && npm run build:preflight`：非严格模式通过；`verify-release-config` 确认 release config ready，随后提示本机缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
+- `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`24 passed`，新增 `desktop/src/csp.test.js` 覆盖 CSP 连接源与 URL origin 解析，`desktop/scripts/verify-release-config.test.js` 覆盖 notarize hook、hardened runtime、entitlements、mac target 和 packaged runtime resources。
 - `git diff --check`：通过。
 
 ### 5.7 2026-08-11 fallback 探测摘要增量复核
