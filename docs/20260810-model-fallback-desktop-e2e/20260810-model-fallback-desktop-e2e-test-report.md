@@ -441,7 +441,7 @@ node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/stor
 
 ## 2026-08-11 Evidence 文本级跨领域评测
 
-这次把 grounding 门禁再往证据正文推进一层：脚本新增 `required_source_text_terms` 和 `forbidden_source_text_terms`，检查范围只包含 API 返回的 `sources` / `evidence` 正文，不把模型最终答案算作证据。这样可以证明答案背后的 evidence 片段本身包含依据，而不是只看模型是否答出了关键词。本轮还在 summary 中新增 `failure_check_summary` 和 `failure_case_summary`，用于失败时按检查项、case 和 turn 归因。
+这次把 grounding 门禁再往证据正文推进一层：脚本新增 `required_source_text_terms` 和 `forbidden_source_text_terms`，检查范围只包含 API 返回的 `sources` / `evidence` 正文，不把模型最终答案算作证据。这样可以证明答案背后的 evidence 片段本身包含依据，而不是只看模型是否答出了关键词。本轮还在 summary 中新增 `failure_check_summary`、`failure_case_summary` 和 `duration_summary`，用于失败时按检查项、case 和 turn 归因，并定位最慢 case/turn。
 
 已执行命令：
 
@@ -449,7 +449,7 @@ node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/stor
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
 ```
 
-结果：`19 passed, 1 warning`。新增覆盖 required evidence text 命中、forbidden evidence text 泄漏失败，以及失败检查项 / case / turn 归因汇总。
+结果：`20 passed, 1 warning`。新增覆盖 required evidence text 命中、forbidden evidence text 泄漏失败、失败检查项 / case / turn 归因汇总，以及耗时诊断汇总。
 
 新增外部样本文件：
 
@@ -466,10 +466,10 @@ node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/stor
   --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v10.json
 ```
 
-结果：`45/45 passed`，逐轮 `48/48 passed`。默认基线 `23/23`，v1 外部样本 `4/4`，v2 外部样本 `6/6`，v3 多轮样本 `3/3`，v4 来源文件级样本 `5/5`，v5 evidence 文本样本 `4/4`；`source-grounding` 和 `evidence-text` tag 切片均为 `100%`；当前 `failure_check_summary={}`、`failure_case_summary=[]`。
+结果：`45/45 passed`，逐轮 `48/48 passed`。默认基线 `23/23`，v1 外部样本 `4/4`，v2 外部样本 `6/6`，v3 多轮样本 `3/3`，v4 来源文件级样本 `5/5`，v5 evidence 文本样本 `4/4`；`source-grounding` 和 `evidence-text` tag 切片均为 `100%`；当前 `failure_check_summary={}`、`failure_case_summary=[]`。`duration_summary.case_total_ms=73247.147`、`case_avg_ms=1627.714`、`turn_avg_ms=1525.958`，最慢 case/turn 和唯一超过 `5000ms` 阈值的 slow item 均为 `grain-negative-utf8-exact-boundary`。
 
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"
 ```
 
-结果：`730 passed, 1 deselected, 35 warnings`。
+结果：`731 passed, 1 deselected, 35 warnings`。

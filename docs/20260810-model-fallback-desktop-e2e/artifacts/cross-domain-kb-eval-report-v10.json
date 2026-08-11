@@ -1,7 +1,8 @@
 {
-  "generated_at": "2026-08-11T13:27:16.076917+00:00",
+  "generated_at": "2026-08-11T13:35:45.658714+00:00",
   "api_base": "http://127.0.0.1:18080",
   "timeout": 120.0,
+  "slow_threshold_ms": 5000.0,
   "summary": {
     "total": 45,
     "passed": 45,
@@ -21,6 +22,28 @@
     "failed_case_ids": [],
     "failure_check_summary": {},
     "failure_case_summary": [],
+    "duration_summary": {
+      "slow_threshold_ms": 5000.0,
+      "case_total_ms": 73247.147,
+      "case_avg_ms": 1627.714,
+      "case_max_ms": 11390.195,
+      "case_max_id": "grain-negative-utf8-exact-boundary",
+      "slow_case_ids": [
+        "grain-negative-utf8-exact-boundary"
+      ],
+      "turn_total_ms": 73246.007,
+      "turn_avg_ms": 1525.958,
+      "turn_max_ms": 11390.195,
+      "turn_max_id": "grain-negative-utf8-exact-boundary",
+      "turn_max_turn_id": "",
+      "slow_turns": [
+        {
+          "id": "grain-negative-utf8-exact-boundary",
+          "turn_id": "",
+          "duration_ms": 11390.195
+        }
+      ]
+    },
     "focus_summary": {
       "boundary": {
         "total": 1,
@@ -302,7 +325,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::grain-positive-safety-policy::f24d99817d384c0392e8a9a5de8716c3",
+      "session_id": "cross-domain-eval::grain-positive-safety-policy::ad630285b6fc4c1b80d19143b43c9fc3",
       "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
       "expected_terms": [
         "预防为主",
@@ -323,8 +346,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是：“预防为主、综合防治”。",
+      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“预防为主、综合防治”。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 2470.581,
       "source_record_count": 10,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -380,7 +404,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::grain-positive-safety-production::85fa6202668b413abf8b3d557c5584ab",
+      "session_id": "cross-domain-eval::grain-positive-safety-production::a84cc30ff61a482cadca8f0798023046",
       "question": "《粮库安全生产守则》遵循什么安全生产理念和方针？",
       "expected_terms": [
         "以人为本",
@@ -407,6 +431,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "《粮库安全生产守则》遵循“以人为本、生命至上、安全发展”的理念，贯彻“安全第一、预防为主、综合治理”的方针。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MDE4Y2E0Mi01OWJmLTQzNWQtYTcxOC00ODQ4YTdiYWM1ZDYiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJlMjM4ZDMxMy01ODI2LTQ1YmUtODE2ZS1lYmNiZTY2NjljMzMifX0\", \"file\": \"粮库安全生",
+      "duration_ms": 1624.52,
       "source_record_count": 8,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -458,7 +483,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::desktop-positive-passcode::d19bee1886464f2485d9cf3e2b5b7658",
+      "session_id": "cross-domain-eval::desktop-positive-passcode::c37d9bb7812b4ffda22ea6f7ed0da89a",
       "question": "What is the unique desktop workflow passcode in the diagnostic document?",
       "expected_terms": [
         "northagent-desktop-e2e-1786353063"
@@ -480,6 +505,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent-desktop-e2e-1786353063.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 1256.287,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -519,7 +545,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786352564"
       ],
-      "session_id": "cross-domain-eval::desktop-positive-passcode-older::671852574ded45908f5c0bd22ece474f",
+      "session_id": "cross-domain-eval::desktop-positive-passcode-older::cfa599c8a9344582a0c3efa111e663b9",
       "question": "What is the unique desktop workflow passcode in the older diagnostic document?",
       "expected_terms": [
         "northagent-desktop-e2e-1786352564"
@@ -541,6 +567,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent-desktop-e2e-1786352564.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI5ZmJkMTc1MC0xNTQzLTQ1NjUtYmE3OC0xOGM5N2NjZTQ2Y2MiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MjU2NCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMzQwMDExNWQtZjI3My00YzkxLTlkNGEtYzIyOTRjZDRiMTRiIn19\", \"file",
+      "duration_ms": 1052.991,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786352564",
@@ -580,7 +607,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::desktop-positive-preview::b041f4e74cdc4cb6b9460bd462e3ee2c",
+      "session_id": "cross-domain-eval::desktop-positive-preview::f32819982b334d80aa1d78a5fba7758e",
       "question": "What should evidence preview resolve after chat returns sources?",
       "expected_terms": [
         "resolve this file after chat returns sources"
@@ -602,6 +629,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "Evidence preview must resolve this file after chat returns sources.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 817.443,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -641,7 +669,7 @@
       "kb_ids": [
         "diag-kb-utf8-1785505921"
       ],
-      "session_id": "cross-domain-eval::utf8-positive-boundary::6291a2b53ef04fdcbde5bef122e582a5",
+      "session_id": "cross-domain-eval::utf8-positive-boundary::af4649d558be429cb1eaf20c79fcec17",
       "question": "这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？",
       "expected_terms": [
         "知识库",
@@ -665,6 +693,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "这份 UTF-8 诊断文档指出：知识库仍然是授权边界，文件夹只承担组织作用，不承担权限。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzY2VjMThhYi0wMjg0LTQ5NzQtYmM5ZC1kMTgyMGI1YzMzOWUiLCJrYl9pZCI6ImRpYWcta2ItdXRmOC0xNzg1NTA1OTIxIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiIzZDA5MjEzYy01YjljLTRmNDYtOGQwOS1lZDlmZjQ2MDdmNmEifX0\", \"file\": \"d",
+      "duration_ms": 1163.572,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-kb-utf8-1785505921",
@@ -704,7 +733,7 @@
       "kb_ids": [
         "diag-image-ocr-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::image-positive-boundary::fb76b819cf12431c9721b2da2105299f",
+      "session_id": "cross-domain-eval::image-positive-boundary::11d106b62ddd4d42a7354b630e66e99c",
       "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
       "expected_terms": [
         "folder is for organization only",
@@ -727,6 +756,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The OCR diagnostic document states that the folder is for organization only, and the knowledge base is the authorization boundary.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 1514.525,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-image-ocr-20260807-r2",
@@ -766,7 +796,7 @@
       "kb_ids": [
         "diag-pdf-scan-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::pdf-positive-fallback::18b953ecdfc74048be7b68bf60d74b57",
+      "session_id": "cross-domain-eval::pdf-positive-fallback::98ec998e3eb9410ca246a6b28487a170",
       "question": "What does the scanned PDF diagnostic say about OCR fallback?",
       "expected_terms": [
         "OCR fallback must merge every predict batch per page"
@@ -788,6 +818,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The scanned PDF diagnostic states that OCR fallback must merge every predict batch per page.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 943.649,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-pdf-scan-20260807-r2",
@@ -827,7 +858,7 @@
       "kb_ids": [
         "diag-mixed-batch-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::mixed-positive-rollback::b7c1f4aa832e43b3b3e2f47992898c94",
+      "session_id": "cross-domain-eval::mixed-positive-rollback::6384f9661ae44693a88577275729ad14",
       "question": "Who gives the final rollback approval in the Friday release cutover note?",
       "expected_terms": [],
       "expected_any_term_groups": [
@@ -854,8 +885,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "在周五发布切换说明中，平台值班主管在部署协调员汇总证据后，给出最终的回滚批准。",
+      "answer_preview": "The platform duty lead gives the final rollback approval in the Friday release cutover note.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+      "duration_ms": 872.351,
       "source_record_count": 8,
       "source_kb_ids": [
         "diag-mixed-batch-20260807-r2",
@@ -907,7 +939,7 @@
       "kb_ids": [
         "diag-mixed-batch-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::mixed-positive-preview::f05021130d7a419286a50323ca5f3927",
+      "session_id": "cross-domain-eval::mixed-positive-preview::a2285ee8112f4265a041bdc177da7dcc",
       "question": "What should every evidence preview include?",
       "expected_terms": [
         "doc_id",
@@ -930,6 +962,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "Every evidence preview must include doc_id and preview_locator.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3ZjhlMzllZS03ZDk1LTRiMTYtYWE3Yi1lYWMyMTA1MzM2YjQiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjYzNGE5YTBkLWIwNzktNGY4ZS04ZWQwLTAwMmUwY2Y1ZjE0NiJ9fQ\", \"fi",
+      "duration_ms": 830.4,
       "source_record_count": 8,
       "source_kb_ids": [
         "diag-mixed-batch-20260807-r2",
@@ -981,7 +1014,7 @@
       "kb_ids": [
         "diag-boundary-1785495036"
       ],
-      "session_id": "cross-domain-eval::boundary-negative-manual-structure::dc8de21b6b9a4210a959460cfa657283",
+      "session_id": "cross-domain-eval::boundary-negative-manual-structure::bb5cd273b5f747a7898595719d6e9e88",
       "question": "What exact sentence does the manual use to describe the authorization boundary?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1003,8 +1036,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The provided context does not contain any sentence that describes the authorization boundary. The text fragments are parts of a PDF file structure and do not include the actual manual content or any description of an authorization boundary.",
+      "answer_preview": "The provided context does not contain any sentence that describes the authorization boundary. The text fragments are from a PDF file's internal structure and do not include the actual manual content or any description of an authorization bo",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI0NzQ2MTk3My1mZWRmLTRiNjgtODliNi00ODQ2YzI5NGE2ZmEiLCJrYl9pZCI6ImRpYWctYm91bmRhcnktMTc4NTQ5NTAzNiIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMzBiOGU1MDMtYjVkNC00MDk2LTg1NjctMWUwMGU4ZWNmMTQzIn19\", \"file\": \"",
+      "duration_ms": 1638.553,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-boundary-1785495036",
@@ -1044,7 +1078,7 @@
       "kb_ids": [
         "diag-exttext-readme-utf8-1785506464"
       ],
-      "session_id": "cross-domain-eval::exttext-positive-readme-utf8::8ae3a797b6e444e9ac2c017234c01e75",
+      "session_id": "cross-domain-eval::exttext-positive-readme-utf8::9dde89c586ec4b849fd818c356744cbe",
       "question": "What exact sentence does the README use to describe the authorization boundary?",
       "expected_terms": [
         "Knowledge Base remains the authorization boundary"
@@ -1066,6 +1100,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The README uses the exact sentence: \"Knowledge Base remains the authorization boundary.\" to describe the authorization boundary.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3NTRkZDJmOS0zMmI1LTQxZWItYmM3Zi1hYzk0OGM1YjI3NjMiLCJrYl9pZCI6ImRpYWctZXh0dGV4dC1yZWFkbWUtdXRmOC0xNzg1NTA2NDY0IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI1ODM0YTRkNy0xOWFiLTQ5ZjAtYjllYS0zMzUxMjExZjVjNDci",
+      "duration_ms": 989.196,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-exttext-readme-utf8-1785506464",
@@ -1105,7 +1140,7 @@
       "kb_ids": [
         "diag-kb-extensionless-text-readme-utf8-1785506975"
       ],
-      "session_id": "cross-domain-eval::exttext-positive-extensionless-utf8-folder::b6cbf299158c4e28bf3b31a865542918",
+      "session_id": "cross-domain-eval::exttext-positive-extensionless-utf8-folder::38de17d320294f3893f09bec644cf8d7",
       "question": "What does the extensionless UTF-8 README say about the folder?",
       "expected_terms": [],
       "expected_any_term_groups": [
@@ -1132,6 +1167,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The extensionless UTF-8 README states that the folder remains an organization object only.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlZGFmNGVjNC1lZjdiLTQ3NWItYTgyMS1mYmIzZWMyZDA4MGEiLCJrYl9pZCI6ImRpYWcta2ItZXh0ZW5zaW9ubGVzcy10ZXh0LXJlYWRtZS11dGY4LTE3ODU1MDY5NzUiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjM2YWRiZDNhLTdjZTYtNDU2ZC05MTJh",
+      "duration_ms": 962.992,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-kb-extensionless-text-readme-utf8-1785506975",
@@ -1171,7 +1207,7 @@
       "kb_ids": [
         "diag-exttext-readme-utf16-1785506468"
       ],
-      "session_id": "cross-domain-eval::exttext-positive-readme-utf16::844db8b3e60547fe90bb637315907b01",
+      "session_id": "cross-domain-eval::exttext-positive-readme-utf16::813ab5deeae84abd831f2c5a8f0590d1",
       "question": "What exact sentence does the UTF-16 README use to describe the authorization boundary?",
       "expected_terms": [
         "Knowledge Base remains the authorization boundary"
@@ -1193,6 +1229,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The exact sentence used in the UTF-16 README to describe the authorization boundary is: \"Knowledge Base remains the authorization boundary.\"",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI5ODM0ZWJhMS1lNzlmLTRhOTktODg2Zi0xMmQ4NTM2ZDhlZjMiLCJrYl9pZCI6ImRpYWctZXh0dGV4dC1yZWFkbWUtdXRmMTYtMTc4NTUwNjQ2OCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmU5NzEwMGMtMzIxZS00ZDdjLThmMmItMmQ4OTdkZTUzOGRi",
+      "duration_ms": 1815.671,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-exttext-readme-utf16-1785506468",
@@ -1232,7 +1269,7 @@
       "kb_ids": [
         "diag-kb-extensionless-text-readme-utf16-1785506975"
       ],
-      "session_id": "cross-domain-eval::utf16-positive-folder-boundary::0ec7d85a9314411bbf1cccf7e2d5c819",
+      "session_id": "cross-domain-eval::utf16-positive-folder-boundary::8cf17233ebae4d5982592ad93d6b8483",
       "question": "What does the UTF-16 README say about the authorization boundary?",
       "expected_terms": [],
       "expected_any_term_groups": [
@@ -1259,6 +1296,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The UTF-16 README states that the authorization boundary remains the base.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlMGNlMmRkOC05NTYzLTRkNGItODM2YS01NmQxNjZlM2Q0ZjYiLCJrYl9pZCI6ImRpYWcta2ItZXh0ZW5zaW9ubGVzcy10ZXh0LXJlYWRtZS11dGYxNi0xNzg1NTA2OTc1IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI5Y2FhYTFiNS1kMWE4LTQ0YWMtOWE4",
+      "duration_ms": 988.96,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-kb-extensionless-text-readme-utf16-1785506975",
@@ -1298,7 +1336,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::desktop-negative-grain-question::211d0dfb32264d28b0415e5606b9ff79",
+      "session_id": "cross-domain-eval::desktop-negative-grain-question::9dacbb8f69d940a0b68741aeef35e5c8",
       "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1321,6 +1359,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "我不知道。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 1045.795,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -1360,7 +1399,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::desktop-negative-older-passcode::2c92ee7c3c444898995433f8e059c391",
+      "session_id": "cross-domain-eval::desktop-negative-older-passcode::81211a70809349679cbe37462670c5da",
       "question": "What is the unique desktop workflow passcode in the 1786352564 diagnostic document?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1380,8 +1419,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The provided context does not contain information about the diagnostic document with ID 1786352564. Therefore, I cannot determine the unique desktop workflow passcode for that specific document.",
+      "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent-desktop-e2e-1786353063. However, please note that the provided context refers to document 1786353063, not 1786352564, and no information about document 1786352564",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 2228.591,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -1421,7 +1461,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::grain-negative-desktop-passcode::ebd7d22ae291416da3e598b9c3641ed5",
+      "session_id": "cross-domain-eval::grain-negative-desktop-passcode::5a1ce1c7b913464f9a61b397ee82d6ea",
       "question": "What is the unique desktop workflow passcode in the diagnostic document?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1443,6 +1483,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The provided context does not contain any information about a \"unique desktop workflow passcode\" or a \"diagnostic document.\" Therefore, based on the given text, it is not possible to determine the passcode.\n\nAnswer: The information is not a",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIxNmY0ZTgyMi01MTExLTQ2NjYtODY1Zi1mNGE3YTdlMzBhZTYiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJkNzM0YTViOC1kYjE2LTQzZTktYWQyYy0wMGFiMjUxMmI1YzIifX0\", \"file\": \"储备粮数字",
+      "duration_ms": 2220.313,
       "source_record_count": 8,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -1494,7 +1535,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::grain-negative-utf8-exact-boundary::8edfd3e5f1b34889a28ae598b3fba437",
+      "session_id": "cross-domain-eval::grain-negative-utf8-exact-boundary::04f49afe86f64636bd14909471c7f06a",
       "question": "这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1515,8 +1556,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "这份 UTF-8 诊断文档描述了知识库和文件夹的边界如下：\n\n**1. 知识库边界：**  \n本知识库用于沉淀粮食仓储与粮仓管理相关资料，涵盖粮油储藏标准规范、仓储作业技术、粮情测控与智能分析、智慧监管平台、专利方法、研究报告和报表样例等内容。  \n但不保证覆盖以下内容：  \n- 实时政策  \n- 实时市场价格  \n- 未收录的新标准  \n- 企业内部未公开制度  \n- 现场安全责任认定  \n- 需要专家勘验才能确认的最终处置结论  \n\n遇到高风险业务问题时，应结合最新官方文",
+      "answer_preview": "这份 UTF-8 文档并未描述“诊断文档”，而是介绍了“粮仓知识库”（Grain Knowledge Base）的定位、边界、目录结构与维护规则。关于知识库和文件夹的边界，文档在第2节“知识库边界”和第5节“分类口径”中有明确说明：\n\n**知识库边界：**\n- 本知识库不保证覆盖：\n  - 实时政策；\n  - 实时市场价格；\n  - 未收录的新标准；\n  - 企业内部未公开制度；\n  - 现场安全责任认定；\n  - 需专家勘验才能确认的最终处置结论。\n- 遇到高风险业务问题时",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4ODE4OTUxNy1lYmFmLTQxMGQtODVkMi1jZmM0NzUzNzM3OTkiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZWIxMjkxZC1lYjM5LTQ3NDgtYTUyYi0zNWVhZTA1MDJmYzQifX0\", \"file\": \"readm",
+      "duration_ms": 11390.195,
       "source_record_count": 10,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -1572,7 +1614,7 @@
       "kb_ids": [
         "diag-image-ocr-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::image-negative-pdf-fallback::0bbebb8dc9d94c2c9ae4dd556a6e7176",
+      "session_id": "cross-domain-eval::image-negative-pdf-fallback::6c7e6c0d387749c7a33200cb9bc4f87b",
       "question": "What does the scanned PDF diagnostic say about OCR fallback?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1592,8 +1634,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The scanned PDF diagnostic does not provide any information about OCR fallback.",
+      "answer_preview": "The scanned PDF diagnostic indicates that the folder is for organization only, and the Knowledge Base is the authorization boundary. It also states that preview should resolve to OCR chunk, implying that OCR fallback is expected to function",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 1406.826,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-image-ocr-20260807-r2",
@@ -1633,7 +1676,7 @@
       "kb_ids": [
         "diag-pdf-scan-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::pdf-negative-image-boundary::3dcddd2d53d441c295b6a7b354395d9d",
+      "session_id": "cross-domain-eval::pdf-negative-image-boundary::da40fa03349240cf8fddbf123c1e451a",
       "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1654,8 +1697,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The provided OCR diagnostic document does not mention anything about folder and knowledge base boundaries. It only discusses scanned PDF diagnostics, OCR fallback merging per page, handover window scans retaining page-level evidence, and ma",
+      "answer_preview": "The provided OCR diagnostic document does not mention anything about folder and knowledge base boundaries.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 873.744,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-pdf-scan-20260807-r2",
@@ -1695,7 +1739,7 @@
       "kb_ids": [
         "diag-mixed-batch-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::mixed-negative-grain-policy::716ce6f000c3421f94611f934cc60510",
+      "session_id": "cross-domain-eval::mixed-negative-grain-policy::5e323b98bcb84991b97f7c9cc73743b2",
       "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1716,8 +1760,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "我不知道。",
+      "answer_preview": "我不知道《粮油安全储存守则》制定的安全储粮方针是什么，因为提供的上下文信息中没有相关内容。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJmNzgyZmYzMC1mZTExLTRlMjctODIzNC1jMjEwOGExY2EzNTgiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImYyNWIyMjExLTM1ZDItNGU0ZS05YmRhLTZiMWYzYTg5NDc3OCJ9fQ\", \"fi",
+      "duration_ms": 1763.011,
       "source_record_count": 8,
       "source_kb_ids": [
         "diag-mixed-batch-20260807-r2",
@@ -1770,7 +1815,7 @@
         "grain-knowledge-base",
         "diag-image-ocr-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::multi-kb-contract-rejected::3089732ecb314c8fa5aaf55c9e4f5ab6",
+      "session_id": "cross-domain-eval::multi-kb-contract-rejected::5fbeaed62023435e8418f8ee2861d8f0",
       "question": "Please compare the grain safety policy and the OCR boundary rule.",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1788,12 +1833,13 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "",
       "source_text_preview": "{\"sources\": [], \"evidence\": []}",
+      "duration_ms": 1.613,
       "source_record_count": 0,
       "source_kb_ids": [],
       "source_files": [],
       "source_kb_id_missing_count": 0,
       "http_status": 400,
-      "response_message": "{\"code\":400,\"message\":\"P0 主线暂不支持多知识库查询，请拆分为单库请求\",\"data\":{},\"request_id\":\"bba7f2b4-fe88-40f5-bf43-bcf0bbcc5add\"}",
+      "response_message": "{\"code\":400,\"message\":\"P0 主线暂不支持多知识库查询，请拆分为单库请求\",\"data\":{},\"request_id\":\"a9a0eefd-bcac-41ce-9a86-6edf03c09af0\"}",
       "checks": {
         "http_status_ok": true,
         "expected_error_terms_hit": true,
@@ -1822,7 +1868,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-grain-positive-storage-scope::4b35477e4a114e8eb7386dbfe1b74b24",
+      "session_id": "cross-domain-eval::extra-grain-positive-storage-scope::607563397ff1423694dcb26c2a4f59fe",
       "question": "《粮油安全储存守则》适用于哪些单位？",
       "expected_terms": [
         "各类粮油仓储单位"
@@ -1844,6 +1890,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "《粮油安全储存守则》适用于各类粮油仓储单位。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 1561.982,
       "source_record_count": 10,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -1899,7 +1946,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-grain-positive-one-card-scope::6c46a73d3f9d46f980097467dc85b512",
+      "session_id": "cross-domain-eval::extra-grain-positive-one-card-scope::561a362785f3402e82502a0aeeee8d50",
       "question": "非直属企业“一卡通”系统适用于哪些收储库点？",
       "expected_terms": [],
       "expected_any_term_groups": [
@@ -1928,6 +1975,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "非直属企业“一卡通”系统适用于中储粮直属企业以外的参与中央事权粮食入库和出库业务的收储库点，包括租仓库点、委托库点。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4YTNlNzhkOC1hYmFlLTQ0MWYtYjY4ZC0yYmE4NjgxMDBmNGMiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJkZGRmYjA2ZS01MjM5LTRhNDgtYTdkYy04MDc1ZmMwM2Q2MjIifX0\", \"file\": \"中储粮非直",
+      "duration_ms": 2475.163,
       "source_record_count": 4,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -1971,7 +2019,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::extra-desktop-negative-one-card-scope::941b4efe42a84646bec7174f6c7cf9ab",
+      "session_id": "cross-domain-eval::extra-desktop-negative-one-card-scope::c1c3ced158f64c54b362c342a9eea33a",
       "question": "非直属企业“一卡通”系统适用于哪些收储库点？",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -1995,6 +2043,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "我不知道。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 707.778,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -2034,7 +2083,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-grain-negative-desktop-preview::e710e38e96924b539a95cfda4031eebb",
+      "session_id": "cross-domain-eval::extra-grain-negative-desktop-preview::24988bb656bc41b69321c7cda057b97a",
       "question": "What should evidence preview resolve after chat returns sources?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -2054,8 +2103,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "I don't know.",
+      "answer_preview": "The provided context does not contain information about what evidence preview should resolve after chat returns sources. Therefore, based on the given documents, I cannot determine the specific issues that evidence preview should address in",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIxNmY0ZTgyMi01MTExLTQ2NjYtODY1Zi1mNGE3YTdlMzBhZTYiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI2MzFhYmQ5MS01ZmVkLTQwZDEtOTk1Ni0zYzM1Mzk0ZTBlMDgifX0\", \"file\": \"储备粮数字",
+      "duration_ms": 2144.486,
       "source_record_count": 10,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -2114,7 +2164,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-v2-grain-long-storage-scope::2c08cf7f36a542b5ab941e9e8fddc1ad",
+      "session_id": "cross-domain-eval::extra-v2-grain-long-storage-scope::66fe329dccaa42a4a7fb4e61512d9522",
       "question": "在这个问题里我会故意给很多上下文：如果我只选择粮仓知识库，请回答《粮油安全储存守则》适用于哪些单位，不要使用其他诊断知识库。",
       "expected_terms": [
         "各类粮油仓储单位"
@@ -2136,6 +2186,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "《粮油安全储存守则》适用于各类粮油仓储单位。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 1766.654,
       "source_record_count": 10,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -2194,7 +2245,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-v2-grain-multihop-policy-and-production::d334a44e423f4c58ba9046964e0785e2",
+      "session_id": "cross-domain-eval::extra-v2-grain-multihop-policy-and-production::d18076588c76430daac9fae5704bd8c6",
       "question": "请同时说明《粮油安全储存守则》制定的安全储粮方针，以及《粮库安全生产守则》遵循的安全生产理念。请只依据当前粮仓知识库回答。",
       "expected_terms": [
         "预防为主",
@@ -2220,6 +2271,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是：“预防为主、综合防治”。\n\n《粮库安全生产守则》遵循的安全生产理念是：“以人为本、生命至上、安全发展”。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MDE4Y2E0Mi01OWJmLTQzNWQtYTcxOC00ODQ4YTdiYWM1ZDYiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJlMjM4ZDMxMy01ODI2LTQ1YmUtODE2ZS1lYmNiZTY2NjljMzMifX0\", \"file\": \"粮库安全生",
+      "duration_ms": 1832.275,
       "source_record_count": 10,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -2279,7 +2331,7 @@
       "kb_ids": [
         "diag-mixed-batch-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v2-mixed-multihop-approval-and-preview::da6bac08cecd455aa489c70bf48df668",
+      "session_id": "cross-domain-eval::extra-v2-mixed-multihop-approval-and-preview::dad33f6b07e442a2818d872f1d3c824f",
       "question": "In one answer, tell me who gives the final rollback approval and what every evidence preview should include.",
       "expected_terms": [
         "platform duty lead",
@@ -2302,8 +2354,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The platform duty lead gives the final rollback approval, and every evidence preview must include doc_id and preview_locator.",
+      "answer_preview": "The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence. Every evidence preview must include doc_id and preview_locator.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3ZjhlMzllZS03ZDk1LTRiMTYtYWE3Yi1lYWMyMTA1MzM2YjQiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjYzNGE5YTBkLWIwNzktNGY4ZS04ZWQwLTAwMmUwY2Y1ZjE0NiJ9fQ\", \"fi",
+      "duration_ms": 1076.694,
       "source_record_count": 8,
       "source_kb_ids": [
         "diag-mixed-batch-20260807-r2",
@@ -2358,7 +2411,7 @@
       "kb_ids": [
         "diag-pdf-scan-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v2-pdf-scan-long-fallback-rule::1f58c6934360442f932cff8aff259d96",
+      "session_id": "cross-domain-eval::extra-v2-pdf-scan-long-fallback-rule::3622f75922744eddac7d4f3f8093517c",
       "question": "What does the scanned PDF diagnostic say about OCR fallback? Please answer with the exact operational rule.",
       "expected_terms": [
         "OCR fallback must merge every predict batch per page"
@@ -2380,6 +2433,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "OCR fallback must merge every predict batch per page.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 827.745,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-pdf-scan-20260807-r2",
@@ -2423,7 +2477,7 @@
       "kb_ids": [
         "diag-image-ocr-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v2-image-negative-pdf-fallback-rule::e1e96b87f16048a8881b069b46b40df8",
+      "session_id": "cross-domain-eval::extra-v2-image-negative-pdf-fallback-rule::3f4c4e16e337474dab15b8cbd868f733",
       "question": "What does the scanned PDF diagnostic say about OCR fallback?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -2443,8 +2497,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The scanned PDF diagnostic indicates that the folder is for organization only, the knowledge base is the authorization boundary, and preview should resolve to OCR chunk. It does not explicitly mention OCR fallback.",
+      "answer_preview": "The scanned PDF diagnostic does not mention anything about OCR fallback.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 834.004,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-image-ocr-20260807-r2",
@@ -2487,7 +2542,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-v2-grain-negative-older-desktop-passcode::a8539377b36c46c8adffc6b5c1347ad6",
+      "session_id": "cross-domain-eval::extra-v2-grain-negative-older-desktop-passcode::49e42055af6f4d72bd11d10470f1a7b6",
       "question": "What is the unique desktop workflow passcode in the 1786352564 diagnostic document?",
       "expected_terms": [],
       "expected_any_term_groups": [],
@@ -2507,8 +2562,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "我不知道。",
+      "answer_preview": "I don't know.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI5NTBlMzhiMy0wY2ZkLTQ2ZjAtYmViMy01Y2QwMzhmMjMzYWIiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiIyN2U1ZDc4ZS04NmQ5LTRhM2MtODNlZi1iNDg2NWY0NGNhODMifX0\", \"file\": \"04谷物冷",
+      "duration_ms": 1946.485,
       "source_record_count": 4,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -2556,11 +2612,13 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::d324e77d06fe47c78bf75c2f11a7ffa6",
+      "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::8268e6c235e043b8a6877f32113c8a9e",
       "is_multi_turn": true,
       "turn_count": 2,
       "passed_turn_count": 2,
       "failed_turn_ids": [],
+      "duration_ms": 2637.79,
+      "turn_duration_total_ms": 2637.294,
       "source_record_count": 20,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -2627,7 +2685,7 @@
           "kb_ids": [
             "grain-knowledge-base"
           ],
-          "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::d324e77d06fe47c78bf75c2f11a7ffa6",
+          "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::8268e6c235e043b8a6877f32113c8a9e",
           "question": "《粮油安全储存守则》适用于哪些单位？",
           "expected_terms": [
             "各类粮油仓储单位"
@@ -2649,6 +2707,7 @@
           "forbidden_source_text_terms": [],
           "answer_preview": "《粮油安全储存守则》适用于各类粮油仓储单位。",
           "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 1371.075,
           "source_record_count": 10,
           "source_kb_ids": [
             "grain-knowledge-base",
@@ -2711,7 +2770,7 @@
           "kb_ids": [
             "grain-knowledge-base"
           ],
-          "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::d324e77d06fe47c78bf75c2f11a7ffa6",
+          "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::8268e6c235e043b8a6877f32113c8a9e",
           "question": "这个守则制定的安全储粮方针是什么？",
           "expected_terms": [
             "预防为主",
@@ -2734,6 +2793,7 @@
           "forbidden_source_text_terms": [],
           "answer_preview": "这个守则制定的安全储粮方针是“预防为主、综合防治”。",
           "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 1266.219,
           "source_record_count": 10,
           "source_kb_ids": [
             "grain-knowledge-base",
@@ -2799,11 +2859,13 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::507790e7a95d4e26be8f7eb7d88bdd30",
+      "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::63731098f7294fcea13f6ed9ac84b563",
       "is_multi_turn": true,
       "turn_count": 2,
       "passed_turn_count": 2,
       "failed_turn_ids": [],
+      "duration_ms": 1975.121,
+      "turn_duration_total_ms": 1974.885,
       "source_record_count": 4,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -2838,7 +2900,7 @@
           "kb_ids": [
             "diag-desktop-e2e-1786353063"
           ],
-          "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::507790e7a95d4e26be8f7eb7d88bdd30",
+          "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::63731098f7294fcea13f6ed9ac84b563",
           "question": "What is the unique desktop workflow passcode in the diagnostic document?",
           "expected_terms": [
             "northagent-desktop-e2e-1786353063"
@@ -2860,6 +2922,7 @@
           "forbidden_source_text_terms": [],
           "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent-desktop-e2e-1786353063.",
           "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+          "duration_ms": 1243.545,
           "source_record_count": 2,
           "source_kb_ids": [
             "diag-desktop-e2e-1786353063",
@@ -2906,7 +2969,7 @@
           "kb_ids": [
             "diag-desktop-e2e-1786353063"
           ],
-          "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::507790e7a95d4e26be8f7eb7d88bdd30",
+          "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::63731098f7294fcea13f6ed9ac84b563",
           "question": "And what should it say evidence preview resolves after chat returns sources?",
           "expected_terms": [
             "resolve this file after chat returns sources"
@@ -2928,6 +2991,7 @@
           "forbidden_source_text_terms": [],
           "answer_preview": "Evidence preview must resolve this file after chat returns sources.",
           "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+          "duration_ms": 731.34,
           "source_record_count": 2,
           "source_kb_ids": [
             "diag-desktop-e2e-1786353063",
@@ -2978,11 +3042,13 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::422bf5925c7c4acc85f39d96f300ac30",
+      "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::0f9844007db541e5a758d7e2e587b38a",
       "is_multi_turn": true,
       "turn_count": 2,
       "passed_turn_count": 2,
       "failed_turn_ids": [],
+      "duration_ms": 2806.851,
+      "turn_duration_total_ms": 2806.443,
       "source_record_count": 20,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -3050,7 +3116,7 @@
           "kb_ids": [
             "grain-knowledge-base"
           ],
-          "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::422bf5925c7c4acc85f39d96f300ac30",
+          "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::0f9844007db541e5a758d7e2e587b38a",
           "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
           "expected_terms": [
             "预防为主",
@@ -3073,6 +3139,7 @@
           "forbidden_source_text_terms": [],
           "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“预防为主、综合防治”。",
           "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 1405.363,
           "source_record_count": 10,
           "source_kb_ids": [
             "grain-knowledge-base",
@@ -3136,7 +3203,7 @@
           "kb_ids": [
             "grain-knowledge-base"
           ],
-          "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::422bf5925c7c4acc85f39d96f300ac30",
+          "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::0f9844007db541e5a758d7e2e587b38a",
           "question": "What about that desktop diagnostic passcode?",
           "expected_terms": [],
           "expected_any_term_groups": [],
@@ -3158,8 +3225,9 @@
           "forbidden_source_files": [],
           "required_source_text_terms": [],
           "forbidden_source_text_terms": [],
-          "answer_preview": "I don't know.",
+          "answer_preview": "我不知道有关桌面诊断密码的信息。",
           "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 1401.08,
           "source_record_count": 10,
           "source_kb_ids": [
             "grain-knowledge-base",
@@ -3224,7 +3292,7 @@
       "kb_ids": [
         "grain-knowledge-base"
       ],
-      "session_id": "cross-domain-eval::extra-v4-grain-source-file-safety-policy::cf3eeb5b8b204893a83fd82a4c05f27f",
+      "session_id": "cross-domain-eval::extra-v4-grain-source-file-safety-policy::19986843ef4d4834844e163d00960871",
       "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
       "expected_terms": [
         "预防为主",
@@ -3247,8 +3315,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“预防为主、综合防治”。",
+      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是：“预防为主、综合防治”。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 1358.977,
       "source_record_count": 10,
       "source_kb_ids": [
         "grain-knowledge-base",
@@ -3307,7 +3376,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::extra-v4-desktop-source-file-workflow::7df271ab51e9459782c14826f4f43196",
+      "session_id": "cross-domain-eval::extra-v4-desktop-source-file-workflow::d54bdb0167534233b8cf5706f79aa7f9",
       "question": "What is the unique desktop workflow passcode in the diagnostic document?",
       "expected_terms": [
         "northagent-desktop-e2e-1786353063"
@@ -3331,6 +3400,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent-desktop-e2e-1786353063.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 1143.895,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -3373,7 +3443,7 @@
       "kb_ids": [
         "diag-pdf-scan-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v4-pdf-source-file-scan-fallback::f49b5fc6de7744e28e80831c0674bfe9",
+      "session_id": "cross-domain-eval::extra-v4-pdf-source-file-scan-fallback::00a336ab7e3d4097b2d0f2a20dd1e0fc",
       "question": "What does the scanned PDF diagnostic say about OCR fallback?",
       "expected_terms": [
         "OCR fallback must merge every predict batch per page"
@@ -3397,6 +3467,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The scanned PDF diagnostic states that OCR fallback must merge every predict batch per page.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 1005.317,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-pdf-scan-20260807-r2",
@@ -3439,7 +3510,7 @@
       "kb_ids": [
         "diag-image-ocr-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v4-image-source-file-ocr-boundary::f5f37f23a5ea4485b63c7bd2ac46f7cf",
+      "session_id": "cross-domain-eval::extra-v4-image-source-file-ocr-boundary::fee704c38c6c4d2dbef1fa9fb2eb5125",
       "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
       "expected_terms": [
         "folder is for organization only",
@@ -3462,8 +3533,9 @@
       "forbidden_source_files": [],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The OCR diagnostic document states that the folder is for organization only, while the knowledge base is the authorization boundary.",
+      "answer_preview": "The OCR diagnostic document states that the folder is for organization only, and the knowledge base is the authorization boundary.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 1191.456,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-image-ocr-20260807-r2",
@@ -3506,7 +3578,7 @@
       "kb_ids": [
         "diag-mixed-batch-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v4-mixed-source-file-cutover::24dc7d734dc04369b85464f08695f121",
+      "session_id": "cross-domain-eval::extra-v4-mixed-source-file-cutover::dd6ff4231f94452cbbae54ae799a4575",
       "question": "Who gives the final rollback approval in the Friday release cutover note?",
       "expected_terms": [],
       "expected_any_term_groups": [
@@ -3538,8 +3610,9 @@
       ],
       "required_source_text_terms": [],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The platform duty lead gives the final rollback approval in the Friday release cutover note.",
+      "answer_preview": "在周五发布切换说明中，平台值班主管在部署协调员汇总证据后，给予最终的回滚批准。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+      "duration_ms": 1635.189,
       "source_record_count": 8,
       "source_kb_ids": [
         "diag-mixed-batch-20260807-r2",
@@ -3595,7 +3668,7 @@
       "kb_ids": [
         "diag-desktop-e2e-1786353063"
       ],
-      "session_id": "cross-domain-eval::extra-v5-desktop-evidence-text-preview::dace65715518422e9caf966f0fffb7f6",
+      "session_id": "cross-domain-eval::extra-v5-desktop-evidence-text-preview::aa72c79d11e14ba5bdbcf109bc689079",
       "question": "What should evidence preview resolve after chat returns sources?",
       "expected_terms": [
         "resolve this file after chat returns sources"
@@ -3621,6 +3694,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "Evidence preview must resolve this file after chat returns sources.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 966.997,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-desktop-e2e-1786353063",
@@ -3664,7 +3738,7 @@
       "kb_ids": [
         "diag-pdf-scan-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v5-pdf-evidence-text-fallback::67d2e2c3e1b14a6faac3669fe7962b83",
+      "session_id": "cross-domain-eval::extra-v5-pdf-evidence-text-fallback::163e68d8120842c5bb8eabcce523298e",
       "question": "What does the scanned PDF diagnostic say about OCR fallback?",
       "expected_terms": [
         "OCR fallback must merge every predict batch per page"
@@ -3690,6 +3764,7 @@
       "forbidden_source_text_terms": [],
       "answer_preview": "The scanned PDF diagnostic states that OCR fallback must merge every predict batch per page.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 1146.114,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-pdf-scan-20260807-r2",
@@ -3733,7 +3808,7 @@
       "kb_ids": [
         "diag-image-ocr-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v5-image-evidence-text-boundary::7c3b60f34e504feb97ba1bc48a9dc494",
+      "session_id": "cross-domain-eval::extra-v5-image-evidence-text-boundary::ad70c7e3d7a44b978d1f4f765836351b",
       "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
       "expected_terms": [
         "folder is for organization only",
@@ -3759,8 +3834,9 @@
         "Knowledge Base is the authorization boundary"
       ],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The OCR diagnostic document states that the folder is for organization only, while the knowledge base is the authorization boundary.",
+      "answer_preview": "The OCR diagnostic document states that the folder is for organization only, and the knowledge base is the authorization boundary.",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 819.838,
       "source_record_count": 2,
       "source_kb_ids": [
         "diag-image-ocr-20260807-r2",
@@ -3804,7 +3880,7 @@
       "kb_ids": [
         "diag-mixed-batch-20260807-r2"
       ],
-      "session_id": "cross-domain-eval::extra-v5-mixed-evidence-text-approval::c68eb93b7e3a4a578dabbf9845fe9285",
+      "session_id": "cross-domain-eval::extra-v5-mixed-evidence-text-approval::45f6c784f2e348e7977b389af2764942",
       "question": "Who gives the final rollback approval in the Friday release cutover note?",
       "expected_terms": [],
       "expected_any_term_groups": [
@@ -3836,8 +3912,9 @@
         "final rollback approval"
       ],
       "forbidden_source_text_terms": [],
-      "answer_preview": "The platform duty lead gives the final rollback approval in the Friday release cutover note.",
+      "answer_preview": "在周五发布切换说明中，平台值班主管在部署协调员汇总证据后，给予最终的回滚批准。",
       "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+      "duration_ms": 1514.557,
       "source_record_count": 8,
       "source_kb_ids": [
         "diag-mixed-batch-20260807-r2",

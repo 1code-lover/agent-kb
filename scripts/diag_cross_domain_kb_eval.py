@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 import urllib.error
 import uuid
 import urllib.request
@@ -15,6 +16,7 @@ from typing import Any
 
 DEFAULT_API_BASE = "http://127.0.0.1:18080"
 DEFAULT_TIMEOUT = 120.0
+DEFAULT_SLOW_THRESHOLD_MS = 5000.0
 
 DEFAULT_CASES: list[dict[str, Any]] = [
     {
@@ -442,6 +444,11 @@ def _new_session_id(case: dict[str, Any], case_id: str) -> str:
     return f"cross-domain-eval::{case_id}::{uuid.uuid4().hex}"
 
 
+def _elapsed_ms(started_at: float) -> float:
+    """计算耗时毫秒，保留 3 位小数。"""
+    return round((time.perf_counter() - started_at) * 1000, 3)
+
+
 def _evaluate_single_turn(
     *,
     case: dict[str, Any],
@@ -465,6 +472,7 @@ def _evaluate_single_turn(
         raise ValueError(f"{case_id}: question is required")
     expected_http_status = int(case.get("expected_http_status") or 200)
 
+    started_at = time.perf_counter()
     response = _post_json(
         api_base,
         "/api/chat/query",
@@ -476,6 +484,7 @@ def _evaluate_single_turn(
         },
         timeout,
     )
+    duration_ms = _elapsed_ms(started_at)
 
     data: dict[str, Any] = {}
     response_message = str(response.get("message") or "")
@@ -590,6 +599,7 @@ def _evaluate_single_turn(
         "forbidden_source_text_terms": forbidden_source_text_terms,
         "answer_preview": answer[:240],
         "source_text_preview": source_text[:240],
+        "duration_ms": duration_ms,
         "source_record_count": source_record_count,
         "source_kb_ids": source_kb_ids,
         "source_files": source_files,
@@ -633,6 +643,7 @@ def _evaluate_multi_turn_case(case: dict[str, Any], api_base: str, timeout: floa
         raise ValueError(f"{case_id}: every turn must be an object")
 
     session_id = _new_session_id(case, case_id)
+    started_at = time.perf_counter()
     results: list[dict[str, Any]] = []
     for index, turn in enumerate(turn_items, start=1):
         turn_id = str(turn.get("id") or f"turn-{index}")
@@ -676,6 +687,8 @@ def _evaluate_multi_turn_case(case: dict[str, Any], api_base: str, timeout: floa
         "turn_count": len(results),
         "passed_turn_count": sum(1 for item in results if item.get("passed")),
         "failed_turn_ids": [str(item.get("turn_id")) for item in failed_turns],
+        "duration_ms": _elapsed_ms(started_at),
+        "turn_duration_total_ms": round(sum(float(item.get("duration_ms") or 0.0) for item in results), 3),
         "source_record_count": source_record_count,
         "source_kb_ids": source_kb_ids,
         "source_files": source_files,
@@ -768,7 +781,71 @@ def _summarize_failures(results: list[dict[str, Any]]) -> tuple[dict[str, Any], 
     return check_summary, case_summary
 
 
-def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
+def _as_float(value: Any) -> float | None:
+    """把数值字段转换为 float。"""
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        return None
+    return result if result >= 0 else None
+
+
+def _summarize_durations(results: list[dict[str, Any]], slow_threshold_ms: float) -> dict[str, Any]:
+    """汇总 case/turn 耗时，便于定位慢用例。"""
+    case_rows: list[dict[str, Any]] = []
+    turn_rows: list[dict[str, Any]] = []
+    for item in results:
+        case_id = str(item.get("id") or "case")
+        duration_ms = _as_float(item.get("duration_ms"))
+        if duration_ms is not None:
+            case_rows.append({"id": case_id, "duration_ms": duration_ms})
+        if item.get("is_multi_turn"):
+            for turn in item.get("turns") or []:
+                if not isinstance(turn, dict):
+                    continue
+                turn_duration_ms = _as_float(turn.get("duration_ms"))
+                if turn_duration_ms is None:
+                    continue
+                turn_rows.append(
+                    {
+                        "id": case_id,
+                        "turn_id": str(turn.get("turn_id") or turn.get("id") or "turn"),
+                        "duration_ms": turn_duration_ms,
+                    }
+                )
+        elif duration_ms is not None:
+            turn_rows.append({"id": case_id, "turn_id": "", "duration_ms": duration_ms})
+
+    def _total(rows: list[dict[str, Any]]) -> float:
+        return round(sum(float(row["duration_ms"]) for row in rows), 3)
+
+    def _avg(rows: list[dict[str, Any]]) -> float | None:
+        return round(_total(rows) / len(rows), 3) if rows else None
+
+    slow_cases = [row for row in case_rows if float(row["duration_ms"]) >= slow_threshold_ms]
+    slow_turns = [row for row in turn_rows if float(row["duration_ms"]) >= slow_threshold_ms]
+    max_case = max(case_rows, key=lambda row: float(row["duration_ms"]), default=None)
+    max_turn = max(turn_rows, key=lambda row: float(row["duration_ms"]), default=None)
+    return {
+        "slow_threshold_ms": slow_threshold_ms,
+        "case_total_ms": _total(case_rows),
+        "case_avg_ms": _avg(case_rows),
+        "case_max_ms": round(float(max_case["duration_ms"]), 3) if max_case else None,
+        "case_max_id": str(max_case["id"]) if max_case else "",
+        "slow_case_ids": [str(row["id"]) for row in sorted(slow_cases, key=lambda row: str(row["id"]))],
+        "turn_total_ms": _total(turn_rows),
+        "turn_avg_ms": _avg(turn_rows),
+        "turn_max_ms": round(float(max_turn["duration_ms"]), 3) if max_turn else None,
+        "turn_max_id": str(max_turn["id"]) if max_turn else "",
+        "turn_max_turn_id": str(max_turn["turn_id"]) if max_turn else "",
+        "slow_turns": [
+            {"id": str(row["id"]), "turn_id": str(row["turn_id"]), "duration_ms": round(float(row["duration_ms"]), 3)}
+            for row in sorted(slow_turns, key=lambda row: (str(row["id"]), str(row["turn_id"])))
+        ],
+    }
+
+
+def summarize(results: list[dict[str, Any]], slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS) -> dict[str, Any]:
     """汇总跨领域用例结果。"""
     total = len(results)
     passed = [item for item in results if item.get("passed")]
@@ -788,6 +865,7 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     case_source_groups: dict[str, list[dict[str, Any]]] = {}
     tag_groups: dict[str, list[dict[str, Any]]] = {}
     failure_check_summary, failure_case_summary = _summarize_failures(results)
+    duration_summary = _summarize_durations(results, slow_threshold_ms)
     for item in results:
         focus_groups.setdefault(str(item.get("focus") or "uncategorized"), []).append(item)
         case_source_groups.setdefault(str(item.get("case_source") or "unknown"), []).append(item)
@@ -818,6 +896,7 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "failed_case_ids": [str(item.get("id")) for item in failed],
         "failure_check_summary": failure_check_summary,
         "failure_case_summary": failure_case_summary,
+        "duration_summary": duration_summary,
         "focus_summary": {
             focus: {
                 "total": len(rows),
@@ -848,14 +927,17 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def build_report(*, cases: list[dict[str, Any]], api_base: str, timeout: float) -> dict[str, Any]:
+def build_report(
+    *, cases: list[dict[str, Any]], api_base: str, timeout: float, slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS
+) -> dict[str, Any]:
     """执行全部用例并构造报告。"""
     results = [evaluate_case(case, api_base, timeout) for case in cases]
     return {
         "generated_at": _now_iso(),
         "api_base": api_base.rstrip("/"),
         "timeout": timeout,
-        "summary": summarize(results),
+        "slow_threshold_ms": slow_threshold_ms,
+        "summary": summarize(results, slow_threshold_ms=slow_threshold_ms),
         "cases": results,
     }
 
@@ -867,12 +949,13 @@ def run_evaluation(
     output: str,
     cases_path: str | None = None,
     extra_cases_paths: list[str] | None = None,
+    slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS,
 ) -> tuple[dict[str, Any], int]:
     """执行跨领域评测并写出报告。"""
     cases = load_cases(cases_path, extra_cases_paths)
     if not cases:
         return {"summary": {"total": 0, "passed": 0, "failed": 0}}, 2
-    report = build_report(cases=cases, api_base=api_base, timeout=timeout)
+    report = build_report(cases=cases, api_base=api_base, timeout=timeout, slow_threshold_ms=slow_threshold_ms)
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -884,6 +967,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="跨知识库、跨领域真实问答诊断")
     parser.add_argument("--api-base", default=DEFAULT_API_BASE, help="API 根地址")
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT, help="单条问答超时秒数")
+    parser.add_argument(
+        "--slow-threshold-ms",
+        type=float,
+        default=DEFAULT_SLOW_THRESHOLD_MS,
+        help="慢用例阈值毫秒数，用于 duration_summary",
+    )
     parser.add_argument("--cases", default=None, help="可选；JSON list 或 {cases: [...]} 格式用例文件；传入后替换内置基线")
     parser.add_argument(
         "--extra-cases",
@@ -904,6 +993,7 @@ def main() -> None:
         output=args.output,
         cases_path=args.cases,
         extra_cases_paths=args.extra_cases,
+        slow_threshold_ms=args.slow_threshold_ms,
     )
     print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
     print(f"报告已写入: {Path(args.output)}")

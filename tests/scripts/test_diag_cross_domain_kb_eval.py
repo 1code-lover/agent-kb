@@ -671,6 +671,52 @@ def test_summarize_includes_failed_check_diagnostics() -> None:
     ]
 
 
+def test_summarize_includes_duration_diagnostics() -> None:
+    """耗时汇总应标记慢 case 和慢 turn。"""
+
+    report = cross_eval.summarize(
+        [
+            {
+                "id": "fast",
+                "kind": "positive",
+                "focus": "grain",
+                "tags": [],
+                "case_source": "default",
+                "passed": True,
+                "duration_ms": 12.0,
+            },
+            {
+                "id": "multi-slow",
+                "kind": "positive",
+                "focus": "desktop",
+                "tags": ["multi-turn"],
+                "case_source": "extra.json",
+                "is_multi_turn": True,
+                "turn_count": 2,
+                "passed_turn_count": 2,
+                "passed": True,
+                "duration_ms": 125.0,
+                "turns": [
+                    {"turn_id": "seed", "passed": True, "duration_ms": 25.0, "checks": {}},
+                    {"turn_id": "follow-up", "passed": True, "duration_ms": 100.0, "checks": {}},
+                ],
+            },
+        ],
+        slow_threshold_ms=80.0,
+    )
+
+    duration = report["duration_summary"]
+    assert duration["slow_threshold_ms"] == 80.0
+    assert duration["case_total_ms"] == 137.0
+    assert duration["case_avg_ms"] == 68.5
+    assert duration["case_max_id"] == "multi-slow"
+    assert duration["slow_case_ids"] == ["multi-slow"]
+    assert duration["turn_total_ms"] == 137.0
+    assert duration["turn_max_id"] == "multi-slow"
+    assert duration["turn_max_turn_id"] == "follow-up"
+    assert duration["slow_turns"] == [{"id": "multi-slow", "turn_id": "follow-up", "duration_ms": 100.0}]
+
+
 def test_load_cases_default_suite_includes_extended_references() -> None:
     """默认跨域评测集应包含新增的桌面、粮仓和 UTF-16 参考样本。"""
 
