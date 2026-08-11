@@ -18,23 +18,76 @@ function loadPackageJson(packagePath = path.join(desktopRoot, "package.json"), f
   return JSON.parse(fsModule.readFileSync(packagePath, "utf8"));
 }
 
+function unique(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function findExistingMacResourcesRoot({ arch, distDir, fsModule = fs, productName }) {
+  const candidateDirs = unique([`mac-${arch}`, arch === "x64" ? "mac" : "", "mac", "mac-universal"]);
+  for (const candidateDir of candidateDirs) {
+    const resourcesRoot = path.join(distDir, candidateDir, `${productName}.app`, "Contents", "Resources");
+    if (fsModule.existsSync(resourcesRoot)) {
+      return resourcesRoot;
+    }
+  }
+  if (!fsModule.existsSync(distDir)) {
+    return "";
+  }
+  const entries = fsModule.readdirSync(distDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory() || !entry.name.startsWith("mac")) {
+      continue;
+    }
+    const resourcesRoot = path.join(distDir, entry.name, `${productName}.app`, "Contents", "Resources");
+    if (fsModule.existsSync(resourcesRoot)) {
+      return resourcesRoot;
+    }
+  }
+  return "";
+}
+
+function findExistingArtifactPath({ arch, distDir, extension, fsModule = fs, productName, suffix = "", version }) {
+  const expected = path.join(distDir, `${productName}-${version}-${arch}${suffix}${extension}`);
+  if (fsModule.existsSync(expected)) {
+    return expected;
+  }
+  if (!fsModule.existsSync(distDir)) {
+    return expected;
+  }
+  const escapedProduct = productName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapedVersion = version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapedSuffix = suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`^${escapedProduct}-${escapedVersion}(?:-.+)?${escapedSuffix}${extension.replace(".", "\\.")}$`);
+  const found = fsModule
+    .readdirSync(distDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && pattern.test(entry.name))
+    .map((entry) => path.join(distDir, entry.name))
+    .sort();
+  return found[0] || expected;
+}
+
 function resolvePackageLayout(options = {}) {
+  const fsModule = options.fs || fs;
   const root = options.desktopRoot || desktopRoot;
-  const pkg = options.packageJson || loadPackageJson(path.join(root, "package.json"), options.fs || fs);
+  const pkg = options.packageJson || loadPackageJson(path.join(root, "package.json"), fsModule);
   const productName = options.productName || pkg?.build?.productName || pkg?.name || "NorthAgent";
   const version = options.version || pkg?.version || "0.1.0";
   const arch = options.arch || process.arch;
   const distDir = options.distDir || path.join(root, "dist");
+  const discoveredResourcesRoot = findExistingMacResourcesRoot({ arch, distDir, fsModule, productName });
   const resourcesRoot =
-    options.resourcesRoot || path.join(distDir, `mac-${arch}`, `${productName}.app`, "Contents", "Resources");
+    options.resourcesRoot ||
+    discoveredResourcesRoot ||
+    path.join(distDir, `mac-${arch}`, `${productName}.app`, "Contents", "Resources");
 
   return {
     arch,
     asarPath: options.asarPath || path.join(resourcesRoot, "app.asar"),
-    artifactPaths: options.artifactPaths || [
-      path.join(root, "dist", `${productName}-${version}-${arch}.dmg`),
-      path.join(root, "dist", `${productName}-${version}-${arch}-mac.zip`),
-    ],
+    artifactPaths:
+      options.artifactPaths || [
+        findExistingArtifactPath({ arch, distDir, extension: ".dmg", fsModule, productName, version }),
+        findExistingArtifactPath({ arch, distDir, extension: ".zip", fsModule, productName, suffix: "-mac", version }),
+      ],
     productName,
     resourcesRoot,
     version,
@@ -96,6 +149,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  findExistingArtifactPath,
+  findExistingMacResourcesRoot,
   loadPackageJson,
   requiredRuntimeFiles,
   resolvePackageLayout,
