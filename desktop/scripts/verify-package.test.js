@@ -85,6 +85,38 @@ test("verifyPackage discovers x64 mac app layout and artifacts without arch suff
   assert.match(result.artifactPaths[1], /NorthAgent-0\.1\.0-mac\.zip$/);
 });
 
+test("verifyPackage discovers mac-universal layout and universal artifacts", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "verify-package-universal-"));
+  const packageJson = {
+    name: "northagent-desktop",
+    version: "0.1.0",
+    build: { productName: "NorthAgent" },
+  };
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify(packageJson), "utf8");
+  const resourcesRoot = path.join(root, "dist", "mac-universal", "NorthAgent.app", "Contents", "Resources");
+  fs.mkdirSync(resourcesRoot, { recursive: true });
+  fs.writeFileSync(path.join(resourcesRoot, "app.asar"), "asar");
+  fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0-universal.dmg"), "artifact");
+  fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0-universal-mac.zip"), "artifact");
+  for (const runtimeFile of requiredRuntimeFiles) {
+    const target = path.join(resourcesRoot, runtimeFile);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, "runtime");
+  }
+
+  const result = verifyPackage({
+    arch: "universal",
+    asar: { listPackage: () => ["/src/main.js"] },
+    desktopRoot: root,
+    packageJson,
+  });
+
+  assert.equal(result.ok, true);
+  assert.match(result.resourcesRoot, /dist\/mac-universal\/NorthAgent\.app\/Contents\/Resources$/);
+  assert.match(result.artifactPaths[0], /NorthAgent-0\.1\.0-universal\.dmg$/);
+  assert.match(result.artifactPaths[1], /NorthAgent-0\.1\.0-universal-mac\.zip$/);
+});
+
 test("verifyPackage reports missing release artifacts", () => {
   const { packageJson, root } = createPackagedFixture({ removeArtifact: true });
 

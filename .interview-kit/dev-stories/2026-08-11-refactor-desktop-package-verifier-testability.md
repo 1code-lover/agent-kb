@@ -44,11 +44,11 @@ CLI 行为保持不变，`npm run verify:package` 仍然调用同一个文件，
 
 ## 验证与结果
 
-- `node --test desktop/scripts/*.test.js`：`28 passed`。
+- `node --test desktop/scripts/*.test.js`：`29 passed`。
 - `node desktop/scripts/verify-release-config.js`：通过。
 - `cd desktop && npm run verify:package`：通过。
 - `git diff --check`：通过。
 
 ## 面试表达版本
 
-我在收桌面发布链路时发现，`verify-package.js` 是发布闭环里的关键门禁，但它还是顶层脚本，没有单测。于是我把它重构成 CLI 加可测试函数，保留原有命令行为，同时让 package layout、runtime 文件、artifact 和 asar 检查都能被测试注入。然后我补了临时 packaged fixture，覆盖完整包、缺 dmg/zip、缺 runtime 文件、app.asar 混入测试文件，以及 x64 `mac/` 布局和无 arch 后缀产物。最后发布脚本测试扩到 28 条全过，真实 `npm run verify:package` 也继续通过。
+我在收桌面发布链路时发现，`verify-package.js` 是发布闭环里的关键门禁，但它还是顶层脚本，没有单测。于是我把它重构成 CLI 加可测试函数，保留原有命令行为，同时让 package layout、runtime 文件、artifact 和 asar 检查都能被测试注入。然后我补了临时 packaged fixture，覆盖完整包、缺 dmg/zip、缺 runtime 文件、app.asar 混入测试文件，以及 x64 `mac/` 布局、mac-universal 布局和无 arch 后缀产物。最后发布脚本测试扩到 29 条全过，真实 `npm run verify:package` 也继续通过。

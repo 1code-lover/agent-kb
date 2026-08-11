@@ -262,7 +262,7 @@ git diff --check
 - `node --test desktop/scripts/*.test.js`：`23 passed`，新增 `build-target.test.js` 覆盖 macOS build 入口的配置预检顺序、预检失败提前停止，以及非 macOS 平台只走对应 electron-builder target。
 - `desktop/scripts/verify-package.js` 已抽成可测试的 `verifyPackage()`，继续校验 dmg/zip 产物、packaged runtime resources、`app.asar` 和测试文件排除。
 - `verifyPackage()` 会优先发现实际存在的 mac app resources 目录和 dmg/zip 产物，兼容 `mac-arm64`、`mac` 和 `mac-universal` 等布局，避免只绑定当前 arm64 产物命名。
-- `node --test desktop/scripts/*.test.js`：`28 passed`，新增 `verify-package.test.js` 覆盖完整 package、x64 `mac/` 布局与无 arch 后缀产物、缺失 release artifact、缺失 runtime 文件和 `app.asar` 混入 `.test.js` 的阻断路径。
+- `node --test desktop/scripts/*.test.js`：`29 passed`，新增 `verify-package.test.js` 覆盖完整 package、x64 `mac/` 布局与无 arch 后缀产物、mac-universal 布局与 universal 产物、缺失 release artifact、缺失 runtime 文件和 `app.asar` 混入 `.test.js` 的阻断路径。
 - `cd desktop && npm run verify:package`：通过，确认当前 `desktop/dist` 产物内容仍满足 package 校验。
 
 ## 2026-08-11 release candidate 清单
