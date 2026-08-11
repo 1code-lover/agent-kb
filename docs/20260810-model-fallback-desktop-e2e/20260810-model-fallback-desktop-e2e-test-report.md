@@ -194,3 +194,13 @@ git diff --check
 - 新矩阵覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、boundary、exttext、cross-domain 与 contract 九类 focus，其中 contract 用例验证多知识库查询仍按主线契约拒绝。
 - 本轮给正向用例补充 `expected_any_term_groups`，避免同一证据在中英文回答之间波动时误报失败。
 - 报告产物 `cross-domain-kb-eval-report-v3.json` 已写入 artifacts，供后续扩展更多真实业务 KB 时复跑对比。
+
+
+## 2026-08-11 发布预检边界加固
+
+- `desktop/scripts/release-preflight.js` 现在返回可测试的预检摘要，并允许注入 Electron 路径、`app-builder` 路径、`xattr` 和失败处理函数；CLI 行为保持不变。
+- 非严格模式会继续提示缺少 Apple 凭证、Developer ID Application 证书或 `app-builder`，但不阻断本地打包准备；严格模式会在缺少发布凭证、证书或 `notarytool` 时失败。
+- `node --test desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js`：`15 passed`，覆盖非严格缺项摘要、严格缺凭证失败、严格全量 gate 通过、Electron bundle 缺失失败、Developer ID 解析和 `notarytool` 探测。
+- `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`17 passed`。
+- `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
+- `cd desktop && npm run build:preflight`：非严格模式通过；本机仍缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。

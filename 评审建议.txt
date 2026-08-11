@@ -1,13 +1,13 @@
 最新评审建议（2026-08-10）
 
 优点：
-1. 桌面发布准备已明显前进：Electron 升级到 43.3.0，补齐 CSP、asar、压缩、macOS hardened runtime、entitlements、release preflight、notarize hook 和 packaged resources 校验；release preflight 现在还能检查 Developer ID Application 证书和 `notarytool`。
+1. 桌面发布准备已明显前进：Electron 升级到 43.3.0，补齐 CSP、asar、压缩、macOS hardened runtime、entitlements、release preflight、notarize hook 和 packaged resources 校验；release preflight 现在还能检查 Developer ID Application 证书和 `notarytool`，并通过单测覆盖非严格缺项摘要、严格缺凭证失败和全量 gate 通过。
 2. macOS dmg/zip 已能成功生成，`verify:package` 已确认 `webapp/dist`、Python API、server、utils、`run_api.py`、`config.py` 和 `requirements.txt` 会进入 packaged app resources，且 `app.asar` 不包含测试文件。
 3. packaged app 已完成启动复核：主进程能使用 conda `agent-kb` Python 拉起 API，渲染进程能加载 packaged `webapp/dist/index.html` 并请求模型、知识库和聊天历史接口。
 4. 模型 fallback 已从 OpenAI-compatible 供应商扩展到本地 Ollama：Ollama 候选允许无 API Key，并可在未配置模型列表时读取 `/api/tags` 发现本机模型。
 5. 前端模型页和 Agent 页已补充更明确的 fallback action hint，并能展示“来源模型 -> 目标模型”的切换提示。
 6. 跨知识库泛化验证已形成更完整的可复跑门禁：`scripts/diag_cross_domain_kb_eval.py` 已扩展到 17 条真实用例，覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8、boundary、exttext 和多 KB 契约拒绝，真实 API 评测 `17/17 passed`。
-7. 本轮关键验证通过：模型服务单测、跨域诊断脚本单测、前端完整 Node 单测、桌面 Node 单测、Vite build、macOS 打包内容校验和 `git diff --check` 均通过。
+7. 本轮关键验证通过：模型服务单测、跨域诊断脚本单测、前端完整 Node 单测、桌面 Node 单测、release preflight/notarize 单测、Vite build、macOS 打包内容校验和 `git diff --check` 均通过。
 
 需要改进的地方：
 1. macOS 严格签名/公证还未完成；当前本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和有效 Developer ID 证书，虽然 `notarytool` 已可用，但只能确认发布配置、预检和打包链路，不能宣称正式公证发布完成。

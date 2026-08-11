@@ -78,61 +78,104 @@ function runPreflight(options = {}) {
   const env = options.env || process.env;
   const strict = options.strict ?? strictMode;
   const spawn = options.spawn || spawnSync;
+  const currentElectronAppPath = options.electronAppPath || electronAppPath;
+  const currentAppBuilderBinaryPath = options.appBuilderBinaryPath || appBuilderBinaryPath;
+  const reportFn = options.report || report;
+  const failFn = options.fail || fail;
+  const runXattrFn = options.runXattr || runXattr;
 
-  if (!fs.existsSync(electronAppPath)) {
-    fail(`Electron.app not found at ${electronAppPath}`);
+  const summary = {
+    ok: true,
+    platform: isDarwin,
+    strict,
+    electronAppPath: currentElectronAppPath,
+    appBuilderBinaryPath: currentAppBuilderBinaryPath,
+    appBuilderExecutable: null,
+    missingReleaseEnv: [],
+    developerIdReady: null,
+    developerIdIdentities: [],
+    notaryToolReady: null,
+    notaryToolPath: "",
+  };
+
+  if (!fs.existsSync(currentElectronAppPath)) {
+    summary.ok = false;
+    failFn(`Electron.app not found at ${currentElectronAppPath}`);
+    return summary;
   }
 
   if (isDarwin === "darwin") {
-    ensureExecutable(appBuilderBinaryPath, report);
+    const executableCheck = ensureExecutable(currentAppBuilderBinaryPath, reportFn);
+    summary.appBuilderExecutable = executableCheck;
+    if (!executableCheck.ok) {
+      const message = `app-builder binary missing at ${currentAppBuilderBinaryPath}`;
+      summary.ok = false;
+      if (strict) {
+        failFn(message);
+        return summary;
+      }
+      reportFn(message);
+    }
 
-    const sanitizeTargets = [electronAppPath];
+    const sanitizeTargets = [currentElectronAppPath];
     for (const target of sanitizeTargets) {
-      const removedQuarantine = runXattr(["-dr", "com.apple.quarantine", target]);
-      const removedProvenance = runXattr(["-dr", "com.apple.provenance", target]);
+      const removedQuarantine = runXattrFn(["-dr", "com.apple.quarantine", target]);
+      const removedProvenance = runXattrFn(["-dr", "com.apple.provenance", target]);
       if (!removedQuarantine.ok && removedQuarantine.stderr) {
-        report(`quarantine cleanup skipped for ${target}: ${removedQuarantine.stderr}`);
+        reportFn(`quarantine cleanup skipped for ${target}: ${removedQuarantine.stderr}`);
       }
       if (!removedProvenance.ok && removedProvenance.stderr) {
-        report(`provenance cleanup skipped for ${target}: ${removedProvenance.stderr}`);
+        reportFn(`provenance cleanup skipped for ${target}: ${removedProvenance.stderr}`);
       }
     }
 
     const missingReleaseEnv = getMissingReleaseEnv(env);
+    summary.missingReleaseEnv = missingReleaseEnv;
     if (missingReleaseEnv.length > 0) {
       const message = `mac release signing/notarization env missing: ${missingReleaseEnv.join(", ")}`;
+      summary.ok = false;
       if (strict) {
-        fail(message);
+        failFn(message);
+        return summary;
       }
-      report(message);
+      reportFn(message);
     } else {
-      report("mac signing/notarization env looks ready");
+      reportFn("mac signing/notarization env looks ready");
     }
 
     const identityCheck = findDeveloperIdApplicationIdentities(spawn);
+    summary.developerIdReady = identityCheck.ok;
+    summary.developerIdIdentities = identityCheck.identities;
     if (!identityCheck.ok) {
       const message = "Developer ID Application signing identity missing";
+      summary.ok = false;
       if (strict) {
-        fail(message);
+        failFn(message);
+        return summary;
       }
-      report(message);
+      reportFn(message);
     } else {
-      report(`Developer ID Application identity ready: ${identityCheck.identities[0]}`);
+      reportFn(`Developer ID Application identity ready: ${identityCheck.identities[0]}`);
     }
 
     const notaryTool = checkNotaryTool(spawn);
+    summary.notaryToolReady = notaryTool.ok;
+    summary.notaryToolPath = notaryTool.path || "";
     if (!notaryTool.ok) {
       const message = "xcrun notarytool not available";
+      summary.ok = false;
       if (strict) {
-        fail(message);
+        failFn(message);
+        return summary;
       }
-      report(message);
+      reportFn(message);
     } else {
-      report(`notarytool ready: ${notaryTool.path}`);
+      reportFn(`notarytool ready: ${notaryTool.path}`);
     }
   }
 
-  report(`Electron bundle present: ${electronAppPath}`);
+  reportFn(`Electron bundle present: ${currentElectronAppPath}`);
+  return summary;
 }
 
 if (require.main === module) {

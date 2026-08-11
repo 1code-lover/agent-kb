@@ -17,7 +17,7 @@
 
 `desktop/src/main.js` 在 packaged app 中改用 `process.resourcesPath` 定位资源，并添加 CSP 响应头。CSP 默认限制脚本来源，同时允许本地 API、Vite dev websocket、file/blob/data 等桌面端实际需要的资源。
 
-新增 `desktop/scripts/release-preflight.js`，用于检查 `Electron.app`、清理 macOS quarantine/provenance xattr、修复 `app-builder` execute bit，并在严格模式下要求 Apple 签名/公证环境变量、Developer ID Application 证书和 `notarytool` 可用性。新增 `desktop/scripts/notarize-mac.js` 作为 electron-builder `afterSign` hook；缺少凭证时默认跳过，`NORTHAGENT_REQUIRE_NOTARIZE=1` 时失败。新增 `desktop/scripts/verify-package.js` 校验 dmg/zip 和 packaged resources，并确保 `app.asar` 不包含测试文件。
+新增 `desktop/scripts/release-preflight.js`，用于检查 `Electron.app`、清理 macOS quarantine/provenance xattr、修复 `app-builder` execute bit，并在严格模式下要求 Apple 签名/公证环境变量、Developer ID Application 证书和 `notarytool` 可用性。预检现在会返回可测试摘要，便于回归非严格缺项提示、严格缺凭证失败和全量 gate 通过。新增 `desktop/scripts/notarize-mac.js` 作为 electron-builder `afterSign` hook；缺少凭证时默认跳过，`NORTHAGENT_REQUIRE_NOTARIZE=1` 时失败。新增 `desktop/scripts/verify-package.js` 校验 dmg/zip 和 packaged resources，并确保 `app.asar` 不包含测试文件。
 
 模型 fallback 在 `api/services/model_service.py` 中新增 Ollama `/api/tags` 读取、模型名提取、Ollama 候选判断和模型存在性检查。Ollama provider 不再因为缺 API Key 被排除；如果配置里没有模型列表，会尝试读取本机已安装模型作为候选。
 
@@ -30,8 +30,10 @@
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py -q`：`17 passed, 2 warnings`。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`8 passed, 1 warning`。
 - `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`80 passed`。
-- `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`8 passed`。
-- `node --test desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js desktop/src/*.test.js`：`13 passed`，覆盖环境变量、Developer ID 证书解析和 `notarytool` 探测。
+- `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`17 passed`。
+- `node --test desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js`：`15 passed`，覆盖非严格缺项摘要、严格缺凭证失败、严格全量 gate 通过、Electron bundle 缺失失败、Developer ID 证书解析和 `notarytool` 探测。
+- `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
+- `cd desktop && npm run build:preflight`：非严格模式通过，提示本机缺 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
 - `cd webapp && npm run build`：通过。
 - `cd desktop && npm run build:mac && npm run verify:package`：通过，生成 `NorthAgent-0.1.0-arm64.dmg` 和 `NorthAgent-0.1.0-arm64-mac.zip`。
 - packaged app 主进程启动验证通过：使用 `/opt/miniconda3/envs/agent-kb/bin/python` 拉起 API，加载 packaged `webapp/dist/index.html`，前端请求模型、知识库和聊天历史接口成功。

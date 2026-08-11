@@ -122,7 +122,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
   - `3d3e010 docs(project): mark closure pushed`
   - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 17 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。增量单测、前端构建、桌面单测、macOS 打包内容校验、跨域真实评测和 preflight 非严格模式已通过。
+- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 17 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。桌面 release preflight 也已补强为可测试摘要，严格模式会在缺 Apple 凭证/Developer ID/`notarytool` 时失败，非严格模式继续支持本地打包准备。
 
 ### 4.4 下一步建议
 
@@ -223,6 +223,20 @@ cd webapp && npm run build
 - `cd desktop && npm audit fix` 后 `npm audit --json`：剩余 `8 vulnerabilities`，其中 `7 high`、`1 critical`；主要需要单独评估 `electron-builder` 大版本升级。
 - `git diff --check`：通过。
 
+### 5.5 2026-08-11 跨 KB 泛化扩容验证
+
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`8 passed, 1 warning`，新增覆盖多 KB 契约拒绝、focus 汇总、同义关键词组和更宽的真实 KB 用例。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v3.json`：`17/17 passed`；覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、boundary、exttext、cross-domain 和 contract 九类 focus，`positive/negative/contract` 均为 `100%`。
+- 报告产物 `cross-domain-kb-eval-report-v3.json` 中，image-ocr、pdf-scan、mixed-batch、boundary、exttext 等领域的正向回答与负向隔离均通过；多 KB 查询契约拒绝也按预期 `400` 返回。
+
+### 5.6 2026-08-11 桌面发布预检边界加固
+
+- `node --test desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js`：`15 passed`，新增覆盖非严格缺项摘要、严格缺凭证失败、严格全量 gate 通过、Electron bundle 缺失失败、Developer ID 解析和 `notarytool` 探测。
+- `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`17 passed`。
+- `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
+- `cd desktop && npm run build:preflight`：非严格模式通过；提示本机缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
+- `git diff --check`：通过。
+
 ---
 
 ## 6. 已知问题和限制
@@ -231,7 +245,7 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有 3 个 KB、6 条正/负向用例的最小门禁，后续需要扩大非粮仓真实资料集和更复杂问题类型。
+- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有 17 条正/负向/契约用例门禁，后续需要继续扩大非粮仓真实资料集和更复杂问题类型。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
@@ -255,7 +269,7 @@ cd webapp && npm run build
 | `docs/20260807-grain-index-coverage-repair/` | 粮仓知识库索引覆盖修复计划 |
 | `docs/20260810-grain-retrieval-quality-tuning/` | 粮仓检索排序质量调优、实验矩阵和最终测试报告 |
 | `docs/20260810-model-fallback-desktop-e2e/` | 模型 fallback、模型健康状态、评测断点续跑和桌面端 E2E 验证 |
-| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report.json` | 跨知识库、跨领域真实问答和隔离诊断报告 |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v3.json` | 跨知识库、跨领域真实问答和隔离诊断报告 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
@@ -293,9 +307,3 @@ cd webapp && npm run build
 | `25dc20a` | feat(kb): add asset registry and preview api |
 
 查看完整历史：`git log --oneline -30`
-
-### 5.5 2026-08-11 跨 KB 泛化扩容验证
-
-- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`8 passed, 1 warning`，新增覆盖多 KB 契约拒绝、focus 汇总、同义关键词组和更宽的真实 KB 用例。
-- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v3.json`：`17/17 passed`；覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、boundary、exttext、cross-domain 和 contract 九类 focus，`positive/negative/contract` 均为 `100%`。
-- 报告产物 `cross-domain-kb-eval-report-v3.json` 中，image-ocr、pdf-scan、mixed-batch、boundary、exttext 等领域的正向回答与负向隔离均通过；多 KB 查询契约拒绝也按预期 `400` 返回。
