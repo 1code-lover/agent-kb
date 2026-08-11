@@ -325,6 +325,8 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `3a7df45` | fix(desktop): upgrade builder release preflight |
+| `005fc60` | docs(project): sync current project status |
 | `4565955` | chore: update dev story capture state |
 | `88044b7` | feat(desktop): verify release config gates |
 | `b065cc7` | chore: update release story state |
