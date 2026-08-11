@@ -143,6 +143,39 @@ def test_evaluate_case_marks_missing_source_kb_id_as_failure(monkeypatch) -> Non
     assert result["checks"]["source_kb_allowed"] is False
 
 
+def test_evaluate_contract_case_accepts_expected_http_error(monkeypatch) -> None:
+    """多知识库契约拒绝应按预期 HTTP 状态通过。"""
+
+    monkeypatch.setattr(
+        cross_eval,
+        "_post_json",
+        lambda *_args: {
+            "code": 400,
+            "_http_status": 400,
+            "message": "不支持多知识库查询",
+        },
+    )
+
+    result = cross_eval.evaluate_case(
+        {
+            "id": "multi-kb-contract",
+            "kind": "contract",
+            "focus": "contract",
+            "kb_ids": ["kb-a", "kb-b"],
+            "question": "compare",
+            "expected_http_status": 400,
+            "expected_error_terms": ["不支持多知识库查询"],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is True
+    assert result["http_status"] == 400
+    assert result["checks"]["http_status_ok"] is True
+    assert result["checks"]["expected_error_terms_hit"] is True
+
+
 def test_run_evaluation_writes_report_and_returns_nonzero_on_failure(tmp_path: Path, monkeypatch) -> None:
     """失败用例应写入报告，并返回非 0。"""
 
@@ -181,3 +214,19 @@ def test_run_evaluation_writes_report_and_returns_nonzero_on_failure(tmp_path: P
     assert exit_code == 1
     assert report["summary"]["failed"] == 1
     assert saved["cases"][0]["id"] == "fail"
+
+
+def test_summarize_includes_focus_groups() -> None:
+    """汇总应按 focus 统计不同领域。"""
+
+    report = cross_eval.summarize(
+        [
+            {"id": "a", "kind": "positive", "focus": "grain", "passed": True},
+            {"id": "b", "kind": "negative", "focus": "cross-domain", "passed": False},
+            {"id": "c", "kind": "contract", "focus": "contract", "passed": True},
+        ]
+    )
+
+    assert report["contract_total"] == 1
+    assert report["focus_summary"]["grain"]["pass_rate"] == 1.0
+    assert report["focus_summary"]["contract"]["passed"] == 1

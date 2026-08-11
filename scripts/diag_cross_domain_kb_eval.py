@@ -18,6 +18,7 @@ DEFAULT_TIMEOUT = 120.0
 DEFAULT_CASES: list[dict[str, Any]] = [
     {
         "id": "grain-positive-safety-policy",
+        "focus": "grain",
         "kind": "positive",
         "kb_ids": ["grain-knowledge-base"],
         "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
@@ -27,6 +28,7 @@ DEFAULT_CASES: list[dict[str, Any]] = [
     },
     {
         "id": "desktop-positive-passcode",
+        "focus": "desktop",
         "kind": "positive",
         "kb_ids": ["diag-desktop-e2e-1786353063"],
         "question": "What is the unique desktop workflow passcode in the diagnostic document?",
@@ -36,6 +38,7 @@ DEFAULT_CASES: list[dict[str, Any]] = [
     },
     {
         "id": "utf8-positive-boundary",
+        "focus": "utf8",
         "kind": "positive",
         "kb_ids": ["diag-kb-utf8-1785505921"],
         "question": "这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？",
@@ -44,7 +47,48 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "required_source_kb_ids": ["diag-kb-utf8-1785505921"],
     },
     {
+        "id": "image-positive-boundary",
+        "focus": "image-ocr",
+        "kind": "positive",
+        "kb_ids": ["diag-image-ocr-20260807-r2"],
+        "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+        "expected_terms": ["folder is for organization only", "knowledge base is the authorization boundary"],
+        "allowed_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+        "required_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+    },
+    {
+        "id": "pdf-positive-fallback",
+        "focus": "pdf-scan",
+        "kind": "positive",
+        "kb_ids": ["diag-pdf-scan-20260807-r2"],
+        "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+        "expected_terms": ["OCR fallback must merge every predict batch per page"],
+        "allowed_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+        "required_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+    },
+    {
+        "id": "mixed-positive-rollback",
+        "focus": "mixed-batch",
+        "kind": "positive",
+        "kb_ids": ["diag-mixed-batch-20260807-r2"],
+        "question": "Who gives the final rollback approval in the Friday release cutover note?",
+        "expected_terms": ["platform duty lead", "final rollback approval"],
+        "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+        "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+    },
+    {
+        "id": "mixed-positive-preview",
+        "focus": "mixed-batch",
+        "kind": "positive",
+        "kb_ids": ["diag-mixed-batch-20260807-r2"],
+        "question": "What should every evidence preview include?",
+        "expected_terms": ["doc_id", "preview_locator"],
+        "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+        "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+    },
+    {
         "id": "desktop-negative-grain-question",
+        "focus": "cross-domain",
         "kind": "negative",
         "kb_ids": ["diag-desktop-e2e-1786353063"],
         "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
@@ -54,6 +98,7 @@ DEFAULT_CASES: list[dict[str, Any]] = [
     },
     {
         "id": "grain-negative-desktop-passcode",
+        "focus": "cross-domain",
         "kind": "negative",
         "kb_ids": ["grain-knowledge-base"],
         "question": "What is the unique desktop workflow passcode in the diagnostic document?",
@@ -63,6 +108,7 @@ DEFAULT_CASES: list[dict[str, Any]] = [
     },
     {
         "id": "grain-negative-utf8-exact-boundary",
+        "focus": "cross-domain",
         "kind": "negative",
         "kb_ids": ["grain-knowledge-base"],
         "question": "这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？",
@@ -70,6 +116,45 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "allowed_source_kb_ids": ["grain-knowledge-base"],
         "forbidden_source_kb_ids": ["diag-kb-utf8-1785505921"],
         "note": "允许 grain KB 回答相似的授权边界概念，但不能泄漏 UTF-8 诊断文档的精确证据短语。",
+    },
+    {
+        "id": "image-negative-pdf-fallback",
+        "focus": "cross-domain",
+        "kind": "negative",
+        "kb_ids": ["diag-image-ocr-20260807-r2"],
+        "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+        "forbidden_terms": ["OCR fallback must merge every predict batch per page"],
+        "allowed_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+        "forbidden_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+    },
+    {
+        "id": "pdf-negative-image-boundary",
+        "focus": "cross-domain",
+        "kind": "negative",
+        "kb_ids": ["diag-pdf-scan-20260807-r2"],
+        "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+        "forbidden_terms": ["folder is organization only", "knowledge base is the authorization boundary"],
+        "allowed_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+        "forbidden_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+    },
+    {
+        "id": "mixed-negative-grain-policy",
+        "focus": "cross-domain",
+        "kind": "negative",
+        "kb_ids": ["diag-mixed-batch-20260807-r2"],
+        "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+        "forbidden_terms": ["预防为主", "综合防治", "粮油安全储存守则"],
+        "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+        "forbidden_source_kb_ids": ["grain-knowledge-base"],
+    },
+    {
+        "id": "multi-kb-contract-rejected",
+        "focus": "contract",
+        "kind": "contract",
+        "kb_ids": ["grain-knowledge-base", "diag-image-ocr-20260807-r2"],
+        "question": "Please compare the grain safety policy and the OCR boundary rule.",
+        "expected_http_status": 400,
+        "expected_error_terms": ["不支持多知识库查询"],
     },
 ]
 
@@ -97,12 +182,15 @@ def _post_json(api_base: str, path: str, payload: dict[str, Any], timeout: float
     request.add_header("Content-Type", "application/json")
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            return json.loads(response.read().decode("utf-8"))
+            payload = json.loads(response.read().decode("utf-8"))
+            if isinstance(payload, dict):
+                payload["_http_status"] = response.status
+            return payload
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
-        return {"code": exc.code, "message": detail}
+        return {"code": exc.code, "_http_status": exc.code, "message": detail}
     except urllib.error.URLError as exc:
-        return {"code": -1, "message": str(exc)}
+        return {"code": -1, "_http_status": -1, "message": str(exc)}
 
 
 def _as_list(value: Any) -> list[str]:
@@ -151,16 +239,34 @@ def _payload_text(data: dict[str, Any]) -> str:
     return answer + "\n" + json.dumps({"sources": sources, "evidence": evidence}, ensure_ascii=False)
 
 
+def _resolve_http_status(response: dict[str, Any]) -> int:
+    """兼容不同响应形态，提取 HTTP 状态码。"""
+    if "_http_status" in response and response["_http_status"] is not None:
+        try:
+            return int(response["_http_status"])
+        except Exception:
+            return -1
+    code = response.get("code")
+    if code == 0:
+        return 200
+    try:
+        return int(code)
+    except Exception:
+        return -1
+
+
 def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[str, Any]:
     """执行单条跨领域用例并计算通过状态。"""
     case_id = str(case.get("id") or "case")
     kind = str(case.get("kind") or "positive")
+    focus = str(case.get("focus") or "uncategorized")
     kb_ids = _as_list(case.get("kb_ids"))
     if not kb_ids:
         raise ValueError(f"{case_id}: kb_ids is required")
     question = str(case.get("question") or "").strip()
     if not question:
         raise ValueError(f"{case_id}: question is required")
+    expected_http_status = int(case.get("expected_http_status") or 200)
 
     response = _post_json(
         api_base,
@@ -175,14 +281,18 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
     )
 
     data: dict[str, Any] = {}
+    response_message = str(response.get("message") or "")
+    http_status = _resolve_http_status(response)
+    status_ok = http_status == expected_http_status
     error: str | None = None
-    if response.get("code") == 0 and isinstance(response.get("data"), dict):
+    if http_status == 200 and isinstance(response.get("data"), dict):
         data = response["data"]
     else:
-        error = str(response.get("message") or response)
+        error = None if status_ok else response_message or str(response)
 
     expected_terms = _as_list(case.get("expected_terms"))
     forbidden_terms = _as_list(case.get("forbidden_terms"))
+    expected_error_terms = _as_list(case.get("expected_error_terms"))
     allowed_source_kb_ids = set(_as_list(case.get("allowed_source_kb_ids")))
     required_source_kb_ids = set(_as_list(case.get("required_source_kb_ids")))
     forbidden_source_kb_ids = set(_as_list(case.get("forbidden_source_kb_ids")))
@@ -193,37 +303,55 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
     source_kb_set = set(source_kb_ids)
     source_kb_id_missing_count = max(source_record_count - len(source_kb_ids), 0)
 
-    require_sources = bool(case.get("require_sources", kind == "positive"))
-    source_presence_ok = (source_record_count > 0) if require_sources else True
-    source_kb_known = source_record_count == len(source_kb_ids)
-    source_kb_allowed = (
-        True
-        if not allowed_source_kb_ids
-        else source_kb_known and all(kb_id in allowed_source_kb_ids for kb_id in source_kb_ids)
-    )
-    required_source_kb_hit = required_source_kb_ids.issubset(source_kb_set)
-    forbidden_source_kb_clean = not bool(source_kb_set & forbidden_source_kb_ids)
-    expected_terms_hit = _contains_all(answer, expected_terms)
-    forbidden_terms_clean = not _contains_any(combined_text, forbidden_terms)
+    if expected_http_status != 200:
+        expected_error_terms_hit = _contains_all(response_message, expected_error_terms) if expected_error_terms else True
+        checks = {
+            "http_status_ok": status_ok,
+            "expected_error_terms_hit": expected_error_terms_hit,
+            "source_presence_ok": True,
+            "source_kb_known": True,
+            "source_kb_allowed": True,
+            "required_source_kb_hit": True,
+            "forbidden_source_kb_clean": True,
+            "expected_terms_hit": True,
+            "forbidden_terms_clean": True,
+        }
+        passed = status_ok and expected_error_terms_hit
+    else:
+        require_sources = bool(case.get("require_sources", kind == "positive"))
+        source_presence_ok = (source_record_count > 0) if require_sources else True
+        source_kb_known = source_record_count == len(source_kb_ids)
+        source_kb_allowed = (
+            True
+            if not allowed_source_kb_ids
+            else source_kb_known and all(kb_id in allowed_source_kb_ids for kb_id in source_kb_ids)
+        )
+        required_source_kb_hit = required_source_kb_ids.issubset(source_kb_set)
+        forbidden_source_kb_clean = not bool(source_kb_set & forbidden_source_kb_ids)
+        expected_terms_hit = _contains_all(answer, expected_terms)
+        forbidden_terms_clean = not _contains_any(combined_text, forbidden_terms)
 
-    checks = {
-        "http_ok": error is None,
-        "expected_terms_hit": expected_terms_hit,
-        "forbidden_terms_clean": forbidden_terms_clean,
-        "source_presence_ok": source_presence_ok,
-        "source_kb_known": source_kb_known,
-        "source_kb_allowed": source_kb_allowed,
-        "required_source_kb_hit": required_source_kb_hit,
-        "forbidden_source_kb_clean": forbidden_source_kb_clean,
-    }
-    passed = all(checks.values())
+        checks = {
+            "http_status_ok": status_ok,
+            "expected_terms_hit": expected_terms_hit,
+            "forbidden_terms_clean": forbidden_terms_clean,
+            "source_presence_ok": source_presence_ok,
+            "source_kb_known": source_kb_known,
+            "source_kb_allowed": source_kb_allowed,
+            "required_source_kb_hit": required_source_kb_hit,
+            "forbidden_source_kb_clean": forbidden_source_kb_clean,
+        }
+        passed = all(checks.values())
 
     return {
         "id": case_id,
         "kind": kind,
+        "focus": focus,
         "kb_ids": kb_ids,
         "question": question,
         "expected_terms": expected_terms,
+        "expected_error_terms": expected_error_terms,
+        "expected_http_status": expected_http_status,
         "forbidden_terms": forbidden_terms,
         "allowed_source_kb_ids": sorted(allowed_source_kb_ids),
         "required_source_kb_ids": sorted(required_source_kb_ids),
@@ -232,6 +360,8 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         "source_record_count": source_record_count,
         "source_kb_ids": source_kb_ids,
         "source_kb_id_missing_count": source_kb_id_missing_count,
+        "http_status": http_status,
+        "response_message": response_message,
         "checks": checks,
         "passed": passed,
         "error": error,
@@ -245,7 +375,11 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     passed = [item for item in results if item.get("passed")]
     positive = [item for item in results if item.get("kind") == "positive"]
     negative = [item for item in results if item.get("kind") == "negative"]
+    contract = [item for item in results if item.get("kind") == "contract"]
     failed = [item for item in results if not item.get("passed")]
+    focus_groups: dict[str, list[dict[str, Any]]] = {}
+    for item in results:
+        focus_groups.setdefault(str(item.get("focus") or "uncategorized"), []).append(item)
 
     def _rate(rows: list[dict[str, Any]]) -> float | None:
         if not rows:
@@ -261,7 +395,18 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "positive_pass_rate": _rate(positive),
         "negative_total": len(negative),
         "negative_pass_rate": _rate(negative),
+        "contract_total": len(contract),
+        "contract_pass_rate": _rate(contract),
         "failed_case_ids": [str(item.get("id")) for item in failed],
+        "focus_summary": {
+            focus: {
+                "total": len(rows),
+                "passed": sum(1 for item in rows if item.get("passed")),
+                "failed": sum(1 for item in rows if not item.get("passed")),
+                "pass_rate": _rate(rows),
+            }
+            for focus, rows in sorted(focus_groups.items())
+        },
     }
 
 

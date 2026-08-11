@@ -185,3 +185,11 @@ git diff --check
 ```
 
 结果：通过。
+
+
+## 2026-08-11 跨 KB 泛化扩容验证
+
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`7 passed, 1 warning`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v2.json`：`14/14 passed`。
+- 新矩阵覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、cross-domain 与 contract 七类 focus，其中 contract 用例验证多知识库查询仍按主线契约拒绝。
+- 报告产物 `cross-domain-kb-eval-report-v2.json` 已写入 artifacts，供后续扩展更多真实业务 KB 时复跑对比。
