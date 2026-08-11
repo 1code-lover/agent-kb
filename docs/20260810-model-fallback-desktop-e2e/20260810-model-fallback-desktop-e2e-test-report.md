@@ -2,7 +2,7 @@
 
 ## 结论
 
-本轮模型配置韧性、评测断点续跑、模型健康 API/UI、桌面端真实工作流诊断、macOS 打包内容校验和跨知识库泛化诊断均已完成验证。macOS 启动桌面端时出现的“危险 App / Electron.app 被移除”问题已定位为旧 Electron 31.7.7 公证撤销，升级到 Electron 43.3.0 后桌面端可独立启动，并能使用 conda `agent-kb` 环境拉起 API。
+本轮模型配置韧性、评测断点续跑、模型健康 API/UI、桌面端真实工作流诊断、macOS 打包内容校验和跨知识库泛化诊断均已完成验证。macOS 启动桌面端时出现的“危险 App / Electron.app 被移除”问题已定位为旧 Electron 31.7.7 公证撤销，升级到 Electron 43.3.0 后桌面端可独立启动，并能使用 conda `agent-kb` 环境拉起 API。本次增量还把 fallback 探测结果写入 `fallback_attempts`，并在 Models 页和 Agent 页展示 `probeSummary`，让用户能直接看到最近一次候选探测摘要。
 
 正式签名/公证尚未完成：本机缺少 Apple Developer 凭证、Developer ID 证书和 `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` 环境变量，因此当前结论只覆盖发布配置、预检、打包、packaged app 启动和内容校验。
 
@@ -15,6 +15,7 @@
 | `GET /api/model/health` | 通过 | `tests/api/test_settings_routes.py` |
 | QA eval `--resume` / `--stop-on-api-error` | 通过 | `tests/scripts/test_run_grain_qa_eval.py` |
 | 前端模型健康状态映射 | 通过 | `webapp/src/domain/modelHealth.test.js` |
+| fallback 探测摘要 UI | 通过 | `webapp/src/pages/ModelsPage.jsx`、`webapp/src/pages/AgentPage.jsx` |
 | 桌面 Python 运行时选择 | 通过 | `desktop/src/python-process.test.js` |
 | 前端 build | 通过 | `cd webapp && npm run build` |
 | 桌面端独立启动 API | 通过 | `storage/logs/desktop_runtime.log` |
@@ -57,6 +58,18 @@ cd webapp && npm run build
 ```
 
 结果：Vite build 通过。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
+```
+
+结果：`55 passed, 8 warnings`
+
+```bash
+node --test webapp/src/domain/modelHealth.test.js webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js
+```
+
+结果：`81 passed`
 
 ```bash
 git diff --check
@@ -103,6 +116,7 @@ notarization indicates this code has been revoked
 - Ollama 作为本地供应商时允许无 API Key 进入 fallback 候选。
 - 当 Ollama provider 未显式配置模型列表时，fallback 会尝试读取 `/api/tags` 发现本地已安装模型。
 - 前端模型页和 Agent 页补充 fallback action hint 与来源到目标的切换提示。
+- 后端 fallback health 继续细化为 `fallback_attempts`，前端以 `probeSummary` 呈现最近一次候选探测结果。
 - Electron 主进程补充 CSP 响应头。
 - `desktop` 新增 release preflight 脚本、macOS hardened runtime 和 entitlements 配置。
 - `desktop` 新增 notarize hook 和 packaged resources 校验脚本，确认 `webapp/dist`、Python API、server、utils、`run_api.py`、`config.py` 和 `requirements.txt` 会进入 macOS app resources。
@@ -204,3 +218,27 @@ git diff --check
 - `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`17 passed`。
 - `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
 - `cd desktop && npm run build:preflight`：非严格模式通过；本机仍缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
+
+## 2026-08-11 fallback 探测摘要增量复核
+
+这次增量主要是把模型 fallback 的候选探测结果可视化到前端，避免用户只能看到“切换成功/失败”，却不知道中间探了哪些候选。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
+```
+
+结果：`55 passed, 8 warnings`
+
+```bash
+node --test webapp/src/domain/modelHealth.test.js webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js
+```
+
+结果：`81 passed`
+
+```bash
+cd webapp && npm run build
+```
+
+结果：通过，`ModelsPage` 和 `AgentPage` 现在展示 fallback 探测摘要。

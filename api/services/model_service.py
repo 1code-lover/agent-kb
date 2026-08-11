@@ -42,6 +42,7 @@ def _default_model_health() -> dict[str, Any]:
         "fallback_from": None,
         "fallback_to": None,
         "candidate_count": 0,
+        "fallback_attempts": [],
     }
 
 
@@ -350,6 +351,7 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
         return {"applied": False, "reason": "non_recoverable", "error_kind": error_kind, "candidate_count": len(candidates)}
 
     trace_id = new_trace_id("fallback")
+    probe_results: list[dict[str, Any]] = []
     for candidate in candidates:
         if _candidate_is_ollama(candidate):
             reachable, detail, _meta = _check_ollama_model(candidate["model"], candidate["api_base"], trace_id)
@@ -360,6 +362,15 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
                 candidate["api_key"],
                 trace_id,
             )
+        probe_results.append(
+            {
+                "service_provider": candidate["service_provider"],
+                "model": candidate["model"],
+                "api_base": candidate["api_base"],
+                "reachable": reachable,
+                "detail": detail,
+            }
+        )
         if not reachable:
             continue
         selected = select_model(
@@ -385,21 +396,29 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
                 "api_base": selected.get("api_base", ""),
             },
             candidate_count=len(candidates),
+            fallback_attempts=probe_results,
         )
         return {
             "applied": True,
             "error_kind": error_kind,
             "selected": selected,
             "candidate_count": len(candidates),
+            "fallback_attempts": probe_results,
             "health": status,
         }
 
-    status = update_model_health(state="unavailable", last_checked_at=now_iso(), candidate_count=len(candidates))
+    status = update_model_health(
+        state="unavailable",
+        last_checked_at=now_iso(),
+        candidate_count=len(candidates),
+        fallback_attempts=probe_results,
+    )
     return {
         "applied": False,
         "reason": "no_reachable_candidate",
         "error_kind": error_kind,
         "candidate_count": len(candidates),
+        "fallback_attempts": probe_results,
         "health": status,
     }
 

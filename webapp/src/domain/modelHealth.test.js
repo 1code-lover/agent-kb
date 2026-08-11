@@ -29,6 +29,10 @@ test("buildModelHealthSummary 会展示自动 fallback 的来源和目标", () =
     last_error_kind: "quota_exhausted",
     fallback_from: { service_provider: "OpenAI", model: "gpt-4o" },
     fallback_to: { service_provider: "阿里百炼", model: "qwen-plus" },
+    fallback_attempts: [
+      { service_provider: "OpenAI", model: "gpt-4o", reachable: false, detail: "http_401" },
+      { service_provider: "Ollama", model: "qwen2.5:7b", reachable: true, detail: "reachable" },
+    ],
   });
 
   assert.equal(summary.state, "fallback_applied");
@@ -38,6 +42,8 @@ test("buildModelHealthSummary 会展示自动 fallback 的来源和目标", () =
   assert.match(summary.detail, /额度耗尽/);
   assert.match(summary.actionHint, /已自动切换到可用模型/);
   assert.equal(summary.transitionLabel, "OpenAI / gpt-4o → 阿里百炼 / qwen-plus");
+  assert.match(summary.probeSummary, /已探测 2 个候选/);
+  assert.match(summary.probeSummary, /Ollama \/ qwen2.5:7b/);
 });
 
 test("buildModelHealthSummary 会把 degraded 映射为异常提示", () => {
@@ -80,4 +86,19 @@ test("buildModelHealthSummary 缺少状态时会回退为未知", () => {
   assert.equal(summary.chipLabel, "状态未知");
   assert.equal(summary.title, "模型状态未知");
   assert.match(summary.actionHint, /重新探活/);
+});
+
+test("buildModelHealthSummary 会在不可用状态展示候选探测摘要", () => {
+  const summary = buildModelHealthSummary({
+    state: "unavailable",
+    candidate_count: 2,
+    fallback_attempts: [
+      { service_provider: "Ollama", model: "qwen2.5:7b", reachable: false, detail: "ollama_unreachable" },
+      { service_provider: "OpenAI", model: "gpt-4o", reachable: false, detail: "http_403" },
+    ],
+  });
+
+  assert.equal(summary.state, "unavailable");
+  assert.match(summary.probeSummary, /已探测 2 个候选/);
+  assert.match(summary.probeSummary, /OpenAI \/ gpt-4o/);
 });

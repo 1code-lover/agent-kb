@@ -449,6 +449,15 @@ def test_attempt_model_fallback_selects_first_reachable_candidate(monkeypatch: p
     assert store.values["model_health_status"]["state"] == "fallback_applied"
     assert store.values["model_health_status"]["last_error_kind"] == "quota_exhausted"
     assert store.values["model_health_status"]["fallback_to"]["model"] == "good-chat"
+    assert store.values["model_health_status"]["fallback_attempts"] == [
+        {
+            "service_provider": "Acme",
+            "model": "good-chat",
+            "api_base": "https://acme.example/v1",
+            "reachable": True,
+            "detail": "reachable",
+        }
+    ]
     assert session_updates[0][0] == "sess-fallback"
 
 
@@ -474,6 +483,7 @@ def test_attempt_model_fallback_records_unavailable_when_no_candidate(monkeypatc
         "reason": "no_reachable_candidate",
         "error_kind": "forbidden",
         "candidate_count": 0,
+        "fallback_attempts": [],
         "health": store.values["model_health_status"],
     }
     assert store.values["model_health_status"]["state"] == "unavailable"
@@ -527,6 +537,15 @@ def test_attempt_model_fallback_can_select_ollama_candidate(monkeypatch: pytest.
     assert result["selected"]["api_key_valid"] is True
     assert checks == [("qwen2.5:7b", "http://localhost:11434")]
     assert store.values["model_health_status"]["fallback_to"]["service_provider"] == "Ollama"
+    assert store.values["model_health_status"]["fallback_attempts"] == [
+        {
+            "service_provider": "Ollama",
+            "model": "qwen2.5:7b",
+            "api_base": "http://localhost:11434",
+            "reachable": True,
+            "detail": "reachable",
+        }
+    ]
     assert session_updates[0][0] == "ollama-fallback"
 
 

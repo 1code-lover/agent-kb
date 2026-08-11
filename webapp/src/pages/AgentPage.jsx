@@ -938,6 +938,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
             <span className="qa-badge">{"上传目标：" + uploadTargetText}</span>
           </div>
           <p className="qa-inline-tip">{modelHealthSummary.actionHint || "当前模型可继续使用。"}</p>
+          {modelHealthSummary.probeSummary ? <p className="qa-inline-tip">{modelHealthSummary.probeSummary}</p> : null}
         </div>
         <div className="qa-hero-actions">
           <Link className="secondary-button link-button" to={buildKnowledgeWorkspaceLink(selectedKbId)}>

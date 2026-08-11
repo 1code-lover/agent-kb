@@ -300,6 +300,7 @@ export default function ModelsPage() {
           <p className="simple-note">{currentInfo?.api_base || "先在下面保存一个供应商。"}</p>
           <p className="simple-note">{modelHealthSummary.title}</p>
           <p className="simple-note">{modelHealthSummary.actionHint}</p>
+          {modelHealthSummary.probeSummary ? <p className="simple-note">{modelHealthSummary.probeSummary}</p> : null}
           <p className="simple-note">
             {modelHealthSummary.detail}
           </p>

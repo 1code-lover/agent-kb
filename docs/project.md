@@ -3,7 +3,7 @@
 > 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构、验证证据和已知问题。
 > **维护规则**：每次有意义的提交后更新「当前进度」「测试与验证」「已知问题」「最近提交」四节；重大架构变化更新「架构」节。日期使用绝对日期。
 
-最近更新：2026-08-10
+最近更新：2026-08-11
 
 ---
 
@@ -122,11 +122,11 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
   - `3d3e010 docs(project): mark closure pushed`
   - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 17 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。桌面 release preflight 也已补强为可测试摘要，严格模式会在缺 Apple 凭证/Developer ID/`notarytool` 时失败，非严格模式继续支持本地打包准备。
+- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 17 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。当前本地未提交增量把 fallback 探测结果继续细化为 `fallback_attempts` / `probeSummary`，让 Models 页和 Agent 页能直接看见最近一次候选探测摘要。桌面 release preflight 也已补强为可测试摘要，严格模式会在缺 Apple 凭证/Developer ID/`notarytool` 时失败，非严格模式继续支持本地打包准备。
 
 ### 4.4 下一步建议
 
-- **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量补齐 Ollama 候选和更明确的 UI 切换提示。
+- **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量把候选探测摘要同步到 UI，补齐 Ollama 候选和更明确的模型切换提示。
 - **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应继续验证桌面端安装后启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
 - **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；release preflight 现在还能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`。下一步补齐凭证和证书后，跑严格 release preflight、签名、公证、安装后启动回归。
@@ -236,6 +236,12 @@ cd webapp && npm run build
 - `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
 - `cd desktop && npm run build:preflight`：非严格模式通过；提示本机缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
 - `git diff --check`：通过。
+
+### 5.7 2026-08-11 fallback 探测摘要增量复核
+
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q`：`55 passed, 8 warnings`。
+- `node --test webapp/src/domain/modelHealth.test.js webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`81 passed`。
+- `cd webapp && npm run build`：通过，`ModelsPage` 和 `AgentPage` 能展示 `probeSummary`。
 
 ---
 

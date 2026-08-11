@@ -46,6 +46,21 @@ function formatReason(kind) {
   return labels[normalized] || normalized;
 }
 
+function formatFallbackAttempts(attempts) {
+  if (!Array.isArray(attempts) || attempts.length === 0) {
+    return "";
+  }
+
+  const lastAttempt = attempts[attempts.length - 1] || {};
+  const attemptedCount = attempts.length;
+  const lastLabel = formatModelLabel(lastAttempt);
+  const lastStatus = lastAttempt.reachable ? "可用" : lastAttempt.detail || "不可用";
+  if (!lastLabel) {
+    return `已探测 ${attemptedCount} 个候选，最近一次结果：${lastStatus}`;
+  }
+  return `已探测 ${attemptedCount} 个候选，最近一次：${lastLabel}（${lastStatus}）`;
+}
+
 export function buildModelHealthSummary(modelHealth) {
   const state = normalizeModelHealthState(modelHealth?.state);
   const currentLabel = formatModelLabel(modelHealth);
@@ -54,6 +69,8 @@ export function buildModelHealthSummary(modelHealth) {
   const lastError = typeof modelHealth?.last_error === "string" ? modelHealth.last_error.trim() : "";
   const reason = formatReason(modelHealth?.last_error_kind);
   const candidateCount = Number.isInteger(modelHealth?.candidate_count) ? modelHealth.candidate_count : 0;
+  const fallbackAttempts = Array.isArray(modelHealth?.fallback_attempts) ? modelHealth.fallback_attempts : [];
+  const probeSummary = formatFallbackAttempts(fallbackAttempts);
 
   if (state === "healthy") {
     return {
@@ -79,6 +96,7 @@ export function buildModelHealthSummary(modelHealth) {
         [fallbackFrom ? `已从 ${fallbackFrom} 切换` : "", fallbackTo ? `到 ${fallbackTo}` : "", reason ? `原因：${reason}` : ""]
           .filter(Boolean)
           .join("，") || "已完成自动 fallback。",
+      probeSummary: probeSummary || (candidateCount ? `已探测 ${candidateCount} 个候选。` : ""),
       currentLabel,
       fallbackFrom,
       fallbackTo,
@@ -98,6 +116,7 @@ export function buildModelHealthSummary(modelHealth) {
         [reason ? `最近错误类型：${reason}` : "", lastError ? `最近错误：${lastError}` : ""]
           .filter(Boolean)
           .join("，") || "模型最近一次调用出现异常，但仍保留当前配置。",
+      probeSummary: probeSummary || (candidateCount ? `已探测 ${candidateCount} 个候选。` : ""),
       currentLabel,
     };
   }
@@ -114,6 +133,7 @@ export function buildModelHealthSummary(modelHealth) {
         [reason ? `最近错误类型：${reason}` : "", lastError ? `最近错误：${lastError}` : "", candidateCount ? `候选数：${candidateCount}` : ""]
           .filter(Boolean)
           .join("，") || "自动探活后没有找到可用候选。",
+      probeSummary: probeSummary || (candidateCount ? `已探测 ${candidateCount} 个候选。` : ""),
       currentLabel,
     };
   }
@@ -126,6 +146,7 @@ export function buildModelHealthSummary(modelHealth) {
     summary: currentLabel ? `当前启用 ${currentLabel}` : "尚未读取到可用模型状态",
     actionHint: "先按当前配置继续使用，必要时到模型配置页重新探活。",
     detail: "还没有写入健康检查结果，先按当前配置继续使用。",
+    probeSummary: probeSummary || "",
     currentLabel,
   };
 }
