@@ -449,6 +449,16 @@ def test_attempt_model_fallback_selects_first_reachable_candidate(monkeypatch: p
     assert store.values["model_health_status"]["state"] == "fallback_applied"
     assert store.values["model_health_status"]["last_error_kind"] == "quota_exhausted"
     assert store.values["model_health_status"]["fallback_to"]["model"] == "good-chat"
+    assert store.values["model_health_status"]["fallback_attempt_summary"] == {
+        "total": 1,
+        "reachable_count": 1,
+        "failed_count": 0,
+        "ollama_candidate_count": 0,
+        "ollama_reachable_count": 0,
+        "last_provider": "Acme",
+        "last_model": "good-chat",
+        "last_detail": "reachable",
+    }
     assert store.values["model_health_status"]["fallback_attempts"] == [
         {
             "service_provider": "Acme",
@@ -484,6 +494,16 @@ def test_attempt_model_fallback_records_unavailable_when_no_candidate(monkeypatc
         "error_kind": "forbidden",
         "candidate_count": 0,
         "fallback_attempts": [],
+        "fallback_attempt_summary": {
+            "total": 0,
+            "reachable_count": 0,
+            "failed_count": 0,
+            "ollama_candidate_count": 0,
+            "ollama_reachable_count": 0,
+            "last_provider": "",
+            "last_model": "",
+            "last_detail": "",
+        },
         "health": store.values["model_health_status"],
     }
     assert store.values["model_health_status"]["state"] == "unavailable"
@@ -537,6 +557,16 @@ def test_attempt_model_fallback_can_select_ollama_candidate(monkeypatch: pytest.
     assert result["selected"]["api_key_valid"] is True
     assert checks == [("qwen2.5:7b", "http://localhost:11434")]
     assert store.values["model_health_status"]["fallback_to"]["service_provider"] == "Ollama"
+    assert store.values["model_health_status"]["fallback_attempt_summary"] == {
+        "total": 1,
+        "reachable_count": 1,
+        "failed_count": 0,
+        "ollama_candidate_count": 1,
+        "ollama_reachable_count": 1,
+        "last_provider": "Ollama",
+        "last_model": "qwen2.5:7b",
+        "last_detail": "reachable",
+    }
     assert store.values["model_health_status"]["fallback_attempts"] == [
         {
             "service_provider": "Ollama",
@@ -547,6 +577,67 @@ def test_attempt_model_fallback_can_select_ollama_candidate(monkeypatch: pytest.
         }
     ]
     assert session_updates[0][0] == "ollama-fallback"
+
+
+def test_attempt_model_fallback_summarizes_failed_ollama_and_cloud_candidates(monkeypatch: pytest.MonkeyPatch) -> None:
+    """fallback 全部失败时应记录可展示的云端/Ollama 候选摘要。"""
+
+    store = _DummyStore(
+        {
+            "current_llm_info": {
+                "service_provider": "OpenAI",
+                "model": "bad-chat",
+                "api_base": "https://api.example/v1",
+                "api_key": "bad-key",
+            },
+        }
+    )
+    monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(
+        model_service.config,
+        "LLM_API_LIST",
+        {
+            "Cloud": {
+                "provider": "Cloud",
+                "api_base": "https://cloud.example/v1",
+                "api_key": "cloud-key",
+                "models": ["cloud-chat"],
+            },
+            "Ollama": {
+                "provider": "Ollama",
+                "api_base": "http://localhost:11434",
+                "models": ["qwen2.5:7b"],
+            },
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-10T02:30:00Z")
+    monkeypatch.setattr(model_service, "new_trace_id", lambda prefix: prefix + "-trace")
+    monkeypatch.setattr(
+        model_service,
+        "_check_openai_compatible",
+        lambda model_name, api_base, api_key, trace_id: (False, "http_403", {"trace_id": trace_id}),
+    )
+    monkeypatch.setattr(
+        model_service,
+        "_check_ollama_model",
+        lambda model_name, api_base, trace_id: (False, "model_not_found", {"trace_id": trace_id}),
+    )
+
+    result = model_service.attempt_model_fallback("model not found", session_id="fallback-summary")
+
+    assert result["applied"] is False
+    assert result["fallback_attempt_summary"] == {
+        "total": 2,
+        "reachable_count": 0,
+        "failed_count": 2,
+        "ollama_candidate_count": 1,
+        "ollama_reachable_count": 0,
+        "last_provider": "Ollama",
+        "last_model": "qwen2.5:7b",
+        "last_detail": "model_not_found",
+    }
+    assert store.values["model_health_status"]["fallback_attempt_summary"] == result["fallback_attempt_summary"]
 
 
 def test_test_custom_provider_connection_rejects_missing_api_key_and_logs(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -46,7 +46,22 @@ function formatReason(kind) {
   return labels[normalized] || normalized;
 }
 
-function formatFallbackAttempts(attempts) {
+function formatFallbackAttempts(attempts, attemptSummary) {
+  const summaryTotal = Number.isInteger(attemptSummary?.total) ? attemptSummary.total : 0;
+  if (summaryTotal > 0) {
+    const reachableCount = Number.isInteger(attemptSummary?.reachable_count) ? attemptSummary.reachable_count : 0;
+    const failedCount = Number.isInteger(attemptSummary?.failed_count) ? attemptSummary.failed_count : 0;
+    const ollamaCount = Number.isInteger(attemptSummary?.ollama_candidate_count) ? attemptSummary.ollama_candidate_count : 0;
+    const ollamaHint = ollamaCount ? `，Ollama 候选 ${ollamaCount} 个` : "";
+    const lastLabel = formatModelLabel({
+      service_provider: attemptSummary?.last_provider,
+      model: attemptSummary?.last_model,
+    });
+    const lastDetail = typeof attemptSummary?.last_detail === "string" ? attemptSummary.last_detail.trim() : "";
+    const lastText = lastLabel ? `；最近一次：${lastLabel}${lastDetail ? `（${lastDetail}）` : ""}` : "";
+    return `已探测 ${summaryTotal} 个候选：${reachableCount} 个可用，${failedCount} 个不可用${ollamaHint}${lastText}`;
+  }
+
   if (!Array.isArray(attempts) || attempts.length === 0) {
     return "";
   }
@@ -72,7 +87,10 @@ export function buildModelHealthSummary(modelHealth) {
   const reason = formatReason(modelHealth?.last_error_kind);
   const candidateCount = Number.isInteger(modelHealth?.candidate_count) ? modelHealth.candidate_count : 0;
   const fallbackAttempts = Array.isArray(modelHealth?.fallback_attempts) ? modelHealth.fallback_attempts : [];
-  const probeSummary = formatFallbackAttempts(fallbackAttempts);
+  const attemptSummary = modelHealth?.fallback_attempt_summary || {};
+  const probeSummary = formatFallbackAttempts(fallbackAttempts, attemptSummary);
+  const ollamaCandidateCount = Number.isInteger(attemptSummary?.ollama_candidate_count) ? attemptSummary.ollama_candidate_count : 0;
+  const ollamaReachableCount = Number.isInteger(attemptSummary?.ollama_reachable_count) ? attemptSummary.ollama_reachable_count : 0;
 
   if (state === "healthy") {
     return {
@@ -129,13 +147,17 @@ export function buildModelHealthSummary(modelHealth) {
   }
 
   if (state === "unavailable") {
+    const unavailableHint =
+      ollamaCandidateCount > 0 && ollamaReachableCount === 0
+        ? "本地 Ollama 候选暂不可用，请确认 Ollama 已启动且目标模型已拉取；也可以补齐云端可用供应商后重试。"
+        : "先补齐可用供应商或修复当前模型，再重试问答。";
     return {
       state,
       tone: "danger",
       chipLabel: "无可用模型",
       title: "当前无可用模型",
       summary: "未找到可直接切换的可用模型，请先检查配置或补齐供应商。",
-      actionHint: "先补齐可用供应商或修复当前模型，再重试问答。",
+      actionHint: unavailableHint,
       detail:
         [reason ? `最近错误类型：${reason}` : "", lastError ? `最近错误：${lastError}` : "", candidateCount ? `候选数：${candidateCount}` : ""]
           .filter(Boolean)

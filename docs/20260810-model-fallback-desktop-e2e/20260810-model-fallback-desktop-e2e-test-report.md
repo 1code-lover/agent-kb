@@ -310,3 +310,36 @@ cd webapp && npm run build
 结果：`27/27 passed`。默认基线 `23/23`，外部追加样本 `4/4`；`positive_total=16`、`negative_total=10`、`contract_total=1`，三类通过率均为 `100%`。
 
 本轮还修正了一个评测误报口径：负向用例的 `forbidden_terms` 不应包含题目自身已经出现的标题词，否则模型在拒答时复述题目也会被误判为泄漏。现在默认负向用例只禁止真正的答案短语或精确证据短语。
+
+## 2026-08-11 fallback 结构化探测摘要
+
+这次继续补模型 fallback 的边角体验：后端不只保存逐个 `fallback_attempts`，还新增 `fallback_attempt_summary`，聚合候选总数、可用数、失败数、Ollama 候选数、Ollama 可用数和最近一次候选明细。前端 `probeSummary` 优先使用这个结构化摘要，能直接显示“几个可用、几个不可用、是否包含 Ollama 候选”；当 Ollama 候选全部不可用时，页面提示会明确建议检查 Ollama 是否启动以及目标模型是否已拉取。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py -q
+```
+
+结果：`18 passed, 2 warnings`。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest \
+  tests/api/test_model_service.py \
+  tests/api/test_settings_routes.py \
+  tests/api/test_chat_service.py -q
+```
+
+结果：`56 passed, 8 warnings`。
+
+```bash
+node --test webapp/src/domain/modelHealth.test.js
+```
+
+结果：`8 passed`。
+
+```bash
+node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js
+```
+
+结果：`83 passed`。

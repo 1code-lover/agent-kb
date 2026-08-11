@@ -104,6 +104,32 @@ test("buildModelHealthSummary 会在不可用状态展示候选探测摘要", ()
   assert.match(summary.probeSummary, /OpenAI \/ gpt-4o/);
 });
 
+test("buildModelHealthSummary 会优先展示结构化候选探测摘要", () => {
+  const summary = buildModelHealthSummary({
+    state: "unavailable",
+    last_error_kind: "model_unavailable",
+    candidate_count: 2,
+    fallback_attempt_summary: {
+      total: 2,
+      reachable_count: 0,
+      failed_count: 2,
+      ollama_candidate_count: 1,
+      ollama_reachable_count: 0,
+      last_provider: "Ollama",
+      last_model: "qwen2.5:7b",
+      last_detail: "model_not_found",
+    },
+  });
+
+  assert.equal(summary.state, "unavailable");
+  assert.match(summary.probeSummary, /已探测 2 个候选：0 个可用，2 个不可用/);
+  assert.match(summary.probeSummary, /Ollama 候选 1 个/);
+  assert.match(summary.probeSummary, /Ollama \/ qwen2.5:7b/);
+  assert.match(summary.probeSummary, /model_not_found/);
+  assert.match(summary.actionHint, /确认 Ollama 已启动/);
+  assert.match(summary.actionHint, /目标模型已拉取/);
+});
+
 test("buildModelHealthSummary 会在 Ollama fallback 时提示本地候选模型", () => {
   const summary = buildModelHealthSummary({
     state: "fallback_applied",

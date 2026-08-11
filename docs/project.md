@@ -123,7 +123,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + 4 条真实业务追加样本合计 `27/27 passed`。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + 4 条真实业务追加样本合计 `27/27 passed`。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
@@ -279,6 +279,15 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`12 passed, 1 warning`。
 - 新增外部样本文件：`docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json`，覆盖粮仓适用对象、一卡通收储库点和跨库负向隔离。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6.json`：`27/27 passed`；默认基线 `23/23`，外部追加样本 `4/4`，`positive/negative/contract` 均为 `100%`。
+
+### 5.12 2026-08-11 fallback 结构化探测摘要复核
+
+- `api/services/model_service.py` 新增 `fallback_attempt_summary`，汇总 fallback 候选探测的总数、可用数、失败数、Ollama 候选数、Ollama 可用数和最近一次候选明细。
+- `webapp/src/domain/modelHealth.js` 优先使用结构化摘要生成 `probeSummary`；当 Ollama 候选全部不可用时，`unavailable` 提示会明确提醒检查 Ollama 是否启动、目标模型是否已拉取。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py -q`：`18 passed, 2 warnings`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q`：`56 passed, 8 warnings`。
+- `node --test webapp/src/domain/modelHealth.test.js`：`8 passed`。
+- `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`83 passed`。
 
 ---
 

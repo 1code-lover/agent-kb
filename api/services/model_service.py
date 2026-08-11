@@ -43,6 +43,7 @@ def _default_model_health() -> dict[str, Any]:
         "fallback_to": None,
         "candidate_count": 0,
         "fallback_attempts": [],
+        "fallback_attempt_summary": {},
     }
 
 
@@ -276,6 +277,25 @@ def _candidate_is_ollama(candidate: dict[str, Any]) -> bool:
     return str(candidate.get("service_provider") or "").strip() == "Ollama"
 
 
+def _summarize_fallback_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
+    """汇总 fallback 候选探测结果，供 API/UI 展示明确切换提示。"""
+    total = len(attempts)
+    reachable = [item for item in attempts if item.get("reachable")]
+    failed = [item for item in attempts if not item.get("reachable")]
+    ollama = [item for item in attempts if _candidate_is_ollama(item)]
+    last_attempt = attempts[-1] if attempts else {}
+    return {
+        "total": total,
+        "reachable_count": len(reachable),
+        "failed_count": len(failed),
+        "ollama_candidate_count": len(ollama),
+        "ollama_reachable_count": sum(1 for item in ollama if item.get("reachable")),
+        "last_provider": str(last_attempt.get("service_provider") or ""),
+        "last_model": str(last_attempt.get("model") or ""),
+        "last_detail": str(last_attempt.get("detail") or ""),
+    }
+
+
 def _iter_provider_candidates(current_info: dict[str, Any]) -> list[dict[str, Any]]:
     """按优先级枚举 OpenAI 兼容与 Ollama 本地模型候选。"""
     providers: list[dict[str, Any]] = []
@@ -373,6 +393,7 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
         )
         if not reachable:
             continue
+        attempt_summary = _summarize_fallback_attempts(probe_results)
         selected = select_model(
             ModelSelectRequest(
                 service_provider=candidate["service_provider"],
@@ -397,6 +418,7 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
             },
             candidate_count=len(candidates),
             fallback_attempts=probe_results,
+            fallback_attempt_summary=attempt_summary,
         )
         return {
             "applied": True,
@@ -404,14 +426,17 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
             "selected": selected,
             "candidate_count": len(candidates),
             "fallback_attempts": probe_results,
+            "fallback_attempt_summary": attempt_summary,
             "health": status,
         }
 
+    attempt_summary = _summarize_fallback_attempts(probe_results)
     status = update_model_health(
         state="unavailable",
         last_checked_at=now_iso(),
         candidate_count=len(candidates),
         fallback_attempts=probe_results,
+        fallback_attempt_summary=attempt_summary,
     )
     return {
         "applied": False,
@@ -419,6 +444,7 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
         "error_kind": error_kind,
         "candidate_count": len(candidates),
         "fallback_attempts": probe_results,
+        "fallback_attempt_summary": attempt_summary,
         "health": status,
     }
 
