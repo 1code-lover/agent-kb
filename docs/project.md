@@ -113,6 +113,8 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 - 远端跟踪：`origin/codex/desktop-agent-stage3`
 - 同步状态：2026-08-11 复核 `HEAD...@{u}` 为 `0 0`，当前工作区干净且已推送到远端。
 - 最近已推送提交：
+  - `ab1bc99 chore: update dev story capture state`
+  - `d96e991 test(desktop): cover universal package layout`
   - `3b408de chore: update dev story capture state`
   - `af71677 fix(desktop): discover mac package layouts`
   - `bf89aa3 chore: update dev story capture state`
@@ -358,6 +360,8 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `ab1bc99` | chore: update dev story capture state |
+| `d96e991` | test(desktop): cover universal package layout |
 | `3b408de` | chore: update dev story capture state |
 | `af71677` | fix(desktop): discover mac package layouts |
 | `bf89aa3` | chore: update dev story capture state |
