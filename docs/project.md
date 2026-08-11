@@ -122,7 +122,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
   - `3d3e010 docs(project): mark closure pushed`
   - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；工作区正在做增量收口，包含 Ollama 本地模型 fallback 候选、fallback 切换提示、Electron CSP、macOS release preflight、entitlements、打包产物校验和跨 KB 泛化诊断脚本。release preflight 已能额外检查 Developer ID Application 证书和 `notarytool` 可用性。跨 KB 泛化评测已扩展到 14 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / cross-domain / contract 分布。增量单测、前端构建、桌面单测、macOS 打包内容校验、跨域真实评测和 preflight 非严格模式已通过，待整理提交。
+- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 17 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。增量单测、前端构建、桌面单测、macOS 打包内容校验、跨域真实评测和 preflight 非严格模式已通过。
 
 ### 4.4 下一步建议
 
@@ -130,7 +130,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 - **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应继续验证桌面端安装后启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
 - **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；release preflight 现在还能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`。下一步补齐凭证和证书后，跑严格 release preflight、签名、公证、安装后启动回归。
-- **跨领域验证已经有 14 条真实门禁，下一步扩样本**：`scripts/diag_cross_domain_kb_eval.py` 已覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8 和多 KB 契约拒绝等 14 条真实用例；后续应继续扩到更多真实业务资料集和更多问题类型。
+- **跨领域验证已经有 17 条真实门禁，下一步扩样本**：`scripts/diag_cross_domain_kb_eval.py` 已覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8、boundary、exttext 和多 KB 契约拒绝等 17 条真实用例；后续应继续扩到更多真实业务资料集和更多问题类型。
 
 ---
 
@@ -296,6 +296,6 @@ cd webapp && npm run build
 
 ### 5.5 2026-08-11 跨 KB 泛化扩容验证
 
-- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`7 passed, 1 warning`，新增覆盖多 KB 契约拒绝、focus 汇总和更宽的真实 KB 用例。
-- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v2.json`：`14/14 passed`；覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、cross-domain 和 contract 七类 focus，`positive/negative/contract` 均为 `100%`。
-- 报告产物 `cross-domain-kb-eval-report-v2.json` 中，image-ocr、pdf-scan、mixed-batch 等领域的正向回答与负向隔离均通过；多 KB 查询契约拒绝也按预期 `400` 返回。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`8 passed, 1 warning`，新增覆盖多 KB 契约拒绝、focus 汇总、同义关键词组和更宽的真实 KB 用例。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v3.json`：`17/17 passed`；覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、boundary、exttext、cross-domain 和 contract 九类 focus，`positive/negative/contract` 均为 `100%`。
+- 报告产物 `cross-domain-kb-eval-report-v3.json` 中，image-ocr、pdf-scan、mixed-batch、boundary、exttext 等领域的正向回答与负向隔离均通过；多 KB 查询契约拒绝也按预期 `400` 返回。

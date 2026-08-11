@@ -72,7 +72,10 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "kind": "positive",
         "kb_ids": ["diag-mixed-batch-20260807-r2"],
         "question": "Who gives the final rollback approval in the Friday release cutover note?",
-        "expected_terms": ["platform duty lead", "final rollback approval"],
+        "expected_any_term_groups": [
+            ["平台值班主管", "最终的回滚批准"],
+            ["platform duty lead", "final rollback approval"],
+        ],
         "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
         "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
     },
@@ -85,6 +88,36 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "expected_terms": ["doc_id", "preview_locator"],
         "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
         "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+    },
+    {
+        "id": "boundary-negative-manual-structure",
+        "focus": "boundary",
+        "kind": "negative",
+        "kb_ids": ["diag-boundary-1785495036"],
+        "question": "What exact sentence does the manual use to describe the authorization boundary?",
+        "forbidden_terms": ["Knowledge Base remains the authorization boundary", "Folder is organization only"],
+        "allowed_source_kb_ids": ["diag-boundary-1785495036"],
+        "forbidden_source_kb_ids": ["diag-exttext-readme-utf8-1785506464", "diag-exttext-readme-utf16-1785506468"],
+    },
+    {
+        "id": "exttext-positive-readme-utf8",
+        "focus": "exttext",
+        "kind": "positive",
+        "kb_ids": ["diag-exttext-readme-utf8-1785506464"],
+        "question": "What exact sentence does the README use to describe the authorization boundary?",
+        "expected_terms": ["Knowledge Base remains the authorization boundary"],
+        "allowed_source_kb_ids": ["diag-exttext-readme-utf8-1785506464"],
+        "required_source_kb_ids": ["diag-exttext-readme-utf8-1785506464"],
+    },
+    {
+        "id": "exttext-positive-readme-utf16",
+        "focus": "exttext",
+        "kind": "positive",
+        "kb_ids": ["diag-exttext-readme-utf16-1785506468"],
+        "question": "What exact sentence does the UTF-16 README use to describe the authorization boundary?",
+        "expected_terms": ["Knowledge Base remains the authorization boundary"],
+        "allowed_source_kb_ids": ["diag-exttext-readme-utf16-1785506468"],
+        "required_source_kb_ids": ["diag-exttext-readme-utf16-1785506468"],
     },
     {
         "id": "desktop-negative-grain-question",
@@ -207,6 +240,14 @@ def _contains_all(haystack: str, terms: list[str]) -> bool:
     return all(term in haystack for term in terms)
 
 
+def _contains_expected_terms(haystack: str, terms: list[str], term_groups: list[list[str]]) -> bool:
+    """检查固定关键词或任一同义关键词组是否命中。"""
+    required_hit = _contains_all(haystack, terms) if terms else True
+    if not term_groups:
+        return required_hit
+    return required_hit and any(_contains_all(haystack, group) for group in term_groups)
+
+
 def _contains_any(haystack: str, terms: list[str]) -> bool:
     """检查文本是否包含任一关键词。"""
     return any(term in haystack for term in terms)
@@ -291,6 +332,11 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         error = None if status_ok else response_message or str(response)
 
     expected_terms = _as_list(case.get("expected_terms"))
+    expected_any_term_groups: list[list[str]] = []
+    for group in case.get("expected_any_term_groups") or []:
+        group_terms = _as_list(group)
+        if group_terms:
+            expected_any_term_groups.append(group_terms)
     forbidden_terms = _as_list(case.get("forbidden_terms"))
     expected_error_terms = _as_list(case.get("expected_error_terms"))
     allowed_source_kb_ids = set(_as_list(case.get("allowed_source_kb_ids")))
@@ -328,7 +374,7 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         )
         required_source_kb_hit = required_source_kb_ids.issubset(source_kb_set)
         forbidden_source_kb_clean = not bool(source_kb_set & forbidden_source_kb_ids)
-        expected_terms_hit = _contains_all(answer, expected_terms)
+        expected_terms_hit = _contains_expected_terms(answer, expected_terms, expected_any_term_groups)
         forbidden_terms_clean = not _contains_any(combined_text, forbidden_terms)
 
         checks = {
@@ -350,6 +396,7 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         "kb_ids": kb_ids,
         "question": question,
         "expected_terms": expected_terms,
+        "expected_any_term_groups": expected_any_term_groups,
         "expected_error_terms": expected_error_terms,
         "expected_http_status": expected_http_status,
         "forbidden_terms": forbidden_terms,

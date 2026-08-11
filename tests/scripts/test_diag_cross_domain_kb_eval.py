@@ -41,6 +41,43 @@ def test_evaluate_positive_case_requires_expected_terms_and_source_kb(monkeypatc
     assert result["checks"]["required_source_kb_hit"] is True
 
 
+def test_evaluate_positive_case_accepts_any_expected_term_group(monkeypatch) -> None:
+    """正向用例可用任一同义关键词组判定答案命中。"""
+
+    monkeypatch.setattr(
+        cross_eval,
+        "_post_json",
+        lambda *_args: {
+            "code": 0,
+            "data": {
+                "answer": "The platform duty lead gives the final rollback approval.",
+                "sources": [{"kb_id": "diag-mixed-batch", "file": "release.md"}],
+            },
+        },
+    )
+
+    result = cross_eval.evaluate_case(
+        {
+            "id": "mixed-positive",
+            "kind": "positive",
+            "kb_ids": ["diag-mixed-batch"],
+            "question": "Who approves rollback?",
+            "expected_any_term_groups": [
+                ["平台值班主管", "最终的回滚批准"],
+                ["platform duty lead", "final rollback approval"],
+            ],
+            "allowed_source_kb_ids": ["diag-mixed-batch"],
+            "required_source_kb_ids": ["diag-mixed-batch"],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is True
+    assert result["checks"]["expected_terms_hit"] is True
+    assert result["expected_any_term_groups"][1] == ["platform duty lead", "final rollback approval"]
+
+
 def test_evaluate_negative_case_fails_on_exact_forbidden_evidence_leak(monkeypatch) -> None:
     """负向隔离用例中，evidence 泄漏精确禁止词必须失败。"""
 

@@ -6,7 +6,7 @@
 3. packaged app 已完成启动复核：主进程能使用 conda `agent-kb` Python 拉起 API，渲染进程能加载 packaged `webapp/dist/index.html` 并请求模型、知识库和聊天历史接口。
 4. 模型 fallback 已从 OpenAI-compatible 供应商扩展到本地 Ollama：Ollama 候选允许无 API Key，并可在未配置模型列表时读取 `/api/tags` 发现本机模型。
 5. 前端模型页和 Agent 页已补充更明确的 fallback action hint，并能展示“来源模型 -> 目标模型”的切换提示。
-6. 跨知识库泛化验证已形成更完整的可复跑门禁：`scripts/diag_cross_domain_kb_eval.py` 已扩展到 14 条真实用例，覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8 和多 KB 契约拒绝，真实 API 评测 `14/14 passed`。
+6. 跨知识库泛化验证已形成更完整的可复跑门禁：`scripts/diag_cross_domain_kb_eval.py` 已扩展到 17 条真实用例，覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8、boundary、exttext 和多 KB 契约拒绝，真实 API 评测 `17/17 passed`。
 7. 本轮关键验证通过：模型服务单测、跨域诊断脚本单测、前端完整 Node 单测、桌面 Node 单测、Vite build、macOS 打包内容校验和 `git diff --check` 均通过。
 
 需要改进的地方：
@@ -14,7 +14,7 @@
 2. Electron CSP 已在 packaged app 启动和首页 API 请求中复核，但签名/公证后的安装包仍需继续验证文件上传、evidence preview、图片/PDF 资源和 dev/prod 两种入口。
 3. `desktop` 依赖树仍有 npm audit 风险，剩余 `8 vulnerabilities`（`7 high`、`1 critical`），主要需要单独评估 `electron-builder` 大版本升级。
 4. Ollama fallback 当前验证到模型发现和候选探活；仍需要在本机实际安装 Ollama 模型后做桌面问答 E2E，确认生成链路不只停在 `/api/tags`。
-5. 跨领域泛化门禁已经扩到 14 条真实样本，适合作为当前冒烟门禁；但它仍主要覆盖诊断类资料，离真实业务泛化还差更多非粮仓资料集和复杂问题类型。
+5. 跨领域泛化门禁已经扩到 17 条真实样本，适合作为当前冒烟门禁；但它仍主要覆盖诊断类资料，离真实业务泛化还差更多非粮仓资料集和复杂问题类型。
 
 具体建议：
 1. 先提交并推送当前增量，确保桌面发布准备、Ollama fallback、跨 KB 诊断脚本、报告和文档一起落库。
