@@ -117,6 +117,36 @@ node --test webapp/src/domain/modelHealth.test.js
 
 结果：`10 passed`。前端健康摘要仍能展示 `unavailable`、Ollama 候选和结构化探测摘要。
 
+## 2026-08-12 跨领域评测系统性故障归因
+
+本轮继续增强跨领域真实评测的报告解释力。此前 `cross-domain-kb-eval-report-v11.json` 因 `qwen-plus-2025-07-28` 免费额度耗尽，导致 `49` 个 case 里只有 contract 用例通过；报告虽然有 `failure_check_summary.http_status_ok`，但不够直接说明这是模型/API 层系统性故障，而不是所有知识库领域同时退化。
+
+现在 `summary` 新增 `systemic_failure_summary`，会展开 multi-turn 的每一轮，统计 `http_status_ok` 失败比例，并把 quota、401、model_not_found、timeout/network 等大面积错误归因为 `model_or_api_unavailable`。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`23 passed, 1 warning`。新增覆盖大面积 quota 错误会标记系统性故障，少量单点 HTTP 失败不会误判为系统性故障。
+
+对既有 v11 失败报告重新汇总验证：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python - <<'PY'
+import json
+from pathlib import Path
+from scripts.diag_cross_domain_kb_eval import summarize
+
+p = Path("docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v11.json")
+d = json.loads(p.read_text())
+print(json.dumps(summarize(d["cases"])["systemic_failure_summary"], ensure_ascii=False, indent=2))
+PY
+```
+
+结果：`suspected=true`、`reason=model_or_api_unavailable`、`dominant_error_kind=quota_exhausted`、`http_failure_total=53`、`http_failure_rate=0.9815`。
+
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
 ```

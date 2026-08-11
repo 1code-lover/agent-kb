@@ -693,6 +693,73 @@ def test_summarize_includes_failed_check_diagnostics() -> None:
     ]
 
 
+def test_summarize_flags_systemic_model_failures() -> None:
+    """大量 HTTP/model 错误应标记为系统性故障，避免误读为泛化退化。"""
+
+    results = [
+        {
+            "id": f"quota-{index}",
+            "kind": "positive",
+            "focus": "grain",
+            "case_source": "default",
+            "passed": False,
+            "checks": {"http_status_ok": False, "expected_terms_hit": False},
+            "http_status": 400,
+            "error": "Error code: 403 - Free quota exhausted AllocationQuota.FreeTierOnly",
+            "response_message": "Free quota exhausted",
+        }
+        for index in range(5)
+    ]
+
+    report = cross_eval.summarize(results)
+    summary = report["systemic_failure_summary"]
+
+    assert summary["suspected"] is True
+    assert summary["reason"] == "model_or_api_unavailable"
+    assert summary["dominant_error_kind"] == "quota_exhausted"
+    assert summary["http_failure_total"] == 5
+    assert summary["http_failure_rate"] == 1.0
+    assert summary["sample_case_ids"] == ["quota-0", "quota-1", "quota-2", "quota-3", "quota-4"]
+
+
+def test_summarize_does_not_flag_sparse_http_failures_as_systemic() -> None:
+    """少量单点 HTTP 失败不应被归因为系统性模型故障。"""
+
+    report = cross_eval.summarize(
+        [
+            {
+                "id": "ok",
+                "kind": "positive",
+                "focus": "grain",
+                "case_source": "default",
+                "passed": True,
+                "checks": {"http_status_ok": True},
+            },
+            {
+                "id": "single-http-fail",
+                "kind": "positive",
+                "focus": "grain",
+                "case_source": "default",
+                "passed": False,
+                "checks": {"http_status_ok": False},
+                "http_status": 400,
+                "error": "timed out",
+            },
+            {
+                "id": "term-fail",
+                "kind": "positive",
+                "focus": "grain",
+                "case_source": "default",
+                "passed": False,
+                "checks": {"expected_terms_hit": False},
+            },
+        ]
+    )
+
+    assert report["systemic_failure_summary"]["suspected"] is False
+    assert report["systemic_failure_summary"]["dominant_error_kind"] == "network_error"
+
+
 def test_summarize_includes_duration_diagnostics() -> None:
     """耗时汇总应标记慢 case 和慢 turn。"""
 

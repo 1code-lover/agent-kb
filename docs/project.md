@@ -368,6 +368,12 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q`：`58 passed, 8 warnings`。
 - `node --test webapp/src/domain/modelHealth.test.js`：`10 passed`。
 
+### 5.20 2026-08-12 跨领域评测系统性故障归因
+
+- `scripts/diag_cross_domain_kb_eval.py` 的 summary 新增 `systemic_failure_summary`，会按 turn 粒度统计 `http_status_ok` 失败比例，并把大面积 quota、401、model_not_found、network/timeout 等问题归因为 `model_or_api_unavailable`，避免把模型层故障误读为知识库泛化整体退化。
+- 对 `cross-domain-kb-eval-report-v11.json` 这类额度耗尽报告重新汇总时，可识别 `suspected=true`、`dominant_error_kind=quota_exhausted`、`http_failure_rate=0.9815`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`23 passed, 1 warning`。
+
 ---
 
 ## 6. 已知问题和限制

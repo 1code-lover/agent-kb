@@ -847,6 +847,81 @@ def _summarize_durations(results: list[dict[str, Any]], slow_threshold_ms: float
     }
 
 
+def _iter_evaluated_turns(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """展开 case/turn 结果，统一用于系统性故障诊断。"""
+    rows: list[dict[str, Any]] = []
+    for item in results:
+        case_id = str(item.get("id") or "case")
+        if item.get("is_multi_turn"):
+            for turn in item.get("turns") or []:
+                if not isinstance(turn, dict):
+                    continue
+                row = dict(turn)
+                row.setdefault("id", case_id)
+                row.setdefault("case_id", case_id)
+                rows.append(row)
+        else:
+            rows.append(item)
+    return rows
+
+
+def _classify_systemic_error(item: dict[str, Any]) -> str:
+    """把评测失败文本归为基础设施/模型错误类型。"""
+    text = "\n".join(
+        str(item.get(name) or "")
+        for name in (
+            "error",
+            "response_message",
+            "answer_preview",
+        )
+    ).lower()
+    if "free quota exhausted" in text or "allocationquota" in text or "insufficient_quota" in text or "quota exhausted" in text:
+        return "quota_exhausted"
+    if "invalid token" in text or "unauthorized" in text or "http_401" in text or "401" in text:
+        return "unauthorized"
+    if "model_not_found" in text or "model not found" in text or "does not exist" in text or "unsupported model" in text:
+        return "model_unavailable"
+    if "timed out" in text or "timeout" in text or "connection refused" in text or "connection reset" in text:
+        return "network_error"
+    status = item.get("http_status")
+    if status not in (None, "", 200, "200"):
+        return "api_error"
+    return "unknown"
+
+
+def _summarize_systemic_failures(results: list[dict[str, Any]]) -> dict[str, Any]:
+    """识别大面积 HTTP/model 失败，避免把环境问题误读为业务泛化退化。"""
+    rows = _iter_evaluated_turns(results)
+    total = len(rows)
+    http_failed = [
+        item
+        for item in rows
+        if isinstance(item.get("checks"), dict) and item["checks"].get("http_status_ok") is False
+    ]
+    error_kind_counts: dict[str, int] = {}
+    for item in http_failed:
+        kind = _classify_systemic_error(item)
+        error_kind_counts[kind] = error_kind_counts.get(kind, 0) + 1
+    dominant_error_kind = ""
+    if error_kind_counts:
+        dominant_error_kind = sorted(error_kind_counts.items(), key=lambda row: (-row[1], row[0]))[0][0]
+    http_failure_rate = round(len(http_failed) / total, 4) if total else 0.0
+    suspected = total >= 3 and len(http_failed) >= 3 and http_failure_rate >= 0.8 and dominant_error_kind not in ("", "unknown")
+    return {
+        "suspected": suspected,
+        "reason": "model_or_api_unavailable" if suspected else "",
+        "turn_total": total,
+        "http_failure_total": len(http_failed),
+        "http_failure_rate": http_failure_rate,
+        "dominant_error_kind": dominant_error_kind,
+        "error_kind_counts": dict(sorted(error_kind_counts.items())),
+        "sample_case_ids": [
+            str(item.get("case_id") or item.get("id") or "case")
+            for item in http_failed[:5]
+        ],
+    }
+
+
 def summarize(results: list[dict[str, Any]], slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS) -> dict[str, Any]:
     """汇总跨领域用例结果。"""
     total = len(results)
@@ -868,6 +943,7 @@ def summarize(results: list[dict[str, Any]], slow_threshold_ms: float = DEFAULT_
     tag_groups: dict[str, list[dict[str, Any]]] = {}
     failure_check_summary, failure_case_summary = _summarize_failures(results)
     duration_summary = _summarize_durations(results, slow_threshold_ms)
+    systemic_failure_summary = _summarize_systemic_failures(results)
     for item in results:
         focus_groups.setdefault(str(item.get("focus") or "uncategorized"), []).append(item)
         case_source_groups.setdefault(str(item.get("case_source") or "unknown"), []).append(item)
@@ -899,6 +975,7 @@ def summarize(results: list[dict[str, Any]], slow_threshold_ms: float = DEFAULT_
         "failure_check_summary": failure_check_summary,
         "failure_case_summary": failure_case_summary,
         "duration_summary": duration_summary,
+        "systemic_failure_summary": systemic_failure_summary,
         "focus_summary": {
             focus: {
                 "total": len(rows),
