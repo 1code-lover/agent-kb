@@ -60,6 +60,39 @@ cd webapp && npm run build
 
 结果：Vite build 通过。
 
+## 2026-08-11 v6 跨领域扩面试跑
+
+本轮继续试扩跨领域真实样本，新增 README 表格、mixed batch 三轮追问、更多跨 KB 拒答隔离样本。同时发现当前模型配置状态会影响评测结论：`qwen-plus-2025-07-28` / `qwen3.7-plus` 返回免费额度耗尽，`ely/qwen-flash` 返回 401，`阿里百炼/qwen-flash` 与 `deepseek-v4-flash` 返回 `model_not_found`；临时可用的 `qwen-math-turbo` 能通过基础粮仓 RAG smoke，但不适合作为正式泛化门禁模型。
+
+本轮还修复了一个评测脚本韧性问题：底层请求触发 `TimeoutError` 时，现在会转换为 `_http_status=-1` 的失败响应并写入报告，不再中断整轮评测。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`21 passed, 1 warning`。新增覆盖底层请求超时时返回可汇总失败响应。
+
+新增试验样本文件：
+
+- `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json`：README 表格、mixed batch 三轮追问、桌面对 grain README 的负向隔离、图片 OCR 对 mixed rollback approval 的负向隔离。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --timeout 45 \
+  --cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-only-v2.json
+```
+
+结果：`2/4 passed`，两个 cross-KB negative case 均通过。剩余失败：
+
+- `extra-v6-grain-readme-table-format`：source 命中 README，但当前临时模型把“主要格式”答成 `text(markdown)`，未命中 `.pdf` / `.docx`。
+- `extra-v6-mixed-three-turn-release-follow-up`：`approval` turn 在 45 秒内超时；`preview` 和 `scope-reminder` turn 通过。
+
+另有一次 v1-v6 全量试跑输出到 `cross-domain-kb-eval-report-v11.json`，结果 `1/49 passed`，主要原因是当时当前模型 `qwen-plus-2025-07-28` 已返回 `AllocationQuota.FreeTierOnly`，不作为真实功能回归失败结论。
+
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
 ```

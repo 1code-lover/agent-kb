@@ -1,0 +1,87 @@
+{
+  "name": "cross-domain extra table and long-turn cases v6",
+  "description": "Additional real cases for table-like Markdown evidence, longer multi-turn follow-up, and cross-KB refusal isolation.",
+  "cases": [
+    {
+      "id": "extra-v6-grain-readme-table-format",
+      "focus": "grain-table",
+      "kind": "positive",
+      "tags": ["table", "source-grounding", "single-kb"],
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "粮仓知识库 README 的基本信息表里，推荐 kb_id 和主要格式分别是什么？",
+      "expected_terms": ["grain-knowledge-base", ".pdf", ".docx"],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_files": ["readme"],
+      "required_source_text_terms": ["推荐 kb_id", "主要格式"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v6-mixed-three-turn-release-follow-up",
+      "focus": "mixed-batch-long-turn",
+      "kind": "positive",
+      "tags": ["multi-turn", "follow-up", "long-turn", "mixed-batch", "source-grounding"],
+      "kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "top_k": 8,
+      "turns": [
+        {
+          "id": "approval",
+          "question": "Who gives the final rollback approval in the Friday release cutover note?",
+          "expected_terms": ["platform duty lead", "final rollback approval"],
+          "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+          "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+          "required_source_files": ["cutover.md"],
+          "required_source_text_terms": ["platform duty lead", "final rollback approval"]
+        },
+        {
+          "id": "preview",
+          "question": "And what should every evidence preview include?",
+          "expected_terms": ["doc_id", "preview_locator"],
+          "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+          "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+          "required_source_files": ["preview-board.png"],
+          "required_source_text_terms": ["doc_id", "preview_locator"]
+        },
+        {
+          "id": "scope-reminder",
+          "question": "Finally, what image does the team keep next to the runbook for scope reminders?",
+          "expected_any_term_groups": [
+            ["escalation board image", "scope reminders"],
+            ["escalations board image", "scope reminders"],
+            ["Escalation board", "scope reminders"]
+          ],
+          "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+          "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+          "required_source_files": ["cutover.md"],
+          "required_source_text_terms": ["escalation board image", "scope reminders"]
+        }
+      ]
+    },
+    {
+      "id": "extra-v6-desktop-negative-grain-readme-table",
+      "focus": "cross-domain-extra",
+      "kind": "negative",
+      "tags": ["table", "refusal", "cross-kb-isolation"],
+      "kb_ids": ["diag-desktop-e2e-1786353063"],
+      "question": "粮仓知识库 README 的基本信息表里，主要格式和总体量分别是什么？",
+      "forbidden_terms": ["775744.1 KB", ".pdf 157", ".docx 98"],
+      "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+      "forbidden_source_kb_ids": ["grain-knowledge-base"],
+      "forbidden_source_files": ["readme"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v6-image-negative-mixed-rollback-approval",
+      "focus": "cross-domain-extra",
+      "kind": "negative",
+      "tags": ["ocr", "mixed-batch", "refusal", "cross-kb-isolation"],
+      "kb_ids": ["diag-image-ocr-20260807-r2"],
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "forbidden_terms": ["platform duty lead"],
+      "allowed_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+      "forbidden_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "forbidden_source_files": ["cutover.md"],
+      "top_k": 8
+    }
+  ]
+}

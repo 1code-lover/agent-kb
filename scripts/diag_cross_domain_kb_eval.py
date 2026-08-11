@@ -324,6 +324,8 @@ def _post_json(api_base: str, path: str, payload: dict[str, Any], timeout: float
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         return {"code": exc.code, "_http_status": exc.code, "message": detail}
+    except TimeoutError as exc:
+        return {"code": -1, "_http_status": -1, "message": str(exc)}
     except urllib.error.URLError as exc:
         return {"code": -1, "_http_status": -1, "message": str(exc)}
 

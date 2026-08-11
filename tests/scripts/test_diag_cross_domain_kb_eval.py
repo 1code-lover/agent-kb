@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import urllib.request
 from pathlib import Path
 
 import scripts.diag_cross_domain_kb_eval as cross_eval
@@ -39,6 +40,27 @@ def test_evaluate_positive_case_requires_expected_terms_and_source_kb(monkeypatc
     assert result["passed"] is True
     assert result["checks"]["expected_terms_hit"] is True
     assert result["checks"]["required_source_kb_hit"] is True
+
+
+def test_post_json_converts_timeout_to_error_response(monkeypatch) -> None:
+    """底层请求超时时应返回可汇总的失败响应，而不是中断整轮评测。"""
+
+    def fake_urlopen(_request: urllib.request.Request, timeout: float):
+        assert timeout == 1.0
+        raise TimeoutError("timed out")
+
+    monkeypatch.setattr(cross_eval.urllib.request, "urlopen", fake_urlopen)
+
+    response = cross_eval._post_json(
+        "http://127.0.0.1:18080",
+        "/api/chat/query",
+        {"question": "q"},
+        timeout=1.0,
+    )
+
+    assert response["_http_status"] == -1
+    assert response["code"] == -1
+    assert "timed out" in response["message"]
 
 
 def test_evaluate_positive_case_accepts_any_expected_term_group(monkeypatch) -> None:
