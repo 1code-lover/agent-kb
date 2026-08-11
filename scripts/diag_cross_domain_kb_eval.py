@@ -1006,16 +1006,70 @@ def summarize(results: list[dict[str, Any]], slow_threshold_ms: float = DEFAULT_
     }
 
 
+def _default_preflight_summary(enabled: bool) -> dict[str, Any]:
+    """返回报告中的 preflight 默认摘要。"""
+    return {
+        "enabled": enabled,
+        "aborted": False,
+        "passed": None,
+        "case_id": "",
+        "reason": "",
+    }
+
+
+def _should_abort_after_preflight(result: dict[str, Any]) -> tuple[bool, str]:
+    """判断 preflight 失败是否属于应提前中止的模型/API 层故障。"""
+    checks = result.get("checks")
+    http_failed = isinstance(checks, dict) and checks.get("http_status_ok") is False
+    if not http_failed:
+        return False, ""
+    summary = _summarize_systemic_failures([result])
+    dominant = str(summary.get("dominant_error_kind") or "")
+    if dominant and dominant != "unknown":
+        return True, "model_or_api_unavailable"
+    return False, ""
+
+
 def build_report(
-    *, cases: list[dict[str, Any]], api_base: str, timeout: float, slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS
+    *,
+    cases: list[dict[str, Any]],
+    api_base: str,
+    timeout: float,
+    slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS,
+    preflight: bool = False,
 ) -> dict[str, Any]:
     """执行全部用例并构造报告。"""
+    preflight_summary = _default_preflight_summary(preflight)
+    if preflight and cases:
+        preflight_result = evaluate_case(cases[0], api_base, timeout)
+        should_abort, reason = _should_abort_after_preflight(preflight_result)
+        preflight_summary.update(
+            {
+                "aborted": should_abort,
+                "passed": bool(preflight_result.get("passed")),
+                "case_id": str(preflight_result.get("id") or cases[0].get("id") or "case"),
+                "reason": reason,
+            }
+        )
+        if should_abort:
+            summary = summarize([preflight_result], slow_threshold_ms=slow_threshold_ms)
+            summary["systemic_failure_summary"].update({"suspected": True, "reason": reason})
+            return {
+                "generated_at": _now_iso(),
+                "api_base": api_base.rstrip("/"),
+                "timeout": timeout,
+                "slow_threshold_ms": slow_threshold_ms,
+                "preflight": preflight_summary,
+                "summary": summary,
+                "cases": [preflight_result],
+            }
     results = [evaluate_case(case, api_base, timeout) for case in cases]
     return {
         "generated_at": _now_iso(),
         "api_base": api_base.rstrip("/"),
         "timeout": timeout,
         "slow_threshold_ms": slow_threshold_ms,
+        "preflight": preflight_summary,
         "summary": summarize(results, slow_threshold_ms=slow_threshold_ms),
         "cases": results,
     }
@@ -1029,12 +1083,19 @@ def run_evaluation(
     cases_path: str | None = None,
     extra_cases_paths: list[str] | None = None,
     slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS,
+    preflight: bool = False,
 ) -> tuple[dict[str, Any], int]:
     """执行跨领域评测并写出报告。"""
     cases = load_cases(cases_path, extra_cases_paths)
     if not cases:
         return {"summary": {"total": 0, "passed": 0, "failed": 0}}, 2
-    report = build_report(cases=cases, api_base=api_base, timeout=timeout, slow_threshold_ms=slow_threshold_ms)
+    report = build_report(
+        cases=cases,
+        api_base=api_base,
+        timeout=timeout,
+        slow_threshold_ms=slow_threshold_ms,
+        preflight=preflight,
+    )
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -1053,6 +1114,11 @@ def main() -> None:
         help="慢用例阈值毫秒数，用于 duration_summary",
     )
     parser.add_argument("--cases", default=None, help="可选；JSON list 或 {cases: [...]} 格式用例文件；传入后替换内置基线")
+    parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="先用首个用例做模型/API 探活；若疑似系统性故障则提前写出诊断报告",
+    )
     parser.add_argument(
         "--extra-cases",
         action="append",
@@ -1073,6 +1139,7 @@ def main() -> None:
         cases_path=args.cases,
         extra_cases_paths=args.extra_cases,
         slow_threshold_ms=args.slow_threshold_ms,
+        preflight=args.preflight,
     )
     print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
     print(f"报告已写入: {Path(args.output)}")

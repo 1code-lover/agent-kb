@@ -147,6 +147,18 @@ PY
 
 结果：`suspected=true`、`reason=model_or_api_unavailable`、`dominant_error_kind=quota_exhausted`、`http_failure_total=53`、`http_failure_rate=0.9815`。
 
+## 2026-08-12 跨领域评测 preflight
+
+本轮把系统性故障归因前移到评测入口。新增 `--preflight` 参数后，脚本会先用首个 case 做一次模型/API 探活；如果首个 case 已经因为 quota、401、model_not_found、network/timeout 等模型/API 层错误失败，就提前写出带 `preflight.aborted=true` 的报告，不再继续消耗完整跨领域矩阵。preflight 通过时仍会继续跑完整 case 集；默认不开启，因此既有评测命令不受影响。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`25 passed, 1 warning`。新增覆盖 preflight 在模型/API 故障时提前中止，以及 preflight 通过后继续执行完整用例集。
+
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
 ```

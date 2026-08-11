@@ -374,6 +374,12 @@ cd webapp && npm run build
 - 对 `cross-domain-kb-eval-report-v11.json` 这类额度耗尽报告重新汇总时，可识别 `suspected=true`、`dominant_error_kind=quota_exhausted`、`http_failure_rate=0.9815`。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`23 passed, 1 warning`。
 
+### 5.21 2026-08-12 跨领域评测 preflight
+
+- `scripts/diag_cross_domain_kb_eval.py` 新增 `--preflight` 参数；开启后会先用首个 case 做模型/API 探活，若发现 quota、401、model_not_found、network/timeout 等模型/API 层故障，会提前写出带 `preflight.aborted=true` 的诊断报告，不再继续消耗完整评测矩阵。
+- preflight 通过时仍会继续执行完整 case 集；默认不启用，既有评测命令和历史报告结构保持兼容。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`25 passed, 1 warning`。
+
 ---
 
 ## 6. 已知问题和限制

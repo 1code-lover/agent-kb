@@ -525,6 +525,104 @@ def test_run_evaluation_writes_report_and_returns_nonzero_on_failure(tmp_path: P
     assert saved["cases"][0]["case_source"] == str(cases_path)
 
 
+def test_run_evaluation_preflight_aborts_on_model_api_failure(tmp_path: Path, monkeypatch) -> None:
+    """preflight 发现模型/API 系统故障时应提前写出诊断报告。"""
+
+    cases_path = tmp_path / "cases.json"
+    output_path = tmp_path / "report.json"
+    cases_path.write_text(
+        json.dumps(
+            [
+                {"id": "first", "kind": "positive", "kb_ids": ["kb-a"], "question": "q1", "expected_terms": ["a"]},
+                {"id": "second", "kind": "positive", "kb_ids": ["kb-a"], "question": "q2", "expected_terms": ["b"]},
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    calls: list[str] = []
+
+    def fake_evaluate(case, _api_base, _timeout):
+        calls.append(str(case["id"]))
+        return {
+            "id": str(case["id"]),
+            "kind": str(case["kind"]),
+            "focus": "grain",
+            "case_source": str(cases_path),
+            "passed": False,
+            "checks": {"http_status_ok": False, "expected_terms_hit": False},
+            "http_status": 400,
+            "error": "Free quota exhausted AllocationQuota.FreeTierOnly",
+            "response_message": "Free quota exhausted",
+        }
+
+    monkeypatch.setattr(cross_eval, "evaluate_case", fake_evaluate)
+
+    report, exit_code = cross_eval.run_evaluation(
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+        output=str(output_path),
+        cases_path=str(cases_path),
+        preflight=True,
+    )
+
+    saved = json.loads(output_path.read_text(encoding="utf-8"))
+    assert calls == ["first"]
+    assert exit_code == 1
+    assert report["preflight"]["aborted"] is True
+    assert report["preflight"]["reason"] == "model_or_api_unavailable"
+    assert report["summary"]["systemic_failure_summary"]["suspected"] is True
+    assert report["summary"]["systemic_failure_summary"]["reason"] == "model_or_api_unavailable"
+    assert report["summary"]["systemic_failure_summary"]["dominant_error_kind"] == "quota_exhausted"
+    assert saved["cases"][0]["id"] == "first"
+
+
+def test_run_evaluation_preflight_continues_when_probe_passes(tmp_path: Path, monkeypatch) -> None:
+    """preflight 通过后应继续跑完整用例集。"""
+
+    cases_path = tmp_path / "cases.json"
+    output_path = tmp_path / "report.json"
+    cases_path.write_text(
+        json.dumps(
+            [
+                {"id": "first", "kind": "positive", "kb_ids": ["kb-a"], "question": "q1", "expected_terms": ["a"]},
+                {"id": "second", "kind": "positive", "kb_ids": ["kb-a"], "question": "q2", "expected_terms": ["b"]},
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    calls: list[str] = []
+
+    def fake_evaluate(case, _api_base, _timeout):
+        calls.append(str(case["id"]))
+        return {
+            "id": str(case["id"]),
+            "kind": str(case["kind"]),
+            "focus": "grain",
+            "case_source": str(cases_path),
+            "passed": True,
+            "checks": {"http_status_ok": True, "expected_terms_hit": True},
+        }
+
+    monkeypatch.setattr(cross_eval, "evaluate_case", fake_evaluate)
+
+    report, exit_code = cross_eval.run_evaluation(
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+        output=str(output_path),
+        cases_path=str(cases_path),
+        preflight=True,
+    )
+
+    assert calls == ["first", "first", "second"]
+    assert exit_code == 0
+    assert report["preflight"]["enabled"] is True
+    assert report["preflight"]["aborted"] is False
+    assert report["preflight"]["passed"] is True
+    assert report["summary"]["passed"] == 2
+
+
 def test_load_cases_accepts_object_payload_and_extra_cases(tmp_path: Path) -> None:
     """外部真实样本可用 {cases: [...]} 格式追加到默认基线。"""
 
