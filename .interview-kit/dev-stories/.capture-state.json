@@ -1,8 +1,8 @@
 {
-  "last_generated_hash": "1391d4d65ab8cfacaddc79c39582009b83793e92",
-  "last_capture_time": "2026-08-12T07:13:21+08:00",
-  "last_story_file": "2026-08-12-feature-cross-domain-systemic-failure-summary.md",
+  "last_generated_hash": "a182ba5212f765a185272562e49ce9b43ea06e9d",
+  "last_capture_time": "2026-08-12T07:18:55+08:00",
+  "last_story_file": "2026-08-12-feature-cross-domain-preflight.md",
   "last_prompt_decision": "generated",
   "last_generated_push_hash": null,
-  "last_prompted_hash": "1391d4d65ab8cfacaddc79c39582009b83793e92"
+  "last_prompted_hash": "a182ba5212f765a185272562e49ce9b43ea06e9d"
 }
