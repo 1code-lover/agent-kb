@@ -260,6 +260,9 @@ git diff --check
 - `cd desktop && npm run build:preflight`：非严格模式通过；`verify-release-config` 确认 release config ready，随后提示本机仍缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
 - `desktop/package.json` 的 `release:mac` 已串起 `build:preflight` + 严格 `release:preflight`；`desktop/scripts/build-target.js` 也已在 macOS `npm run build` 路径里先执行 `verify-release-config.js` 和 `release-preflight.js`，避免本机打包入口绕过发布配置校验。
 - `node --test desktop/scripts/*.test.js`：`23 passed`，新增 `build-target.test.js` 覆盖 macOS build 入口的配置预检顺序、预检失败提前停止，以及非 macOS 平台只走对应 electron-builder target。
+- `desktop/scripts/verify-package.js` 已抽成可测试的 `verifyPackage()`，继续校验 dmg/zip 产物、packaged runtime resources、`app.asar` 和测试文件排除。
+- `node --test desktop/scripts/*.test.js`：`27 passed`，新增 `verify-package.test.js` 覆盖完整 package、缺失 release artifact、缺失 runtime 文件和 `app.asar` 混入 `.test.js` 的阻断路径。
+- `cd desktop && npm run verify:package`：通过，确认当前 `desktop/dist` 产物内容仍满足 package 校验。
 
 ## 2026-08-11 release candidate 清单
 
