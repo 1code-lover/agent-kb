@@ -605,6 +605,72 @@ def test_summarize_includes_focus_groups() -> None:
     assert report["turn_passed"] == 3
 
 
+def test_summarize_includes_failed_check_diagnostics() -> None:
+    """失败汇总应按检查项和 case/turn 归因。"""
+
+    report = cross_eval.summarize(
+        [
+            {
+                "id": "single-fail",
+                "kind": "positive",
+                "focus": "grain",
+                "tags": ["source-grounding"],
+                "case_source": "default",
+                "passed": False,
+                "checks": {
+                    "expected_terms_hit": True,
+                    "required_source_file_hit": False,
+                },
+            },
+            {
+                "id": "multi-fail",
+                "kind": "positive",
+                "focus": "desktop",
+                "tags": ["multi-turn"],
+                "case_source": "extra.json",
+                "is_multi_turn": True,
+                "turn_count": 2,
+                "passed_turn_count": 1,
+                "passed": False,
+                "checks": {"turns_passed": False},
+                "turns": [
+                    {
+                        "turn_id": "seed",
+                        "passed": True,
+                        "checks": {"expected_terms_hit": True},
+                    },
+                    {
+                        "turn_id": "follow-up",
+                        "passed": False,
+                        "checks": {
+                            "expected_terms_hit": False,
+                            "required_source_text_hit": False,
+                        },
+                    },
+                ],
+            },
+        ]
+    )
+
+    assert report["failed"] == 2
+    assert report["failure_check_summary"]["required_source_file_hit"]["case_ids"] == ["single-fail"]
+    assert report["failure_check_summary"]["expected_terms_hit"]["case_ids"] == ["multi-fail"]
+    assert report["failure_check_summary"]["expected_terms_hit"]["turn_ids"] == ["follow-up"]
+    assert report["failure_check_summary"]["required_source_text_hit"]["turn_ids"] == ["follow-up"]
+    assert report["failure_case_summary"] == [
+        {
+            "id": "multi-fail",
+            "failed_checks": ["expected_terms_hit", "required_source_text_hit"],
+            "failed_turns": ["follow-up"],
+        },
+        {
+            "id": "single-fail",
+            "failed_checks": ["required_source_file_hit"],
+            "failed_turns": [],
+        },
+    ]
+
+
 def test_load_cases_default_suite_includes_extended_references() -> None:
     """默认跨域评测集应包含新增的桌面、粮仓和 UTF-16 参考样本。"""
 

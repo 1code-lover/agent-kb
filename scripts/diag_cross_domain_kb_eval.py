@@ -705,6 +705,69 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
     )
 
 
+def _failed_check_names(item: dict[str, Any]) -> list[str]:
+    """提取单条结果中失败的检查项名称。"""
+    checks = item.get("checks")
+    if not isinstance(checks, dict):
+        return []
+    return sorted(str(name) for name, passed in checks.items() if passed is False)
+
+
+def _iter_check_results(item: dict[str, Any]) -> list[tuple[str, str, list[str]]]:
+    """返回 case/turn 粒度的失败检查项，用于汇总诊断。"""
+    case_id = str(item.get("id") or "case")
+    rows: list[tuple[str, str, list[str]]] = []
+    if item.get("is_multi_turn"):
+        for turn in item.get("turns") or []:
+            if not isinstance(turn, dict):
+                continue
+            check_names = _failed_check_names(turn)
+            if check_names:
+                turn_id = str(turn.get("turn_id") or turn.get("id") or "turn")
+                rows.append((case_id, turn_id, check_names))
+        parent_checks = [name for name in _failed_check_names(item) if name != "turns_passed"]
+        if parent_checks:
+            rows.append((case_id, "", parent_checks))
+    else:
+        check_names = _failed_check_names(item)
+        if check_names:
+            rows.append((case_id, "", check_names))
+    return rows
+
+
+def _summarize_failures(results: list[dict[str, Any]]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """按失败检查项和失败 case 生成诊断摘要。"""
+    check_groups: dict[str, list[dict[str, str]]] = {}
+    case_groups: dict[str, dict[str, Any]] = {}
+    for item in results:
+        for case_id, turn_id, check_names in _iter_check_results(item):
+            case_entry = case_groups.setdefault(case_id, {"id": case_id, "failed_checks": [], "failed_turns": []})
+            for check_name in check_names:
+                check_groups.setdefault(check_name, []).append({"id": case_id, "turn_id": turn_id})
+                if check_name not in case_entry["failed_checks"]:
+                    case_entry["failed_checks"].append(check_name)
+            if turn_id and turn_id not in case_entry["failed_turns"]:
+                case_entry["failed_turns"].append(turn_id)
+
+    check_summary = {
+        check_name: {
+            "total": len(rows),
+            "case_ids": sorted({row["id"] for row in rows}),
+            "turn_ids": sorted({row["turn_id"] for row in rows if row["turn_id"]}),
+        }
+        for check_name, rows in sorted(check_groups.items())
+    }
+    case_summary = [
+        {
+            "id": item["id"],
+            "failed_checks": sorted(item["failed_checks"]),
+            "failed_turns": sorted(item["failed_turns"]),
+        }
+        for item in sorted(case_groups.values(), key=lambda row: row["id"])
+    ]
+    return check_summary, case_summary
+
+
 def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     """汇总跨领域用例结果。"""
     total = len(results)
@@ -724,6 +787,7 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     focus_groups: dict[str, list[dict[str, Any]]] = {}
     case_source_groups: dict[str, list[dict[str, Any]]] = {}
     tag_groups: dict[str, list[dict[str, Any]]] = {}
+    failure_check_summary, failure_case_summary = _summarize_failures(results)
     for item in results:
         focus_groups.setdefault(str(item.get("focus") or "uncategorized"), []).append(item)
         case_source_groups.setdefault(str(item.get("case_source") or "unknown"), []).append(item)
@@ -752,6 +816,8 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "turn_failed": max(turn_total - turn_passed, 0),
         "turn_pass_rate": round(turn_passed / turn_total, 4) if turn_total else 0.0,
         "failed_case_ids": [str(item.get("id")) for item in failed],
+        "failure_check_summary": failure_check_summary,
+        "failure_case_summary": failure_case_summary,
         "focus_summary": {
             focus: {
                 "total": len(rows),
