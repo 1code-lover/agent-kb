@@ -371,3 +371,36 @@ node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/stor
 ```
 
 结果：`83 passed`。
+
+## 2026-08-11 多轮追问跨领域评测
+
+这次把跨领域评测从单轮 case 扩展到多轮 `turns`：同一个 case 内按顺序复用同一个本次评测专用 `session_id`，每一轮都会独立记录 checks、answer preview、来源 KB 和通过状态，顶层 case 再汇总 `turn_count`、`passed_turn_count`、`failed_turn_ids` 与整体通过状态。这个能力用于验证当前最小 follow-up/session grounding，不宣称已经完成完整多轮推理。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`14 passed, 1 warning`。新增覆盖多轮 session 复用、逐轮汇总、任一轮失败导致顶层 case 失败。
+
+新增外部样本文件：
+
+- `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json`：粮仓正向追问、桌面 evidence preview 正向追问、粮仓 KB 内追问桌面 passcode 的负向隔离。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v8.json
+```
+
+结果：`36/36 passed`，逐轮 `39/39 passed`。默认基线 `23/23`，v1 外部样本 `4/4`，v2 外部样本 `6/6`，v3 多轮样本 `3/3`；`multi-turn`、`follow-up`、`cross-kb-isolation`、`refusal` 等 tag 切片均为 `100%`。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"
+```
+
+结果：`725 passed, 1 deselected, 35 warnings`。

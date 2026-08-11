@@ -213,6 +213,108 @@ def test_evaluate_contract_case_accepts_expected_http_error(monkeypatch) -> None
     assert result["checks"]["expected_error_terms_hit"] is True
 
 
+def test_evaluate_multi_turn_case_reuses_session_and_aggregates_turns(monkeypatch) -> None:
+    """多轮追问用例应按顺序复用同一 session 并汇总逐轮结果。"""
+
+    requests = []
+
+    def fake_post_json(_api_base, _path, payload, _timeout):
+        requests.append(payload)
+        if len(requests) == 1:
+            return {
+                "code": 0,
+                "data": {
+                    "answer": "The diagnostic passcode is northagent-desktop-e2e-1786353063.",
+                    "sources": [{"kb_id": "diag-desktop-e2e-1786353063"}],
+                },
+            }
+        return {
+            "code": 0,
+            "data": {
+                "answer": "Evidence preview should resolve this file after chat returns sources.",
+                "sources": [{"kb_id": "diag-desktop-e2e-1786353063"}],
+            },
+        }
+
+    monkeypatch.setattr(cross_eval, "_post_json", fake_post_json)
+    result = cross_eval.evaluate_case(
+        {
+            "id": "desktop-follow-up",
+            "kind": "positive",
+            "focus": "desktop",
+            "tags": ["multi-turn"],
+            "kb_ids": ["diag-desktop-e2e-1786353063"],
+            "turns": [
+                {
+                    "id": "seed",
+                    "question": "What is the unique desktop workflow passcode?",
+                    "expected_terms": ["northagent-desktop-e2e-1786353063"],
+                    "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+                    "required_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+                },
+                {
+                    "id": "follow-up",
+                    "question": "And what should evidence preview resolve?",
+                    "expected_terms": ["resolve this file after chat returns sources"],
+                    "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+                    "required_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+                },
+            ],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is True
+    assert result["is_multi_turn"] is True
+    assert result["turn_count"] == 2
+    assert result["passed_turn_count"] == 2
+    assert result["failed_turn_ids"] == []
+    assert result["turns"][0]["turn_id"] == "seed"
+    assert result["turns"][1]["turn_id"] == "follow-up"
+    assert requests[0]["session_id"] == requests[1]["session_id"]
+    assert requests[0]["session_id"].startswith("cross-domain-eval::desktop-follow-up::")
+
+
+def test_evaluate_multi_turn_case_fails_when_any_turn_fails(monkeypatch) -> None:
+    """任一追问轮次失败时，顶层多轮用例也应失败。"""
+
+    monkeypatch.setattr(
+        cross_eval,
+        "_post_json",
+        lambda *_args: {
+            "code": 0,
+            "data": {
+                "answer": "没有命中目标关键词。",
+                "sources": [{"kb_id": "grain-knowledge-base"}],
+            },
+        },
+    )
+
+    result = cross_eval.evaluate_case(
+        {
+            "id": "grain-follow-up",
+            "kind": "positive",
+            "kb_ids": ["grain-knowledge-base"],
+            "turns": [
+                {
+                    "id": "follow-up",
+                    "question": "这个方针是什么？",
+                    "expected_terms": ["预防为主"],
+                    "allowed_source_kb_ids": ["grain-knowledge-base"],
+                }
+            ],
+        },
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+    )
+
+    assert result["passed"] is False
+    assert result["checks"]["turns_passed"] is False
+    assert result["failed_turn_ids"] == ["follow-up"]
+    assert result["turns"][0]["checks"]["expected_terms_hit"] is False
+
+
 def test_run_evaluation_writes_report_and_returns_nonzero_on_failure(tmp_path: Path, monkeypatch) -> None:
     """失败用例应写入报告，并返回非 0。"""
 
@@ -318,6 +420,7 @@ def test_summarize_includes_focus_groups() -> None:
                 "tags": ["long-question", "multi-hop"],
                 "case_source": "default",
                 "passed": True,
+                "turn_count": 1,
             },
             {
                 "id": "b",
@@ -326,6 +429,7 @@ def test_summarize_includes_focus_groups() -> None:
                 "tags": ["refusal", "long-question"],
                 "case_source": "extra.json",
                 "passed": False,
+                "turn_count": 1,
             },
             {
                 "id": "c",
@@ -334,6 +438,9 @@ def test_summarize_includes_focus_groups() -> None:
                 "tags": ["contract"],
                 "case_source": "default",
                 "passed": True,
+                "is_multi_turn": True,
+                "turn_count": 2,
+                "passed_turn_count": 2,
             },
         ]
     )
@@ -346,6 +453,9 @@ def test_summarize_includes_focus_groups() -> None:
     assert report["tag_summary"]["long-question"]["total"] == 2
     assert report["tag_summary"]["long-question"]["failed"] == 1
     assert report["tag_summary"]["multi-hop"]["passed"] == 1
+    assert report["multi_turn_total"] == 1
+    assert report["turn_total"] == 4
+    assert report["turn_passed"] == 3
 
 
 def test_load_cases_default_suite_includes_extended_references() -> None:

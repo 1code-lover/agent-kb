@@ -1,0 +1,80 @@
+{
+  "name": "cross-domain extra multi-turn cases v3",
+  "description": "Additional real multi-turn follow-up cases that reuse one chat session per case while preserving single-KB isolation.",
+  "cases": [
+    {
+      "id": "extra-v3-grain-multiturn-policy-follow-up",
+      "focus": "grain-extra",
+      "kind": "positive",
+      "tags": ["multi-turn", "follow-up", "single-kb"],
+      "kb_ids": ["grain-knowledge-base"],
+      "top_k": 8,
+      "turns": [
+        {
+          "id": "scope",
+          "question": "《粮油安全储存守则》适用于哪些单位？",
+          "expected_terms": ["各类粮油仓储单位"],
+          "allowed_source_kb_ids": ["grain-knowledge-base"],
+          "required_source_kb_ids": ["grain-knowledge-base"]
+        },
+        {
+          "id": "policy-follow-up",
+          "question": "这个守则制定的安全储粮方针是什么？",
+          "expected_terms": ["预防为主", "综合防治"],
+          "allowed_source_kb_ids": ["grain-knowledge-base"],
+          "required_source_kb_ids": ["grain-knowledge-base"]
+        }
+      ]
+    },
+    {
+      "id": "extra-v3-desktop-multiturn-preview-follow-up",
+      "focus": "desktop-extra",
+      "kind": "positive",
+      "tags": ["multi-turn", "follow-up", "evidence-preview"],
+      "kb_ids": ["diag-desktop-e2e-1786353063"],
+      "top_k": 8,
+      "turns": [
+        {
+          "id": "passcode",
+          "question": "What is the unique desktop workflow passcode in the diagnostic document?",
+          "expected_terms": ["northagent-desktop-e2e-1786353063"],
+          "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+          "required_source_kb_ids": ["diag-desktop-e2e-1786353063"]
+        },
+        {
+          "id": "preview-follow-up",
+          "question": "And what should it say evidence preview resolves after chat returns sources?",
+          "expected_terms": ["resolve this file after chat returns sources"],
+          "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+          "required_source_kb_ids": ["diag-desktop-e2e-1786353063"]
+        }
+      ]
+    },
+    {
+      "id": "extra-v3-grain-negative-desktop-follow-up",
+      "focus": "cross-domain-extra",
+      "kind": "negative",
+      "tags": ["multi-turn", "follow-up", "cross-kb-isolation", "refusal"],
+      "kb_ids": ["grain-knowledge-base"],
+      "top_k": 8,
+      "turns": [
+        {
+          "id": "grain-policy",
+          "kind": "positive",
+          "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+          "expected_terms": ["预防为主", "综合防治"],
+          "allowed_source_kb_ids": ["grain-knowledge-base"],
+          "required_source_kb_ids": ["grain-knowledge-base"]
+        },
+        {
+          "id": "desktop-passcode-follow-up",
+          "kind": "negative",
+          "question": "What about that desktop diagnostic passcode?",
+          "forbidden_terms": ["northagent-desktop-e2e-1786353063", "northagent-desktop-e2e-1786352564"],
+          "allowed_source_kb_ids": ["grain-knowledge-base"],
+          "forbidden_source_kb_ids": ["diag-desktop-e2e-1786353063", "diag-desktop-e2e-1786352564"]
+        }
+      ]
+    }
+  ]
+}

@@ -139,14 +139,14 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight`，`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条真实业务追加样本合计 `33/33 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight`，`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力与多轮 `turns` 评测后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条 + v3 多轮 3 条真实业务追加样本合计 `36/36 passed`，逐轮统计 `39/39 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`multi-turn`、`follow-up`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
 - **发布入口已经串起配置预检**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight` 和 `electron-builder --mac`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
-- **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本，当前默认 23 条 + 外部 4 条 + 外部 6 条达到 `33/33 passed`；下一阶段应继续补表格、长文档、多轮追问和更多跨库拒答样本，同时保持 tag 维度可分组回归。
+- **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本和 `turns` 多轮追问用例，当前默认 23 条 + 外部 4 条 + 外部 6 条 + 多轮 3 条达到 `36/36 passed`、逐轮 `39/39 passed`；下一阶段应继续补表格、长文档、更长多轮链路和更多跨库拒答样本，同时保持 tag 维度可分组回归。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **补发布后的桌面安装体验验证**：当前已验证 packaged app 主进程、API 和前端加载；签名/公证后还需要覆盖首次安装、模型重新配置、文件上传/导入、preview、引用来源和跨 KB 隔离。
 
@@ -306,6 +306,14 @@ cd webapp && npm run build
 - `node --test webapp/src/domain/modelHealth.test.js`：`8 passed`。
 - `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`83 passed`。
 
+### 5.13 2026-08-11 多轮追问跨领域评测复核
+
+- `scripts/diag_cross_domain_kb_eval.py` 新增 `turns` 多轮用例格式；同一 case 内按顺序复用同一个本次评测专用 `session_id`，报告记录顶层 case 结果、`turn_count`、`passed_turn_count`、`failed_turn_ids` 和每一轮的 checks / answer preview / source KB。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`14 passed, 1 warning`，新增覆盖多轮 session 复用、逐轮汇总和任一轮失败时顶层 case 失败。
+- 新增外部样本文件：`docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json`，覆盖粮仓正向追问、桌面 evidence preview 正向追问和粮仓 KB 内追问桌面 passcode 的负向隔离。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v8.json`：`36/36 passed`；默认基线 `23/23`，v1 `4/4`，v2 `6/6`，v3 多轮 `3/3`，逐轮 `39/39 passed`；`multi-turn`、`follow-up`、`cross-kb-isolation` 等 tag 切片均为 `100%`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"`：`725 passed, 1 deselected, 35 warnings`。
+
 ---
 
 ## 6. 已知问题和限制
@@ -314,7 +322,7 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 追加外部真实样本；当前 v7 报告为 `33/33 passed`。
+- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 追加外部真实样本和 `turns` 多轮追问样本；当前 v8 报告为 `36/36 passed`，逐轮 `39/39 passed`。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
@@ -346,6 +354,8 @@ cd webapp && npm run build
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6.json` | 默认基线 + 外部追加样本的跨领域诊断报告 |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json` | 跨领域真实业务追加样本（长问题 / 多跳 / OCR / 拒答） |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v7.json` | 默认基线 + v1/v2 外部追加样本的跨领域诊断报告 |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json` | 跨领域真实业务追加样本（多轮追问 / follow-up / 跨库隔离） |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v8.json` | 默认基线 + v1/v2/v3 外部追加样本的跨领域多轮诊断报告 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |

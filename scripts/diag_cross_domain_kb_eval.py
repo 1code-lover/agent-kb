@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 import urllib.error
+import uuid
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -347,6 +348,16 @@ def _contains_expected_terms(haystack: str, terms: list[str], term_groups: list[
     return required_hit and any(_contains_all(haystack, group) for group in term_groups)
 
 
+def _expected_any_term_groups(case: dict[str, Any]) -> list[list[str]]:
+    """规整任一命中关键词组。"""
+    expected_any_term_groups: list[list[str]] = []
+    for group in case.get("expected_any_term_groups") or []:
+        group_terms = _as_list(group)
+        if group_terms:
+            expected_any_term_groups.append(group_terms)
+    return expected_any_term_groups
+
+
 def _contains_any(haystack: str, terms: list[str]) -> bool:
     """检查文本是否包含任一关键词。"""
     return any(term in haystack for term in terms)
@@ -395,8 +406,25 @@ def _resolve_http_status(response: dict[str, Any]) -> int:
         return -1
 
 
-def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[str, Any]:
-    """执行单条跨领域用例并计算通过状态。"""
+def _new_session_id(case: dict[str, Any], case_id: str) -> str:
+    """生成本次评测专用 session，避免历史记录串扰。"""
+    configured = str(case.get("session_id") or "").strip()
+    if configured:
+        return configured
+    return f"cross-domain-eval::{case_id}::{uuid.uuid4().hex}"
+
+
+def _evaluate_single_turn(
+    *,
+    case: dict[str, Any],
+    api_base: str,
+    timeout: float,
+    case_id: str,
+    session_id: str,
+    turn_index: int | None = None,
+    turn_id: str | None = None,
+) -> dict[str, Any]:
+    """执行一次问答请求并计算该轮检查结果。"""
     case_id = str(case.get("id") or "case")
     kind = str(case.get("kind") or "positive")
     focus = str(case.get("focus") or "uncategorized")
@@ -414,7 +442,7 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         "/api/chat/query",
         {
             "question": question,
-            "session_id": f"cross-domain-eval::{case_id}",
+            "session_id": session_id,
             "kb_ids": kb_ids,
             "top_k": int(case.get("top_k") or 5),
         },
@@ -432,11 +460,7 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         error = None if status_ok else response_message or str(response)
 
     expected_terms = _as_list(case.get("expected_terms"))
-    expected_any_term_groups: list[list[str]] = []
-    for group in case.get("expected_any_term_groups") or []:
-        group_terms = _as_list(group)
-        if group_terms:
-            expected_any_term_groups.append(group_terms)
+    expected_any_term_groups = _expected_any_term_groups(case)
     forbidden_terms = _as_list(case.get("forbidden_terms"))
     expected_error_terms = _as_list(case.get("expected_error_terms"))
     allowed_source_kb_ids = set(_as_list(case.get("allowed_source_kb_ids")))
@@ -489,13 +513,14 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         }
         passed = all(checks.values())
 
-    return {
+    result = {
         "id": case_id,
         "kind": kind,
         "focus": focus,
         "tags": tags,
         "case_source": str(case.get("case_source") or ""),
         "kb_ids": kb_ids,
+        "session_id": session_id,
         "question": question,
         "expected_terms": expected_terms,
         "expected_any_term_groups": expected_any_term_groups,
@@ -516,6 +541,105 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         "error": error,
         "note": case.get("note"),
     }
+    if turn_index is not None:
+        result["case_id"] = str(case.get("case_id") or case_id)
+        result["turn_index"] = turn_index
+        result["turn_id"] = turn_id or f"turn-{turn_index}"
+    return result
+
+
+def _merge_turn_case(case: dict[str, Any], turn: dict[str, Any], index: int) -> dict[str, Any]:
+    """把 case 默认字段和单轮字段合并为可评测结构。"""
+    merged = {key: value for key, value in case.items() if key != "turns"}
+    turn_id = str(turn.get("id") or f"turn-{index}")
+    merged.update(turn)
+    merged["case_id"] = str(case.get("id") or "case")
+    merged["id"] = f"{merged['case_id']}::{turn_id}"
+    merged.setdefault("kind", case.get("kind") or "positive")
+    merged.setdefault("focus", case.get("focus") or "uncategorized")
+    merged.setdefault("tags", _as_list(case.get("tags")))
+    merged.setdefault("case_source", case.get("case_source") or "")
+    return merged
+
+
+def _evaluate_multi_turn_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[str, Any]:
+    """按同一 session 顺序执行多轮追问用例。"""
+    case_id = str(case.get("id") or "case")
+    turns = case.get("turns")
+    if not isinstance(turns, list) or not turns:
+        raise ValueError(f"{case_id}: turns must be a non-empty list")
+    turn_items = [item for item in turns if isinstance(item, dict)]
+    if len(turn_items) != len(turns):
+        raise ValueError(f"{case_id}: every turn must be an object")
+
+    session_id = _new_session_id(case, case_id)
+    results: list[dict[str, Any]] = []
+    for index, turn in enumerate(turn_items, start=1):
+        turn_id = str(turn.get("id") or f"turn-{index}")
+        turn_case = _merge_turn_case(case, turn, index)
+        results.append(
+            _evaluate_single_turn(
+                case=turn_case,
+                api_base=api_base,
+                timeout=timeout,
+                case_id=case_id,
+                session_id=session_id,
+                turn_index=index,
+                turn_id=turn_id,
+            )
+        )
+
+    failed_turns = [item for item in results if not item.get("passed")]
+    kind = str(case.get("kind") or "positive")
+    focus = str(case.get("focus") or "uncategorized")
+    tags = _as_list(case.get("tags"))
+    kb_ids = _as_list(case.get("kb_ids"))
+    source_kb_ids: list[str] = []
+    source_kb_id_missing_count = 0
+    source_record_count = 0
+    for item in results:
+        source_kb_ids.extend(_as_list(item.get("source_kb_ids")))
+        source_kb_id_missing_count += int(item.get("source_kb_id_missing_count") or 0)
+        source_record_count += int(item.get("source_record_count") or 0)
+
+    return {
+        "id": case_id,
+        "kind": kind,
+        "focus": focus,
+        "tags": tags,
+        "case_source": str(case.get("case_source") or ""),
+        "kb_ids": kb_ids,
+        "session_id": session_id,
+        "is_multi_turn": True,
+        "turn_count": len(results),
+        "passed_turn_count": sum(1 for item in results if item.get("passed")),
+        "failed_turn_ids": [str(item.get("turn_id")) for item in failed_turns],
+        "source_record_count": source_record_count,
+        "source_kb_ids": source_kb_ids,
+        "source_kb_id_missing_count": source_kb_id_missing_count,
+        "checks": {
+            "turns_passed": not failed_turns,
+            "turn_count_ok": len(results) == len(turn_items),
+            "source_kb_known": source_kb_id_missing_count == 0,
+        },
+        "passed": not failed_turns,
+        "turns": results,
+        "note": case.get("note"),
+    }
+
+
+def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[str, Any]:
+    """执行单条跨领域用例并计算通过状态，支持单轮和多轮追问。"""
+    case_id = str(case.get("id") or "case")
+    if "turns" in case:
+        return _evaluate_multi_turn_case(case, api_base, timeout)
+    return _evaluate_single_turn(
+        case=case,
+        api_base=api_base,
+        timeout=timeout,
+        case_id=case_id,
+        session_id=_new_session_id(case, case_id),
+    )
 
 
 def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
@@ -526,6 +650,14 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     negative = [item for item in results if item.get("kind") == "negative"]
     contract = [item for item in results if item.get("kind") == "contract"]
     failed = [item for item in results if not item.get("passed")]
+    multi_turn = [item for item in results if item.get("is_multi_turn")]
+    turn_total = sum(int(item.get("turn_count") or 1) for item in results)
+    turn_passed = 0
+    for item in results:
+        if item.get("is_multi_turn"):
+            turn_passed += int(item.get("passed_turn_count") or 0)
+        elif item.get("passed"):
+            turn_passed += 1
     focus_groups: dict[str, list[dict[str, Any]]] = {}
     case_source_groups: dict[str, list[dict[str, Any]]] = {}
     tag_groups: dict[str, list[dict[str, Any]]] = {}
@@ -551,6 +683,11 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "negative_pass_rate": _rate(negative),
         "contract_total": len(contract),
         "contract_pass_rate": _rate(contract),
+        "multi_turn_total": len(multi_turn),
+        "turn_total": turn_total,
+        "turn_passed": turn_passed,
+        "turn_failed": max(turn_total - turn_passed, 0),
+        "turn_pass_rate": round(turn_passed / turn_total, 4) if turn_total else 0.0,
         "failed_case_ids": [str(item.get("id")) for item in failed],
         "focus_summary": {
             focus: {
