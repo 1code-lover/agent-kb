@@ -139,14 +139,14 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`，正式发布会在打包后继续检查 packaged runtime contents、codesign、Gatekeeper assess 和 stapler ticket。`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力、多轮 `turns` 评测、来源文件级断言、evidence 文本断言、失败检查项归因汇总和耗时诊断后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条 + v3 多轮 3 条 + v4 source-grounding 5 条 + v5 evidence-text 4 条真实业务追加样本合计 `45/45 passed`，逐轮统计 `48/48 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`multi-turn`、`follow-up`、`source-grounding`、`evidence-text`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁；报告新增 `failure_check_summary`、`failure_case_summary` 和 `duration_summary`，当前稳定基线失败归因为空，最慢 case 为 `grain-negative-utf8-exact-boundary`。2026-08-11 晚间继续试扩 v6 表格、长多轮和更多跨库拒答样本，但当前可用模型已从 `qwen-plus-2025-07-28` 额度耗尽切到 `qwen-math-turbo`，v6 定向复核暂为 `2/4 passed`，剩余问题集中在 README 表格抽取和 mixed batch 第一轮超时。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`，正式发布会在打包后继续检查 packaged runtime contents、codesign、Gatekeeper assess 和 stapler ticket。`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力、多轮 `turns` 评测、来源文件级断言、evidence 文本断言、失败检查项归因汇总和耗时诊断后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条 + v3 多轮 3 条 + v4 source-grounding 5 条 + v5 evidence-text 4 条真实业务追加样本合计 `45/45 passed`，逐轮统计 `48/48 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`multi-turn`、`follow-up`、`source-grounding`、`evidence-text`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁；报告新增 `failure_check_summary`、`failure_case_summary` 和 `duration_summary`，当前稳定基线失败归因为空，最慢 case 为 `grain-negative-utf8-exact-boundary`。2026-08-11 晚间继续试扩 v6 表格、长多轮和更多跨库拒答样本，但当前可用模型已从 `qwen-plus-2025-07-28` 额度耗尽切到 `qwen-math-turbo`，v6 定向复核暂为 `2/4 passed`，剩余问题集中在 README 表格抽取和 mixed batch 第一轮超时。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
 - **发布入口已经串起配置预检和后置校验**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight`、`electron-builder --mac`、`verify:package` 和 `verify:mac-release`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测，`verify-mac-release` 会验证 codesign、Gatekeeper 和 stapler。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
-- **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
+- **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；`/api/model/select` 也会在保存模型后即时探活并把失败写入 `model_health`，下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
 - **优先恢复稳定通用模型并复跑 v6**：`qwen-plus-2025-07-28` 当前返回 `AllocationQuota.FreeTierOnly`，`ely/qwen-flash` 返回 401，`阿里百炼/qwen-flash` 与 `deepseek-v4-flash` 返回 `model_not_found`；临时可用的 `qwen-math-turbo` 可通过基础 RAG smoke，但对表格抽取和长多轮稳定性不足。下一步应先恢复通用模型额度或配置一个可用通用模型，再复跑 v1-v6 全量。
 - **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本、`turns` 多轮追问用例、来源文件级断言、evidence 文本级断言、失败检查项归因汇总、超时归一和耗时诊断，当前默认 23 条 + 外部 4 条 + 外部 6 条 + 多轮 3 条 + source-grounding 5 条 + evidence-text 4 条达到 `45/45 passed`、逐轮 `48/48 passed`；v6 已补表格、长多轮和更多跨库拒答样本，但还不是正式门禁，下一阶段应在稳定模型上打绿后再纳入全量基线。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
@@ -359,6 +359,14 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`21 passed, 1 warning`。
 - 新增试验样本文件：`docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json`，覆盖 README 表格、mixed batch 三轮追问、桌面对 grain README 的负向隔离、图片 OCR 对 mixed rollback approval 的负向隔离。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --timeout 45 --cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-only-v2.json`：`2/4 passed`，两个 cross-KB negative case 均通过；失败集中在 README 表格 expected terms 未命中，以及 mixed batch `approval` turn 在 45 秒内超时。
+
+### 5.19 2026-08-12 模型选择即时探活
+
+- `api/services/model_service.py` 的 `/api/model/select` 服务路径现在会在保存当前模型后立即调用轻量探活；坏 token、额度耗尽、模型不存在或 Ollama 未就绪时会把 `model_health.state` 写为 `unavailable`，并写入 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`，不再把只保存成功的配置误标为 `healthy`。
+- 自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复请求同一个候选。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py -q`：`20 passed, 2 warnings`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q`：`58 passed, 8 warnings`。
+- `node --test webapp/src/domain/modelHealth.test.js`：`10 passed`。
 
 ---
 

@@ -114,6 +114,12 @@ def test_select_model_uses_provider_defaults_and_updates_session(monkeypatch: py
         "_find_provider",
         lambda name: {"name": name, "api_base": " https://provider.example/v1/ ", "api_key": "sk-provider"},
     )
+    monkeypatch.setattr(
+        model_service,
+        "_check_openai_compatible",
+        lambda model_name, api_base, api_key, trace_id: (True, "reachable", {"status_code": 200, "trace_id": trace_id}),
+    )
+    monkeypatch.setattr(model_service, "new_trace_id", lambda prefix: prefix + "-trace")
     monkeypatch.setattr(model_service, "update_session", lambda session_id, payload: session_updates.append((session_id, payload)))
 
     payload = model_service.select_model(
@@ -126,6 +132,7 @@ def test_select_model_uses_provider_defaults_and_updates_session(monkeypatch: py
     assert store.values["current_llm_info"]["model"] == "gpt-test"
     assert store.values["model_health_status"]["state"] == "healthy"
     assert store.values["model_health_status"]["current_model"] == "gpt-test"
+    assert store.values["model_health_status"]["fallback_attempt_summary"]["reachable_count"] == 1
     assert session_updates == [
         (
             "sess-1",
@@ -152,12 +159,63 @@ def test_select_model_allows_ollama_without_api_key(monkeypatch: pytest.MonkeyPa
         "_find_provider",
         lambda name: {"name": name, "api_base": "http://localhost:11434", "api_key": ""},
     )
+    monkeypatch.setattr(
+        model_service,
+        "_check_ollama_model",
+        lambda model_name, api_base, trace_id: (True, "reachable", {"trace_id": trace_id}),
+    )
+    monkeypatch.setattr(model_service, "new_trace_id", lambda prefix: prefix + "-trace")
     monkeypatch.setattr(model_service, "update_session", lambda *_args, **_kwargs: None)
 
     payload = model_service.select_model(ModelSelectRequest(service_provider="Ollama", model="qwen2.5"))
 
     assert payload["api_key"] == ""
     assert payload["api_key_valid"] is True
+    assert store.values["model_health_status"]["state"] == "healthy"
+
+
+def test_select_model_records_probe_failure_in_health(monkeypatch: pytest.MonkeyPatch) -> None:
+    """选择模型后真实探活失败时，不应把模型健康状态写成 healthy。"""
+
+    store = _DummyStore()
+    monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-11T08:00:00Z")
+    monkeypatch.setattr(model_service, "new_trace_id", lambda prefix: prefix + "-trace")
+    monkeypatch.setattr(
+        model_service,
+        "_find_provider",
+        lambda name: {"name": name, "api_base": "https://provider.example/v1", "api_key": "bad-key"},
+    )
+    monkeypatch.setattr(
+        model_service,
+        "_check_openai_compatible",
+        lambda model_name, api_base, api_key, trace_id: (
+            False,
+            "http_401",
+            {"status_code": 401, "trace_id": trace_id},
+        ),
+    )
+    monkeypatch.setattr(model_service, "update_session", lambda *_args, **_kwargs: None)
+
+    payload = model_service.select_model(
+        ModelSelectRequest(service_provider="Builtin", model="bad-chat", session_id="sess-bad")
+    )
+
+    assert payload["model"] == "bad-chat"
+    assert store.values["current_llm_info"]["model"] == "bad-chat"
+    assert store.values["model_health_status"]["state"] == "unavailable"
+    assert store.values["model_health_status"]["last_error_kind"] == "unauthorized"
+    assert store.values["model_health_status"]["last_error"] == "http_401"
+    assert store.values["model_health_status"]["fallback_attempt_summary"] == {
+        "total": 1,
+        "reachable_count": 0,
+        "failed_count": 1,
+        "ollama_candidate_count": 0,
+        "ollama_reachable_count": 0,
+        "last_provider": "Builtin",
+        "last_model": "bad-chat",
+        "last_detail": "http_401",
+    }
 
 
 def test_select_model_rejects_unknown_provider(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -95,7 +95,10 @@ def get_model_options() -> dict[str, Any]:
     }
 
 
-def select_model(request: ModelSelectRequest) -> dict[str, Any]:
+def select_model(
+    request: ModelSelectRequest,
+    probe_result: tuple[bool, str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     config_store = _get_config_store()
     payload = request.model_dump(exclude_none=True)
     provider = _find_provider(request.service_provider)
@@ -108,13 +111,30 @@ def select_model(request: ModelSelectRequest) -> dict[str, Any]:
     payload["api_key"] = payload.get("api_key") or ""
     payload["api_key_valid"] = True if payload["api_key"] or request.service_provider == "Ollama" else False
     config_store.put("current_llm_info", payload)
+    reachable, detail, meta = probe_result or _probe_selected_model(payload)
+    probe_results = [
+        {
+            "service_provider": payload["service_provider"],
+            "model": payload["model"],
+            "api_base": payload["api_base"],
+            "reachable": reachable,
+            "detail": detail,
+        }
+    ]
+    error_kind = None if reachable else classify_model_error(detail, meta.get("status_code"))
     update_model_health(
-        state="healthy" if payload["api_key_valid"] else "unknown",
+        state="healthy" if reachable else "unavailable",
         current_provider=payload["service_provider"],
         current_model=payload["model"],
-        last_error_kind=None,
-        last_error=None,
+        last_error_kind=error_kind,
+        last_error=None if reachable else detail,
         last_checked_at=now_iso(),
+        last_fallback_at=None,
+        fallback_from=None,
+        fallback_to=None,
+        candidate_count=1,
+        fallback_attempts=probe_results,
+        fallback_attempt_summary=_summarize_fallback_attempts(probe_results),
     )
     update_session(
         request.session_id,
@@ -129,6 +149,21 @@ def select_model(request: ModelSelectRequest) -> dict[str, Any]:
         },
     )
     return payload
+
+
+def _probe_selected_model(payload: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
+    """选择模型后做一次轻量探活，避免坏配置被标记为 healthy。"""
+    trace_id = new_trace_id("select")
+    provider = str(payload.get("service_provider") or "")
+    model = str(payload.get("model") or "")
+    api_base = str(payload.get("api_base") or "")
+    api_key = str(payload.get("api_key") or "")
+    if not payload.get("api_key_valid"):
+        return False, "api_key is required", {"trace_id": trace_id, "status_code": 401}
+    candidate = {"service_provider": provider, "model": model, "api_base": api_base, "api_key": api_key}
+    if _candidate_is_ollama(candidate):
+        return _check_ollama_model(model, api_base, trace_id)
+    return _check_openai_compatible(model, api_base, api_key, trace_id)
 
 
 def _find_provider(name: str) -> dict[str, Any] | None:
@@ -433,7 +468,8 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
                 api_base=candidate["api_base"],
                 api_key=candidate["api_key"],
                 session_id=session_id,
-            )
+            ),
+            probe_result=(reachable, detail, _meta),
         )
         status = update_model_health(
             state="fallback_applied",

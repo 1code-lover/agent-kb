@@ -93,6 +93,30 @@ cd webapp && npm run build
 
 另有一次 v1-v6 全量试跑输出到 `cross-domain-kb-eval-report-v11.json`，结果 `1/49 passed`，主要原因是当时当前模型 `qwen-plus-2025-07-28` 已返回 `AllocationQuota.FreeTierOnly`，不作为真实功能回归失败结论。
 
+## 2026-08-12 模型选择即时探活
+
+本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py -q
+```
+
+结果：`20 passed, 2 warnings`。新增覆盖模型选择成功探活、Ollama 无 API Key 探活、坏 token / 401 时不再显示 healthy。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
+```
+
+结果：`58 passed, 8 warnings`。确认模型选择路由、fallback 重试路径和 chat query 回归不受影响。
+
+```bash
+node --test webapp/src/domain/modelHealth.test.js
+```
+
+结果：`10 passed`。前端健康摘要仍能展示 `unavailable`、Ollama 候选和结构化探测摘要。
+
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
 ```
