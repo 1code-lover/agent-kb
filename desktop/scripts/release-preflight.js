@@ -5,7 +5,10 @@ const { spawnSync } = require("node:child_process");
 
 const projectRoot = path.resolve(__dirname, "..", "..");
 const electronAppPath = path.join(projectRoot, "desktop", "node_modules", "electron", "dist", "Electron.app");
-const appBuilderBinaryPath = path.join(projectRoot, "desktop", "node_modules", "app-builder-bin", "mac", "app-builder_arm64");
+const legacyAppBuilderBinaryCandidates = [
+  path.join(projectRoot, "desktop", "node_modules", "app-builder-bin", "mac", "app-builder_arm64"),
+  path.join(projectRoot, "desktop", "node_modules", "app-builder-bin", "mac", "app-builder_x64"),
+];
 const strictMode = process.argv.includes("--strict");
 const requiredReleaseEnv = ["APPLE_ID", "APPLE_APP_SPECIFIC_PASSWORD", "APPLE_TEAM_ID"];
 
@@ -45,6 +48,10 @@ function ensureExecutable(targetPath, logger = report) {
   return { ok: true, repaired: false };
 }
 
+function resolveLegacyAppBuilderBinaryPath(candidates = legacyAppBuilderBinaryCandidates) {
+  return candidates.find((candidate) => fs.existsSync(candidate)) || "";
+}
+
 function findDeveloperIdApplicationIdentities(spawn = spawnSync) {
   const result = spawn("security", ["find-identity", "-v", "-p", "codesigning"], { stdio: "pipe" });
   const stdout = result.stdout ? result.stdout.toString("utf8") : "";
@@ -79,7 +86,10 @@ function runPreflight(options = {}) {
   const strict = options.strict ?? strictMode;
   const spawn = options.spawn || spawnSync;
   const currentElectronAppPath = options.electronAppPath || electronAppPath;
-  const currentAppBuilderBinaryPath = options.appBuilderBinaryPath || appBuilderBinaryPath;
+  const currentAppBuilderBinaryPath =
+    options.appBuilderBinaryPath === undefined
+      ? resolveLegacyAppBuilderBinaryPath(options.appBuilderBinaryCandidates)
+      : options.appBuilderBinaryPath;
   const reportFn = options.report || report;
   const failFn = options.fail || fail;
   const runXattrFn = options.runXattr || runXattr;
@@ -105,16 +115,21 @@ function runPreflight(options = {}) {
   }
 
   if (isDarwin === "darwin") {
-    const executableCheck = ensureExecutable(currentAppBuilderBinaryPath, reportFn);
-    summary.appBuilderExecutable = executableCheck;
-    if (!executableCheck.ok) {
-      const message = `app-builder binary missing at ${currentAppBuilderBinaryPath}`;
-      summary.ok = false;
-      if (strict) {
-        failFn(message);
-        return summary;
+    if (currentAppBuilderBinaryPath) {
+      const executableCheck = ensureExecutable(currentAppBuilderBinaryPath, reportFn);
+      summary.appBuilderExecutable = executableCheck;
+      if (!executableCheck.ok) {
+        const message = `app-builder binary missing at ${currentAppBuilderBinaryPath}`;
+        summary.ok = false;
+        if (strict) {
+          failFn(message);
+          return summary;
+        }
+        reportFn(message);
       }
-      reportFn(message);
+    } else {
+      summary.appBuilderExecutable = { ok: true, skipped: true, reason: "app-builder-bin not installed" };
+      reportFn("legacy app-builder-bin executable not installed; skipping execute-bit repair");
     }
 
     const sanitizeTargets = [currentElectronAppPath];
@@ -187,5 +202,6 @@ module.exports = {
   ensureExecutable,
   findDeveloperIdApplicationIdentities,
   getMissingReleaseEnv,
+  resolveLegacyAppBuilderBinaryPath,
   runPreflight,
 };

@@ -127,7 +127,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 ### 4.4 下一步建议
 
-- **优先收口桌面依赖安全**：`desktop npm audit` 仍有 `8 vulnerabilities`（`7 high`、`1 critical`），修复路径指向 `electron-builder@26.15.3`。下一步建议单独做 electron-builder 大版本升级、重跑 release config / package / mac build 验证。
+- **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
 - **继续扩大真实业务知识库评测**：跨领域门禁已有 23 条，下一阶段应把测试从诊断 KB 和粮仓资料扩展到更多真实业务资料集，并补更长问题、多跳问题、表格/扫描件和无答案拒答样本。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
@@ -267,9 +267,10 @@ cd webapp && npm run build
 - `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`24 passed`。
 - `cd webapp && npm run build`：通过，Vite 生产构建输出 `dist/`。
 - `cd desktop && npm run build:preflight`：release config verifier 通过；非严格 preflight 提示缺少 Apple 发布环境变量和 Developer ID Application 证书，`notarytool` 和 Electron bundle 可用。
+- `cd desktop && npm run build`：通过，已产出 `dist/NorthAgent-0.1.0-arm64.dmg` 与 `dist/NorthAgent-0.1.0-arm64-mac.zip`，`electron-builder` 26.15.3 在未签名环境下可正常打包。
 - `security find-identity -v -p codesigning`：`0 valid identities found`，确认正式签名/公证仍被外部证书条件阻塞。
 - `cd webapp && npm audit --json`：`0 vulnerabilities`。
-- `cd desktop && npm audit --json`：`8 vulnerabilities`，其中 `7 high`、`1 critical`，主要修复路径是升级 `electron-builder` 到 `26.15.3`。
+- `cd desktop && npm audit --json`：`0 vulnerabilities`。
 - `git diff --check`：通过。
 
 ---
@@ -285,7 +286,7 @@ cd webapp && npm run build
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
 - **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包和 packaged app 启动验证；preflight 已能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
-- **桌面端依赖安全仍需独立收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，但 `desktop` 依赖树仍有 `8 vulnerabilities`（`7 high`、`1 critical`），需要后续单独升级 `electron-builder` 并重跑打包验证。
+- **桌面端依赖安全已收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，`electron-builder` 也已升级到 `26.15.3`，`desktop npm audit` 当前为 `0 vulnerabilities`。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 
 ---

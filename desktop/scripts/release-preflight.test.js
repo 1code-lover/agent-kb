@@ -9,6 +9,7 @@ const {
   ensureExecutable,
   findDeveloperIdApplicationIdentities,
   getMissingReleaseEnv,
+  resolveLegacyAppBuilderBinaryPath,
   runPreflight,
 } = require("./release-preflight");
 
@@ -64,6 +65,12 @@ test("ensureExecutable reports missing files", () => {
   const result = ensureExecutable(path.join(os.tmpdir(), "missing-binary"), () => {});
 
   assert.deepEqual(result, { ok: false, reason: "missing" });
+});
+
+test("resolveLegacyAppBuilderBinaryPath returns empty when electron-builder no longer ships app-builder-bin", () => {
+  const result = resolveLegacyAppBuilderBinaryPath([path.join(os.tmpdir(), "missing-app-builder")]);
+
+  assert.equal(result, "");
 });
 
 test("getMissingReleaseEnv reports only absent notarization variables", () => {
@@ -231,6 +238,37 @@ test("runPreflight passes strict mode when mac release gates are ready", () => {
   assert.equal(xattrCalls.length, 2);
   assert.match(messages.join("\n"), /mac signing\/notarization env looks ready/);
   assert.match(messages.join("\n"), /Electron bundle present/);
+});
+
+test("runPreflight skips legacy app-builder executable when upgraded electron-builder does not install it", () => {
+  const { electronAppPath } = createFakeElectronApp();
+  const messages = [];
+
+  const summary = runPreflight({
+    platform: "darwin",
+    strict: true,
+    env: {
+      APPLE_ID: "release@example.com",
+      APPLE_APP_SPECIFIC_PASSWORD: "app-password",
+      APPLE_TEAM_ID: "TEAM12345",
+    },
+    electronAppPath,
+    appBuilderBinaryCandidates: [path.join(os.tmpdir(), "missing-app-builder")],
+    spawn: buildReadySpawn(),
+    runXattr: () => ({ ok: true, stdout: "", stderr: "" }),
+    report: (message) => messages.push(message),
+    fail: (message) => {
+      throw new Error(message);
+    },
+  });
+
+  assert.equal(summary.ok, true);
+  assert.deepEqual(summary.appBuilderExecutable, {
+    ok: true,
+    skipped: true,
+    reason: "app-builder-bin not installed",
+  });
+  assert.match(messages.join("\n"), /skipping execute-bit repair/);
 });
 
 test("runPreflight fails when Electron bundle is missing", () => {
