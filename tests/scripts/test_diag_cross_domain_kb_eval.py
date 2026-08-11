@@ -307,13 +307,34 @@ def test_load_cases_rejects_duplicate_case_ids(tmp_path: Path) -> None:
 
 
 def test_summarize_includes_focus_groups() -> None:
-    """汇总应按 focus 和 case_source 统计不同领域。"""
+    """汇总应按 focus、case_source 和 tags 统计不同领域。"""
 
     report = cross_eval.summarize(
         [
-            {"id": "a", "kind": "positive", "focus": "grain", "case_source": "default", "passed": True},
-            {"id": "b", "kind": "negative", "focus": "cross-domain", "case_source": "extra.json", "passed": False},
-            {"id": "c", "kind": "contract", "focus": "contract", "case_source": "default", "passed": True},
+            {
+                "id": "a",
+                "kind": "positive",
+                "focus": "grain",
+                "tags": ["long-question", "multi-hop"],
+                "case_source": "default",
+                "passed": True,
+            },
+            {
+                "id": "b",
+                "kind": "negative",
+                "focus": "cross-domain",
+                "tags": ["refusal", "long-question"],
+                "case_source": "extra.json",
+                "passed": False,
+            },
+            {
+                "id": "c",
+                "kind": "contract",
+                "focus": "contract",
+                "tags": ["contract"],
+                "case_source": "default",
+                "passed": True,
+            },
         ]
     )
 
@@ -322,6 +343,9 @@ def test_summarize_includes_focus_groups() -> None:
     assert report["focus_summary"]["contract"]["passed"] == 1
     assert report["case_source_summary"]["default"]["total"] == 2
     assert report["case_source_summary"]["extra.json"]["failed"] == 1
+    assert report["tag_summary"]["long-question"]["total"] == 2
+    assert report["tag_summary"]["long-question"]["failed"] == 1
+    assert report["tag_summary"]["multi-hop"]["passed"] == 1
 
 
 def test_load_cases_default_suite_includes_extended_references() -> None:

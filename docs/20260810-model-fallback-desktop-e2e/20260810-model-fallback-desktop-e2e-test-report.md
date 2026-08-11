@@ -311,6 +311,28 @@ cd webapp && npm run build
 
 本轮还修正了一个评测误报口径：负向用例的 `forbidden_terms` 不应包含题目自身已经出现的标题词，否则模型在拒答时复述题目也会被误判为泄漏。现在默认负向用例只禁止真正的答案短语或精确证据短语。
 
+
+## 2026-08-11 tag 维度泛化复核
+
+这次在外部样本上再补了一层可持续验证：`scripts/diag_cross_domain_kb_eval.py` 的每条 case 现在可以带 `tags`，汇总里会生成 `tag_summary`，方便把长问题、多跳、OCR、扫描件、拒答和跨库隔离单独做成回归切片，而不是只看总通过率。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`12 passed, 1 warning`。新增覆盖 `tags` 透传、`tag_summary` 汇总和旧结构兼容。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v7.json
+```
+
+结果：`33/33 passed`。默认基线 `23/23`，外部追加样本 v1 `4/4`、v2 `6/6`；`positive_total=20`、`negative_total=12`、`contract_total=1`，三类通过率均为 `100%`。`tag_summary` 里 `long-question`、`multi-hop`、`ocr`、`scan`、`refusal`、`cross-kb-isolation` 的切片也都保持 `100%`。
 ## 2026-08-11 fallback 结构化探测摘要
 
 这次继续补模型 fallback 的边角体验：后端不只保存逐个 `fallback_attempts`，还新增 `fallback_attempt_summary`，聚合候选总数、可用数、失败数、Ollama 候选数、Ollama 可用数和最近一次候选明细。前端 `probeSummary` 优先使用这个结构化摘要，能直接显示“几个可用、几个不可用、是否包含 Ollama 候选”；当 Ollama 候选全部不可用时，页面提示会明确建议检查 Ollama 是否启动以及目标模型是否已拉取。

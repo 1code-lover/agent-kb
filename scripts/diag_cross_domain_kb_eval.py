@@ -400,6 +400,7 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
     case_id = str(case.get("id") or "case")
     kind = str(case.get("kind") or "positive")
     focus = str(case.get("focus") or "uncategorized")
+    tags = _as_list(case.get("tags"))
     kb_ids = _as_list(case.get("kb_ids"))
     if not kb_ids:
         raise ValueError(f"{case_id}: kb_ids is required")
@@ -492,6 +493,7 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         "id": case_id,
         "kind": kind,
         "focus": focus,
+        "tags": tags,
         "case_source": str(case.get("case_source") or ""),
         "kb_ids": kb_ids,
         "question": question,
@@ -526,9 +528,12 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     failed = [item for item in results if not item.get("passed")]
     focus_groups: dict[str, list[dict[str, Any]]] = {}
     case_source_groups: dict[str, list[dict[str, Any]]] = {}
+    tag_groups: dict[str, list[dict[str, Any]]] = {}
     for item in results:
         focus_groups.setdefault(str(item.get("focus") or "uncategorized"), []).append(item)
         case_source_groups.setdefault(str(item.get("case_source") or "unknown"), []).append(item)
+        for tag in _as_list(item.get("tags")):
+            tag_groups.setdefault(tag, []).append(item)
 
     def _rate(rows: list[dict[str, Any]]) -> float | None:
         if not rows:
@@ -564,6 +569,15 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
                 "pass_rate": _rate(rows),
             }
             for source, rows in sorted(case_source_groups.items())
+        },
+        "tag_summary": {
+            tag: {
+                "total": len(rows),
+                "passed": sum(1 for item in rows if item.get("passed")),
+                "failed": sum(1 for item in rows if not item.get("passed")),
+                "pass_rate": _rate(rows),
+            }
+            for tag, rows in sorted(tag_groups.items())
         },
     }
 

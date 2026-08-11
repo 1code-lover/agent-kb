@@ -1,0 +1,78 @@
+{
+  "name": "cross-domain extra generalization cases v2",
+  "description": "Additional tagged real cases for long questions, multi-hop answers, OCR/PDF isolation, and no-answer refusal checks.",
+  "cases": [
+    {
+      "id": "extra-v2-grain-long-storage-scope",
+      "focus": "grain-extra",
+      "kind": "positive",
+      "tags": ["long-question", "single-kb"],
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "在这个问题里我会故意给很多上下文：如果我只选择粮仓知识库，请回答《粮油安全储存守则》适用于哪些单位，不要使用其他诊断知识库。",
+      "expected_terms": ["各类粮油仓储单位"],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_kb_ids": ["grain-knowledge-base"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v2-grain-multihop-policy-and-production",
+      "focus": "grain-extra",
+      "kind": "positive",
+      "tags": ["multi-hop", "long-question"],
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "请同时说明《粮油安全储存守则》制定的安全储粮方针，以及《粮库安全生产守则》遵循的安全生产理念。请只依据当前粮仓知识库回答。",
+      "expected_terms": ["预防为主", "综合防治", "以人为本", "生命至上", "安全发展"],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_kb_ids": ["grain-knowledge-base"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v2-mixed-multihop-approval-and-preview",
+      "focus": "mixed-batch-extra",
+      "kind": "positive",
+      "tags": ["multi-hop", "mixed-batch", "evidence-preview"],
+      "kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "question": "In one answer, tell me who gives the final rollback approval and what every evidence preview should include.",
+      "expected_terms": ["platform duty lead", "final rollback approval", "doc_id", "preview_locator"],
+      "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "required_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v2-pdf-scan-long-fallback-rule",
+      "focus": "pdf-scan-extra",
+      "kind": "positive",
+      "tags": ["scan", "long-question"],
+      "kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "question": "What does the scanned PDF diagnostic say about OCR fallback? Please answer with the exact operational rule.",
+      "expected_terms": ["OCR fallback must merge every predict batch per page"],
+      "allowed_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "required_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v2-image-negative-pdf-fallback-rule",
+      "focus": "cross-domain-extra",
+      "kind": "negative",
+      "tags": ["ocr", "scan", "cross-kb-isolation"],
+      "kb_ids": ["diag-image-ocr-20260807-r2"],
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "forbidden_terms": ["OCR fallback must merge every predict batch per page"],
+      "allowed_source_kb_ids": ["diag-image-ocr-20260807-r2"],
+      "forbidden_source_kb_ids": ["diag-pdf-scan-20260807-r2"],
+      "top_k": 8
+    },
+    {
+      "id": "extra-v2-grain-negative-older-desktop-passcode",
+      "focus": "cross-domain-extra",
+      "kind": "negative",
+      "tags": ["refusal", "cross-kb-isolation"],
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "What is the unique desktop workflow passcode in the 1786352564 diagnostic document?",
+      "forbidden_terms": ["northagent-desktop-e2e-1786352564"],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "forbidden_source_kb_ids": ["diag-desktop-e2e-1786352564"],
+      "top_k": 8
+    }
+  ]
+}

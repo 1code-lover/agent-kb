@@ -125,13 +125,13 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + 4 条真实业务追加样本合计 `27/27 passed`。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条真实业务追加样本合计 `33/33 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
-- **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本，当前默认 23 条 + 外部 4 条达到 `27/27 passed`；下一阶段应继续补更长问题、多跳问题、表格/扫描件和无答案拒答样本。
+- **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本，当前默认 23 条 + 外部 4 条 + 外部 6 条达到 `33/33 passed`；下一阶段应继续补表格、长文档、多轮追问和更多跨库拒答样本，同时保持 tag 维度可分组回归。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **补发布后的桌面安装体验验证**：当前已验证 packaged app 主进程、API 和前端加载；签名/公证后还需要覆盖首次安装、模型重新配置、文件上传/导入、preview、引用来源和跨 KB 隔离。
 
@@ -329,6 +329,8 @@ cd webapp && npm run build
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json` | 跨知识库、跨领域真实问答和隔离诊断报告（再扩容版） |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json` | 跨领域真实业务追加样本 |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6.json` | 默认基线 + 外部追加样本的跨领域诊断报告 |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json` | 跨领域真实业务追加样本（长问题 / 多跳 / OCR / 拒答） |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v7.json` | 默认基线 + v1/v2 外部追加样本的跨领域诊断报告 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
@@ -347,6 +349,7 @@ cd webapp && npm run build
 |---|---|
 | `e482db2` | chore: update dev story capture state |
 | `c43bf1e` | feat(model): add structured fallback probe summary |
+| `7968ac1` | docs(project): sync fallback probe status |
 | `e6f5c41` | feat(eval): support extra cross-domain cases |
 | `d85bcae` | chore: update dev story capture state |
 | `3a7df45` | fix(desktop): upgrade builder release preflight |
