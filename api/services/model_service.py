@@ -272,6 +272,19 @@ def _check_ollama_model(model_name: str, api_base: str, trace_id: str) -> tuple[
     return False, "model_not_found" if names else "ollama_unreachable", meta
 
 
+def _ollama_discovery_detail(names: list[str], meta: dict[str, Any]) -> str:
+    """把 Ollama 动态候选发现结果转换为可展示的诊断详情。"""
+    if names:
+        return "ollama_models_discovered"
+    result = str(meta.get("result") or "").strip()
+    if result == "reachable":
+        return "ollama_no_models"
+    if result == "http_error":
+        status_code = meta.get("status_code")
+        return f"ollama_http_{status_code}" if status_code else "ollama_http_error"
+    return "ollama_unreachable"
+
+
 def _candidate_is_ollama(candidate: dict[str, Any]) -> bool:
     """判断候选是否为 Ollama 本地模型。"""
     return str(candidate.get("service_provider") or "").strip() == "Ollama"
@@ -322,6 +335,20 @@ def _iter_provider_candidates(current_info: dict[str, Any]) -> list[dict[str, An
         provider_models = [str(item or "").strip() for item in (provider.get("models", []) or []) if str(item or "").strip()]
         if provider_name == "Ollama" and not provider_models:
             provider_models, _meta = _list_ollama_models(api_base, new_trace_id("ollama"))
+            if not provider_models:
+                key = (provider_name, api_base, "__ollama_discovery__")
+                if key not in seen:
+                    seen.add(key)
+                    candidates.append(
+                        {
+                            "service_provider": provider_name,
+                            "model": "",
+                            "api_base": api_base,
+                            "api_key": "",
+                            "discovery_only": True,
+                        }
+                    )
+                continue
         if provider_name != "Ollama" and not api_key:
             continue
         for model_name in provider_models:
@@ -374,7 +401,12 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
     probe_results: list[dict[str, Any]] = []
     for candidate in candidates:
         if _candidate_is_ollama(candidate):
-            reachable, detail, _meta = _check_ollama_model(candidate["model"], candidate["api_base"], trace_id)
+            if candidate.get("discovery_only"):
+                names, meta = _list_ollama_models(candidate["api_base"], trace_id)
+                reachable = False
+                detail = _ollama_discovery_detail(names, meta)
+            else:
+                reachable, detail, _meta = _check_ollama_model(candidate["model"], candidate["api_base"], trace_id)
         else:
             reachable, detail, _meta = _check_openai_compatible(
                 candidate["model"],

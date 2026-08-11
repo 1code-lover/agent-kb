@@ -78,6 +78,21 @@ function formatFallbackAttempts(attempts, attemptSummary) {
   return `已探测 ${attemptedCount} 个候选${ollamaHint}，最近一次：${lastLabel}（${lastStatus}）`;
 }
 
+function formatOllamaUnavailableHint(attemptSummary) {
+  const lastDetail = typeof attemptSummary?.last_detail === "string" ? attemptSummary.last_detail.trim() : "";
+  const lastModel = typeof attemptSummary?.last_model === "string" ? attemptSummary.last_model.trim() : "";
+  if (lastDetail === "ollama_no_models") {
+    return "Ollama 已连接但没有可切换模型，请先运行 ollama pull qwen2.5:7b，或在模型配置里填入已安装模型。";
+  }
+  if (lastDetail === "model_not_found" && lastModel) {
+    return `Ollama 已连接但 ${lastModel} 未安装，请运行 ollama pull ${lastModel}，或选择已安装模型。`;
+  }
+  if (lastDetail === "ollama_unreachable" || lastDetail.startsWith("ollama_http_")) {
+    return "请先启动 Ollama，确认 http://localhost:11434 可访问，或在模型配置中修正 Ollama 地址；也可以切换到云端可用供应商。";
+  }
+  return "本地 Ollama 候选暂不可用，请确认 Ollama 已启动且目标模型已拉取；也可以补齐云端可用供应商后重试。";
+}
+
 export function buildModelHealthSummary(modelHealth) {
   const state = normalizeModelHealthState(modelHealth?.state);
   const currentLabel = formatModelLabel(modelHealth);
@@ -149,7 +164,7 @@ export function buildModelHealthSummary(modelHealth) {
   if (state === "unavailable") {
     const unavailableHint =
       ollamaCandidateCount > 0 && ollamaReachableCount === 0
-        ? "本地 Ollama 候选暂不可用，请确认 Ollama 已启动且目标模型已拉取；也可以补齐云端可用供应商后重试。"
+        ? formatOllamaUnavailableHint(attemptSummary)
         : "先补齐可用供应商或修复当前模型，再重试问答。";
     return {
       state,

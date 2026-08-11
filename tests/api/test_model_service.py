@@ -579,6 +579,70 @@ def test_attempt_model_fallback_can_select_ollama_candidate(monkeypatch: pytest.
     assert session_updates[0][0] == "ollama-fallback"
 
 
+def test_attempt_model_fallback_records_ollama_discovery_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ollama 动态发现失败时也应留下诊断候选，避免 UI 只看到 0 候选。"""
+
+    store = _DummyStore(
+        {
+            "current_llm_info": {
+                "service_provider": "OpenAI",
+                "model": "bad-chat",
+                "api_base": "https://api.example/v1",
+                "api_key": "bad-key",
+            },
+        }
+    )
+    list_calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(
+        model_service.config,
+        "LLM_API_LIST",
+        {
+            "Ollama": {
+                "provider": "Ollama",
+                "api_base": "http://localhost:11434",
+                "models": [],
+            }
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-11T22:00:00Z")
+    monkeypatch.setattr(model_service, "new_trace_id", lambda prefix: prefix + "-trace")
+
+    def fake_list_ollama_models(api_base: str, trace_id: str):
+        list_calls.append((api_base, trace_id))
+        return [], {"result": "exception", "detail": "connection refused", "trace_id": trace_id}
+
+    monkeypatch.setattr(model_service, "_list_ollama_models", fake_list_ollama_models)
+
+    result = model_service.attempt_model_fallback("model not found", session_id="ollama-discovery")
+
+    assert result["applied"] is False
+    assert result["candidate_count"] == 1
+    assert result["fallback_attempts"] == [
+        {
+            "service_provider": "Ollama",
+            "model": "",
+            "api_base": "http://localhost:11434",
+            "reachable": False,
+            "detail": "ollama_unreachable",
+        }
+    ]
+    assert result["fallback_attempt_summary"] == {
+        "total": 1,
+        "reachable_count": 0,
+        "failed_count": 1,
+        "ollama_candidate_count": 1,
+        "ollama_reachable_count": 0,
+        "last_provider": "Ollama",
+        "last_model": "",
+        "last_detail": "ollama_unreachable",
+    }
+    assert store.values["model_health_status"]["state"] == "unavailable"
+    assert store.values["model_health_status"]["fallback_attempt_summary"] == result["fallback_attempt_summary"]
+    assert list_calls == [("http://localhost:11434", "ollama-trace"), ("http://localhost:11434", "fallback-trace")]
+
+
 def test_attempt_model_fallback_summarizes_failed_ollama_and_cloud_candidates(monkeypatch: pytest.MonkeyPatch) -> None:
     """fallback 全部失败时应记录可展示的云端/Ollama 候选摘要。"""
 

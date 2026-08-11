@@ -504,3 +504,39 @@ cd desktop && node scripts/verify-mac-release.js
 ```
 
 结果：非严格诊断按预期指出当前本机未完成正式签名/公证：codesign 与 Gatekeeper 校验失败，`NorthAgent.app` 没有 stapled notarization ticket。补齐 Apple 凭证和 Developer ID Application 证书后，正式 `npm run release:mac` 会在打包后强制执行这两类后置校验。
+
+## 2026-08-11 fallback Ollama 动态发现边角
+
+本轮继续补 fallback 的边角提示：当配置里存在 Ollama provider 但 `models: []` 依赖动态发现，而本地 Ollama 没启动、地址不可达或没有已安装模型时，后端会保留一个诊断候选并写入 `fallback_attempt_summary`。前端会据此给出更明确的动作提示，而不是只展示“没有可用供应商”。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py -q
+```
+
+结果：`19 passed, 2 warnings`。新增覆盖 Ollama 动态发现失败时仍记录 `ollama_unreachable` 诊断候选。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
+```
+
+结果：`57 passed, 8 warnings`。
+
+```bash
+node --test webapp/src/domain/modelHealth.test.js
+```
+
+结果：`10 passed`。新增覆盖 Ollama 服务不可达、Ollama 已连接但没有本地模型、目标模型未安装三类提示。
+
+```bash
+node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js
+```
+
+结果：`85 passed`。
+
+```bash
+cd webapp && npm run build
+```
+
+结果：Vite build 通过。

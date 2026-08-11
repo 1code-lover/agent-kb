@@ -126,8 +126,8 @@ test("buildModelHealthSummary 会优先展示结构化候选探测摘要", () =>
   assert.match(summary.probeSummary, /Ollama 候选 1 个/);
   assert.match(summary.probeSummary, /Ollama \/ qwen2.5:7b/);
   assert.match(summary.probeSummary, /model_not_found/);
-  assert.match(summary.actionHint, /确认 Ollama 已启动/);
-  assert.match(summary.actionHint, /目标模型已拉取/);
+  assert.match(summary.actionHint, /qwen2\.5:7b 未安装/);
+  assert.match(summary.actionHint, /ollama pull qwen2\.5:7b/);
 });
 
 test("buildModelHealthSummary 会在 Ollama fallback 时提示本地候选模型", () => {
@@ -143,4 +143,47 @@ test("buildModelHealthSummary 会在 Ollama fallback 时提示本地候选模型
   assert.equal(summary.state, "fallback_applied");
   assert.match(summary.actionHint, /本地 Ollama 候选模型/);
   assert.match(summary.probeSummary, /本地 Ollama 候选/);
+});
+
+test("buildModelHealthSummary 会提示 Ollama 服务不可达的修复动作", () => {
+  const summary = buildModelHealthSummary({
+    state: "unavailable",
+    fallback_attempt_summary: {
+      total: 1,
+      reachable_count: 0,
+      failed_count: 1,
+      ollama_candidate_count: 1,
+      ollama_reachable_count: 0,
+      last_provider: "Ollama",
+      last_model: "",
+      last_detail: "ollama_unreachable",
+    },
+  });
+
+  assert.equal(summary.state, "unavailable");
+  assert.match(summary.probeSummary, /最近一次：Ollama/);
+  assert.match(summary.actionHint, /启动 Ollama/);
+  assert.match(summary.actionHint, /http:\/\/localhost:11434/);
+  assert.match(summary.actionHint, /修正 Ollama 地址/);
+});
+
+test("buildModelHealthSummary 会提示 Ollama 已连接但没有本地模型", () => {
+  const summary = buildModelHealthSummary({
+    state: "unavailable",
+    fallback_attempt_summary: {
+      total: 1,
+      reachable_count: 0,
+      failed_count: 1,
+      ollama_candidate_count: 1,
+      ollama_reachable_count: 0,
+      last_provider: "Ollama",
+      last_model: "",
+      last_detail: "ollama_no_models",
+    },
+  });
+
+  assert.equal(summary.state, "unavailable");
+  assert.match(summary.actionHint, /没有可切换模型/);
+  assert.match(summary.actionHint, /ollama pull qwen2\.5:7b/);
+  assert.match(summary.actionHint, /已安装模型/);
 });
