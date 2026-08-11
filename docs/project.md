@@ -111,26 +111,27 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 - 当前分支：`codex/desktop-agent-stage3`
 - 远端跟踪：`origin/codex/desktop-agent-stage3`
+- 同步状态：2026-08-11 复核 `HEAD...@{u}` 为 `0 0`，当前工作区干净且已推送到远端。
 - 最近已推送提交：
-  - `b2deaf9 fix(retrieval): improve grain source ranking`
-  - `bde25b0 feat(grain): repair coverage gate and qa recall`
-  - `ddd506f chore: update eval dev story`
-  - `ebef6ad fix(eval): include empty failure groups`
-  - `9273780 docs(grain): plan index coverage repair`
-  - `fa282a6 chore: update dev story capture state`
-  - `f5a84a8 feat(eval): expand grain qa coverage`
-  - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
-  - `3d3e010 docs(project): mark closure pushed`
-  - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 23 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。当前本地未提交增量把 fallback 探测结果继续细化为 `fallback_attempts` / `probeSummary`，并在 Ollama fallback 时明确提示本地候选模型，让 Models 页和 Agent 页能直接看见最近一次候选探测摘要。桌面 release preflight 也已补强为可测试摘要，严格模式会在缺 Apple 凭证/Developer ID/`notarytool` 时失败，非严格模式继续支持本地打包准备。
+  - `4565955 chore: update dev story capture state`
+  - `88044b7 feat(desktop): verify release config gates`
+  - `b065cc7 chore: update release story state`
+  - `63b4606 docs(desktop): add mac release checklist`
+  - `537fe7a chore: update dev story capture state`
+  - `85795af feat(desktop): add csp unit coverage`
+  - `470bdf3 chore: update dev story capture state`
+  - `3e17026 feat(eval): expand cross-domain v5 coverage`
+  - `8e0cb12 chore: update dev story capture state`
+  - `b6e3837 docs(project): sync cross-domain expansion`
+- 当前优化状态：模型 fallback、`fallback_attempts` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和 23 条跨领域真实门禁均已落地并推送。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
-- **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量把候选探测摘要同步到 UI，补齐 Ollama 候选和更明确的本地模型切换提示。
-- **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应继续验证桌面端安装后启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
-- **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
-- **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；release preflight 现在还能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`。下一步补齐凭证和证书后，跑严格 release preflight、签名、公证、安装后启动回归。
-- **跨领域验证已经有 23 条真实门禁**：`scripts/diag_cross_domain_kb_eval.py` 已覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8、boundary、exttext 和多 KB 契约拒绝等 23 条真实用例；后续应继续扩到更多真实业务资料集和更多问题类型。
+- **优先收口桌面依赖安全**：`desktop npm audit` 仍有 `8 vulnerabilities`（`7 high`、`1 critical`），修复路径指向 `electron-builder@26.15.3`。下一步建议单独做 electron-builder 大版本升级、重跑 release config / package / mac build 验证。
+- **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
+- **继续扩大真实业务知识库评测**：跨领域门禁已有 23 条，下一阶段应把测试从诊断 KB 和粮仓资料扩展到更多真实业务资料集，并补更长问题、多跳问题、表格/扫描件和无答案拒答样本。
+- **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
+- **补发布后的桌面安装体验验证**：当前已验证 packaged app 主进程、API 和前端加载；签名/公证后还需要覆盖首次安装、模型重新配置、文件上传/导入、preview、引用来源和跨 KB 隔离。
 
 ---
 
@@ -257,6 +258,20 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json`：`23/23 passed`。
 - 新增用例继续补强旧桌面 passcode、extensionless UTF-8 folder boundary 和真实跨域隔离组合，评测面扩到 23 条。
 
+### 5.10 2026-08-11 当前状态复核
+
+- `git fetch --prune` 后 `git status --short --branch`：工作区干净，当前分支 `codex/desktop-agent-stage3` 跟踪 `origin/codex/desktop-agent-stage3`。
+- `git rev-list --left-right --count HEAD...@{u}`：`0 0`，确认本地与远端一致。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"`：`719 passed, 1 deselected, 35 warnings in 7.78s`。
+- `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`82 passed`。
+- `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`24 passed`。
+- `cd webapp && npm run build`：通过，Vite 生产构建输出 `dist/`。
+- `cd desktop && npm run build:preflight`：release config verifier 通过；非严格 preflight 提示缺少 Apple 发布环境变量和 Developer ID Application 证书，`notarytool` 和 Electron bundle 可用。
+- `security find-identity -v -p codesigning`：`0 valid identities found`，确认正式签名/公证仍被外部证书条件阻塞。
+- `cd webapp && npm audit --json`：`0 vulnerabilities`。
+- `cd desktop && npm audit --json`：`8 vulnerabilities`，其中 `7 high`、`1 critical`，主要修复路径是升级 `electron-builder` 到 `26.15.3`。
+- `git diff --check`：通过。
+
 ---
 
 ## 6. 已知问题和限制
@@ -265,12 +280,12 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有 17 条正/负向/契约用例门禁，后续需要继续扩大非粮仓真实资料集和更复杂问题类型。
+- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有 23 条正/负向/契约用例门禁，后续需要继续扩大非粮仓真实资料集和更复杂问题类型。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
 - **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包和 packaged app 启动验证；preflight 已能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
-- **桌面端依赖安全仍需独立收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，但 `desktop` 依赖树仍有 `8 vulnerabilities`，需要后续单独做 `electron-builder` 等构建依赖升级评估。
+- **桌面端依赖安全仍需独立收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，但 `desktop` 依赖树仍有 `8 vulnerabilities`（`7 high`、`1 critical`），需要后续单独升级 `electron-builder` 并重跑打包验证。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 
 ---
@@ -309,24 +324,24 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `4565955` | chore: update dev story capture state |
+| `88044b7` | feat(desktop): verify release config gates |
+| `b065cc7` | chore: update release story state |
+| `63b4606` | docs(desktop): add mac release checklist |
+| `537fe7a` | chore: update dev story capture state |
+| `85795af` | feat(desktop): add csp unit coverage |
+| `470bdf3` | chore: update dev story capture state |
+| `3e17026` | feat(eval): expand cross-domain v5 coverage |
+| `8e0cb12` | chore: update dev story capture state |
+| `b6e3837` | docs(project): sync cross-domain expansion |
+| `40ff7d8` | feat(ui): surface fallback probe summaries |
+| `f82d316` | fix(model): support local ollama fallback discovery |
+| `e9855fd` | test(eval): expand cross-domain kb diagnostics |
+| `caad7b9` | docs(desktop): document fallback and release checks |
+| `6005d4e` | feat(desktop): add release preflight checks |
+| `fcf951f` | chore(desktop): update electron dependencies |
+| `233f84c` | feat(desktop): add csp header |
+| `4b5bab0` | feat(desktop): add mac release verification |
 | `3d679d7` | chore: update dev story capture state |
-| `9415547` | feat(model): add fallback health and desktop e2e |
-| `b2deaf9` | fix(retrieval): improve grain source ranking |
-| `bde25b0` | feat(grain): repair coverage gate and qa recall |
-| `ca34b66` | docs(dev): record local kb stability closure |
-| `ddf8317` | refactor(web): replace router dependency with local navigation |
-| `6f1ef56` | fix(ocr): stabilize paddle runtime and diagnostics |
-| `1520aef` | fix(kb): harden import filtering and grain qa eval |
-| `82b6cba` | docs(project): sync closure status before push |
-| `ed8368f` | docs(grain-qa): add real KB QA evaluation report artifacts |
-| `7b0037d` | feat(eval): add grain KB real QA evaluation script |
-| `64c402b` | fix(ingest,retrieve): adapt to llama_index 0.11.19 internal API changes |
-| `575ff3d` | fix(kb): recognize docx/office documents as importable file kind |
-| `57e6a30` | feat(kb): close local multi-kb ingestion qa loop |
-| `7d0533a` | refactor(import): add persist stage diagnostics breakdown |
-| `f7cc351` | chore: update dev story capture state |
-| `4d2abb7` | refactor: batch index persistence during kb imports |
-| `7889bc1` | feat: add knowledge workspace and import diagnostics |
-| `25dc20a` | feat(kb): add asset registry and preview api |
 
 查看完整历史：`git log --oneline -30`
