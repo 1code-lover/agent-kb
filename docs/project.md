@@ -139,12 +139,12 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight`，`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力、多轮 `turns` 评测、来源文件级断言、evidence 文本断言、失败检查项归因汇总和耗时诊断后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条 + v3 多轮 3 条 + v4 source-grounding 5 条 + v5 evidence-text 4 条真实业务追加样本合计 `45/45 passed`，逐轮统计 `48/48 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`multi-turn`、`follow-up`、`source-grounding`、`evidence-text`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁；报告新增 `failure_check_summary`、`failure_case_summary` 和 `duration_summary`，当前失败归因为空，最慢 case 为 `grain-negative-utf8-exact-boundary`。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`，正式发布会在打包后继续检查 packaged runtime contents、codesign、Gatekeeper assess 和 stapler ticket。`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力、多轮 `turns` 评测、来源文件级断言、evidence 文本断言、失败检查项归因汇总和耗时诊断后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条 + v3 多轮 3 条 + v4 source-grounding 5 条 + v5 evidence-text 4 条真实业务追加样本合计 `45/45 passed`，逐轮统计 `48/48 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`multi-turn`、`follow-up`、`source-grounding`、`evidence-text`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁；报告新增 `failure_check_summary`、`failure_case_summary` 和 `duration_summary`，当前失败归因为空，最慢 case 为 `grain-negative-utf8-exact-boundary`。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
-- **发布入口已经串起配置预检**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight` 和 `electron-builder --mac`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测。
+- **发布入口已经串起配置预检和后置校验**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight`、`electron-builder --mac`、`verify:package` 和 `verify:mac-release`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测，`verify-mac-release` 会验证 codesign、Gatekeeper 和 stapler。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
 - **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本、`turns` 多轮追问用例、来源文件级断言、evidence 文本级断言、失败检查项归因汇总和耗时诊断，当前默认 23 条 + 外部 4 条 + 外部 6 条 + 多轮 3 条 + source-grounding 5 条 + evidence-text 4 条达到 `45/45 passed`、逐轮 `48/48 passed`；下一阶段应继续补表格、长文档、更长多轮链路和更多跨库拒答样本，同时保持 tag 维度可分组回归。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
@@ -331,6 +331,15 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v5.json --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v10.json`：`45/45 passed`；默认基线 `23/23`，v1 `4/4`，v2 `6/6`，v3 `3/3`，v4 `5/5`，v5 evidence-text `4/4`，逐轮 `48/48 passed`；`source-grounding` 和 `evidence-text` tag 切片均为 `100%`，`failure_check_summary={}`、`failure_case_summary=[]`；`duration_summary.case_total_ms=73247.147`、`case_avg_ms=1627.714`，最慢 case 和 slow case 均为 `grain-negative-utf8-exact-boundary`。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"`：`731 passed, 1 deselected, 35 warnings`。
 
+### 5.16 2026-08-11 macOS release 后置校验链路
+
+- `desktop/scripts/verify-mac-release.js` 新增 `.app` 发布信任链校验：`codesign --verify --deep --strict`、`spctl --assess --type execute` 和 `xcrun stapler validate`。
+- `desktop/package.json` 的 `release:mac` 已在 `electron-builder --mac` 后串起 `verify:package` 和 `verify:mac-release`；`desktop/scripts/verify-release-config.js` 同步把这两步纳入 release config gate，避免正式发布绕过包内容、签名、Gatekeeper 和 notarization ticket 校验。
+- `node --test desktop/scripts/verify-mac-release.test.js desktop/scripts/verify-release-config.test.js desktop/scripts/verify-package.test.js desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js desktop/scripts/build-target.test.js`：`36 passed`。
+- `cd desktop && npm run build:preflight`：通过；非严格预检仍提示缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书，`notarytool` 可用。
+- `cd desktop && npm run verify:package`：通过，当前 `desktop/dist` 包内容可解析。
+- `cd desktop && node scripts/verify-mac-release.js`：非严格诊断按预期指出当前 `.app` 尚未完成正式签名/公证，codesign/Gatekeeper 校验失败且没有 stapled notarization ticket；补齐 Apple 凭证和 Developer ID Application 证书后，正式 `npm run release:mac` 会把这些后置检查作为阻断 gate。
+
 ---
 
 ## 6. 已知问题和限制
@@ -343,7 +352,7 @@ cd webapp && npm run build
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
-- **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包和 packaged app 启动验证；preflight 已能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
+- **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包、packaged app 启动验证、包内容校验和 mac release 后置签名/公证校验；preflight 已能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，`verify-mac-release` 已能检查 codesign、Gatekeeper 和 stapler，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
 - **桌面端依赖安全已收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，`electron-builder` 也已升级到 `26.15.3`，`desktop npm audit` 当前为 `0 vulnerabilities`。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 

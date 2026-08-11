@@ -13,7 +13,8 @@
     "build:preflight": "node scripts/verify-release-config.js && node scripts/release-preflight.js",
     "release:preflight": "node scripts/release-preflight.js --strict",
     "verify:package": "node scripts/verify-package.js",
-    "release:mac": "npm run build:web && npm run build:preflight && npm run release:preflight && NORTHAGENT_REQUIRE_NOTARIZE=1 node ./node_modules/electron-builder/cli.js --mac",
+    "verify:mac-release": "node scripts/verify-mac-release.js --strict",
+    "release:mac": "npm run build:web && npm run build:preflight && npm run release:preflight && NORTHAGENT_REQUIRE_NOTARIZE=1 node ./node_modules/electron-builder/cli.js --mac && npm run verify:package && npm run verify:mac-release",
     "build:win": "npm run build:web && node ./node_modules/electron-builder/cli.js --win",
     "build:mac": "npm run build:web && npm run build:preflight && node ./node_modules/electron-builder/cli.js --mac"
   },

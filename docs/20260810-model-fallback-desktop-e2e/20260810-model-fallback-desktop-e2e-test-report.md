@@ -21,6 +21,7 @@
 | 桌面端独立启动 API | 通过 | `storage/logs/desktop_runtime.log` |
 | 桌面工作流 E2E | 通过 | `artifacts/desktop-model-workflow-report-after-electron-fix.json` |
 | macOS dmg/zip 打包与 packaged resources | 通过 | `desktop/dist/` + `desktop/scripts/verify-package.js` |
+| macOS release 后置签名/公证校验链路 | 通过 | `desktop/scripts/verify-mac-release.js` |
 | 跨知识库泛化诊断 | 通过 | `artifacts/cross-domain-kb-eval-report.json` |
 
 ## 已执行命令
@@ -473,3 +474,33 @@ node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/stor
 ```
 
 结果：`731 passed, 1 deselected, 35 warnings`。
+
+## 2026-08-11 macOS release 后置校验链路
+
+本轮继续收口桌面发布链路：`release:mac` 在严格预检和 `electron-builder --mac` 后，新增强制执行 `verify:package` 与 `verify:mac-release`。其中 `verify:package` 校验 dmg/zip、`app.asar` 和 packaged runtime resources；`verify:mac-release` 校验 `.app` 的 codesign、Gatekeeper assess 和 notarization staple。
+
+已执行命令：
+
+```bash
+node --test desktop/scripts/verify-mac-release.test.js desktop/scripts/verify-release-config.test.js desktop/scripts/verify-package.test.js desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js desktop/scripts/build-target.test.js
+```
+
+结果：`36 passed`。新增覆盖 `.app` 路径解析、codesign/spctl/stapler 成功、缺失 app bundle、三类信任链失败，以及 release config 必须串起 `verify:package` 和 `verify:mac-release`。
+
+```bash
+cd desktop && npm run build:preflight
+```
+
+结果：通过；`verify-release-config` 确认 release config ready，非严格 `release-preflight` 继续提示本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书，`notarytool` 可用。
+
+```bash
+cd desktop && npm run verify:package
+```
+
+结果：通过，现有 `desktop/dist` 包内容可解析，packaged runtime contents ready。
+
+```bash
+cd desktop && node scripts/verify-mac-release.js
+```
+
+结果：非严格诊断按预期指出当前本机未完成正式签名/公证：codesign 与 Gatekeeper 校验失败，`NorthAgent.app` 没有 stapled notarization ticket。补齐 Apple 凭证和 Developer ID Application 证书后，正式 `npm run release:mac` 会在打包后强制执行这两类后置校验。

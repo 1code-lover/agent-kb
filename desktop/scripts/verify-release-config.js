@@ -80,6 +80,15 @@ function verifyReleaseConfig(pkg) {
   if (!releaseMac.includes("electron-builder/cli.js --mac")) {
     failures.push("scripts.release:mac must run electron-builder --mac");
   }
+  if (!releaseMac.includes("verify:package")) {
+    failures.push("scripts.release:mac must verify packaged runtime contents");
+  }
+  if (!releaseMac.includes("verify:mac-release")) {
+    failures.push("scripts.release:mac must verify mac release signature and notarization");
+  }
+  if (!scripts["verify:mac-release"]?.includes("verify-mac-release.js --strict")) {
+    failures.push("scripts.verify:mac-release must run verify-mac-release.js --strict");
+  }
 
   return {
     ok: failures.length === 0,
