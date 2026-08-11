@@ -3,6 +3,7 @@ const path = require("node:path");
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const { startPythonApi, stopPythonApi, waitForApiReady } = require("./python-process");
 const { getLogFile, logRuntime } = require("./runtime-log");
+const { buildContentSecurityPolicy, resolveUrlOrigin } = require("./csp");
 
 const projectRoot = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, "..", "..");
 const distIndexPath = path.join(projectRoot, "webapp", "dist", "index.html");
@@ -10,39 +11,6 @@ const desktopIconCandidates = [
   path.join(projectRoot, "desktop", "resources", "icon.png"),
   path.join(__dirname, "..", "resources", "icon.png"),
 ];
-
-function resolveUrlOrigin(value) {
-  try {
-    return new URL(value).origin;
-  } catch {
-    return "";
-  }
-}
-
-function buildContentSecurityPolicy(rendererEntry) {
-  const rendererOrigin = rendererEntry.type === "url" ? resolveUrlOrigin(rendererEntry.value) : "";
-  const connectSources = [
-    "'self'",
-    "http://127.0.0.1:18080",
-    "http://localhost:18080",
-    "ws://127.0.0.1:5173",
-    "ws://localhost:5173",
-    rendererOrigin,
-  ].filter(Boolean);
-
-  return [
-    "default-src 'self'",
-    "script-src 'self'",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: file:",
-    "font-src 'self' data:",
-    "media-src 'self' blob: file:",
-    `connect-src ${connectSources.join(" ")}`,
-    "object-src 'none'",
-    "base-uri 'self'",
-    "frame-ancestors 'none'"
-  ].join("; ");
-}
 
 function applySecurityHeaders(win, rendererEntry) {
   const csp = buildContentSecurityPolicy(rendererEntry);
@@ -148,3 +116,11 @@ app.on("before-quit", () => {
   logRuntime(projectRoot, "desktop_before_quit");
   stopPythonApi(projectRoot);
 });
+
+module.exports = {
+  applySecurityHeaders,
+  buildContentSecurityPolicy,
+  createWindow,
+  resolveRendererEntry,
+  resolveUrlOrigin,
+};

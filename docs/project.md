@@ -126,13 +126,11 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 ### 4.4 下一步建议
 
-- **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量把候选探测摘要同步到 UI，补齐 Ollama 候选和更明确的模型切换提示。
-- **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量把候选探测摘要同步到 UI，补齐 Ollama 候选和更明确的本地模型切换提示。
 - **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量把候选探测摘要同步到 UI，补齐 Ollama 候选和更明确的本地模型切换提示。
 - **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应继续验证桌面端安装后启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
 - **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；release preflight 现在还能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`。下一步补齐凭证和证书后，跑严格 release preflight、签名、公证、安装后启动回归。
-- **跨领域验证已经有 17 条真实门禁，下一步扩样本**：`scripts/diag_cross_domain_kb_eval.py` 已覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8、boundary、exttext 和多 KB 契约拒绝等 17 条真实用例；后续应继续扩到更多真实业务资料集和更多问题类型。
+- **跨领域验证已经有 23 条真实门禁**：`scripts/diag_cross_domain_kb_eval.py` 已覆盖 grain、desktop、image-ocr、pdf-scan、mixed-batch、UTF-8、boundary、exttext 和多 KB 契约拒绝等 23 条真实用例；后续应继续扩到更多真实业务资料集和更多问题类型。
 
 ---
 
@@ -237,6 +235,7 @@ cd webapp && npm run build
 - `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`17 passed`。
 - `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
 - `cd desktop && npm run build:preflight`：非严格模式通过；提示本机缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
+- `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`21 passed`，新增 `desktop/src/csp.test.js` 覆盖 CSP 连接源与 URL origin 解析。
 - `git diff --check`：通过。
 
 ### 5.7 2026-08-11 fallback 探测摘要增量复核

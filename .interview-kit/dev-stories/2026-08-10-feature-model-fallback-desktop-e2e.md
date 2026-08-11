@@ -30,6 +30,8 @@
 
 新增 `scripts/diag_desktop_model_workflow.py` 作为桌面真实工作流诊断脚本，覆盖模型 options/health、模型选择与探活、文件导入、定向知识库问答、来源/evidence、preview 和 `default` 跨 KB 隔离。
 
+后续又把桌面 CSP 抽成了 `desktop/src/csp.js`，让主进程里的连接源规则可以被单独测试。这样 packaged app、Vite dev server 和本地 API 的允许源就不再只靠人工观察，而是有了可回归的单测约束。
+
 ## 验证
 
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py tests/scripts/test_run_grain_qa_eval.py -q`：`65 passed, 8 warnings`。
@@ -41,6 +43,7 @@
 - `cd webapp && npm run build`：通过，ModelsPage 和 AgentPage 都能显示 fallback 探测摘要。
 - `cd webapp && npm run build`：通过，Ollama fallback 时会提示“本地候选模型”。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json`：`21/21 passed`，补进 grain 安全生产、desktop evidence preview、UTF-16 边界和旧 desktop passcode 隔离样本。
+- `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`21 passed`，新增 `desktop/src/csp.test.js` 覆盖 CSP 连接源和 URL origin 解析。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json`：`23/23 passed`，继续补强旧 desktop passcode、extensionless UTF-8 folder boundary 和跨域组合。
 
 ## 取舍
@@ -51,6 +54,7 @@
 - fallback 探测摘要先以文本形式落到页面，后续如果还要继续增强，可再做展开式明细或时间线事件。
 - 跨领域评测用例继续沿着真实资料扩容，优先用现成文档里的稳定句子做正向和隔离门禁。
 - 跨领域评测里碰到真实表述波动时，优先收紧“语义边界”，不要把样本写成对单一短语的脆弱依赖。
+- 桌面 release 收口还差 Apple Developer 凭证和签名身份；这部分不是代码问题，必须靠真实证书环境补齐后再跑 strict notarization。
 
 ## 后续
 
