@@ -127,11 +127,12 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条真实业务追加样本合计 `33/33 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；`release:mac` 现已串起 `build:preflight` + `release:preflight`，把配置校验、签名预检和打包入口绑成一条发布链。2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条真实业务追加样本合计 `33/33 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
+- **发布入口已经串起配置预检**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight` 和 `electron-builder --mac`，避免签名/公证前漏掉配置校验。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
 - **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本，当前默认 23 条 + 外部 4 条 + 外部 6 条达到 `33/33 passed`；下一阶段应继续补表格、长文档、多轮追问和更多跨库拒答样本，同时保持 tag 维度可分组回归。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。

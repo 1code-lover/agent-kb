@@ -68,6 +68,9 @@ function verifyReleaseConfig(pkg) {
   }
 
   const releaseMac = scripts["release:mac"] || "";
+  if (!releaseMac.includes("build:preflight")) {
+    failures.push("scripts.release:mac must run build:preflight");
+  }
   if (!releaseMac.includes("release:preflight")) {
     failures.push("scripts.release:mac must run release:preflight");
   }

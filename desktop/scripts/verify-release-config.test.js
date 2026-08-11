@@ -7,7 +7,7 @@ function buildPackage(overrides = {}) {
   const pkg = {
     scripts: {
       "release:mac":
-        "npm run build:web && npm run release:preflight && NORTHAGENT_REQUIRE_NOTARIZE=1 node ./node_modules/electron-builder/cli.js --mac",
+        "npm run build:web && npm run build:preflight && npm run release:preflight && NORTHAGENT_REQUIRE_NOTARIZE=1 node ./node_modules/electron-builder/cli.js --mac",
     },
     build: {
       afterSign: "scripts/notarize-mac.js",
@@ -70,6 +70,7 @@ test("verifyReleaseConfig rejects missing notarize hook and hardened runtime", (
   assert.match(result.failures.join("\n"), /hardenedRuntime/);
   assert.match(result.failures.join("\n"), /entitlements/);
   assert.match(result.failures.join("\n"), /notarization/);
+  assert.match(result.failures.join("\n"), /build:preflight/);
   assert.match(result.failures.join("\n"), /release:preflight/);
 });
 

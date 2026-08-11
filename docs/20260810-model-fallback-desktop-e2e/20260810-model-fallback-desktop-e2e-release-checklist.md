@@ -46,7 +46,7 @@ cd desktop && npm run build:preflight
 cd desktop && npm run release:mac
 ```
 
-通过标准：生成签名并公证后的 macOS `dmg` 和 `zip` 产物，`afterSign` 阶段执行 `scripts/notarize-mac.js` 且未跳过。
+通过标准：`release:mac` 先串起 `build:web`、`build:preflight` 和严格 `release:preflight`，再生成签名并公证后的 macOS `dmg` 和 `zip` 产物，`afterSign` 阶段执行 `scripts/notarize-mac.js` 且未跳过。
 
 ```bash
 cd desktop && npm run verify:package
