@@ -255,9 +255,14 @@ git diff --check
 - `desktop/scripts/release-preflight.js` 现在返回可测试的预检摘要，并允许注入 Electron 路径、`app-builder` 路径、`xattr` 和失败处理函数；CLI 行为保持不变。
 - 非严格模式会继续提示缺少 Apple 凭证、Developer ID Application 证书或 `app-builder`，但不阻断本地打包准备；严格模式会在缺少发布凭证、证书或 `notarytool` 时失败。
 - `node --test desktop/scripts/release-preflight.test.js desktop/scripts/notarize-mac.test.js`：`15 passed`，覆盖非严格缺项摘要、严格缺凭证失败、严格全量 gate 通过、Electron bundle 缺失失败、Developer ID 解析和 `notarytool` 探测。
-- `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`17 passed`。
+- `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`21 passed`，新增 `desktop/src/csp.test.js` 覆盖 CSP 连接源与 URL origin 解析。
 - `cd desktop && node scripts/release-preflight.js --strict`：按预期失败，原因是本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
 - `cd desktop && npm run build:preflight`：非严格模式通过；本机仍缺少 Apple 签名/公证环境变量和 Developer ID Application 证书，但 `notarytool` 可用。
+
+## 2026-08-11 release candidate 清单
+
+- 新增 `20260810-model-fallback-desktop-e2e-release-checklist.md`，把 Apple Developer 凭证、Developer ID Application、严格 `release:preflight`、`release:mac`、`verify:package`、安装后启动和 `diag_desktop_model_workflow` 的通过标准固化为发布清单。
+- 该清单不宣称签名/公证已完成；它用于凭证到位后直接执行 release candidate 验收。
 
 ## 2026-08-11 fallback 探测摘要增量复核
 

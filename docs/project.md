@@ -289,6 +289,7 @@ cd webapp && npm run build
 | `docs/20260807-grain-index-coverage-repair/` | 粮仓知识库索引覆盖修复计划 |
 | `docs/20260810-grain-retrieval-quality-tuning/` | 粮仓检索排序质量调优、实验矩阵和最终测试报告 |
 | `docs/20260810-model-fallback-desktop-e2e/` | 模型 fallback、模型健康状态、评测断点续跑和桌面端 E2E 验证 |
+| `docs/20260810-model-fallback-desktop-e2e/20260810-model-fallback-desktop-e2e-release-checklist.md` | macOS 签名、公证、打包和安装后回归清单 |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v3.json` | 跨知识库、跨领域真实问答和隔离诊断报告 |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json` | 跨知识库、跨领域真实问答和隔离诊断报告（扩容版） |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json` | 跨知识库、跨领域真实问答和隔离诊断报告（再扩容版） |
