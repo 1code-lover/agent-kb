@@ -32,6 +32,8 @@
 
 后续又把桌面 CSP 抽成了 `desktop/src/csp.js`，让主进程里的连接源规则可以被单独测试。这样 packaged app、Vite dev server 和本地 API 的允许源就不再只靠人工观察，而是有了可回归的单测约束。
 
+在 Apple 凭证暂时缺失的情况下，又补了一份 `20260810-model-fallback-desktop-e2e-release-checklist.md`，把严格预检、签名、公证、package 校验、安装后启动和桌面工作流诊断的通过标准固化下来。这样等证书到位后，不需要重新讨论发布步骤，可以直接按清单执行和留证据。
+
 ## 验证
 
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py tests/scripts/test_run_grain_qa_eval.py -q`：`65 passed, 8 warnings`。
@@ -44,6 +46,7 @@
 - `cd webapp && npm run build`：通过，Ollama fallback 时会提示“本地候选模型”。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json`：`21/21 passed`，补进 grain 安全生产、desktop evidence preview、UTF-16 边界和旧 desktop passcode 隔离样本。
 - `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`21 passed`，新增 `desktop/src/csp.test.js` 覆盖 CSP 连接源和 URL origin 解析。
+- `20260810-model-fallback-desktop-e2e-release-checklist.md` 已补齐，明确 release candidate 通过必须具备严格 preflight、签名公证、package 校验、安装后启动和桌面 E2E 诊断证据。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json`：`23/23 passed`，继续补强旧 desktop passcode、extensionless UTF-8 folder boundary 和跨域组合。
 
 ## 取舍
@@ -55,6 +58,7 @@
 - 跨领域评测用例继续沿着真实资料扩容，优先用现成文档里的稳定句子做正向和隔离门禁。
 - 跨领域评测里碰到真实表述波动时，优先收紧“语义边界”，不要把样本写成对单一短语的脆弱依赖。
 - 桌面 release 收口还差 Apple Developer 凭证和签名身份；这部分不是代码问题，必须靠真实证书环境补齐后再跑 strict notarization。
+- 在外部证书缺失时，先把后续执行清单固化到仓库，避免 release candidate 验收依赖临时口头流程。
 
 ## 后续
 
