@@ -251,22 +251,77 @@ def test_run_evaluation_writes_report_and_returns_nonzero_on_failure(tmp_path: P
     assert exit_code == 1
     assert report["summary"]["failed"] == 1
     assert saved["cases"][0]["id"] == "fail"
+    assert saved["cases"][0]["case_source"] == str(cases_path)
+
+
+def test_load_cases_accepts_object_payload_and_extra_cases(tmp_path: Path) -> None:
+    """外部真实样本可用 {cases: [...]} 格式追加到默认基线。"""
+
+    extra_path = tmp_path / "extra-cases.json"
+    extra_path.write_text(
+        json.dumps(
+            {
+                "name": "extra business suite",
+                "cases": [
+                    {
+                        "id": "external-positive",
+                        "kind": "positive",
+                        "kb_ids": ["external-kb"],
+                        "question": "q",
+                    }
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    cases = cross_eval.load_cases(extra_paths=[extra_path])
+    external = [item for item in cases if item.get("id") == "external-positive"]
+
+    assert len(cases) == len(cross_eval.DEFAULT_CASES) + 1
+    assert external[0]["case_source"] == str(extra_path)
+
+
+def test_load_cases_rejects_duplicate_case_ids(tmp_path: Path) -> None:
+    """追加真实样本时，重复 id 应直接失败，避免报告混淆。"""
+
+    cases_path = tmp_path / "cases.json"
+    cases_path.write_text(
+        json.dumps(
+            [
+                {"id": "dup", "kind": "positive", "kb_ids": ["a"], "question": "q1"},
+                {"id": "dup", "kind": "positive", "kb_ids": ["b"], "question": "q2"},
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        cross_eval.load_cases(cases_path)
+    except ValueError as exc:
+        assert "duplicate cross-domain case ids" in str(exc)
+    else:
+        raise AssertionError("expected duplicate case ids to fail")
 
 
 def test_summarize_includes_focus_groups() -> None:
-    """汇总应按 focus 统计不同领域。"""
+    """汇总应按 focus 和 case_source 统计不同领域。"""
 
     report = cross_eval.summarize(
         [
-            {"id": "a", "kind": "positive", "focus": "grain", "passed": True},
-            {"id": "b", "kind": "negative", "focus": "cross-domain", "passed": False},
-            {"id": "c", "kind": "contract", "focus": "contract", "passed": True},
+            {"id": "a", "kind": "positive", "focus": "grain", "case_source": "default", "passed": True},
+            {"id": "b", "kind": "negative", "focus": "cross-domain", "case_source": "extra.json", "passed": False},
+            {"id": "c", "kind": "contract", "focus": "contract", "case_source": "default", "passed": True},
         ]
     )
 
     assert report["contract_total"] == 1
     assert report["focus_summary"]["grain"]["pass_rate"] == 1.0
     assert report["focus_summary"]["contract"]["passed"] == 1
+    assert report["case_source_summary"]["default"]["total"] == 2
+    assert report["case_source_summary"]["extra.json"]["failed"] == 1
 
 
 def test_load_cases_default_suite_includes_extended_references() -> None:
@@ -281,3 +336,14 @@ def test_load_cases_default_suite_includes_extended_references() -> None:
     assert "exttext-positive-extensionless-utf8-folder" in case_ids
     assert "utf16-positive-folder-boundary" in case_ids
     assert "desktop-negative-older-passcode" in case_ids
+
+
+def test_default_negative_forbidden_terms_do_not_duplicate_question_text() -> None:
+    """负向禁止词不应只是题目复述，否则拒答时可能误判泄漏。"""
+
+    for case in cross_eval.load_cases():
+        if case.get("kind") != "negative":
+            continue
+        question = str(case.get("question") or "")
+        for term in case.get("forbidden_terms") or []:
+            assert str(term) not in question, f"{case.get('id')} forbidden term repeats the question"

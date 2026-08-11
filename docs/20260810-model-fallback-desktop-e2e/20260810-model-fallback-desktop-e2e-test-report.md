@@ -287,3 +287,26 @@ cd webapp && npm run build
 ```
 
 结果：通过，`ModelsPage` 和 `AgentPage` 现在展示 fallback 探测摘要。
+
+## 2026-08-11 外部跨领域样本追加验证
+
+这次把跨领域评测从“修改 Python 内置列表扩样本”推进到“默认基线 + 外部真实样本文件追加”。`scripts/diag_cross_domain_kb_eval.py` 现在支持 JSON list 或 `{ "cases": [...] }` 两种文件格式，可重复传入 `--extra-cases`，报告里会记录每条用例的 `case_source`，并对重复 case id 直接失败。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`12 passed, 1 warning`。新增覆盖外部 `{cases: [...]}` 读取、默认基线追加 extra cases、重复 id 失败、`case_source_summary` 汇总和负向 forbidden term 不复述题目。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6.json
+```
+
+结果：`27/27 passed`。默认基线 `23/23`，外部追加样本 `4/4`；`positive_total=16`、`negative_total=10`、`contract_total=1`，三类通过率均为 `100%`。
+
+本轮还修正了一个评测误报口径：负向用例的 `forbidden_terms` 不应包含题目自身已经出现的标题词，否则模型在拒答时复述题目也会被误判为泄漏。现在默认负向用例只禁止真正的答案短语或精确证据短语。

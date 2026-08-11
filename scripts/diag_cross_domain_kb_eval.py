@@ -181,7 +181,7 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "kind": "negative",
         "kb_ids": ["diag-desktop-e2e-1786353063"],
         "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
-        "forbidden_terms": ["预防为主", "综合防治", "粮油安全储存守则"],
+        "forbidden_terms": ["预防为主", "综合防治"],
         "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
         "forbidden_source_kb_ids": ["grain-knowledge-base"],
     },
@@ -242,7 +242,7 @@ DEFAULT_CASES: list[dict[str, Any]] = [
         "kind": "negative",
         "kb_ids": ["diag-mixed-batch-20260807-r2"],
         "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
-        "forbidden_terms": ["预防为主", "综合防治", "粮油安全储存守则"],
+        "forbidden_terms": ["预防为主", "综合防治"],
         "allowed_source_kb_ids": ["diag-mixed-batch-20260807-r2"],
         "forbidden_source_kb_ids": ["grain-knowledge-base"],
     },
@@ -263,14 +263,47 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_cases(path: str | Path | None = None) -> list[dict[str, Any]]:
-    """读取 JSON 用例；未传路径时返回内置诊断用例。"""
-    if path is None:
-        return [dict(item) for item in DEFAULT_CASES]
-    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+def _copy_case(item: dict[str, Any], source: str) -> dict[str, Any]:
+    """复制用例并补充来源标记。"""
+    copied = dict(item)
+    copied.setdefault("case_source", source)
+    return copied
+
+
+def _read_cases_file(path: str | Path) -> list[dict[str, Any]]:
+    """读取外部 JSON 用例文件。"""
+    source_path = Path(path)
+    payload = json.loads(source_path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict):
+        payload = payload.get("cases")
     if not isinstance(payload, list):
-        raise ValueError("cross-domain cases file must be a JSON list")
-    return [dict(item) for item in payload if isinstance(item, dict)]
+        raise ValueError("cross-domain cases file must be a JSON list or an object with a cases list")
+    return [_copy_case(item, str(source_path)) for item in payload if isinstance(item, dict)]
+
+
+def _ensure_unique_case_ids(cases: list[dict[str, Any]]) -> None:
+    """确保用例 id 唯一，避免追加真实样本时误覆盖。"""
+    seen: set[str] = set()
+    duplicates: list[str] = []
+    for item in cases:
+        case_id = str(item.get("id") or "case")
+        if case_id in seen:
+            duplicates.append(case_id)
+        seen.add(case_id)
+    if duplicates:
+        raise ValueError(f"duplicate cross-domain case ids: {', '.join(sorted(set(duplicates)))}")
+
+
+def load_cases(path: str | Path | None = None, extra_paths: list[str | Path] | None = None) -> list[dict[str, Any]]:
+    """读取 JSON 用例；未传路径时返回内置诊断用例，可追加外部真实样本。"""
+    if path is None:
+        cases = [_copy_case(item, "default") for item in DEFAULT_CASES]
+    else:
+        cases = _read_cases_file(path)
+    for extra_path in extra_paths or []:
+        cases.extend(_read_cases_file(extra_path))
+    _ensure_unique_case_ids(cases)
+    return cases
 
 
 def _post_json(api_base: str, path: str, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
@@ -459,6 +492,7 @@ def evaluate_case(case: dict[str, Any], api_base: str, timeout: float) -> dict[s
         "id": case_id,
         "kind": kind,
         "focus": focus,
+        "case_source": str(case.get("case_source") or ""),
         "kb_ids": kb_ids,
         "question": question,
         "expected_terms": expected_terms,
@@ -491,8 +525,10 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
     contract = [item for item in results if item.get("kind") == "contract"]
     failed = [item for item in results if not item.get("passed")]
     focus_groups: dict[str, list[dict[str, Any]]] = {}
+    case_source_groups: dict[str, list[dict[str, Any]]] = {}
     for item in results:
         focus_groups.setdefault(str(item.get("focus") or "uncategorized"), []).append(item)
+        case_source_groups.setdefault(str(item.get("case_source") or "unknown"), []).append(item)
 
     def _rate(rows: list[dict[str, Any]]) -> float | None:
         if not rows:
@@ -520,6 +556,15 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
             }
             for focus, rows in sorted(focus_groups.items())
         },
+        "case_source_summary": {
+            source: {
+                "total": len(rows),
+                "passed": sum(1 for item in rows if item.get("passed")),
+                "failed": sum(1 for item in rows if not item.get("passed")),
+                "pass_rate": _rate(rows),
+            }
+            for source, rows in sorted(case_source_groups.items())
+        },
     }
 
 
@@ -541,9 +586,10 @@ def run_evaluation(
     timeout: float,
     output: str,
     cases_path: str | None = None,
+    extra_cases_paths: list[str] | None = None,
 ) -> tuple[dict[str, Any], int]:
     """执行跨领域评测并写出报告。"""
-    cases = load_cases(cases_path)
+    cases = load_cases(cases_path, extra_cases_paths)
     if not cases:
         return {"summary": {"total": 0, "passed": 0, "failed": 0}}, 2
     report = build_report(cases=cases, api_base=api_base, timeout=timeout)
@@ -558,7 +604,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="跨知识库、跨领域真实问答诊断")
     parser.add_argument("--api-base", default=DEFAULT_API_BASE, help="API 根地址")
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT, help="单条问答超时秒数")
-    parser.add_argument("--cases", default=None, help="可选；JSON list 格式用例文件")
+    parser.add_argument("--cases", default=None, help="可选；JSON list 或 {cases: [...]} 格式用例文件；传入后替换内置基线")
+    parser.add_argument(
+        "--extra-cases",
+        action="append",
+        default=[],
+        help="可重复；在当前用例集后追加 JSON list 或 {cases: [...]} 格式真实样本文件",
+    )
     parser.add_argument(
         "--output",
         default="docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report.json",
@@ -571,6 +623,7 @@ def main() -> None:
         timeout=args.timeout,
         output=args.output,
         cases_path=args.cases,
+        extra_cases_paths=args.extra_cases,
     )
     print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
     print(f"报告已写入: {Path(args.output)}")

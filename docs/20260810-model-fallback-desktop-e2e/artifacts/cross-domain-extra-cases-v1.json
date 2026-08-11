@@ -1,0 +1,49 @@
+{
+  "name": "cross-domain extra business cases v1",
+  "description": "Additional real business questions appended to the built-in cross-domain baseline without editing the Python default suite.",
+  "cases": [
+    {
+      "id": "extra-grain-positive-storage-scope",
+      "focus": "grain-extra",
+      "kind": "positive",
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "《粮油安全储存守则》适用于哪些单位？",
+      "expected_terms": ["各类粮油仓储单位"],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_kb_ids": ["grain-knowledge-base"]
+    },
+    {
+      "id": "extra-grain-positive-one-card-scope",
+      "focus": "grain-extra",
+      "kind": "positive",
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "非直属企业“一卡通”系统适用于哪些收储库点？",
+      "expected_any_term_groups": [
+        ["租仓库点", "委托库点"],
+        ["中央事权粮食入库和出库业务", "收储库点"]
+      ],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "required_source_kb_ids": ["grain-knowledge-base"]
+    },
+    {
+      "id": "extra-desktop-negative-one-card-scope",
+      "focus": "cross-domain-extra",
+      "kind": "negative",
+      "kb_ids": ["diag-desktop-e2e-1786353063"],
+      "question": "非直属企业“一卡通”系统适用于哪些收储库点？",
+      "forbidden_terms": ["租仓库点", "委托库点", "中央事权粮食入库和出库业务"],
+      "allowed_source_kb_ids": ["diag-desktop-e2e-1786353063"],
+      "forbidden_source_kb_ids": ["grain-knowledge-base"]
+    },
+    {
+      "id": "extra-grain-negative-desktop-preview",
+      "focus": "cross-domain-extra",
+      "kind": "negative",
+      "kb_ids": ["grain-knowledge-base"],
+      "question": "What should evidence preview resolve after chat returns sources?",
+      "forbidden_terms": ["resolve this file after chat returns sources"],
+      "allowed_source_kb_ids": ["grain-knowledge-base"],
+      "forbidden_source_kb_ids": ["diag-desktop-e2e-1786353063"]
+    }
+  ]
+}

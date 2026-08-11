@@ -123,13 +123,13 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `3e17026 feat(eval): expand cross-domain v5 coverage`
   - `8e0cb12 chore: update dev story capture state`
   - `b6e3837 docs(project): sync cross-domain expansion`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和 23 条跨领域真实门禁均已落地并推送。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `probeSummary` UI 展示、Ollama 本地候选提示、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验和跨领域真实门禁均已落地并推送；2026-08-11 新增外部 extra cases 追加能力后，默认 23 条基线 + 4 条真实业务追加样本合计 `27/27 passed`。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
-- **继续扩大真实业务知识库评测**：跨领域门禁已有 23 条，下一阶段应把测试从诊断 KB 和粮仓资料扩展到更多真实业务资料集，并补更长问题、多跳问题、表格/扫描件和无答案拒答样本。
+- **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本，当前默认 23 条 + 外部 4 条达到 `27/27 passed`；下一阶段应继续补更长问题、多跳问题、表格/扫描件和无答案拒答样本。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **补发布后的桌面安装体验验证**：当前已验证 packaged app 主进程、API 和前端加载；签名/公证后还需要覆盖首次安装、模型重新配置、文件上传/导入、preview、引用来源和跨 KB 隔离。
 
@@ -273,6 +273,13 @@ cd webapp && npm run build
 - `cd desktop && npm audit --json`：`0 vulnerabilities`。
 - `git diff --check`：通过。
 
+### 5.11 2026-08-11 外部跨领域样本追加验证
+
+- `scripts/diag_cross_domain_kb_eval.py` 新增 `{ "cases": [...] }` 外部用例格式、可重复 `--extra-cases` 追加、`case_source` 报告字段和重复 case id 失败保护，后续扩真实资料集时不再需要直接修改 Python 内置用例。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`12 passed, 1 warning`。
+- 新增外部样本文件：`docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json`，覆盖粮仓适用对象、一卡通收储库点和跨库负向隔离。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --extra-cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6.json`：`27/27 passed`；默认基线 `23/23`，外部追加样本 `4/4`，`positive/negative/contract` 均为 `100%`。
+
 ---
 
 ## 6. 已知问题和限制
@@ -281,7 +288,7 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有 23 条正/负向/契约用例门禁，后续需要继续扩大非粮仓真实资料集和更复杂问题类型。
+- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 追加外部真实样本；当前 v6 报告为 `27/27 passed`。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
@@ -309,6 +316,8 @@ cd webapp && npm run build
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v3.json` | 跨知识库、跨领域真实问答和隔离诊断报告 |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json` | 跨知识库、跨领域真实问答和隔离诊断报告（扩容版） |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v5.json` | 跨知识库、跨领域真实问答和隔离诊断报告（再扩容版） |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json` | 跨领域真实业务追加样本 |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6.json` | 默认基线 + 外部追加样本的跨领域诊断报告 |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
