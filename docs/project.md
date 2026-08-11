@@ -122,11 +122,12 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `b9e0fd6 docs(project): add next-step plan and refresh review notes`
   - `3d3e010 docs(project): mark closure pushed`
   - `82b6cba docs(project): sync closure status before push`
-- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 17 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。当前本地未提交增量把 fallback 探测结果继续细化为 `fallback_attempts` / `probeSummary`，让 Models 页和 Agent 页能直接看见最近一次候选探测摘要。桌面 release preflight 也已补强为可测试摘要，严格模式会在缺 Apple 凭证/Developer ID/`notarytool` 时失败，非严格模式继续支持本地打包准备。
+- 当前工作区状态：2026-08-10 模型 fallback 与桌面 E2E 已推送；2026-08-11 继续扩展跨 KB 泛化门禁，`scripts/diag_cross_domain_kb_eval.py` 已从 14 条扩展到 21 条真实用例，覆盖 grain / desktop / image-ocr / pdf-scan / mixed-batch / boundary / exttext / cross-domain / contract 分布，并补充中英同义关键词组判定，降低模型回答语言波动导致的误报。当前本地未提交增量把 fallback 探测结果继续细化为 `fallback_attempts` / `probeSummary`，并在 Ollama fallback 时明确提示本地候选模型，让 Models 页和 Agent 页能直接看见最近一次候选探测摘要。桌面 release preflight 也已补强为可测试摘要，严格模式会在缺 Apple 凭证/Developer ID/`notarytool` 时失败，非严格模式继续支持本地打包准备。
 
 ### 4.4 下一步建议
 
 - **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量把候选探测摘要同步到 UI，补齐 Ollama 候选和更明确的模型切换提示。
+- **模型韧性与桌面端体验已进入发布候选收口**：额度耗尽、403、401、模型不可用时的 fallback 主链路已落地；当前增量把候选探测摘要同步到 UI，补齐 Ollama 候选和更明确的本地模型切换提示。
 - **桌面端真实工作流成为主验收门禁**：后续不只跑脚本，还应继续验证桌面端安装后启动、模型重新配置、文件上传/导入、知识库选择、问答引用、preview 与跨 KB 隔离。
 - **保留粮仓质量门禁作为回归基线**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入或重建索引后仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **正式发布闭环还差 Apple 凭证和证书**：已能生成 macOS dmg/zip 并校验 packaged resources；release preflight 现在还能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`。下一步补齐凭证和证书后，跑严格 release preflight、签名、公证、安装后启动回归。
@@ -243,6 +244,13 @@ cd webapp && npm run build
 - `node --test webapp/src/domain/modelHealth.test.js webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`81 passed`。
 - `cd webapp && npm run build`：通过，`ModelsPage` 和 `AgentPage` 能展示 `probeSummary`。
 
+### 5.8 2026-08-11 跨 KB 泛化扩容复核
+
+- `node --test webapp/src/domain/modelHealth.test.js`：`7 passed`，覆盖 Ollama 本地候选提示。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`9 passed, 1 warning`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json`：`21/21 passed`。
+- 新增用例覆盖 grain 安全生产、desktop evidence preview、UTF-16 边界、旧 desktop passcode 隔离和更多 cross-domain 负向组合。
+
 ---
 
 ## 6. 已知问题和限制
@@ -276,6 +284,7 @@ cd webapp && npm run build
 | `docs/20260810-grain-retrieval-quality-tuning/` | 粮仓检索排序质量调优、实验矩阵和最终测试报告 |
 | `docs/20260810-model-fallback-desktop-e2e/` | 模型 fallback、模型健康状态、评测断点续跑和桌面端 E2E 验证 |
 | `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v3.json` | 跨知识库、跨领域真实问答和隔离诊断报告 |
+| `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v4.json` | 跨知识库、跨领域真实问答和隔离诊断报告（扩容版） |
 | `docs/20260714-kb-directory-storage/` | 多知识库目录化存储专题 |
 | `docs/20260715-grain-kb-evaluation/` | 粮仓知识库导入与人工验收指南 |
 | `docs/20260716-kb-upload-target-selection/` | 上传目标显式选择与 multipart 400 修复专题 |
