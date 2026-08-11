@@ -334,6 +334,8 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `e6f5c41` | feat(eval): support extra cross-domain cases |
+| `d85bcae` | chore: update dev story capture state |
 | `3a7df45` | fix(desktop): upgrade builder release preflight |
 | `005fc60` | docs(project): sync current project status |
 | `4565955` | chore: update dev story capture state |
