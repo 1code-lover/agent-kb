@@ -133,8 +133,46 @@ def test_summarize_runtime_readiness_reports_embedding_and_ocr_blockers() -> Non
 
     assert summary["is_ready"] is False
     assert summary["blockers"] == ["embedding_warmup", "ocr_warmup"]
+    assert summary["blocker_details"] == ["(embedding_warmup, ready=False)", "(ocr_warmup, ready=False)"]
     assert summary["embedding_ready"] is False
     assert summary["ocr_dependencies_ready"] is True
+
+
+def test_summarize_runtime_readiness_includes_embedding_cache_diagnostics() -> None:
+    """embedding 未就绪时，应保留本地缓存和远程下载诊断。"""
+
+    health = {
+        "data": {
+            "embedding_warmup": {
+                "state": "failed",
+                "is_ready": False,
+                "last_error": "Embedding model is unavailable.",
+            },
+            "embedding_diagnostics": {
+                "local_path_exists": False,
+                "allow_remote_download": False,
+                "local_path": "./localmodels/BAAI/bge-small-zh-v1.5",
+                "hf_endpoint": "https://hf-mirror.com",
+            },
+            "ocr_warmup": {"state": "ready", "is_ready": True},
+            "import_capabilities": {
+                "image_ocr": {"ready": True},
+            },
+        }
+    }
+
+    summary = summarize_runtime_readiness(health, require_ocr=True)
+
+    assert summary["is_ready"] is False
+    assert summary["blockers"] == ["embedding_warmup"]
+    assert summary["embedding_diagnostics"]["allow_remote_download"] is False
+    assert summary["blocker_details"] == [
+        "("
+        "embedding_warmup, state=failed, ready=False, error=Embedding model is unavailable., "
+        "local_path_exists=False, allow_remote_download=False, "
+        "local_path=./localmodels/BAAI/bge-small-zh-v1.5, hf_endpoint=https://hf-mirror.com"
+        ")"
+    ]
 
 
 
@@ -264,3 +302,46 @@ def test_wait_for_runtime_ready_raises_timeout_with_blockers(monkeypatch: pytest
             require_ocr=True,
             session=session,
         )
+
+
+def test_wait_for_runtime_ready_timeout_reports_embedding_cache_details(monkeypatch: pytest.MonkeyPatch) -> None:
+    """等待 runtime ready 超时时，应把 embedding 缓存缺失原因带进错误消息。"""
+
+    session = _FakeSession(
+        [
+            {
+                "data": {
+                    "embedding_warmup": {
+                        "state": "failed",
+                        "is_ready": False,
+                        "last_error": "Embedding model is unavailable.",
+                    },
+                    "embedding_diagnostics": {
+                        "local_path_exists": False,
+                        "allow_remote_download": False,
+                        "local_path": "./localmodels/BAAI/bge-small-zh-v1.5",
+                        "hf_endpoint": "https://hf-mirror.com",
+                    },
+                    "ocr_warmup": {"state": "ready", "is_ready": True},
+                    "import_capabilities": {"image_ocr": {"ready": True}},
+                }
+            }
+        ]
+    )
+    perf_values = iter([0.0, 0.1, 0.2, 1.2, 1.3])
+    monkeypatch.setattr(support_module.time, "perf_counter", lambda: next(perf_values))
+    monkeypatch.setattr(support_module.time, "sleep", lambda _: None)
+
+    with pytest.raises(TimeoutError) as exc_info:
+        wait_for_runtime_ready(
+            "http://127.0.0.1:18080",
+            timeout=1.0,
+            poll_interval=0.1,
+            require_ocr=True,
+            session=session,
+        )
+
+    message = str(exc_info.value)
+    assert "local_path_exists=False" in message
+    assert "allow_remote_download=False" in message
+    assert "./localmodels/BAAI/bge-small-zh-v1.5" in message

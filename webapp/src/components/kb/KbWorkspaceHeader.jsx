@@ -1,6 +1,6 @@
 /**
  * 文件功能：
- * - Knowledge Workspace 头部，聚合当前知识库摘要、OCR 运行状态与核心动作入口。
+ * - Knowledge Workspace 头部，聚合当前知识库摘要、运行时状态与核心动作入口。
  */
 
 import { Link } from '../../router';
@@ -20,6 +20,7 @@ export default function KbWorkspaceHeader({
   hasSelectedKb,
   actionMode,
   onToggleActionMode,
+  embeddingWarmupSummary,
   ocrWarmupSummary,
 }) {
   const rootPath = hasSelectedKb ? 'data/' + selectedKbId + '/' : '选择知识库后显示';
@@ -28,8 +29,8 @@ export default function KbWorkspaceHeader({
   const uploadButtonClass = 'kb-action-button' + (actionMode === KB_WORKSPACE_ACTION_MODES.UPLOAD ? ' active' : '');
   const webButtonClass = 'kb-action-button' + (actionMode === KB_WORKSPACE_ACTION_MODES.WEB_IMPORT ? ' active' : '');
   const linkClass = 'kb-link-button' + (hasSelectedKb ? '' : ' disabled');
-  const runtimeTone = ocrWarmupSummary?.tone || 'muted';
-  const runtimeClassName = `kb-runtime-status ${runtimeTone}`;
+  const embeddingRuntimeClassName = `kb-runtime-status ${embeddingWarmupSummary?.tone || 'muted'}`;
+  const ocrRuntimeClassName = `kb-runtime-status ${ocrWarmupSummary?.tone || 'muted'}`;
 
   return (
     <section className='kb-workspace-header'>
@@ -52,14 +53,25 @@ export default function KbWorkspaceHeader({
           <span className='kb-meta-pill'>根目录: {rootPath}</span>
         </div>
 
-        <div className={runtimeClassName} role='status' aria-live='polite'>
-          <div className='kb-runtime-status-head'>
-            <strong>{ocrWarmupSummary?.title || 'OCR 状态未知'}</strong>
-            <span>{ocrWarmupSummary?.detail || '等待后台返回运行状态'}</span>
+        <div className='kb-runtime-status-grid'>
+          <div className={embeddingRuntimeClassName} role='status' aria-live='polite'>
+            <div className='kb-runtime-status-head'>
+              <strong>{embeddingWarmupSummary?.title || 'Embedding 状态未知'}</strong>
+              <span>{embeddingWarmupSummary?.detail || '等待后台返回运行状态'}</span>
+            </div>
+            <p className='kb-runtime-status-text'>
+              {embeddingWarmupSummary?.summary || '导入和问答前会先检查向量模型状态。'}
+            </p>
           </div>
-          <p className='kb-runtime-status-text'>
-            {ocrWarmupSummary?.summary || '导入图片前会先检查 OCR 运行时状态。'}
-          </p>
+          <div className={ocrRuntimeClassName} role='status' aria-live='polite'>
+            <div className='kb-runtime-status-head'>
+              <strong>{ocrWarmupSummary?.title || 'OCR 状态未知'}</strong>
+              <span>{ocrWarmupSummary?.detail || '等待后台返回运行状态'}</span>
+            </div>
+            <p className='kb-runtime-status-text'>
+              {ocrWarmupSummary?.summary || '导入图片前会先检查 OCR 运行时状态。'}
+            </p>
+          </div>
         </div>
       </div>
 

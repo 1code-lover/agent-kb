@@ -116,6 +116,36 @@ def _warmup_state_is_ready(status: dict[str, Any]) -> bool:
     return state == "ready"
 
 
+def _append_detail(parts: list[str], label: str, value: Any) -> None:
+    """把非空诊断字段追加到文本片段。"""
+    if value in (None, ""):
+        return
+    parts.append(f"{label}={value}")
+
+
+def _summarize_embedding_blocker(embedding: dict[str, Any], diagnostics: dict[str, Any]) -> str:
+    """生成 embedding 未就绪时的可读阻塞原因。"""
+    parts = ["embedding_warmup"]
+    _append_detail(parts, "state", embedding.get("state"))
+    _append_detail(parts, "ready", embedding.get("is_ready"))
+    _append_detail(parts, "error", embedding.get("last_error"))
+    if diagnostics:
+        _append_detail(parts, "local_path_exists", diagnostics.get("local_path_exists"))
+        _append_detail(parts, "allow_remote_download", diagnostics.get("allow_remote_download"))
+        _append_detail(parts, "local_path", diagnostics.get("local_path"))
+        _append_detail(parts, "hf_endpoint", diagnostics.get("hf_endpoint"))
+    return "(" + ", ".join(parts) + ")"
+
+
+def _summarize_ocr_blocker(ocr: dict[str, Any]) -> str:
+    """生成 OCR 未就绪时的可读阻塞原因。"""
+    parts = ["ocr_warmup"]
+    _append_detail(parts, "state", ocr.get("state"))
+    _append_detail(parts, "ready", ocr.get("is_ready"))
+    _append_detail(parts, "error", ocr.get("last_error"))
+    return "(" + ", ".join(parts) + ")"
+
+
 def summarize_runtime_readiness(
     health_resp: dict[str, Any] | None,
     *,
@@ -124,6 +154,9 @@ def summarize_runtime_readiness(
     """?? /api/health ???? roundtrip ????????????"""
     health_payload = _get_health_payload(health_resp)
     embedding = health_payload.get("embedding_warmup") if isinstance(health_payload.get("embedding_warmup"), dict) else {}
+    embedding_diagnostics = (
+        health_payload.get("embedding_diagnostics") if isinstance(health_payload.get("embedding_diagnostics"), dict) else {}
+    )
     ocr = health_payload.get("ocr_warmup") if isinstance(health_payload.get("ocr_warmup"), dict) else {}
     import_caps = health_payload.get("import_capabilities") if isinstance(health_payload.get("import_capabilities"), dict) else {}
     image_ocr_cap = import_caps.get("image_ocr") if isinstance(import_caps.get("image_ocr"), dict) else {}
@@ -132,18 +165,24 @@ def summarize_runtime_readiness(
     embedding_ready = _warmup_state_is_ready(embedding)
     ocr_ready = _warmup_state_is_ready(ocr)
     blockers: list[str] = []
+    blocker_details: list[str] = []
     if not embedding_ready:
         blockers.append("embedding_warmup")
+        blocker_details.append(_summarize_embedding_blocker(embedding, embedding_diagnostics))
     if require_ocr:
         if not ocr_dependencies_ready:
             blockers.append("image_ocr_dependencies")
+            blocker_details.append("(image_ocr_dependencies, ready=False)")
         elif not ocr_ready:
             blockers.append("ocr_warmup")
+            blocker_details.append(_summarize_ocr_blocker(ocr))
 
     return {
         "is_ready": len(blockers) == 0,
         "blockers": blockers,
+        "blocker_details": blocker_details,
         "embedding_ready": embedding_ready,
+        "embedding_diagnostics": embedding_diagnostics,
         "ocr_ready": ocr_ready,
         "ocr_dependencies_ready": ocr_dependencies_ready,
     }
@@ -185,6 +224,9 @@ def wait_for_runtime_ready(
 
             if time.perf_counter() >= deadline:
                 blocker_text = ", ".join(readiness["blockers"]) or "unknown"
+                detail_text = "; ".join(readiness.get("blocker_details") or [])
+                if detail_text:
+                    blocker_text = f"{blocker_text}; details: {detail_text}"
                 if last_error is not None:
                     blocker_text = f"{blocker_text}; last_error={type(last_error).__name__}: {last_error}"
                 raise TimeoutError(f"runtime not ready within {timeout:.1f}s; blockers: {blocker_text}")

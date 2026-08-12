@@ -1065,6 +1065,12 @@ button {
   max-width: 360px;
 }
 
+.kb-runtime-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .kb-runtime-status {
   display: flex;
   flex-direction: column;
@@ -1114,6 +1120,12 @@ button {
   color: #cbd5e1;
   font-size: 12px;
   line-height: 1.6;
+}
+
+@media (max-width: 860px) {
+  .kb-runtime-status-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kb-action-button,

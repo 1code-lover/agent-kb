@@ -23,7 +23,7 @@ import {
   buildPersistedImportReceiptSummary,
   resolveVisibleReceiptSummary,
 } from '../domain/importSummary';
-import { buildOcrWarmupSummary } from '../domain/ocrWarmup';
+import { buildEmbeddingWarmupSummary, buildOcrWarmupSummary } from '../domain/ocrWarmup';
 import { canUseKbTarget } from '../domain/kbSelection';
 import {
   buildKnowledgeWorkspaceLink,
@@ -117,14 +117,40 @@ function KnowledgeContent() {
   );
 
   const healthQuery = useQuery({
-    queryKey: ['health', 'ocr-warmup'],
+    queryKey: ['health', 'runtime-warmup'],
     retry: false,
-    refetchInterval: (query) => (query.state.data?.state === 'warming' ? 3000 : false),
+    refetchInterval: (query) => {
+      const embeddingState = query.state.data?.embedding_warmup?.state;
+      const ocrState = query.state.data?.ocr_warmup?.state;
+      return embeddingState === 'warming' || ocrState === 'warming' ? 3000 : false;
+    },
     queryFn: async () => {
       const response = await getHealthStatus();
-      return readApiData(response)?.ocr_warmup || null;
+      return readApiData(response) || null;
     },
   });
+
+  const embeddingWarmupSummary = useMemo(() => {
+    if (healthQuery.isLoading && !healthQuery.data) {
+      return {
+        state: 'loading',
+        tone: 'muted',
+        title: 'Embedding 状态加载中',
+        summary: '正在读取后台向量模型预热状态，稍后会自动刷新。',
+        detail: '等待 /api/health 返回',
+        isReady: false,
+      };
+    }
+
+    if (healthQuery.error) {
+      return buildEmbeddingWarmupSummary({
+        state: 'failed',
+        last_error: healthQuery.error.message,
+      });
+    }
+
+    return buildEmbeddingWarmupSummary(healthQuery.data?.embedding_warmup, healthQuery.data?.embedding_diagnostics);
+  }, [healthQuery.data, healthQuery.error, healthQuery.isLoading]);
 
   const ocrWarmupSummary = useMemo(() => {
     if (healthQuery.isLoading && !healthQuery.data) {
@@ -145,7 +171,7 @@ function KnowledgeContent() {
       });
     }
 
-    return buildOcrWarmupSummary(healthQuery.data);
+    return buildOcrWarmupSummary(healthQuery.data?.ocr_warmup);
   }, [healthQuery.data, healthQuery.error, healthQuery.isLoading]);
 
   useEffect(() => {
@@ -225,6 +251,7 @@ function KnowledgeContent() {
           hasSelectedKb={hasSelectedKb}
           actionMode={actionMode}
           onToggleActionMode={handleToggleActionMode}
+          embeddingWarmupSummary={embeddingWarmupSummary}
           ocrWarmupSummary={ocrWarmupSummary}
         />
 
