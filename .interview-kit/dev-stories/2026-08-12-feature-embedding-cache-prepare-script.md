@@ -21,12 +21,14 @@ source-backed 精确短语修复需要重启 API 后复跑 v1-v6 全量 suite �
 在 API 启动时自动下载没有采用，因为桌面启动会变得更不可控，模型源网络慢时用户只会看到启动卡住。把 HuggingFaceEmbedding 初始化改成硬超时子进程也没有在本轮做，因为它涉及 Settings 生命周期和半初始化清理，适合作为后续更大的 runtime 改造。
 
 ## 风险与权衡
-脚本只是提供缓存准备能力，不保证当前机器网络一定能下载成功。它也不会自动重启 18080，因此 source-backed answer repair 的全量 suite 改善仍需在本地缓存准备好并重启 API 后验证。
+脚本只是提供缓存准备能力，不保证当前机器网络一定能下载成功。2026-08-12 后续实测 `--download` 时 HuggingFace mirror 连接超时，并因为本地没有 snapshot 抛出 `LocalEntryNotFoundError`，说明代码入口已具备，但当前机器的模型缓存前置条件仍未解除。脚本也不会自动重启 18080，因此 source-backed answer repair 的全量 suite 改善仍需在本地缓存准备好并重启 API 后验证。
 
 ## 验证与结果
 `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.prepare_embedding_model_cache`：输出 `local_path_exists=false`、`load_source=remote`、`download_requested=false`、`downloaded=false`、`skipped=true`。
 
 `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_prepare_embedding_model_cache.py tests/api/test_chat_service.py tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`59 passed, 7 warnings`。
+
+`/opt/miniconda3/envs/agent-kb/bin/python -m scripts.prepare_embedding_model_cache --download`：未成功，`huggingface_hub.snapshot_download` 访问 HuggingFace mirror 时触发 `ConnectTimeout: [Errno 60] Operation timed out`，本地缓存仍为 `local_path_exists=false`。
 
 ## 面试表达版本
 我在复跑 RAG 全量评测前发现了一个很典型的本地模型问题：代码已经修了，但新 API 启动后 embedding 预热卡到 stale，因为本地模型缓存不存在，只能走远程 mirror。我没有继续盲等，而是补了一个缓存准备脚本，默认只做诊断，显式 `--download` 才下载到项目的 `localmodels` 目录。这样桌面启动和评测前置条件都更可控，也给后续做硬超时隔离留下了清晰边界。

@@ -227,6 +227,14 @@ curl http://127.0.0.1:18084/api/health
 
 结果：`59 passed, 7 warnings`。新增覆盖 dry-run、未知模型、已有缓存跳过和显式 download 调用参数。
 
+随后继续尝试显式预下载：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.prepare_embedding_model_cache --download
+```
+
+结果：下载未成功，`huggingface_hub.snapshot_download` 在访问 HuggingFace mirror 时触发 `ConnectTimeout: [Errno 60] Operation timed out`，并因为本地没有可用 snapshot 抛出 `LocalEntryNotFoundError`。复跑 dry-run 仍显示 `local_path_exists=false`、`load_source=remote`、`downloaded=false`、`skipped=true`。因此当前状态是：脚本和诊断能力已完成，但本机 embedding 本地缓存尚未准备好；在解决网络/代理/离线模型来源前，不建议重启主用 18080 API 去跑新代码全量 v1-v6 suite，以免再次进入长时间 cold start。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。
@@ -372,6 +380,7 @@ notarization indicates this code has been revoked
 - `desktop` 依赖树仍有 npm audit 风险：`8 vulnerabilities`，其中 `7 high`、`1 critical`。本轮优先解决 macOS 公证撤销导致的启动失败，后续应单独安排桌面依赖安全升级。
 - Electron CSP 已补到主进程响应头，并允许本地 API、Vite dev websocket 和文件资源；packaged app 已完成启动和首页 API 请求复核，后续仍需在签名/公证后的安装包中复核上传、preview 和更多静态资源加载。
 - macOS release preflight、hardened runtime 与 entitlements 已补充，但本机未配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 且未发现有效 Developer ID 证书，严格签名/公证预检和真实 notarization 尚未执行。
+- 本机 `localmodels/BAAI/bge-small-zh-v1.5` 仍不存在；显式预下载因 HuggingFace mirror 连接超时失败。当前 18080 API 旧进程已 ready，可继续给桌面/Web 配置模型和做手工验证；但要复跑加载新代码的全量 v1-v6 suite，建议先解决 embedding 本地缓存或给初始化加硬超时隔离。
 
 ## 2026-08-10 增量复核
 
