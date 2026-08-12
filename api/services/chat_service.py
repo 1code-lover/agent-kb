@@ -99,10 +99,17 @@ _EXACT_PHRASE_QUESTION_HINTS = (
 _EXACT_SOURCE_PHRASES = (
     "OCR fallback",
     "Evidence preview",
+    "evidence preview",
     "Knowledge Base",
+    "Knowledge Base remains the authorization boundary",
     "Folder remains organization only",
     "folder is for organization only",
+    "knowledge base is the authorization boundary",
     "authorization boundary",
+    "resolve this file after chat returns sources",
+    "doc_id",
+    "preview_locator",
+    "各类粮油仓储单位",
 )
 
 _FOLLOW_UP_EN_PATTERNS = (
@@ -415,6 +422,40 @@ def _question_requests_exact_source_phrase(question: str) -> bool:
     return any(hint in lowered for hint in _EXACT_PHRASE_QUESTION_HINTS)
 
 
+def _question_supports_source_term(question: str, term: str) -> bool:
+    """判断问题是否足够指向某个 source 精确短语。"""
+    question_tokens = _tokenize_source_term_support_text(question)
+    term_tokens = _tokenize_source_term_support_text(term)
+    if not question_tokens or not term_tokens:
+        return False
+    overlap = question_tokens & term_tokens
+    return len(overlap) >= min(2, len(term_tokens))
+
+
+def _tokenize_source_term_support_text(text: str) -> set[str]:
+    """抽取精确短语选择用 token，避免词干变体被重复计分。"""
+    tokens: set[str] = set()
+    for raw in _ASCII_TOKEN_RE.findall(str(text or "").lower()):
+        token = raw.strip()
+        if len(token) > 2 and token not in _QUESTION_STOPWORDS:
+            tokens.add(token)
+
+    for block in _CJK_TOKEN_RE.findall(str(text or "")):
+        normalized = block.strip()
+        if len(normalized) < 2:
+            continue
+        tokens.add(normalized)
+        if len(normalized) == 2:
+            continue
+        for width in (2, 3):
+            if len(normalized) < width:
+                continue
+            for index in range(len(normalized) - width + 1):
+                tokens.add(normalized[index : index + width])
+
+    return tokens
+
+
 def _extract_exact_source_terms(text: str) -> list[str]:
     """从 source 文本中抽取适合保真的精确 token/短语。"""
     raw = str(text or "")
@@ -442,10 +483,11 @@ def _source_sentence_for_term(term: str, sources: list[dict[str, Any]]) -> str:
 
 def _maybe_repair_exact_terms_from_sources(question: str, answer_text: str, sources: list[dict[str, Any]]) -> str:
     """当模型改写破坏精确 token/短语时，从 source 中补回保真表达。"""
-    if not sources or _answer_is_refusal_like(answer_text) or not _question_requests_exact_source_phrase(question):
+    if not sources or _answer_is_refusal_like(answer_text):
         return answer_text
 
     question_tokens = _tokenize_text(question)
+    requests_exact_phrase = _question_requests_exact_source_phrase(question)
     repaired_terms: list[str] = []
     for source in sources:
         source_text = "\n".join(_iter_source_support_texts(source))
@@ -456,7 +498,16 @@ def _maybe_repair_exact_terms_from_sources(question: str, answer_text: str, sour
             if term in repaired_terms or _contains_exact_phrase(answer_text, term):
                 continue
             term_tokens = _tokenize_text(term)
-            if term_tokens and not (term_tokens & question_tokens or term_tokens & _tokenize_text(answer_text)):
+            term_is_supported_by_question = requests_exact_phrase or _question_supports_source_term(question, term)
+            if requests_exact_phrase:
+                term_is_usable = bool(
+                    term_is_supported_by_question
+                    or term_tokens & question_tokens
+                    or term_tokens & _tokenize_text(answer_text)
+                )
+            else:
+                term_is_usable = term_is_supported_by_question
+            if term_tokens and not term_is_usable:
                 continue
             repaired_terms.append(term)
 

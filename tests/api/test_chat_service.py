@@ -397,6 +397,87 @@ def test_query_repairs_exact_ocr_fallback_phrase_from_sources(chat_service_modul
     assert result["answer"] == "Scanned PDF diagnostic says that OCR fallback must merge every predict batch per page."
 
 
+def test_query_repairs_preview_exact_phrase_from_sources(chat_service_module, monkeypatch, single_kb_scope):
+    """模型把 this 改成 the 时，应从 source 补回 evidence preview 原句。"""
+
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="Evidence preview should resolve the file after chat returns sources.",
+    )
+    sources = [
+        {
+            "file": "desktop-model-workflow.md",
+            "text": "Evidence preview should resolve this file after chat returns sources.",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What should evidence preview resolve after chat returns sources?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "Evidence preview should resolve this file after chat returns sources."
+
+
+def test_query_repairs_preview_field_tokens_from_sources(chat_service_module, monkeypatch, single_kb_scope):
+    """模型漏掉 doc_id/preview_locator 时，应从 source 补回精确字段名。"""
+
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="Evidence preview checklist.",
+    )
+    sources = [
+        {
+            "file": "preview-board.png",
+            "text": "Every evidence preview must include doc_id and preview_locator.",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What should every evidence preview include?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "Every evidence preview must include doc_id and preview_locator."
+
+
+def test_query_repairs_chinese_storage_scope_phrase_from_sources(chat_service_module, monkeypatch, single_kb_scope):
+    """中文 source 精确范围短语被模型泛化时，应补回来源原词。"""
+
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="《粮油安全储存守则》适用于所有粮油仓储单位。",
+    )
+    sources = [
+        {
+            "file": "AAA粮油安全储存守则_0119014f.docx",
+            "text": "《粮油安全储存守则》适用于各类粮油仓储单位。",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="《粮油安全储存守则》适用于哪些单位？"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "《粮油安全储存守则》适用于各类粮油仓储单位。"
+
+
 def test_query_keeps_brief_answer_when_source_lacks_grounded_clause(chat_service_module, monkeypatch, single_kb_scope):
     """\u5f53\u6765\u6e90\u91cc\u6ca1\u6709\u53ef\u76f4\u63a5\u652f\u6491\u7684\u5b50\u53e5\u65f6\uff0c\u4e0d\u5e94\u5f3a\u884c\u6269\u5199\u77ed\u7b54\u6848\u3002"""
     _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="\u77e5\u8bc6\u5e93")

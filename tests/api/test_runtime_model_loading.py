@@ -593,6 +593,34 @@ def test_ensure_models_ready_marks_failed_when_embedding_factory_returns_none(
     assert status["is_ready"] is False
 
 
+def test_ensure_models_ready_preserves_warmup_start_for_final_duration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """后台 warmup 调用 ensure_models_ready 时，不应清掉最终耗时所需的起点。"""
+
+    embed_sentinel = object()
+    monkeypatch.setattr(Settings, "_embed_model", None, raising=False)
+    monkeypatch.setattr(Settings, "_llm", None, raising=False)
+    monkeypatch.setattr(embedding_module, "create_embedding_model", lambda model_name: embed_sentinel)
+
+    def fake_config_get(key: str) -> Any:
+        if key == "current_llm_settings":
+            return {"embedding_model": "bge-small-zh-v1.5"}
+        if key == "current_llm_info":
+            return {}
+        return None
+
+    monkeypatch.setattr(config_store_module.CONFIG_STORE, "get", fake_config_get)
+    state = RuntimeState()
+    state.embedding_warmup_status["_started_monotonic"] = 123.0
+
+    assert state.ensure_models_ready(require_llm=False) is True
+
+    status = state.embedding_warmup_status
+    assert status["state"] == "ready"
+    assert status["_started_monotonic"] == 123.0
+
+
 def test_ensure_models_ready_reuses_loaded_embedding_and_cached_llm_fingerprint(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

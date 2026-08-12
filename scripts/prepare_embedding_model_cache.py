@@ -12,6 +12,12 @@ import config
 from server.models.embedding import get_embedding_model_diagnostics
 from server.utils.hf_mirror import use_hf_mirror
 
+DOWNLOAD_PROVIDERS = {"huggingface", "modelscope"}
+MODELSCOPE_MODEL_PATH = {
+    "bge-small-zh-v1.5": "AI-ModelScope/bge-small-zh-v1.5",
+    "bge-large-zh-v1.5": "AI-ModelScope/bge-large-zh-v1.5",
+}
+
 
 def _normalize_local_path(local_path: str | None) -> Path | None:
     """把诊断里的本地路径转换为 Path。"""
@@ -35,13 +41,16 @@ def prepare_embedding_model_cache(
     *,
     download: bool = False,
     source_dir: str | None = None,
+    provider: str = "huggingface",
 ) -> dict[str, Any]:
     """诊断或下载指定 embedding 模型到 localmodels。"""
     will_import_local = bool(source_dir)
+    normalized_provider = provider.strip().lower()
     diagnostics = get_embedding_model_diagnostics(model_name, allow_remote_download=download)
     result: dict[str, Any] = {
         "model_name": model_name,
         "download_requested": download,
+        "download_provider": normalized_provider,
         "source_dir": source_dir,
         "imported_from_source": False,
         "before": diagnostics,
@@ -52,6 +61,9 @@ def prepare_embedding_model_cache(
     }
     if diagnostics.get("hf_model_path") is None:
         result["error"] = f"Unknown embedding model: {model_name}"
+        return result
+    if normalized_provider not in DOWNLOAD_PROVIDERS:
+        result["error"] = f"Unsupported download provider: {provider}"
         return result
     if diagnostics.get("local_path_exists"):
         result["skipped"] = True
@@ -76,23 +88,34 @@ def prepare_embedding_model_cache(
         result["skipped"] = True
         return result
 
-    try:
-        from huggingface_hub import snapshot_download
-    except Exception as exc:
-        result["error"] = f"huggingface_hub is unavailable: {type(exc).__name__}: {exc}"
-        return result
-
-    use_hf_mirror()
     local_path.parent.mkdir(parents=True, exist_ok=True)
     try:
-        snapshot_download(
-            repo_id=str(diagnostics["hf_model_path"]),
-            local_dir=str(local_path),
-            local_dir_use_symlinks=False,
-            resume_download=True,
-        )
+        if normalized_provider == "modelscope":
+            try:
+                from modelscope.hub.snapshot_download import snapshot_download as modelscope_snapshot_download
+            except Exception as exc:
+                result["error"] = f"modelscope is unavailable: {type(exc).__name__}: {exc}"
+                return result
+            modelscope_model_id = MODELSCOPE_MODEL_PATH.get(model_name)
+            if not modelscope_model_id:
+                result["error"] = f"ModelScope mapping is unavailable for model: {model_name}"
+                return result
+            modelscope_snapshot_download(model_id=modelscope_model_id, local_dir=str(local_path))
+        else:
+            try:
+                from huggingface_hub import snapshot_download
+            except Exception as exc:
+                result["error"] = f"huggingface_hub is unavailable: {type(exc).__name__}: {exc}"
+                return result
+            use_hf_mirror()
+            snapshot_download(
+                repo_id=str(diagnostics["hf_model_path"]),
+                local_dir=str(local_path),
+                local_dir_use_symlinks=False,
+                resume_download=True,
+            )
     except Exception as exc:
-        result["error"] = f"Download failed: {type(exc).__name__}: {exc}"
+        result["error"] = f"Download failed via {normalized_provider}: {type(exc).__name__}: {exc}"
         result["after"] = get_embedding_model_diagnostics(model_name, allow_remote_download=download)
         return result
     result["downloaded"] = True
@@ -105,10 +128,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="准备 embedding 模型本地缓存")
     parser.add_argument("--model", default=config.DEFAULT_EMBEDDING_MODEL, help="embedding 模型名称")
     parser.add_argument("--download", action="store_true", help="实际下载模型；未传时只输出诊断")
+    parser.add_argument(
+        "--provider",
+        choices=sorted(DOWNLOAD_PROVIDERS),
+        default="huggingface",
+        help="下载来源；默认 huggingface，可显式指定 modelscope",
+    )
     parser.add_argument("--source-dir", help="从已有本地模型目录复制到项目 localmodels")
     args = parser.parse_args()
 
-    result = prepare_embedding_model_cache(args.model, download=args.download, source_dir=args.source_dir)
+    result = prepare_embedding_model_cache(
+        args.model,
+        download=args.download,
+        source_dir=args.source_dir,
+        provider=args.provider,
+    )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if result.get("error"):
         raise SystemExit(1)

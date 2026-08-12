@@ -310,7 +310,6 @@ class RuntimeState:
                     is_ready=True,
                     is_stale=False,
                     thread_alive=False,
-                    _started_monotonic=None,
                 )
 
             provider_info = CONFIG_STORE.get("current_llm_info") or {}

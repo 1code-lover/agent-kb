@@ -1,0 +1,760 @@
+{
+  "generated_at": "2026-08-12T05:18:26.581665+00:00",
+  "api_base": "http://127.0.0.1:18084",
+  "timeout": 120.0,
+  "slow_threshold_ms": 5000.0,
+  "preflight": {
+    "enabled": true,
+    "aborted": false,
+    "passed": true,
+    "case_id": "extra-v6-grain-readme-table-format",
+    "reason": ""
+  },
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "pass_rate": 1.0,
+    "positive_total": 2,
+    "positive_pass_rate": 1.0,
+    "negative_total": 2,
+    "negative_pass_rate": 1.0,
+    "contract_total": 0,
+    "contract_pass_rate": null,
+    "multi_turn_total": 1,
+    "turn_total": 6,
+    "turn_passed": 6,
+    "turn_failed": 0,
+    "turn_pass_rate": 1.0,
+    "failed_case_ids": [],
+    "failure_check_summary": {},
+    "failure_case_summary": [],
+    "duration_summary": {
+      "slow_threshold_ms": 5000.0,
+      "case_total_ms": 80524.408,
+      "case_avg_ms": 20131.102,
+      "case_max_ms": 67833.981,
+      "case_max_id": "extra-v6-mixed-three-turn-release-follow-up",
+      "slow_case_ids": [
+        "extra-v6-desktop-negative-grain-readme-table",
+        "extra-v6-image-negative-mixed-rollback-approval",
+        "extra-v6-mixed-three-turn-release-follow-up"
+      ],
+      "turn_total_ms": 80523.359,
+      "turn_avg_ms": 13420.56,
+      "turn_max_ms": 65700.512,
+      "turn_max_id": "extra-v6-mixed-three-turn-release-follow-up",
+      "turn_max_turn_id": "approval",
+      "slow_turns": [
+        {
+          "id": "extra-v6-desktop-negative-grain-readme-table",
+          "turn_id": "",
+          "duration_ms": 5443.827
+        },
+        {
+          "id": "extra-v6-image-negative-mixed-rollback-approval",
+          "turn_id": "",
+          "duration_ms": 5075.559
+        },
+        {
+          "id": "extra-v6-mixed-three-turn-release-follow-up",
+          "turn_id": "approval",
+          "duration_ms": 65700.512
+        }
+      ]
+    },
+    "systemic_failure_summary": {
+      "suspected": false,
+      "reason": "",
+      "turn_total": 6,
+      "http_failure_total": 0,
+      "http_failure_rate": 0.0,
+      "dominant_error_kind": "",
+      "error_kind_counts": {},
+      "sample_case_ids": []
+    },
+    "focus_summary": {
+      "cross-domain-extra": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "grain-table": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "mixed-batch-long-turn": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    },
+    "case_source_summary": {
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    },
+    "tag_summary": {
+      "cross-kb-isolation": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "follow-up": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "long-turn": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "mixed-batch": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "multi-turn": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "ocr": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "refusal": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "single-kb": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "source-grounding": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "table": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "extra-v6-grain-readme-table-format",
+      "kind": "positive",
+      "focus": "grain-table",
+      "tags": [
+        "table",
+        "source-grounding",
+        "single-kb"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-grain-readme-table-format::cbecaf92439645b79c733dd7e48955db",
+      "question": "粮仓知识库 README 的基本信息表里，推荐 kb_id 和主要格式分别是什么？",
+      "expected_terms": [
+        "grain-knowledge-base",
+        ".pdf",
+        ".docx"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "readme"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [
+        "推荐 kb_id",
+        "主要格式"
+      ],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "推荐 kb_id是 grain-knowledge-base，主要格式是 .pdf 157 个，.docx 98 个。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4ODE4OTUxNy1lYmFmLTQxMGQtODVkMi1jZmM0NzUzNzM3OTkiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZWIxMjkxZC1lYjM5LTQ3NDgtYTUyYi0zNWVhZTA1MDJmYzQifX0\", \"file\": \"readm",
+      "duration_ms": 2171.041,
+      "source_record_count": 10,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "readme_f4b82287.md",
+        "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范_92ca8dfb.pdf",
+        "粮库粮情报表样例3-浅圆仓_aa3a2320.pdf",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告_153d074e.docx",
+        "readme_f4b82287.md",
+        "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范_92ca8dfb.pdf",
+        "粮库粮情报表样例3-浅圆仓_aa3a2320.pdf",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "20180307基于粮情大数据分析的储粮安全水分分析辅助软件—技术需求报告_153d074e.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v6-mixed-three-turn-release-follow-up",
+      "kind": "positive",
+      "focus": "mixed-batch-long-turn",
+      "tags": [
+        "multi-turn",
+        "follow-up",
+        "long-turn",
+        "mixed-batch",
+        "source-grounding"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::0742bd1b2b1f4987805f335284017973",
+      "is_multi_turn": true,
+      "turn_count": 3,
+      "passed_turn_count": 3,
+      "failed_turn_ids": [],
+      "duration_ms": 67833.981,
+      "turn_duration_total_ms": 67832.932,
+      "source_record_count": 24,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "preview-board.png",
+        "escalation-board.png",
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "cutover.md",
+        "preview-board.png",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "cutover.md",
+        "preview-board.png",
+        "vendor-cutover.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "checks": {
+        "turns_passed": true,
+        "turn_count_ok": true,
+        "source_kb_known": true
+      },
+      "passed": true,
+      "turns": [
+        {
+          "id": "extra-v6-mixed-three-turn-release-follow-up::approval",
+          "kind": "positive",
+          "focus": "mixed-batch-long-turn",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "long-turn",
+            "mixed-batch",
+            "source-grounding"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+          "kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::0742bd1b2b1f4987805f335284017973",
+          "question": "Who gives the final rollback approval in the Friday release cutover note?",
+          "expected_terms": [
+            "platform duty lead",
+            "final rollback approval"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "required_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [
+            "cutover.md"
+          ],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [
+            "platform duty lead",
+            "final rollback approval"
+          ],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "The Friday release cutover note explains who can approve rollback decisions. The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence. The team also keeps an escalation board image ne",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+          "duration_ms": 65700.512,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "source_files": [
+            "cutover.md",
+            "vendor-cutover.pdf",
+            "preview-board.png",
+            "escalation-board.png",
+            "cutover.md",
+            "vendor-cutover.pdf",
+            "preview-board.png",
+            "escalation-board.png"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v6-mixed-three-turn-release-follow-up",
+          "turn_index": 1,
+          "turn_id": "approval"
+        },
+        {
+          "id": "extra-v6-mixed-three-turn-release-follow-up::preview",
+          "kind": "positive",
+          "focus": "mixed-batch-long-turn",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "long-turn",
+            "mixed-batch",
+            "source-grounding"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+          "kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::0742bd1b2b1f4987805f335284017973",
+          "question": "And what should every evidence preview include?",
+          "expected_terms": [
+            "doc_id",
+            "preview_locator"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "required_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [
+            "preview-board.png"
+          ],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [
+            "doc_id",
+            "preview_locator"
+          ],
+          "forbidden_source_text_terms": [],
+          "answer_preview": " evidence preview must include doc_id and preview_locator.",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3ZjhlMzllZS03ZDk1LTRiMTYtYWE3Yi1lYWMyMTA1MzM2YjQiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjYzNGE5YTBkLWIwNzktNGY4ZS04ZWQwLTAwMmUwY2Y1ZjE0NiJ9fQ\", \"fi",
+          "duration_ms": 960.944,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "source_files": [
+            "preview-board.png",
+            "escalation-board.png",
+            "cutover.md",
+            "vendor-cutover.pdf",
+            "preview-board.png",
+            "escalation-board.png",
+            "cutover.md",
+            "vendor-cutover.pdf"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v6-mixed-three-turn-release-follow-up",
+          "turn_index": 2,
+          "turn_id": "preview"
+        },
+        {
+          "id": "extra-v6-mixed-three-turn-release-follow-up::scope-reminder",
+          "kind": "positive",
+          "focus": "mixed-batch-long-turn",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "long-turn",
+            "mixed-batch",
+            "source-grounding"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+          "kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::0742bd1b2b1f4987805f335284017973",
+          "question": "Finally, what image does the team keep next to the runbook for scope reminders?",
+          "expected_terms": [],
+          "expected_any_term_groups": [
+            [
+              "escalation board image",
+              "scope reminders"
+            ],
+            [
+              "escalations board image",
+              "scope reminders"
+            ],
+            [
+              "Escalation board",
+              "scope reminders"
+            ]
+          ],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "required_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [
+            "cutover.md"
+          ],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [
+            "escalation board image",
+            "scope reminders"
+          ],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "根据上下文信息， team 保持 next to the runbook for scope reminders 的图像是escalation board image。因此，答案是：\n\n!( Escalation board image)",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJmNzgyZmYzMC1mZTExLTRlMjctODIzNC1jMjEwOGExY2EzNTgiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImYyNWIyMjExLTM1ZDItNGU0ZS05YmRhLTZiMWYzYTg5NDc3OCJ9fQ\", \"fi",
+          "duration_ms": 1171.476,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "source_files": [
+            "escalation-board.png",
+            "cutover.md",
+            "preview-board.png",
+            "vendor-cutover.pdf",
+            "escalation-board.png",
+            "cutover.md",
+            "preview-board.png",
+            "vendor-cutover.pdf"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v6-mixed-three-turn-release-follow-up",
+          "turn_index": 3,
+          "turn_id": "scope-reminder"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "extra-v6-desktop-negative-grain-readme-table",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [
+        "table",
+        "refusal",
+        "cross-kb-isolation"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-desktop-negative-grain-readme-table::ef4dafcd165c419abb5511b326fd992a",
+      "question": "粮仓知识库 README 的基本信息表里，主要格式和总体量分别是什么？",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "775744.1 KB",
+        ".pdf 157",
+        ".docx 98"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [
+        "readme"
+      ],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "根据给定的上下文信息，我们可以找到粮仓知识库 README 的 basic information 表。该表包括以下列：\n\n1. file_path: /Users/zhaojianyong/python/agent-kb的数据/diag desktop-e2e-1786353063 desktop-e2e desktop model-workflow.md\n2. file_name: desktop model-workflow MD\n3. file_type: text(",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 5443.827,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v6-image-negative-mixed-rollback-approval",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [
+        "ocr",
+        "mixed-batch",
+        "refusal",
+        "cross-kb-isolation"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-image-negative-mixed-rollback-approval::00fb716b0c5549e2b815cafe49bf7c98",
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "platform duty lead"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [
+        "cutover.md"
+      ],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine who gives the final rollback approval in the Friday release cut-off note, we need to analyze the given context information and identify any relevant details.\n\nThe context information provided is:\n- File name: diag-ocr.png\n- Ima",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 5075.559,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-image-ocr-20260807-r2",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "source_files": [
+        "diag-ocr.png",
+        "diag-ocr.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    }
+  ]
+}

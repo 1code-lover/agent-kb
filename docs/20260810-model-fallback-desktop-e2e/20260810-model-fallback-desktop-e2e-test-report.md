@@ -298,6 +298,64 @@ curl http://127.0.0.1:18084/api/health
 
 结果：相关测试 `58 passed, 3 warnings`；下载命令结构化返回 JSON error；临时 18084 API 继续秒级返回 `embedding_warmup.state=failed`、`allow_remote_download=false`、`local_path_exists=false`。因此全量 v1-v6 suite 仍需先准备本地 embedding 缓存或提供可用下载代理。
 
+## 2026-08-12 ModelScope embedding 缓存与最新复核
+
+HuggingFace mirror 在本机仍会出现 `ConnectTimeout`，因此本轮给 `scripts.prepare_embedding_model_cache` 增加 `--provider {huggingface,modelscope}`。ModelScope provider 当前映射 `bge-small-zh-v1.5` 和 `bge-large-zh-v1.5`，用于把 embedding 模型准备到项目 `localmodels/`，避免 API/桌面启动期依赖远程下载。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.prepare_embedding_model_cache \
+  --download \
+  --provider modelscope
+```
+
+结果：成功下载 `bge-small-zh-v1.5` 到 `localmodels/BAAI/bge-small-zh-v1.5`；随后 dry-run 显示 `local_path_exists=true`、`load_source=local`、`skipped=true`。`localmodels/` 已被 `.gitignore` 忽略，不进入提交。
+
+本轮同时修复 `api/runtime.py` 的 warmup 计时状态：后台 warmup 调用 `ensure_models_ready()` 时不再清掉 `_started_monotonic`，避免 health 中 `finished_at` 与 `last_duration_ms` 不一致。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest \
+  tests/api/test_chat_service.py \
+  tests/scripts/test_prepare_embedding_model_cache.py \
+  tests/api/test_runtime_model_loading.py \
+  tests/test_embedding_model_diagnostics.py -q
+```
+
+结果：`76 passed, 7 warnings`。
+
+最新临时 API 复核：
+
+```bash
+KB_API_PORT=18084 /opt/miniconda3/envs/agent-kb/bin/python run_api.py
+curl http://127.0.0.1:18084/api/health
+```
+
+结果：`embedding_warmup.state=ready`、`embedding_diagnostics.load_source=local`、`embedding last_duration_ms=4521.347`；OCR `ready`，`last_duration_ms=6766.399`。
+
+最新 v6 定向复跑：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18084 \
+  --timeout 120 \
+  --preflight \
+  --cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-after-latest-source-term-repair.json
+```
+
+结果：`4/4 passed`、逐轮 `6/6 passed`，`systemic_failure_summary.suspected=false`。最慢仍是 `extra-v6-mixed-three-turn-release-follow-up` 的 `approval` turn，约 `63.98s`，因此 v6 长多轮当前稳定口径继续使用 `--timeout 120`。
+
+本地 embedding 缓存后的 v1-v6 全量 suite 基线：
+
+- 报告：`artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-modelscope-cache.json`
+- 结果：`34/49 passed`、逐轮 `39/54 passed`
+- positive pass rate：`0.5758`
+- negative pass rate：`0.9333`
+- contract pass rate：`1.0`
+
+对比此前未准备本地缓存/临时模型状态下的 `26/49`、逐轮 `30/54`，通过率已有明显改善；但全量 suite 仍未完成。剩余失败主要是正向 expected terms 和 source/evidence grounding，另有一个负向 case 返回 `400 InternalError.Algo.InvalidParameter: Range of input length should be [1, 3072]`，需要下一轮单独收口。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。
@@ -443,7 +501,8 @@ notarization indicates this code has been revoked
 - `desktop` 依赖树仍有 npm audit 风险：`8 vulnerabilities`，其中 `7 high`、`1 critical`。本轮优先解决 macOS 公证撤销导致的启动失败，后续应单独安排桌面依赖安全升级。
 - Electron CSP 已补到主进程响应头，并允许本地 API、Vite dev websocket 和文件资源；packaged app 已完成启动和首页 API 请求复核，后续仍需在签名/公证后的安装包中复核上传、preview 和更多静态资源加载。
 - macOS release preflight、hardened runtime 与 entitlements 已补充，但本机未配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 且未发现有效 Developer ID 证书，严格签名/公证预检和真实 notarization 尚未执行。
-- 本机 `localmodels/BAAI/bge-small-zh-v1.5` 仍不存在；显式预下载因 HuggingFace mirror 连接超时失败，且本机未发现可复用的全局 bge-small snapshot。新代码已默认禁止 runtime 远程下载并快速失败，roundtrip 报告和 Knowledge Workspace 已能展示本地缓存缺失诊断，缓存准备脚本也支持 `--source-dir` 离线导入。当前 18080 API 旧进程已 ready，可继续给桌面/Web 配置模型和做手工验证；但要复跑加载新代码的全量 v1-v6 suite，仍需先解决 embedding 本地缓存或显式允许远程下载。
+- 本机 `localmodels/BAAI/bge-small-zh-v1.5` 已通过 ModelScope 准备完成，新 API 可从本地加载；但新机器、清理缓存或换模型后仍需重新执行 `scripts.prepare_embedding_model_cache --download --provider modelscope`，或用 `--source-dir` 离线导入。runtime 仍默认禁止远程下载，这是为了避免桌面/API 启动被网络下载长期卡住。
+- v1-v6 全量 suite 当前为 `34/49 passed`，还不能宣称跨领域正向泛化完成；下一轮应优先处理正向 expected terms、source/evidence grounding、UTF-16/extensionless 文本和长多轮 follow-up，另查一个负向 case 的 3072 输入长度 API 错误。
 
 ## 2026-08-10 增量复核
 

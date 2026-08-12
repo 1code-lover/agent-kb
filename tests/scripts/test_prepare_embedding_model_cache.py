@@ -17,6 +17,7 @@ def test_prepare_embedding_model_cache_dry_run_reports_missing_cache(monkeypatch
     result = prepare_cache.prepare_embedding_model_cache("bge-small-zh-v1.5", download=False)
 
     assert result["download_requested"] is False
+    assert result["download_provider"] == "huggingface"
     assert result["source_dir"] is None
     assert result["imported_from_source"] is False
     assert result["downloaded"] is False
@@ -33,6 +34,19 @@ def test_prepare_embedding_model_cache_rejects_unknown_model() -> None:
 
     assert result["downloaded"] is False
     assert result["error"] == "Unknown embedding model: missing-model"
+
+
+def test_prepare_embedding_model_cache_rejects_unknown_provider() -> None:
+    """未知下载来源应返回 error。"""
+
+    result = prepare_cache.prepare_embedding_model_cache(
+        "bge-small-zh-v1.5",
+        download=True,
+        provider="unknown",
+    )
+
+    assert result["downloaded"] is False
+    assert result["error"] == "Unsupported download provider: unknown"
 
 
 def test_prepare_embedding_model_cache_skips_existing_local_cache(monkeypatch, tmp_path: Path) -> None:
@@ -74,6 +88,37 @@ def test_prepare_embedding_model_cache_downloads_to_project_localmodels(monkeypa
             "local_dir": "localmodels/BAAI/bge-small-zh-v1.5",
             "local_dir_use_symlinks": False,
             "resume_download": True,
+        }
+    ]
+
+
+def test_prepare_embedding_model_cache_downloads_from_modelscope(monkeypatch, tmp_path: Path) -> None:
+    """显式 provider=modelscope 时应调用 ModelScope 下载到 localmodels。"""
+
+    calls: list[dict[str, object]] = []
+
+    def fake_modelscope_snapshot_download(**kwargs):
+        calls.append(kwargs)
+        Path(str(kwargs["local_dir"])).mkdir(parents=True, exist_ok=True)
+        return str(kwargs["local_dir"])
+
+    fake_snapshot_module = types.SimpleNamespace(snapshot_download=fake_modelscope_snapshot_download)
+    monkeypatch.setitem(sys.modules, "modelscope.hub.snapshot_download", fake_snapshot_module)
+    monkeypatch.chdir(tmp_path)
+
+    result = prepare_cache.prepare_embedding_model_cache(
+        "bge-small-zh-v1.5",
+        download=True,
+        provider="modelscope",
+    )
+
+    assert result["downloaded"] is True
+    assert result["download_provider"] == "modelscope"
+    assert result["after"]["local_path_exists"] is True
+    assert calls == [
+        {
+            "model_id": "AI-ModelScope/bge-small-zh-v1.5",
+            "local_dir": "localmodels/BAAI/bge-small-zh-v1.5",
         }
     ]
 
@@ -126,4 +171,4 @@ def test_prepare_embedding_model_cache_reports_download_failure(monkeypatch, tmp
 
     assert result["downloaded"] is False
     assert result["after"]["local_path_exists"] is False
-    assert result["error"] == "Download failed: TimeoutError: mirror timeout"
+    assert result["error"] == "Download failed via huggingface: TimeoutError: mirror timeout"
