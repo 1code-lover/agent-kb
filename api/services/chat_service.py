@@ -111,6 +111,13 @@ _EXACT_SOURCE_PHRASES = (
     "preview_locator",
     "各类粮油仓储单位",
 )
+_PREVIEW_QUESTION_HINTS = (
+    "preview",
+    "resolve this file",
+    "resolve after chat returns sources",
+    "chat returns sources",
+    "evidence preview",
+)
 
 _FOLLOW_UP_EN_PATTERNS = (
     re.compile(r"\bwhat about\b"),
@@ -248,6 +255,12 @@ def _question_requests_entity(question: str) -> bool:
     return any(marker in lowered for marker in _ENTITY_QUESTION_MARKERS)
 
 
+def _question_requests_preview_expansion(question: str) -> bool:
+    """判断问题是否在问 preview 该如何落到 source 原句。"""
+    lowered = str(question or "").lower()
+    return any(hint in lowered for hint in _PREVIEW_QUESTION_HINTS)
+
+
 def _iter_source_support_texts(source: dict[str, Any]) -> list[str]:
     """\u63d0\u53d6\u9002\u5408\u505a\u7b54\u6848\u6269\u5199\u7684 source \u6587\u672c\u5b57\u6bb5\u3002"""
     texts: list[str] = []
@@ -361,9 +374,40 @@ def _maybe_answer_table_fields_from_sources(question: str, answer_text: str, sou
     return "，".join(parts) + "。"
 
 
+def _maybe_answer_preview_from_sources(question: str, answer_text: str, sources: list[dict[str, Any]]) -> str:
+    """preview 问题命中 source 时，优先返回 source 中的 preview 原句。"""
+    if not sources or not _question_requests_preview_expansion(question) or _answer_is_refusal_like(answer_text):
+        return answer_text
+
+    best_candidate = ""
+    best_score: tuple[int, int, int] | None = None
+    question_tokens = _tokenize_text(question)
+    for source in sources:
+        for support_text in _iter_source_support_texts(source):
+            sentences = [segment.strip() for segment in _SENTENCE_SPLIT_RE.split(support_text) if segment.strip()]
+            for sentence in sentences:
+                lowered = sentence.lower()
+                if "preview" not in lowered:
+                    continue
+                candidate_tokens = _tokenize_text(sentence)
+                overlap = len(question_tokens & candidate_tokens)
+                resolve_score = int("resolve" in lowered)
+                source_score = int("source" in lowered)
+                if overlap <= 0 and not resolve_score:
+                    continue
+                if len(sentence) > 180:
+                    continue
+                score = (resolve_score, source_score, overlap)
+                if best_score is None or score > best_score:
+                    best_candidate = sentence
+                    best_score = score
+
+    return _normalize_expanded_answer(best_candidate) or answer_text
+
+
 def _maybe_expand_brief_answer_from_sources(question: str, answer_text: str, sources: list[dict[str, Any]]) -> str:
     """\u5f53\u56de\u7b54\u8fc7\u77ed\u4e14\u6765\u6e90\u53ef\u76f4\u63a5\u652f\u6491\u65f6\uff0c\u7528\u6700\u5c0f\u5b8c\u6574\u53e5\u66ff\u6362\u5b64\u7acb\u540d\u8bcd\u3002"""
-    if not sources or not _question_requests_entity(question) or not _answer_is_brief_entity(answer_text):
+    if not sources or not _answer_is_brief_entity(answer_text):
         return answer_text
 
     answer_core = str(answer_text or "").strip().strip(_ANSWER_EDGE_STRIP_CHARS)
@@ -376,6 +420,8 @@ def _maybe_expand_brief_answer_from_sources(question: str, answer_text: str, sou
     focus_question_tokens = question_tokens - answer_tokens
     best_candidate = ""
     best_score: tuple[int, int, int] | None = None
+    question_is_preview = _question_requests_preview_expansion(question)
+    question_requests_entity = _question_requests_entity(question)
 
     for source in sources:
         for support_text in _iter_source_support_texts(source):
@@ -393,11 +439,13 @@ def _maybe_expand_brief_answer_from_sources(question: str, answer_text: str, sou
                     if not candidate_tokens:
                         continue
                     question_overlap = len(focus_question_tokens & candidate_tokens)
-                    if question_overlap <= 0:
+                    if question_overlap <= 0 and not question_is_preview:
                         continue
+                    preview_bonus = int(question_is_preview and "preview" in candidate.lower())
+                    entity_bonus = int(question_requests_entity and question_overlap > 0)
                     hint_score = int(any(hint in candidate.lower() for hint in _ANSWER_EXPANSION_HINTS))
                     clause_preference = int(candidate != sentence)
-                    score = (hint_score, clause_preference, question_overlap, -len(candidate))
+                    score = (hint_score, preview_bonus, entity_bonus, clause_preference, question_overlap, -len(candidate))
                     if best_score is None or score > best_score:
                         best_candidate = candidate
                         best_score = score
@@ -488,6 +536,9 @@ def _maybe_repair_exact_terms_from_sources(question: str, answer_text: str, sour
 
     question_tokens = _tokenize_text(question)
     requests_exact_phrase = _question_requests_exact_source_phrase(question)
+    requests_preview_phrase = _question_requests_preview_expansion(question)
+    if requests_preview_phrase and _contains_exact_phrase(answer_text, "preview"):
+        return answer_text
     repaired_terms: list[str] = []
     for source in sources:
         source_text = "\n".join(_iter_source_support_texts(source))
@@ -612,6 +663,7 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
         sources = _prune_sources_for_refusal(request.question, sources)
     else:
         answer_text = _maybe_answer_table_fields_from_sources(request.question, answer_text, sources)
+        answer_text = _maybe_answer_preview_from_sources(request.question, answer_text, sources)
         answer_text = _maybe_expand_brief_answer_from_sources(request.question, answer_text, sources)
         answer_text = _maybe_repair_exact_terms_from_sources(request.question, answer_text, sources)
 

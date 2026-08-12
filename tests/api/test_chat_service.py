@@ -307,6 +307,35 @@ def test_query_expands_brief_answer_with_grounded_image_ocr_clause(chat_service_
     assert result["answer"] == "Knowledge Base is the authorization boundary for image OCR answers."
 
 
+def test_query_expands_brief_preview_answer_from_source(chat_service_module, monkeypatch, single_kb_scope):
+    """preview 问题短答偏到同源 passcode 时，应优先回到 preview 原句。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="The unique desktop workflow passcode is northagent-desktop-e2e-1786353063.",
+    )
+    sources = [
+        {
+            "file": "desktop-model-workflow.md",
+            "text": (
+                "The unique desktop workflow passcode is northagent-desktop-e2e-1786353063. "
+                "Evidence preview must resolve this file after chat returns sources."
+            ),
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What should evidence preview resolve after chat returns sources?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "Evidence preview must resolve this file after chat returns sources."
+
+
 def test_query_answers_markdown_table_fields_from_sources(chat_service_module, monkeypatch, single_kb_scope):
     """表格字段问答应优先使用 source 中的 Markdown 表格原值。"""
     _stub_query_runtime(

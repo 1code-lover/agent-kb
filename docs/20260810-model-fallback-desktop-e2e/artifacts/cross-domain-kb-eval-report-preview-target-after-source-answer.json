@@ -1,0 +1,219 @@
+{
+  "generated_at": "2026-08-12T06:44:19.643307+00:00",
+  "api_base": "http://127.0.0.1:18084",
+  "timeout": 120.0,
+  "slow_threshold_ms": 5000.0,
+  "preflight": {
+    "enabled": true,
+    "aborted": false,
+    "passed": true,
+    "case_id": "desktop-positive-preview",
+    "reason": ""
+  },
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "pass_rate": 1.0,
+    "positive_total": 2,
+    "positive_pass_rate": 1.0,
+    "negative_total": 0,
+    "negative_pass_rate": null,
+    "contract_total": 0,
+    "contract_pass_rate": null,
+    "multi_turn_total": 0,
+    "turn_total": 2,
+    "turn_passed": 2,
+    "turn_failed": 0,
+    "turn_pass_rate": 1.0,
+    "failed_case_ids": [],
+    "failure_check_summary": {},
+    "failure_case_summary": [],
+    "duration_summary": {
+      "slow_threshold_ms": 5000.0,
+      "case_total_ms": 2661.86,
+      "case_avg_ms": 1330.93,
+      "case_max_ms": 1581.068,
+      "case_max_id": "mixed-positive-preview",
+      "slow_case_ids": [],
+      "turn_total_ms": 2661.86,
+      "turn_avg_ms": 1330.93,
+      "turn_max_ms": 1581.068,
+      "turn_max_id": "mixed-positive-preview",
+      "turn_max_turn_id": "",
+      "slow_turns": []
+    },
+    "systemic_failure_summary": {
+      "suspected": false,
+      "reason": "",
+      "turn_total": 2,
+      "http_failure_total": 0,
+      "http_failure_rate": 0.0,
+      "dominant_error_kind": "",
+      "error_kind_counts": {},
+      "sample_case_ids": []
+    },
+    "focus_summary": {
+      "desktop": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "mixed-batch": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    },
+    "case_source_summary": {
+      "temp/cross-domain-preview-target-cases.json": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    },
+    "tag_summary": {}
+  },
+  "cases": [
+    {
+      "id": "desktop-positive-preview",
+      "kind": "positive",
+      "focus": "desktop",
+      "tags": [],
+      "case_source": "temp/cross-domain-preview-target-cases.json",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::desktop-positive-preview::3e19b01ae17f4087b355e70dc33f6efe",
+      "question": "What should evidence preview resolve after chat returns sources?",
+      "expected_terms": [
+        "resolve this file after chat returns sources"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "Evidence preview must resolve this file after chat returns sources.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 1080.792,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "mixed-positive-preview",
+      "kind": "positive",
+      "focus": "mixed-batch",
+      "tags": [],
+      "case_source": "temp/cross-domain-preview-target-cases.json",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::mixed-positive-preview::d970caa14c7f423098f54fe42cb07365",
+      "question": "What should every evidence preview include?",
+      "expected_terms": [
+        "doc_id",
+        "preview_locator"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "Every evidence preview must include doc_id and preview_locator.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3ZjhlMzllZS03ZDk1LTRiMTYtYWE3Yi1lYWMyMTA1MzM2YjQiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjYzNGE5YTBkLWIwNzktNGY4ZS04ZWQwLTAwMmUwY2Y1ZjE0NiJ9fQ\", \"fi",
+      "duration_ms": 1581.068,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    }
+  ]
+}

@@ -356,6 +356,61 @@ curl http://127.0.0.1:18084/api/health
 
 对比此前未准备本地缓存/临时模型状态下的 `26/49`、逐轮 `30/54`，通过率已有明显改善；但全量 suite 仍未完成。剩余失败主要是正向 expected terms 和 source/evidence grounding，另有一个负向 case 返回 `400 InternalError.Algo.InvalidParameter: Range of input length should be [1, 3072]`，需要下一轮单独收口。
 
+## 2026-08-12 source-backed preview 回答兜底
+
+继续分析当前分支全量报告时，发现 `desktop-positive-preview` 和 `mixed-positive-preview` 的 source 已命中，但模型会答到同一文档里的 passcode 或相邻事实，导致 expected terms 没命中。为避免继续依赖模型在 preview 问题上自行抽取原句，本轮在 `api/services/chat_service.py` 增加 source-backed preview 兜底：当问题明确询问 `evidence preview` / `chat returns sources`，且 source 文本包含 preview 原句时，优先返回 source 原句。该逻辑仅对 preview 问题触发，并在后续 exact repair 中保留 preview 原句，避免又被同源 passcode 覆盖。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest \
+  tests/api/test_chat_service.py \
+  tests/scripts/test_prepare_embedding_model_cache.py \
+  tests/api/test_runtime_model_loading.py \
+  tests/test_embedding_model_diagnostics.py -q
+```
+
+结果：`77 passed, 7 warnings`。
+
+Targeted preview 复跑：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18084 \
+  --timeout 120 \
+  --preflight \
+  --cases temp/cross-domain-preview-target-cases.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-preview-target-after-source-answer.json
+```
+
+结果：`desktop-positive-preview` 和 `mixed-positive-preview` 均通过，`2/2 passed`。
+
+v6 定向回归：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18084 \
+  --timeout 120 \
+  --preflight \
+  --cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-after-source-preview-answer.json
+```
+
+结果：`4/4 passed`、逐轮 `6/6 passed`，`systemic_failure_summary.suspected=false`。
+
+当前分支全量 v1-v6 复跑：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18084 \
+  --timeout 120 \
+  --preflight \
+  --suite v1-v6 \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-current-branch-check.json
+```
+
+结果：`37/49 passed`、逐轮 `42/54 passed`，positive pass rate `0.6667`、negative pass rate `0.9333`、contract pass rate `1.0`。剩余失败 12 个，主要集中在 image OCR boundary 原句保真、UTF-16/extensionless 文本清洗、桌面多轮 preview follow-up、一卡通适用范围，以及 1 个负向 case 的 3072 输入长度 API 错误。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。
@@ -502,7 +557,7 @@ notarization indicates this code has been revoked
 - Electron CSP 已补到主进程响应头，并允许本地 API、Vite dev websocket 和文件资源；packaged app 已完成启动和首页 API 请求复核，后续仍需在签名/公证后的安装包中复核上传、preview 和更多静态资源加载。
 - macOS release preflight、hardened runtime 与 entitlements 已补充，但本机未配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 且未发现有效 Developer ID 证书，严格签名/公证预检和真实 notarization 尚未执行。
 - 本机 `localmodels/BAAI/bge-small-zh-v1.5` 已通过 ModelScope 准备完成，新 API 可从本地加载；但新机器、清理缓存或换模型后仍需重新执行 `scripts.prepare_embedding_model_cache --download --provider modelscope`，或用 `--source-dir` 离线导入。runtime 仍默认禁止远程下载，这是为了避免桌面/API 启动被网络下载长期卡住。
-- v1-v6 全量 suite 当前为 `34/49 passed`，还不能宣称跨领域正向泛化完成；下一轮应优先处理正向 expected terms、source/evidence grounding、UTF-16/extensionless 文本和长多轮 follow-up，另查一个负向 case 的 3072 输入长度 API 错误。
+- v1-v6 全量 suite 当前为 `37/49 passed`，还不能宣称跨领域正向泛化完成；下一轮应优先处理 image OCR boundary、UTF-16/extensionless 文本、桌面多轮 preview follow-up、一卡通适用范围，另查一个负向 case 的 3072 输入长度 API 错误。
 
 ## 2026-08-10 增量复核
 
