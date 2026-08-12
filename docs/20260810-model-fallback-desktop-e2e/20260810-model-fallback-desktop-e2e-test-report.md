@@ -203,7 +203,29 @@ KB_API_PORT=18084 /opt/miniconda3/envs/agent-kb/bin/python run_api.py
 curl http://127.0.0.1:18084/api/health
 ```
 
-结果：`embedding_diagnostics.local_path_exists=false`、`load_source=remote`、`hf_endpoint=https://hf-mirror.com`，并返回预下载 `localmodels/` 的建议。该临时进程未等待 embedding 完整 ready，已手动停止；当前 18080 仍是旧进程，需重启后才能复跑 answer repair 对 v1-v6 suite 的真实改善。
+结果：`embedding_diagnostics.local_path_exists=false`、`load_source=remote`、`hf_endpoint=https://hf-mirror.com`，并返回预下载 `localmodels/` 的建议。该临时进程继续等待到 120 秒后进入 `embedding_warmup.state=stale`，说明新代码全量复跑的前置阻塞仍是本地 embedding 缓存缺失；当前 18080 仍是旧进程，需准备本地缓存并重启后才能复跑 answer repair 对 v1-v6 suite 的真实改善。
+
+为此新增 `scripts/prepare_embedding_model_cache.py`：
+
+- 默认只输出诊断，不下载。
+- 显式传 `--download` 时调用 `huggingface_hub.snapshot_download`，把模型下载到 `localmodels/BAAI/bge-small-zh-v1.5`。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.prepare_embedding_model_cache
+```
+
+结果：`local_path_exists=false`、`load_source=remote`、`download_requested=false`、`downloaded=false`、`skipped=true`，确认当前仍需预下载。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest \
+  tests/scripts/test_prepare_embedding_model_cache.py \
+  tests/api/test_chat_service.py \
+  tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`59 passed, 7 warnings`。新增覆盖 dry-run、未知模型、已有缓存跳过和显式 download 调用参数。
 
 ## 2026-08-12 模型选择即时探活
 

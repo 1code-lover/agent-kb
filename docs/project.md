@@ -404,12 +404,14 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --timeout 60 --preflight --suite v1-v6 --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite.json`：`26/49 passed`、逐轮 `30/54 passed`；`negative_total=15`、`negative_pass_rate=1.0`，`contract_total=1`、`contract_pass_rate=1.0`，`positive_pass_rate=0.303`。
 - 当前失败不是系统性模型/API 故障：`systemic_failure_summary.suspected=false`，HTTP/network 失败仅 2 个 turn；主要失败项为 `expected_terms_hit=24`，并集中在桌面诊断正向、UTF-16/extensionless 文本、长问题、多跳、多轮追问和 source/evidence grounding。
 
-### 5.27 2026-08-12 source-backed 精确短语保真
+### 5.27 2026-08-12 source-backed 精确短语保真与 embedding 缓存准备
 
 - 失败分析显示，部分正向 expected terms 已经由 source 命中，但模型会破坏精确 token/短语，例如把 `northagent-desktop-e2e-1786353063` 改成 `northagent desktop-e2e-1786353063`，或把 `OCR fallback` 粘成 `OCRfallback`。
 - `api/services/chat_service.py` 新增 source-backed 精确短语修复：当问题明确索要 unique/exact/passcode 或 `what does/what should/what must` 类 source 原文短语，且 source `text/excerpt` 中存在高置信 hyphen token 或固定短语时，优先返回 source 原句或附加精确来源短语。该逻辑不处理拒答，不从文件名/title 抽词，降低误补风险。
-- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_chat_service.py tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`55 passed, 7 warnings`。
-- 使用 `KB_API_PORT=18084 /opt/miniconda3/envs/agent-kb/bin/python run_api.py` 验证新代码 health 路径，`embedding_diagnostics.local_path_exists=false`、`load_source=remote`、`hf_endpoint=https://hf-mirror.com`，并返回预下载 `localmodels/` 的建议。该进程未等待 embedding 完整 ready，已手动停止；当前 18080 仍是旧进程，需重启后才能真实复跑 answer repair 的全量效果。
+- 使用 `KB_API_PORT=18084 /opt/miniconda3/envs/agent-kb/bin/python run_api.py` 验证新代码 health 路径，`embedding_diagnostics.local_path_exists=false`、`load_source=remote`、`hf_endpoint=https://hf-mirror.com`，并返回预下载 `localmodels/` 的建议；18084 在 120 秒后进入 `embedding_warmup.state=stale`，证明复跑全量 suite 的前置阻塞是本地 embedding 缓存缺失。
+- `scripts/prepare_embedding_model_cache.py` 新增本地 embedding 缓存准备入口：默认 dry-run 输出诊断，显式 `--download` 才调用 `huggingface_hub.snapshot_download` 下载到 `localmodels/BAAI/bge-small-zh-v1.5`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m scripts.prepare_embedding_model_cache`：确认 `local_path_exists=false`、`load_source=remote`、`skipped=true`、`downloaded=false`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_prepare_embedding_model_cache.py tests/api/test_chat_service.py tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`59 passed, 7 warnings`。
 
 ---
 
@@ -420,7 +422,7 @@ cd webapp && npm run build
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
 - **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 或 `--suite v1-v6` 追加外部真实样本、`turns` 多轮追问样本、来源文件级断言和 evidence 文本级断言；当前 v1-v6 全量 suite 暴露出正向泛化仍不足，但负向隔离和 contract 已稳定。下一步应重启 API 复跑 source-backed 精确短语修复后的全量 suite，再继续处理 UTF-16/extensionless、长多轮和 grounding 失败。
-- **embedding 初始化仍需进一步收口**：2026-08-12 复核发现默认 `bge-small-zh-v1.5` 初始化冷启动耗时约 626 秒，独立进程 45 秒内不会返回；健康检查已能标记 stale，并补充本地缓存/远程下载诊断和预下载建议，但还没有对 HuggingFaceEmbedding 初始化做硬超时隔离。
+- **embedding 初始化仍需进一步收口**：2026-08-12 复核发现默认 `bge-small-zh-v1.5` 初始化冷启动耗时约 626 秒，独立进程 45 秒内不会返回；健康检查已能标记 stale，并补充本地缓存/远程下载诊断和预下载建议。当前新增 `scripts.prepare_embedding_model_cache` 可显式预下载本地缓存；仍未对 HuggingFaceEmbedding 初始化做硬超时隔离。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
