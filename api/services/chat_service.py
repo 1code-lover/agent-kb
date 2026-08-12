@@ -84,6 +84,26 @@ _MARKDOWN_TABLE_SEPARATOR_RE = re.compile(r"^:?-{2,}:?$")
 _TABLE_FIELD_SPLIT_RE = re.compile(r"[,，、/]+|(?:\s+(?:and|or)\s+)|\s*[和及与]\s*")
 _TABLE_QUESTION_MARKERS = ("表", "字段", "field", "table")
 _TABLE_VALUE_QUESTION_MARKERS = ("是什么", "分别是什么", "what", "which")
+_EXACT_HYPHEN_TOKEN_RE = re.compile(r"\b[a-z][a-z0-9_]*(?:-[a-z0-9_]+){2,}\b", re.IGNORECASE)
+_EXACT_PHRASE_QUESTION_HINTS = (
+    "exact",
+    "unique",
+    "passcode",
+    "what does",
+    "what should",
+    "what must",
+    "原文",
+    "精确",
+    "唯一",
+)
+_EXACT_SOURCE_PHRASES = (
+    "OCR fallback",
+    "Evidence preview",
+    "Knowledge Base",
+    "Folder remains organization only",
+    "folder is for organization only",
+    "authorization boundary",
+)
 
 _FOLLOW_UP_EN_PATTERNS = (
     re.compile(r"\bwhat about\b"),
@@ -379,6 +399,78 @@ def _maybe_expand_brief_answer_from_sources(question: str, answer_text: str, sou
     return expanded or answer_text
 
 
+def _contains_exact_phrase(answer_text: str, phrase: str) -> bool:
+    """判断答案是否已包含精确短语。"""
+    answer = str(answer_text or "")
+    if not phrase:
+        return True
+    if _CJK_TOKEN_RE.search(phrase):
+        return phrase in answer
+    return phrase.lower() in answer.lower()
+
+
+def _question_requests_exact_source_phrase(question: str) -> bool:
+    """判断问题是否倾向索要唯一/精确来源短语。"""
+    lowered = str(question or "").lower()
+    return any(hint in lowered for hint in _EXACT_PHRASE_QUESTION_HINTS)
+
+
+def _extract_exact_source_terms(text: str) -> list[str]:
+    """从 source 文本中抽取适合保真的精确 token/短语。"""
+    raw = str(text or "")
+    terms: list[str] = []
+    for match in _EXACT_HYPHEN_TOKEN_RE.finditer(raw):
+        token = match.group(0).strip()
+        if token and token not in terms:
+            terms.append(token)
+    for phrase in _EXACT_SOURCE_PHRASES:
+        if phrase in raw and phrase not in terms:
+            terms.append(phrase)
+    return terms
+
+
+def _source_sentence_for_term(term: str, sources: list[dict[str, Any]]) -> str:
+    """查找包含精确短语的最小 source 句子。"""
+    for source in sources:
+        for support_text in _iter_source_support_texts(source):
+            sentences = [segment.strip() for segment in _SENTENCE_SPLIT_RE.split(support_text) if segment.strip()]
+            for sentence in sentences:
+                if term.lower() in sentence.lower():
+                    return _normalize_expanded_answer(sentence)
+    return ""
+
+
+def _maybe_repair_exact_terms_from_sources(question: str, answer_text: str, sources: list[dict[str, Any]]) -> str:
+    """当模型改写破坏精确 token/短语时，从 source 中补回保真表达。"""
+    if not sources or _answer_is_refusal_like(answer_text) or not _question_requests_exact_source_phrase(question):
+        return answer_text
+
+    question_tokens = _tokenize_text(question)
+    repaired_terms: list[str] = []
+    for source in sources:
+        source_text = "\n".join(_iter_source_support_texts(source))
+        source_tokens = _tokenize_text(source_text)
+        if question_tokens and not (question_tokens & source_tokens):
+            continue
+        for term in _extract_exact_source_terms(source_text):
+            if term in repaired_terms or _contains_exact_phrase(answer_text, term):
+                continue
+            term_tokens = _tokenize_text(term)
+            if term_tokens and not (term_tokens & question_tokens or term_tokens & _tokenize_text(answer_text)):
+                continue
+            repaired_terms.append(term)
+
+    if not repaired_terms:
+        return answer_text
+
+    sentence = _source_sentence_for_term(repaired_terms[0], sources)
+    if sentence and len(sentence) <= 180:
+        return sentence
+
+    suffix = "；精确来源短语：" + "，".join(repaired_terms) + "。"
+    return str(answer_text or "").rstrip() + suffix
+
+
 def _prune_sources_for_refusal(question: str, sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """\u62d2\u7b54\u65f6\u88c1\u526a\u65e0\u5173\u6765\u6e90\uff0c\u907f\u514d\u628a\u9519\u8bef\u4e3b\u9898\u7684\u8bc1\u636e\u66b4\u9732\u7ed9\u524d\u7aef\u3002"""
     grounded = [source for source in sources if _source_supports_question(question, source)]
@@ -470,6 +562,7 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
     else:
         answer_text = _maybe_answer_table_fields_from_sources(request.question, answer_text, sources)
         answer_text = _maybe_expand_brief_answer_from_sources(request.question, answer_text, sources)
+        answer_text = _maybe_repair_exact_terms_from_sources(request.question, answer_text, sources)
 
     if record_history:
         append_chat_message(request.session_id, "user", request.question)

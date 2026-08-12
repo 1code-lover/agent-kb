@@ -343,6 +343,60 @@ def test_query_answers_markdown_table_fields_from_sources(chat_service_module, m
     assert "主要格式是 .pdf 157 个，.docx 98 个" in result["answer"]
 
 
+def test_query_repairs_exact_hyphenated_passcode_from_sources(chat_service_module, monkeypatch, single_kb_scope):
+    """模型改写唯一 passcode 时，应从 source 补回精确保真 token。"""
+
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="The unique desktop workflow passcode is northagent desktop-e2e-1786353063.",
+    )
+    sources = [
+        {
+            "file": "desktop-model-workflow.md",
+            "text": "The unique desktop workflow passcode is northagent-desktop-e2e-1786353063.",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What is the unique desktop workflow passcode in the diagnostic document?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "The unique desktop workflow passcode is northagent-desktop-e2e-1786353063."
+
+
+def test_query_repairs_exact_ocr_fallback_phrase_from_sources(chat_service_module, monkeypatch, single_kb_scope):
+    """模型把 OCR fallback 粘连时，应从 source 补回精确短语。"""
+
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="Scanned PDF diagnostic says that OCRfallback must merge every predict batch per page.",
+    )
+    sources = [
+        {
+            "file": "diag-scan-fallback.pdf",
+            "text": "Scanned PDF diagnostic says that OCR fallback must merge every predict batch per page.",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What does the scanned PDF diagnostic say about OCR fallback?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "Scanned PDF diagnostic says that OCR fallback must merge every predict batch per page."
+
+
 def test_query_keeps_brief_answer_when_source_lacks_grounded_clause(chat_service_module, monkeypatch, single_kb_scope):
     """\u5f53\u6765\u6e90\u91cc\u6ca1\u6709\u53ef\u76f4\u63a5\u652f\u6491\u7684\u5b50\u53e5\u65f6\uff0c\u4e0d\u5e94\u5f3a\u884c\u6269\u5199\u77ed\u7b54\u6848\u3002"""
     _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="\u77e5\u8bc6\u5e93")

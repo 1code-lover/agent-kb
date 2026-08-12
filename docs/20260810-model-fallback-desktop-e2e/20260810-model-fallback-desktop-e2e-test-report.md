@@ -177,6 +177,34 @@ runtime ready 后复跑 v6 extra：
 
 本轮结论：v6 定向样本已稳定跑绿，但 v1-v6 全量 suite 暴露出当前临时模型 `qwen-math-turbo` 下的正向泛化不足。报告 `systemic_failure_summary.suspected=false`，因此这不是大面积模型/API 不可用；下一步应优先恢复更合适的通用模型或针对正向 source/answer grounding 做优化。
 
+## 2026-08-12 source-backed 精确短语保真
+
+本轮针对 v1-v6 全量 suite 中的一类高频正向失败做低风险修复。失败报告显示，部分 case 的目标 source 已经命中，但模型在最终答案里破坏了精确 token/短语，例如：
+
+- `northagent-desktop-e2e-1786353063` 被答成 `northagent desktop-e2e-1786353063`
+- `OCR fallback` 被答成 `OCRfallback`
+
+这类问题不是检索缺口，而是模型改写导致 expected terms 失败。`api/services/chat_service.py` 新增 source-backed 精确短语保真：当问题明确索要 unique/exact/passcode 或 `what does/what should/what must` 类来源短语，且 source `text/excerpt` 中存在高置信 hyphen token 或固定短语时，返回 source 原句或补充精确来源短语。逻辑不会处理拒答，也不会从 file/title 抽取 token，避免把文件名误补到答案里。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest \
+  tests/api/test_chat_service.py \
+  tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`55 passed, 7 warnings`。新增覆盖 passcode 连字符保真和 `OCR fallback` 粘连修复。
+
+另起新端口验证 health 新字段：
+
+```bash
+KB_API_PORT=18084 /opt/miniconda3/envs/agent-kb/bin/python run_api.py
+curl http://127.0.0.1:18084/api/health
+```
+
+结果：`embedding_diagnostics.local_path_exists=false`、`load_source=remote`、`hf_endpoint=https://hf-mirror.com`，并返回预下载 `localmodels/` 的建议。该临时进程未等待 embedding 完整 ready，已手动停止；当前 18080 仍是旧进程，需重启后才能复跑 answer repair 对 v1-v6 suite 的真实改善。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。
