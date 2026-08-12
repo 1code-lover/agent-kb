@@ -146,7 +146,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
 - **发布入口已经串起配置预检和后置校验**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight`、`electron-builder --mac`、`verify:package` 和 `verify:mac-release`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测，`verify-mac-release` 会验证 codesign、Gatekeeper 和 stapler。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
-- **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；`/api/model/select` 也会在保存模型后即时探活并把失败写入 `model_health`，下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
+- **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；`/api/model/select` 也会在保存模型后即时探活并把失败写入 `model_health`，桌面启动时若发现 `18080` API 已可用会复用现有服务，不再额外拉起一个失败的 API 子进程；配置落盘已改为缩进 JSON，方便人工恢复模型配置时核对。下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
 - **优先恢复稳定通用模型并复跑 v6**：`qwen-plus-2025-07-28` 当前返回 `AllocationQuota.FreeTierOnly`，`ely/qwen-flash` 返回 401，`阿里百炼/qwen-flash` 与 `deepseek-v4-flash` 返回 `model_not_found`；临时可用的 `qwen-math-turbo` 可通过基础 RAG smoke，但对表格抽取和长多轮稳定性不足。下一步应先恢复通用模型额度或配置一个可用通用模型，再复跑 v1-v6 全量。
 - **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本、`turns` 多轮追问用例、来源文件级断言、evidence 文本级断言、失败检查项归因汇总、超时归一和耗时诊断，当前默认 23 条 + 外部 4 条 + 外部 6 条 + 多轮 3 条 + source-grounding 5 条 + evidence-text 4 条达到 `45/45 passed`、逐轮 `48/48 passed`；v6 已补表格、长多轮和更多跨库拒答样本，但还不是正式门禁，下一阶段应在稳定模型上打绿后再纳入全量基线。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
@@ -379,6 +379,16 @@ cd webapp && npm run build
 - `scripts/diag_cross_domain_kb_eval.py` 新增 `--preflight` 参数；开启后会先用首个 case 做模型/API 探活，若发现 quota、401、model_not_found、network/timeout 等模型/API 层故障，会提前写出带 `preflight.aborted=true` 的诊断报告，不再继续消耗完整评测矩阵。
 - preflight 通过时仍会继续执行完整 case 集；默认不启用，既有评测命令和历史报告结构保持兼容。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`25 passed, 1 warning`。
+
+### 5.22 2026-08-12 桌面复用已运行 API
+
+- `desktop/src/python-process.js` 新增 `ensurePythonApi`：桌面启动时先检查 `http://127.0.0.1:18080/api/health`，如果 API 已经可用，就记录 `python_api_reusing_existing` 并直接进入渲染，不再额外 spawn `run_api.py` 造成端口占用错误日志。
+- 如果 API 不可用，仍会按原逻辑选择 conda `agent-kb` Python 并启动 `run_api.py`。
+- `server/stores/config_store.py` 在 `put/delete` 后会把 `config_store.json` 重新写成缩进 JSON，并保留中文原文，便于桌面/网页重新配置模型后人工核对和恢复。
+- `node --test desktop/src/python-process.test.js`：`4 passed`。
+- `node --test desktop/src/python-process.test.js desktop/src/csp.test.js desktop/scripts/verify-release-config.test.js desktop/scripts/release-preflight.test.js desktop/scripts/build-target.test.js desktop/scripts/verify-package.test.js desktop/scripts/verify-mac-release.test.js desktop/scripts/notarize-mac.test.js`：`44 passed`。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_config_store.py -q`：`2 passed, 2 warnings`。
+- 实测在 API 已运行时重启桌面，`storage/logs/desktop_runtime.log` 写入 `python_api_reusing_existing`，不再出现新的 `address already in use` 子进程错误。
 
 ---
 

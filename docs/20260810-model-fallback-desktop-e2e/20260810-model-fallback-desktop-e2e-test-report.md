@@ -159,6 +159,36 @@ PY
 
 结果：`25 passed, 1 warning`。新增覆盖 preflight 在模型/API 故障时提前中止，以及 preflight 通过后继续执行完整用例集。
 
+## 2026-08-12 桌面复用已运行 API
+
+本轮补齐“模型不可用时打开桌面版/网页版由用户自行配置”的桌面启动细节：如果用户或调试流程已经先启动了 `run_api.py`，旧桌面逻辑仍会无条件再 spawn 一个 Python API 子进程，随后因为 `127.0.0.1:18080` 已占用而输出 `address already in use`。虽然主窗口能继续使用现有 API，但日志会显得像启动失败。
+
+现在 `desktop/src/python-process.js` 新增 `ensurePythonApi`：桌面启动时先检查 `http://127.0.0.1:18080/api/health`，如果已有 API 可用，就记录 `python_api_reusing_existing` 并直接加载渲染页面；只有 API 不可用时才启动 `run_api.py`。
+
+已执行命令：
+
+```bash
+node --test desktop/src/python-process.test.js
+```
+
+结果：`4 passed`。新增覆盖已有 API 时不 spawn、新 API 不可用时再启动 Python。
+
+```bash
+node --test desktop/src/python-process.test.js desktop/src/csp.test.js desktop/scripts/verify-release-config.test.js desktop/scripts/release-preflight.test.js desktop/scripts/build-target.test.js desktop/scripts/verify-package.test.js desktop/scripts/verify-mac-release.test.js desktop/scripts/notarize-mac.test.js
+```
+
+结果：`44 passed`。确认 CSP、发布配置、preflight、包校验和 mac release 后置校验不受影响。
+
+手工复核：在 API 已运行时重启桌面，`storage/logs/desktop_runtime.log` 出现 `python_api_reusing_existing`，未再产生新的 `address already in use` 子进程错误。
+
+同时补齐配置恢复可读性：`server/stores/config_store.py` 在 `put/delete` 后会把 `config_store.json` 重新写成缩进 JSON，并保留中文原文，方便模型配置恢复后人工核对。
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_config_store.py -q
+```
+
+结果：`2 passed, 2 warnings`。新增覆盖写入和删除后的 JSON 缩进格式。
+
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_model_service.py tests/api/test_settings_routes.py tests/api/test_chat_service.py -q
 ```

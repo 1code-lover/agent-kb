@@ -4,6 +4,7 @@ const path = require("node:path");
 const { logRuntime } = require("./runtime-log");
 
 let pythonProcess = null;
+const API_HEALTH_URL = "http://127.0.0.1:18080/api/health";
 
 function resolvePythonCommand(projectRoot) {
   const explicitPython = process.env.NORTHAGENT_PYTHON || process.env.THINKRAG_PYTHON || process.env.FOXGLOVE_PYTHON;
@@ -34,7 +35,7 @@ function resolvePythonCommand(projectRoot) {
   return process.platform === "win32" ? "python" : "python3";
 }
 
-function startPythonApi(projectRoot) {
+function startPythonApi(projectRoot, options = {}) {
   if (pythonProcess) {
     logRuntime(projectRoot, "python_api_already_running", {
       pid: pythonProcess.pid
@@ -50,7 +51,8 @@ function startPythonApi(projectRoot) {
     cwd: projectRoot
   });
 
-  pythonProcess = spawn(cmd, [script], {
+  const spawnImpl = options.spawnImpl || spawn;
+  pythonProcess = spawnImpl(cmd, [script], {
     cwd: projectRoot,
     stdio: "pipe",
     windowsHide: true,
@@ -108,10 +110,12 @@ function stopPythonApi(projectRoot) {
   pythonProcess = null;
 }
 
-async function waitForApiReady(projectRoot, retries = 20, intervalMs = 500) {
+async function waitForApiReady(projectRoot, retries = 20, intervalMs = 500, options = {}) {
+  const fetchImpl = options.fetchImpl || fetch;
+  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
   for (let i = 0; i < retries; i += 1) {
     try {
-      const response = await fetch("http://127.0.0.1:18080/api/health");
+      const response = await fetchImpl(API_HEALTH_URL);
       if (response.ok) {
         logRuntime(projectRoot, "python_api_ready", {
           attempt: i + 1,
@@ -129,7 +133,7 @@ async function waitForApiReady(projectRoot, retries = 20, intervalMs = 500) {
         });
       }
     }
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    await sleep(intervalMs);
   }
   logRuntime(projectRoot, "python_api_not_ready", {
     retries,
@@ -138,7 +142,20 @@ async function waitForApiReady(projectRoot, retries = 20, intervalMs = 500) {
   return false;
 }
 
+async function ensurePythonApi(projectRoot, options = {}) {
+  const alreadyReady = await waitForApiReady(projectRoot, 1, 0, options);
+  if (alreadyReady) {
+    logRuntime(projectRoot, "python_api_reusing_existing", {
+      url: API_HEALTH_URL
+    });
+    return true;
+  }
+  startPythonApi(projectRoot, options);
+  return waitForApiReady(projectRoot, options.retries || 20, options.intervalMs || 500, options);
+}
+
 module.exports = {
+  ensurePythonApi,
   startPythonApi,
   stopPythonApi,
   waitForApiReady,

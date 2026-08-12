@@ -8,6 +8,7 @@
 3. 启动时自动从持久化文件恢复 CONFIG_STORE。
 """
 
+import json
 import os
 from typing import Optional, Dict
 from llama_index.core.storage.kvstore import SimpleKVStore
@@ -39,6 +40,15 @@ class LocalKVStore(SimpleKVStore):
         """
         super().__init__(data)
 
+    def _pretty_write(self) -> None:
+        """将持久化文件重新以缩进格式写回，便于人工查看。"""
+        if not os.path.exists(self.persist_path):
+            return
+        with open(self.persist_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        with open(self.persist_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
     def put(self, key: str, val: dict) -> None:
         """
         写入键值对并立即持久化。
@@ -49,6 +59,7 @@ class LocalKVStore(SimpleKVStore):
         """
         super().put(key=key, val=val)
         super().persist(persist_path=self.persist_path)
+        self._pretty_write()
 
     def delete(self, key: str) -> bool:
         """
@@ -63,6 +74,7 @@ class LocalKVStore(SimpleKVStore):
         try:
             super().delete(key)
             super().persist(persist_path=self.persist_path)
+            self._pretty_write()
             return True
         except KeyError:
             return False

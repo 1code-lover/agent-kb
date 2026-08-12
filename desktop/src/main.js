@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
-const { startPythonApi, stopPythonApi, waitForApiReady } = require("./python-process");
+const { ensurePythonApi, stopPythonApi } = require("./python-process");
 const { getLogFile, logRuntime } = require("./runtime-log");
 const { buildContentSecurityPolicy, resolveUrlOrigin } = require("./csp");
 
@@ -89,8 +89,7 @@ app.whenReady().then(async () => {
   const logFile = getLogFile(projectRoot);
   logRuntime(projectRoot, "desktop_app_ready", { log_file: logFile });
 
-  startPythonApi(projectRoot);
-  const ready = await waitForApiReady(projectRoot);
+  const ready = await ensurePythonApi(projectRoot);
   if (!ready) {
     logRuntime(projectRoot, "desktop_app_boot_failed", {
       reason: "python_api_not_ready",
