@@ -21,6 +21,9 @@ def _elapsed_ms(started_at: float) -> float:
     return round((time.perf_counter() - started_at) * 1000, 3)
 
 
+EMBEDDING_WARMUP_STALE_AFTER_MS = 120_000.0
+
+
 def _new_embedding_warmup_status() -> dict[str, Any]:
     """创建 embedding 预热状态默认结构。"""
     return {
@@ -33,6 +36,11 @@ def _new_embedding_warmup_status() -> dict[str, Any]:
         "current_model": None,
         "loaded_model": None,
         "is_ready": False,
+        "elapsed_ms": None,
+        "is_stale": False,
+        "stale_after_ms": EMBEDDING_WARMUP_STALE_AFTER_MS,
+        "thread_alive": False,
+        "_started_monotonic": None,
     }
 
 
@@ -84,11 +92,31 @@ class RuntimeState:
         with self.lock:
             current_model = self._get_configured_embedding_model_name()
             status = dict(self.embedding_warmup_status)
+            thread = self._embedding_warmup_thread
+            thread_alive = thread is not None and thread.is_alive()
+            started_monotonic = status.get("_started_monotonic")
+            elapsed_ms = status.get("last_duration_ms")
+            if status.get("state") == "warming" and isinstance(started_monotonic, (int, float)):
+                elapsed_ms = _elapsed_ms(float(started_monotonic))
             status["current_model"] = current_model
             status["loaded_model"] = self.embedding_model_name
             status["is_ready"] = self._embedding_runtime_is_ready()
+            status["elapsed_ms"] = elapsed_ms
+            status["stale_after_ms"] = EMBEDDING_WARMUP_STALE_AFTER_MS
+            status["thread_alive"] = thread_alive
+            status["is_stale"] = (
+                status.get("state") == "warming"
+                and not status["is_ready"]
+                and elapsed_ms is not None
+                and (elapsed_ms >= EMBEDDING_WARMUP_STALE_AFTER_MS or not thread_alive)
+            )
             if status["is_ready"] and status.get("state") in {"idle", "warming"}:
                 status["state"] = "ready"
+                status["is_stale"] = False
+            elif status["is_stale"]:
+                status["state"] = "stale"
+                status["last_error"] = status.get("last_error") or "Embedding warmup exceeded stale threshold."
+            status.pop("_started_monotonic", None)
             return status
 
     def _run_embedding_warmup(self) -> None:
@@ -111,6 +139,10 @@ class RuntimeState:
                     current_model=current_model,
                     loaded_model=self.embedding_model_name,
                     is_ready=False,
+                    elapsed_ms=_elapsed_ms(started_at),
+                    is_stale=False,
+                    thread_alive=False,
+                    _started_monotonic=None,
                 )
                 self._embedding_warmup_thread = None
             return
@@ -125,6 +157,10 @@ class RuntimeState:
                 current_model=current_model,
                 loaded_model=self.embedding_model_name,
                 is_ready=self._embedding_runtime_is_ready(),
+                elapsed_ms=_elapsed_ms(started_at),
+                is_stale=False,
+                thread_alive=False,
+                _started_monotonic=None,
             )
             self._embedding_warmup_thread = None
 
@@ -138,6 +174,10 @@ class RuntimeState:
                     current_model=self._get_configured_embedding_model_name(),
                     loaded_model=self.embedding_model_name,
                     is_ready=True,
+                    elapsed_ms=self.embedding_warmup_status.get("last_duration_ms"),
+                    is_stale=False,
+                    thread_alive=False,
+                    _started_monotonic=None,
                     finished_at=_utc_now_iso(),
                 )
                 return False
@@ -155,6 +195,11 @@ class RuntimeState:
                 current_model=self._get_configured_embedding_model_name(),
                 loaded_model=self.embedding_model_name,
                 is_ready=False,
+                elapsed_ms=None,
+                is_stale=False,
+                stale_after_ms=EMBEDDING_WARMUP_STALE_AFTER_MS,
+                thread_alive=True,
+                _started_monotonic=time.perf_counter(),
             )
             thread = Thread(target=self._run_embedding_warmup, name="thinkrag-embedding-warmup", daemon=True)
             self._embedding_warmup_thread = thread
@@ -244,6 +289,9 @@ class RuntimeState:
                             current_model=embedding_model,
                             loaded_model=self.embedding_model_name,
                             is_ready=False,
+                            is_stale=False,
+                            thread_alive=False,
+                            _started_monotonic=None,
                         )
                     return False
                 with self.lock:
@@ -260,6 +308,9 @@ class RuntimeState:
                     current_model=embedding_model,
                     loaded_model=loaded_embedding_model,
                     is_ready=True,
+                    is_stale=False,
+                    thread_alive=False,
+                    _started_monotonic=None,
                 )
 
             provider_info = CONFIG_STORE.get("current_llm_info") or {}

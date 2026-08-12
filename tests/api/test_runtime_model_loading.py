@@ -271,6 +271,68 @@ def test_get_embedding_warmup_status_does_not_block_during_model_init(monkeypatc
     assert status["is_ready"] is False
 
 
+def test_get_embedding_warmup_status_marks_stale_when_warmup_exceeds_threshold(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """embedding 预热长期未完成时，应暴露 stale 诊断而不是无限 warming。"""
+
+    state = RuntimeState()
+    started_monotonic = 1000.0
+    state._embedding_warmup_thread = _AliveThread()
+    state.embedding_warmup_status.update(
+        {
+            "state": "warming",
+            "attempt_count": 1,
+            "last_error": None,
+            "started_at": "2026-08-12T00:00:00+00:00",
+            "current_model": "bge-small-zh-v1.5",
+            "_started_monotonic": started_monotonic,
+        }
+    )
+    monkeypatch.setattr(runtime_module.time, "perf_counter", lambda: started_monotonic + 121.0)
+    monkeypatch.setattr(state, "_get_configured_embedding_model_name", lambda: "bge-small-zh-v1.5")
+    monkeypatch.setattr(state, "_embedding_runtime_is_ready", lambda: False)
+
+    status = state.get_embedding_warmup_status()
+
+    assert status["state"] == "stale"
+    assert status["is_stale"] is True
+    assert status["elapsed_ms"] == 121000.0
+    assert status["stale_after_ms"] == runtime_module.EMBEDDING_WARMUP_STALE_AFTER_MS
+    assert status["thread_alive"] is True
+    assert status["last_error"] == "Embedding warmup exceeded stale threshold."
+    assert "_started_monotonic" not in status
+
+
+def test_get_embedding_warmup_status_keeps_recent_warmup_non_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """短时间 warming 应继续显示为 warming，并带上 elapsed_ms。"""
+
+    state = RuntimeState()
+    started_monotonic = 1000.0
+    state._embedding_warmup_thread = _AliveThread()
+    state.embedding_warmup_status.update(
+        {
+            "state": "warming",
+            "attempt_count": 1,
+            "last_error": None,
+            "_started_monotonic": started_monotonic,
+        }
+    )
+    monkeypatch.setattr(runtime_module.time, "perf_counter", lambda: started_monotonic + 1.5)
+    monkeypatch.setattr(state, "_get_configured_embedding_model_name", lambda: "bge-small-zh-v1.5")
+    monkeypatch.setattr(state, "_embedding_runtime_is_ready", lambda: False)
+
+    status = state.get_embedding_warmup_status()
+
+    assert status["state"] == "warming"
+    assert status["is_stale"] is False
+    assert status["elapsed_ms"] == 1500.0
+    assert status["thread_alive"] is True
+    assert "_started_monotonic" not in status
+
+
 def test_get_index_manager_caches_instances_per_kb(monkeypatch: pytest.MonkeyPatch) -> None:
     """按 kb_id 缓存不同的 IndexManager，同一 kb_id 应复用实例。"""
 
