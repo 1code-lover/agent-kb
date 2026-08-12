@@ -1,8 +1,8 @@
 {
-  "last_generated_hash": "2b6c74d9c85866caa36b922d409b3b949493f2af",
-  "last_capture_time": "2026-08-12T11:53:23+08:00",
-  "last_story_file": "2026-08-12-feature-cross-domain-table-field-fallback.md",
+  "last_generated_hash": "193f3b1fa8e813c65f58b76fd2436e148afdcd7c",
+  "last_capture_time": "2026-08-12T12:02:48+08:00",
+  "last_story_file": "2026-08-12-feature-embedding-warmup-stale-diagnostics.md",
   "last_prompt_decision": "generated",
   "last_generated_push_hash": null,
-  "last_prompted_hash": "2b6c74d9c85866caa36b922d409b3b949493f2af"
+  "last_prompted_hash": "193f3b1fa8e813c65f58b76fd2436e148afdcd7c"
 }
