@@ -881,7 +881,13 @@ def _classify_systemic_error(item: dict[str, Any]) -> str:
         return "unauthorized"
     if "model_not_found" in text or "model not found" in text or "does not exist" in text or "unsupported model" in text:
         return "model_unavailable"
-    if "timed out" in text or "timeout" in text or "connection refused" in text or "connection reset" in text:
+    if (
+        "timed out" in text
+        or "timeout" in text
+        or "connection refused" in text
+        or "connection reset" in text
+        or "broken pipe" in text
+    ):
         return "network_error"
     status = item.get("http_status")
     if status not in (None, "", 200, "200"):

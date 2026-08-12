@@ -307,6 +307,42 @@ def test_query_expands_brief_answer_with_grounded_image_ocr_clause(chat_service_
     assert result["answer"] == "Knowledge Base is the authorization boundary for image OCR answers."
 
 
+def test_query_answers_markdown_table_fields_from_sources(chat_service_module, monkeypatch, single_kb_scope):
+    """表格字段问答应优先使用 source 中的 Markdown 表格原值。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="推荐 kb_id: `grain-knowledge-base`，主要格式: `text(markdown)`",
+    )
+    sources = [
+        {
+            "file": "readme.md",
+            "text": "\n".join(
+                [
+                    "| 字段 | 内容 |",
+                    "|---|---|",
+                    "| 推荐 kb_id | `grain-knowledge-base` |",
+                    "| 主要语言 | 中文 |",
+                    "| 主要格式 | `.pdf` 157 个，`.docx` 98 个 |",
+                    "| 总体量 | 775744.1 KB |",
+                ]
+            ),
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="粮仓知识库 README 的基本信息表里，推荐 kb_id 和主要格式分别是什么？"),
+        record_history=False,
+    )
+
+    assert "推荐 kb_id是 grain-knowledge-base" in result["answer"]
+    assert "主要格式是 .pdf 157 个，.docx 98 个" in result["answer"]
+
+
 def test_query_keeps_brief_answer_when_source_lacks_grounded_clause(chat_service_module, monkeypatch, single_kb_scope):
     """\u5f53\u6765\u6e90\u91cc\u6ca1\u6709\u53ef\u76f4\u63a5\u652f\u6491\u7684\u5b50\u53e5\u65f6\uff0c\u4e0d\u5e94\u5f3a\u884c\u6269\u5199\u77ed\u7b54\u6848\u3002"""
     _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="\u77e5\u8bc6\u5e93")

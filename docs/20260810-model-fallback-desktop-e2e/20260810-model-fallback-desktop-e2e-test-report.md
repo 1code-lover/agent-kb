@@ -93,6 +93,33 @@ cd webapp && npm run build
 
 另有一次 v1-v6 全量试跑输出到 `cross-domain-kb-eval-report-v11.json`，结果 `1/49 passed`，主要原因是当时当前模型 `qwen-plus-2025-07-28` 已返回 `AllocationQuota.FreeTierOnly`，不作为真实功能回归失败结论。
 
+## 2026-08-12 README 表格字段问答兜底
+
+针对 v6 的 README 表格问答误答，本轮在 `api/services/chat_service.py` 增加 source-backed Markdown 表格字段兜底：当问题明确询问“表里/字段”的具体值，且来源文本包含 Markdown 表格时，服务端会按表格行抽取字段值补齐答案，避免模型把 `file_type=text/markdown` 这类 metadata 误当成正文表格里的“主要格式”。
+
+同时 `scripts/diag_cross_domain_kb_eval.py` 将 `[Errno 32] Broken pipe` 归类为 `network_error`，让 preflight/summary 更明确地区分模型链路断流和业务泛化失败。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_chat_service.py tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`50 passed, 7 warnings`。
+
+真实 v6 extra 复跑命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --timeout 60 \
+  --preflight \
+  --cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-after-table-fallback.json
+```
+
+结果：preflight 提前中止，首个 case 在 60 秒内 `timed out`，报告中的 `systemic_failure_summary.dominant_error_kind=network_error`；重启 API 后 `/api/health` 显示 embedding warmup 仍为 `warming`。因此本次真实 v6 结果记录为模型/运行时链路限制，不作为业务回归失败结论，待稳定通用模型和 runtime ready 后继续复跑。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。

@@ -80,6 +80,10 @@ _ANSWER_EXPANSION_HINTS = (
 _ANSWER_EDGE_STRIP_CHARS = "\"'\u201c\u201d\u2018\u2019()[]{}<> "
 _ANSWER_TRAILING_PUNCT_CHARS = "\u3002\uff01\uff1f!?;?,:?"
 _ANSWER_LEADING_PUNCT_CHARS = "\uff1a:\uff0c,\uff1b; "
+_MARKDOWN_TABLE_SEPARATOR_RE = re.compile(r"^:?-{2,}:?$")
+_TABLE_FIELD_SPLIT_RE = re.compile(r"[,，、/]+|(?:\s+(?:and|or)\s+)|\s*[和及与]\s*")
+_TABLE_QUESTION_MARKERS = ("表", "字段", "field", "table")
+_TABLE_VALUE_QUESTION_MARKERS = ("是什么", "分别是什么", "what", "which")
 
 _FOLLOW_UP_EN_PATTERNS = (
     re.compile(r"\bwhat about\b"),
@@ -238,6 +242,98 @@ def _normalize_expanded_answer(candidate: str) -> str:
     return cleaned
 
 
+def _split_markdown_table_row(line: str) -> list[str]:
+    """拆分 Markdown 表格行，过滤分隔线。"""
+    raw = str(line or "").strip()
+    if not raw.startswith("|") or "|" not in raw[1:]:
+        return []
+    cells = [cell.strip().replace("`", "") for cell in raw.strip("|").split("|")]
+    if len(cells) < 2:
+        return []
+    if all(_MARKDOWN_TABLE_SEPARATOR_RE.match(cell.replace(" ", "")) for cell in cells if cell):
+        return []
+    return cells
+
+
+def _extract_table_field_names(question: str) -> list[str]:
+    """从“表里某些字段是什么”类问题中抽取字段名。"""
+    raw = str(question or "").strip()
+    lowered = raw.lower()
+    if not raw or not any(marker in lowered for marker in _TABLE_QUESTION_MARKERS):
+        return []
+    if not any(marker in lowered for marker in _TABLE_VALUE_QUESTION_MARKERS):
+        return []
+
+    focus = raw
+    if "，" in focus:
+        focus = focus.rsplit("，", 1)[-1]
+    elif "," in focus:
+        focus = focus.rsplit(",", 1)[-1]
+    for marker in ("分别是什么", "是什么", "what are", "what is", "which are", "which is"):
+        focus = re.sub(re.escape(marker), " ", focus, flags=re.IGNORECASE)
+    for marker in ("表里", "表中", "表的", "field", "fields", "table"):
+        focus = focus.replace(marker, " ")
+
+    fields: list[str] = []
+    for item in _TABLE_FIELD_SPLIT_RE.split(focus):
+        normalized = item.strip().strip(" ?？。:：")
+        if len(normalized) >= 2 and normalized not in {"基本信息", "内容"}:
+            fields.append(normalized)
+    return fields
+
+
+def _extract_markdown_table_values(text: str, fields: list[str]) -> dict[str, str]:
+    """从 Markdown 表格中按字段名抽取对应值。"""
+    if not fields:
+        return {}
+    values: dict[str, str] = {}
+    wanted = {field: _tokenize_text(field) for field in fields}
+    for line in str(text or "").splitlines():
+        cells = _split_markdown_table_row(line)
+        if len(cells) < 2:
+            continue
+        label = cells[0]
+        label_tokens = _tokenize_text(label)
+        for field, field_tokens in wanted.items():
+            if field in values:
+                continue
+            token_overlap = field_tokens & label_tokens
+            weak_match = len(token_overlap) >= 2
+            if field == label or field in label or label in field or weak_match:
+                values[field] = cells[1].strip()
+    return values
+
+
+def _maybe_answer_table_fields_from_sources(question: str, answer_text: str, sources: list[dict[str, Any]]) -> str:
+    """表格字段问答命中 source 时，优先用表格原值补齐答案。"""
+    fields = _extract_table_field_names(question)
+    if not fields or not sources:
+        return answer_text
+
+    collected: dict[str, str] = {}
+    for source in sources:
+        for support_text in _iter_source_support_texts(source):
+            values = _extract_markdown_table_values(support_text, fields)
+            for field in fields:
+                value = values.get(field)
+                if value and field not in collected:
+                    collected[field] = value
+        if len(collected) == len(fields):
+            break
+
+    if not collected:
+        return answer_text
+
+    normalized_answer = str(answer_text or "")
+    if all(value and value in normalized_answer for value in collected.values()):
+        return answer_text
+
+    parts = [f"{field}是 {collected[field]}" for field in fields if collected.get(field)]
+    if not parts:
+        return answer_text
+    return "，".join(parts) + "。"
+
+
 def _maybe_expand_brief_answer_from_sources(question: str, answer_text: str, sources: list[dict[str, Any]]) -> str:
     """\u5f53\u56de\u7b54\u8fc7\u77ed\u4e14\u6765\u6e90\u53ef\u76f4\u63a5\u652f\u6491\u65f6\uff0c\u7528\u6700\u5c0f\u5b8c\u6574\u53e5\u66ff\u6362\u5b64\u7acb\u540d\u8bcd\u3002"""
     if not sources or not _question_requests_entity(question) or not _answer_is_brief_entity(answer_text):
@@ -372,6 +468,7 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
     if _answer_is_refusal_like(answer_text):
         sources = _prune_sources_for_refusal(request.question, sources)
     else:
+        answer_text = _maybe_answer_table_fields_from_sources(request.question, answer_text, sources)
         answer_text = _maybe_expand_brief_answer_from_sources(request.question, answer_text, sources)
 
     if record_history:

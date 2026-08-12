@@ -820,6 +820,19 @@ def test_summarize_flags_systemic_model_failures() -> None:
     assert summary["sample_case_ids"] == ["quota-0", "quota-1", "quota-2", "quota-3", "quota-4"]
 
 
+def test_classify_systemic_error_treats_broken_pipe_as_network_error() -> None:
+    """Broken pipe 应归入网络/模型链路错误，而不是泛泛 api_error。"""
+
+    result = {
+        "checks": {"http_status_ok": False},
+        "http_status": 400,
+        "error": '{"code":400,"message":"[Errno 32] Broken pipe"}',
+        "response_message": '{"message":"[Errno 32] Broken pipe"}',
+    }
+
+    assert cross_eval._classify_systemic_error(result) == "network_error"
+
+
 def test_summarize_does_not_flag_sparse_http_failures_as_systemic() -> None:
     """少量单点 HTTP 失败不应被归因为系统性模型故障。"""
 
