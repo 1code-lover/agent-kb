@@ -82,6 +82,12 @@ ZH_TITLE_ENHANCE = False
 # 嵌入模型配置
 # ============================================================
 HF_ENDPOINT = "https://hf-mirror.com"
+EMBEDDING_ALLOW_REMOTE_DOWNLOAD = os.getenv("EMBEDDING_ALLOW_REMOTE_DOWNLOAD", "0").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 DEFAULT_EMBEDDING_MODEL = "bge-small-zh-v1.5"
 EMBEDDING_MODEL_PATH = {

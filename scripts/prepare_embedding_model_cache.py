@@ -21,7 +21,7 @@ def _normalize_local_path(local_path: str | None) -> Path | None:
 
 def prepare_embedding_model_cache(model_name: str, *, download: bool = False) -> dict[str, Any]:
     """诊断或下载指定 embedding 模型到 localmodels。"""
-    diagnostics = get_embedding_model_diagnostics(model_name)
+    diagnostics = get_embedding_model_diagnostics(model_name, allow_remote_download=download)
     result: dict[str, Any] = {
         "model_name": model_name,
         "download_requested": download,
@@ -61,7 +61,7 @@ def prepare_embedding_model_cache(model_name: str, *, download: bool = False) ->
         resume_download=True,
     )
     result["downloaded"] = True
-    result["after"] = get_embedding_model_diagnostics(model_name)
+    result["after"] = get_embedding_model_diagnostics(model_name, allow_remote_download=download)
     return result
 
 

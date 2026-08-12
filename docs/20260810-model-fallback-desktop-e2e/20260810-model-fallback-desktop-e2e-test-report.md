@@ -233,7 +233,30 @@ curl http://127.0.0.1:18084/api/health
 /opt/miniconda3/envs/agent-kb/bin/python -m scripts.prepare_embedding_model_cache --download
 ```
 
-结果：下载未成功，`huggingface_hub.snapshot_download` 在访问 HuggingFace mirror 时触发 `ConnectTimeout: [Errno 60] Operation timed out`，并因为本地没有可用 snapshot 抛出 `LocalEntryNotFoundError`。复跑 dry-run 仍显示 `local_path_exists=false`、`load_source=remote`、`downloaded=false`、`skipped=true`。因此当前状态是：脚本和诊断能力已完成，但本机 embedding 本地缓存尚未准备好；在解决网络/代理/离线模型来源前，不建议重启主用 18080 API 去跑新代码全量 v1-v6 suite，以免再次进入长时间 cold start。
+结果：下载未成功，`huggingface_hub.snapshot_download` 在访问 HuggingFace mirror 时触发 `ConnectTimeout: [Errno 60] Operation timed out`，并因为本地没有可用 snapshot 抛出 `LocalEntryNotFoundError`。复跑 dry-run 仍显示 `local_path_exists=false`、`load_source=remote`、`downloaded=false`、`skipped=true`。因此当前状态是：脚本和诊断能力已完成，但本机 embedding 本地缓存尚未准备好。
+
+随后继续补运行时保护：默认禁止 API/桌面启动期 embedding 初始化走远程下载，只有显式设置 `EMBEDDING_ALLOW_REMOTE_DOWNLOAD=1` 才允许回退远程。缓存缺失时 `create_embedding_model` 会快速失败并清空 `Settings._embed_model`，避免 LlamaIndex 把 `None` 转成 `MockEmbedding` 后误报可用。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest \
+  tests/test_embedding_model_diagnostics.py \
+  tests/api/test_health_route.py \
+  tests/api/test_runtime_model_loading.py \
+  tests/scripts/test_prepare_embedding_model_cache.py -q
+```
+
+结果：`44 passed, 3 warnings`。
+
+临时 API 实测：
+
+```bash
+KB_API_PORT=18084 /opt/miniconda3/envs/agent-kb/bin/python run_api.py
+curl http://127.0.0.1:18084/api/health
+```
+
+结果：`embedding_warmup.state=failed`、`is_ready=false`、`embedding_diagnostics.allow_remote_download=false`、`local_path_exists=false`，临时 API 秒级返回诊断，不再等待到 120 秒 stale。全量 v1-v6 suite 仍需本地缓存准备好或显式允许远程下载后再复跑。
 
 ## 2026-08-12 模型选择即时探活
 
@@ -380,7 +403,7 @@ notarization indicates this code has been revoked
 - `desktop` 依赖树仍有 npm audit 风险：`8 vulnerabilities`，其中 `7 high`、`1 critical`。本轮优先解决 macOS 公证撤销导致的启动失败，后续应单独安排桌面依赖安全升级。
 - Electron CSP 已补到主进程响应头，并允许本地 API、Vite dev websocket 和文件资源；packaged app 已完成启动和首页 API 请求复核，后续仍需在签名/公证后的安装包中复核上传、preview 和更多静态资源加载。
 - macOS release preflight、hardened runtime 与 entitlements 已补充，但本机未配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 且未发现有效 Developer ID 证书，严格签名/公证预检和真实 notarization 尚未执行。
-- 本机 `localmodels/BAAI/bge-small-zh-v1.5` 仍不存在；显式预下载因 HuggingFace mirror 连接超时失败。当前 18080 API 旧进程已 ready，可继续给桌面/Web 配置模型和做手工验证；但要复跑加载新代码的全量 v1-v6 suite，建议先解决 embedding 本地缓存或给初始化加硬超时隔离。
+- 本机 `localmodels/BAAI/bge-small-zh-v1.5` 仍不存在；显式预下载因 HuggingFace mirror 连接超时失败。新代码已默认禁止 runtime 远程下载并快速失败，当前 18080 API 旧进程已 ready，可继续给桌面/Web 配置模型和做手工验证；但要复跑加载新代码的全量 v1-v6 suite，仍需先解决 embedding 本地缓存或显式允许远程下载。
 
 ## 2026-08-10 增量复核
 
