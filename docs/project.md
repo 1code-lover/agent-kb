@@ -133,7 +133,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 - **发布入口已经串起配置预检和后置校验**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight`、`electron-builder --mac`、`verify:package` 和 `verify:mac-release`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测，`verify-mac-release` 会验证 codesign、Gatekeeper 和 stapler。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
 - **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；`/api/model/select` 也会在保存模型后即时探活并把失败写入 `model_health`，桌面启动时若发现 `18080` API 已可用会复用现有服务，不再额外拉起一个失败的 API 子进程；配置落盘已改为缩进 JSON，方便人工恢复模型配置时核对。下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
-- **继续收口 embedding 冷启动体验**：当前 API/Web 可用，embedding 最终 ready，但本机冷启动曾耗时约 626 秒；健康检查已补 `elapsed_ms` / stale 状态和 `embedding_diagnostics`，能提示本地缓存缺失、远程 HuggingFace mirror 回退和预下载建议。2026-08-12 直接执行 `scripts.prepare_embedding_model_cache --download` 仍因 `ConnectTimeout` 失败；当前 runtime 已默认禁用启动期远程下载，让缓存缺失快速失败。下一步应把该诊断接入前端/诊断脚本，并解决模型缓存来源或下载代理后再复跑完整评测。
+- **继续收口 embedding 冷启动体验**：当前 API/Web 可用，embedding 最终 ready，但本机冷启动曾耗时约 626 秒；健康检查已补 `elapsed_ms` / stale 状态和 `embedding_diagnostics`，能提示本地缓存缺失、远程 HuggingFace mirror 回退和预下载建议。2026-08-12 直接执行 `scripts.prepare_embedding_model_cache --download` 仍因 `ConnectTimeout` 失败；当前 runtime 已默认禁用启动期远程下载，让缓存缺失快速失败，脚本也已支持 `--source-dir` 从已有本地模型目录导入。下一步应解决模型缓存来源或下载代理后再复跑完整评测。
 - **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本、`--suite v1-v6` 一键追加 v1-v6 外部真实样本、`turns` 多轮追问用例、来源文件级断言、evidence 文本级断言、失败检查项归因汇总、超时归一、逐 case 进度输出和耗时诊断；v6 表格、长多轮和更多跨库拒答样本已在 runtime ready 后定向跑到 `4/4 cases`、`6/6 turns`。当前 v1-v6 全量 suite 在临时 `qwen-math-turbo` 下为 `26/49 passed`，下一步应优先修正正向 expected terms / source grounding 失败，或恢复更合适的通用模型后复跑。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **补发布后的桌面安装体验验证**：当前已验证 packaged app 主进程、API 和前端加载；签名/公证后还需要覆盖首次安装、模型重新配置、文件上传/导入、preview、引用来源和跨 KB 隔离。
@@ -429,6 +429,14 @@ cd webapp && npm run build
 - `cd webapp && npm run build`：通过。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/test_diag_roundtrip_support.py tests/scripts/test_diag_cross_domain_kb_eval.py -q`：`40 passed, 1 warning`。
 
+### 5.30 2026-08-12 embedding 缓存准备工具增强
+
+- 本机缓存复核：`localmodels/` 为空，`~/.cache/huggingface` 仅发现 `BAAI/bge-reranker-base`，未发现 `BAAI/bge-small-zh-v1.5` 可复用 snapshot；因此仍不能直接复跑新 API 全量 v1-v6 suite。
+- `scripts.prepare_embedding_model_cache` 新增 `--source-dir`，可把已有本地模型目录复制到 `localmodels/BAAI/bge-small-zh-v1.5`，后续用户从其他机器、离线包或可用镜像拿到模型后无需再依赖 HuggingFace 在线下载。
+- `--download` 路径改为捕获 `snapshot_download` 异常并输出 JSON `error`，不再抛出长 traceback；本机复跑仍返回 `Download failed: LocalEntryNotFoundError ... ConnectTimeout`，`local_path_exists=false`。
+- `KB_API_PORT=18084 /opt/miniconda3/envs/agent-kb/bin/python run_api.py` 后请求 `/api/health`：继续秒级返回 `embedding_warmup.state=failed`、`allow_remote_download=false`、`local_path_exists=false`，避免 cold start 卡住。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_prepare_embedding_model_cache.py tests/test_embedding_model_diagnostics.py tests/api/test_health_route.py tests/api/test_runtime_model_loading.py tests/test_diag_roundtrip_support.py -q`：`58 passed, 3 warnings`。
+
 ---
 
 ## 6. 已知问题和限制
@@ -438,7 +446,7 @@ cd webapp && npm run build
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
 - **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 或 `--suite v1-v6` 追加外部真实样本、`turns` 多轮追问样本、来源文件级断言和 evidence 文本级断言；当前 v1-v6 全量 suite 暴露出正向泛化仍不足，但负向隔离和 contract 已稳定。下一步应先准备本地 embedding 缓存或显式允许远程下载，再复跑 source-backed 精确短语修复后的全量 suite，之后继续处理 UTF-16/extensionless、长多轮和 grounding 失败。
-- **embedding 初始化仍需进一步收口**：2026-08-12 复核发现默认 `bge-small-zh-v1.5` 初始化冷启动耗时约 626 秒，独立进程 45 秒内不会返回；健康检查已能标记 stale，并补充本地缓存/远程下载诊断和预下载建议。当前新增 `scripts.prepare_embedding_model_cache` 可显式预下载本地缓存，但本机下载实测因 HuggingFace `ConnectTimeout` 失败，`local_path_exists=false` 仍未解除；runtime 已默认禁用远程下载并快速失败，剩余问题是准备模型缓存或提供可用下载代理。
+- **embedding 初始化仍需进一步收口**：2026-08-12 复核发现默认 `bge-small-zh-v1.5` 初始化冷启动耗时约 626 秒，独立进程 45 秒内不会返回；健康检查已能标记 stale，并补充本地缓存/远程下载诊断和预下载建议。当前新增 `scripts.prepare_embedding_model_cache` 可显式预下载或通过 `--source-dir` 导入本地缓存，但本机下载实测因 HuggingFace `ConnectTimeout` 失败，且本机未发现可复用的 `bge-small-zh-v1.5` 全局缓存，`local_path_exists=false` 仍未解除；runtime 已默认禁用远程下载并快速失败，剩余问题是准备模型缓存或提供可用下载代理。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。

@@ -17,6 +17,8 @@ def test_prepare_embedding_model_cache_dry_run_reports_missing_cache(monkeypatch
     result = prepare_cache.prepare_embedding_model_cache("bge-small-zh-v1.5", download=False)
 
     assert result["download_requested"] is False
+    assert result["source_dir"] is None
+    assert result["imported_from_source"] is False
     assert result["downloaded"] is False
     assert result["skipped"] is True
     assert result["before"]["local_path_exists"] is False
@@ -74,3 +76,54 @@ def test_prepare_embedding_model_cache_downloads_to_project_localmodels(monkeypa
             "resume_download": True,
         }
     ]
+
+
+def test_prepare_embedding_model_cache_imports_from_source_dir(monkeypatch, tmp_path: Path) -> None:
+    """传入 source_dir 时应从本地目录复制模型缓存。"""
+
+    source_dir = tmp_path / "snapshot"
+    source_dir.mkdir()
+    (source_dir / "config.json").write_text("{}", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    result = prepare_cache.prepare_embedding_model_cache(
+        "bge-small-zh-v1.5",
+        source_dir=str(source_dir),
+    )
+
+    local_model = tmp_path / "localmodels" / "BAAI" / "bge-small-zh-v1.5"
+    assert result["imported_from_source"] is True
+    assert result["downloaded"] is False
+    assert result["after"]["local_path_exists"] is True
+    assert (local_model / "config.json").read_text(encoding="utf-8") == "{}"
+
+
+def test_prepare_embedding_model_cache_reports_missing_source_dir(monkeypatch, tmp_path: Path) -> None:
+    """source_dir 不存在时应返回结构化 error。"""
+
+    monkeypatch.chdir(tmp_path)
+
+    result = prepare_cache.prepare_embedding_model_cache(
+        "bge-small-zh-v1.5",
+        source_dir=str(tmp_path / "missing"),
+    )
+
+    assert result["imported_from_source"] is False
+    assert result["error"].startswith("Source import failed: FileNotFoundError")
+
+
+def test_prepare_embedding_model_cache_reports_download_failure(monkeypatch, tmp_path: Path) -> None:
+    """下载异常应进入 JSON error，而不是抛出 traceback。"""
+
+    def fake_snapshot_download(**kwargs):
+        raise TimeoutError("mirror timeout")
+
+    fake_hf = types.SimpleNamespace(snapshot_download=fake_snapshot_download)
+    monkeypatch.setitem(sys.modules, "huggingface_hub", fake_hf)
+    monkeypatch.chdir(tmp_path)
+
+    result = prepare_cache.prepare_embedding_model_cache("bge-small-zh-v1.5", download=True)
+
+    assert result["downloaded"] is False
+    assert result["after"]["local_path_exists"] is False
+    assert result["error"] == "Download failed: TimeoutError: mirror timeout"
