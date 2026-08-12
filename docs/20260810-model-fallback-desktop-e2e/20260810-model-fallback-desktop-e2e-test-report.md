@@ -120,6 +120,36 @@ cd webapp && npm run build
 
 结果：preflight 提前中止，首个 case 在 60 秒内 `timed out`，报告中的 `systemic_failure_summary.dominant_error_kind=network_error`；重启 API 后 `/api/health` 显示 embedding warmup 仍为 `warming`。因此本次真实 v6 结果记录为模型/运行时链路限制，不作为业务回归失败结论，待稳定通用模型和 runtime ready 后继续复跑。
 
+## 2026-08-12 embedding 缓存诊断与 v6 复跑
+
+本轮继续收口上一次 v6 被 runtime warmup 拖住的问题。`api/runtime.py` 已能用 `elapsed_ms`、`is_stale`、`thread_alive` 和 `stale_after_ms` 标记长期预热；本次进一步在 `server/models/embedding.py` 增加 `get_embedding_model_diagnostics()`，并让 `/api/health` 返回 `embedding_diagnostics`，用于说明当前 embedding 会从本地 `localmodels/` 加载还是回退到 HuggingFace mirror，以及本地缓存缺失时的预下载建议。
+
+注意：当前 18080 上运行的是改动前启动的 API 进程，因此实时 curl 暂时还不会包含新增的 `embedding_diagnostics` 字段；该字段已由 TestClient 路径覆盖，API 下次启动后生效。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest \
+  tests/test_embedding_model_diagnostics.py \
+  tests/api/test_health_route.py \
+  tests/api/test_runtime_model_loading.py -q
+```
+
+结果：`38 passed, 3 warnings`。覆盖本地缓存存在、缓存缺失远程回退、未知 embedding 模型、health 返回 embedding 诊断，以及预热 stale 状态。
+
+runtime ready 后复跑 v6 extra：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --timeout 60 \
+  --preflight \
+  --cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-after-embedding-diagnostics.json
+```
+
+结果：`4/4 passed`、逐轮 `6/6 passed`，`systemic_failure_summary.suspected=false`。README 表格字段、mixed batch 三轮追问、桌面对 grain README 的负向隔离、图片 OCR 对 mixed rollback approval 的负向隔离均通过。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。

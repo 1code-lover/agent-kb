@@ -11,6 +11,7 @@ from typing import Any
 from fastapi import APIRouter
 
 from api.runtime import runtime_state
+from server.models.embedding import get_embedding_model_diagnostics
 from server.readers.image_ocr import get_ocr_warmup_status
 from utils.api_response import success_response
 
@@ -84,11 +85,13 @@ def _build_runtime_metadata() -> dict[str, Any]:
 @router.get("/health")
 def health() -> dict:
     """返回服务健康状态、模型/OCR 预热状态、导入依赖摘要与运行时信息。"""
+    embedding_warmup = runtime_state.get_embedding_warmup_status()
     return success_response(
         {
             "status": "ok",
             "runtime": _build_runtime_metadata(),
-            "embedding_warmup": runtime_state.get_embedding_warmup_status(),
+            "embedding_warmup": embedding_warmup,
+            "embedding_diagnostics": get_embedding_model_diagnostics(embedding_warmup.get("current_model")),
             "ocr_warmup": get_ocr_warmup_status(),
             "import_capabilities": _build_import_capabilities(),
         }

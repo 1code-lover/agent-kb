@@ -102,6 +102,16 @@ def test_health_returns_embedding_ocr_and_runtime_status(monkeypatch) -> None:
     )
     monkeypatch.setattr(
         health_router,
+        "get_embedding_model_diagnostics",
+        lambda model_name: {
+            "model_name": model_name,
+            "load_source": "local",
+            "local_path_exists": True,
+            "recommendations": [],
+        },
+    )
+    monkeypatch.setattr(
+        health_router,
         "_build_runtime_metadata",
         lambda: {
             "pid": 12345,
@@ -127,6 +137,12 @@ def test_health_returns_embedding_ocr_and_runtime_status(monkeypatch) -> None:
     assert payload["embedding_warmup"]["state"] == "ready"
     assert payload["embedding_warmup"]["is_ready"] is True
     assert payload["embedding_warmup"]["current_model"] == "bge-small-zh-v1.5"
+    assert payload["embedding_diagnostics"] == {
+        "model_name": "bge-small-zh-v1.5",
+        "load_source": "local",
+        "local_path_exists": True,
+        "recommendations": [],
+    }
     assert payload["ocr_warmup"]["state"] == "warming"
     assert payload["ocr_warmup"]["is_ready"] is False
     assert payload["import_capabilities"]["pdf_text_extraction"]["ready"] is False

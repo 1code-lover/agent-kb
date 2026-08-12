@@ -125,7 +125,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `bd4a190 feat(model): probe selected model health`
   - `8e9257f chore: update dev story capture state`
   - `e084e4c feat(eval): expand cross-domain v6 diagnostics`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`，正式发布会在打包后继续检查 packaged runtime contents、codesign、Gatekeeper assess 和 stapler ticket。`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力、多轮 `turns` 评测、来源文件级断言、evidence 文本断言、失败检查项归因汇总和耗时诊断后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条 + v3 多轮 3 条 + v4 source-grounding 5 条 + v5 evidence-text 4 条真实业务追加样本合计 `45/45 passed`，逐轮统计 `48/48 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`multi-turn`、`follow-up`、`source-grounding`、`evidence-text`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁；报告新增 `failure_check_summary`、`failure_case_summary` 和 `duration_summary`，当前稳定基线失败归因为空，最慢 case 为 `grain-negative-utf8-exact-boundary`。2026-08-12 已针对 v6 README 表格误答补充 source-backed Markdown 表格字段兜底，并把 `Broken pipe`/timeout 等断流归入 `network_error`，便于区分模型/网络链路问题和业务泛化退化；v6 定向复核仍受当前模型与 embedding warmup 状态影响，需要在稳定通用模型 ready 后复跑。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`，正式发布会在打包后继续检查 packaged runtime contents、codesign、Gatekeeper assess 和 stapler ticket。`npm run build` 的 macOS 路径也会先跑发布配置校验和非严格预检，`verify-package` 已有单测覆盖并能发现 `mac-arm64` / `mac` / `mac-universal` 等产物布局，避免打包与产物校验入口绕过门禁，也避免旧架构产物残留时误选错误 artifact。2026-08-11 新增外部 extra cases 追加能力、多轮 `turns` 评测、来源文件级断言、evidence 文本断言、失败检查项归因汇总和耗时诊断后，默认 23 条基线 + v1 外部 4 条 + v2 外部 6 条 + v3 多轮 3 条 + v4 source-grounding 5 条 + v5 evidence-text 4 条真实业务追加样本合计 `45/45 passed`，逐轮统计 `48/48 passed`，并按 tag 维度切出了 `long-question`、`multi-hop`、`multi-turn`、`follow-up`、`source-grounding`、`evidence-text`、`ocr`、`scan`、`refusal` 和 `cross-kb-isolation` 的细分门禁；报告新增 `failure_check_summary`、`failure_case_summary` 和 `duration_summary`，当前稳定基线失败归因为空，最慢 case 为 `grain-negative-utf8-exact-boundary`。2026-08-12 已针对 v6 README 表格误答补充 source-backed Markdown 表格字段兜底，并把 `Broken pipe`/timeout 等断流归入 `network_error`；runtime ready 后 v6 定向复跑 `4/4 cases`、`6/6 turns` 全部通过。健康检查也补齐 embedding 本地缓存/远程下载诊断，便于解释冷启动慢或模型缓存缺失。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
@@ -133,8 +133,8 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 - **发布入口已经串起配置预检和后置校验**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight`、`electron-builder --mac`、`verify:package` 和 `verify:mac-release`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测，`verify-mac-release` 会验证 codesign、Gatekeeper 和 stapler。
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
 - **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；`/api/model/select` 也会在保存模型后即时探活并把失败写入 `model_health`，桌面启动时若发现 `18080` API 已可用会复用现有服务，不再额外拉起一个失败的 API 子进程；配置落盘已改为缩进 JSON，方便人工恢复模型配置时核对。下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
-- **先把 runtime ready 状态收口，再复跑 v6**：当前 API 和 Web 可访问，但 2026-08-12 复核发现默认 embedding 初始化在独立进程 45 秒内未返回，API `/api/health` 的 `embedding_warmup` 长时间停留在 `warming`；本轮已补 `elapsed_ms`、`is_stale`、`thread_alive` 和 `stale_after_ms` 诊断。下一步应继续给 embedding 初始化补超时/本地缓存提示/恢复路径，再恢复通用模型额度或配置一个可用通用模型，最后复跑 v1-v6 全量。
-- **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本、`turns` 多轮追问用例、来源文件级断言、evidence 文本级断言、失败检查项归因汇总、超时归一和耗时诊断，当前默认 23 条 + 外部 4 条 + 外部 6 条 + 多轮 3 条 + source-grounding 5 条 + evidence-text 4 条达到 `45/45 passed`、逐轮 `48/48 passed`；v6 已补表格、长多轮和更多跨库拒答样本，但还不是正式门禁，下一阶段应在稳定模型上打绿后再纳入全量基线。
+- **继续收口 embedding 冷启动体验**：当前 API/Web 可用，embedding 最终 ready，但本机冷启动耗时约 626 秒；健康检查已补 `elapsed_ms` / stale 状态和 `embedding_diagnostics`，能提示本地缓存缺失、远程 HuggingFace mirror 回退和预下载建议。下一步应把诊断接入前端或诊断脚本，并评估是否需要用独立进程给 HuggingFaceEmbedding 初始化加硬超时。
+- **继续扩大真实业务知识库评测**：跨领域门禁已支持 `--extra-cases` 追加外部 JSON 样本、`turns` 多轮追问用例、来源文件级断言、evidence 文本级断言、失败检查项归因汇总、超时归一和耗时诊断，当前默认 23 条 + 外部 4 条 + 外部 6 条 + 多轮 3 条 + source-grounding 5 条 + evidence-text 4 条达到 `45/45 passed`、逐轮 `48/48 passed`；v6 表格、长多轮和更多跨库拒答样本已在 runtime ready 后定向跑到 `4/4 cases`、`6/6 turns`，下一阶段应纳入 v1-v6 全量门禁并继续扩真实资料样本。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **补发布后的桌面安装体验验证**：当前已验证 packaged app 主进程、API 和前端加载；签名/公证后还需要覆盖首次安装、模型重新配置、文件上传/导入、preview、引用来源和跨 KB 隔离。
 
@@ -390,6 +390,13 @@ cd webapp && npm run build
 - `api/runtime.py` 的 embedding 预热状态新增 `elapsed_ms`、`is_stale`、`stale_after_ms` 和 `thread_alive`；当后台预热超过 120 秒或线程已不存活但状态仍是 warming 时，健康检查对外显示 `state=stale`，避免长期误读为正常预热中。
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_runtime_model_loading.py -q`：`32 passed, 2 warnings`。
 
+### 5.25 2026-08-12 embedding 缓存诊断与 v6 复跑
+
+- `server/models/embedding.py` 新增 `get_embedding_model_diagnostics()`，返回当前 embedding 名称、支持列表、HuggingFace 模型路径、本地 `localmodels/` 路径、缓存是否存在、加载来源、HF mirror 和预下载建议。
+- `/api/health` 新增 `embedding_diagnostics` 字段。注意：当前 18080 运行中的旧 API 进程尚未重启，因此实时 curl 暂不包含该新字段；代码和 TestClient 路径已通过测试，API 下次启动后生效。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/test_embedding_model_diagnostics.py tests/api/test_health_route.py tests/api/test_runtime_model_loading.py -q`：`38 passed, 3 warnings`。
+- runtime ready 后复跑 v6 extra：`/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval --api-base http://127.0.0.1:18080 --timeout 60 --preflight --cases docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-after-embedding-diagnostics.json`，结果 `4/4 passed`、逐轮 `6/6 passed`，`systemic_failure_summary.suspected=false`。
+
 ---
 
 ## 6. 已知问题和限制
@@ -398,8 +405,8 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 追加外部真实样本、`turns` 多轮追问样本、来源文件级断言和 evidence 文本级断言；当前稳定 v10 报告为 `45/45 passed`，逐轮 `48/48 passed`。v6 扩面样本仍处于试跑阶段，当前临时模型下为 `2/4 passed`。
-- **embedding 初始化仍需进一步收口**：2026-08-12 复核发现默认 `bge-small-zh-v1.5` 初始化在独立进程 45 秒内未返回，API 预热也会长期停在 warming；健康检查已能标记 stale，但下一步还需要补初始化超时、模型缓存/下载诊断和用户可执行的恢复提示。
+- **粮仓知识库检索质量已收口，下一步转向扩样本泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 追加外部真实样本、`turns` 多轮追问样本、来源文件级断言和 evidence 文本级断言；当前稳定 v10 报告为 `45/45 passed`，逐轮 `48/48 passed`。v6 扩面样本在 runtime ready 后已定向跑绿，下一步应纳入全量门禁。
+- **embedding 初始化仍需进一步收口**：2026-08-12 复核发现默认 `bge-small-zh-v1.5` 初始化冷启动耗时约 626 秒，独立进程 45 秒内不会返回；健康检查已能标记 stale，并补充本地缓存/远程下载诊断和预下载建议，但还没有对 HuggingFaceEmbedding 初始化做硬超时隔离。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。

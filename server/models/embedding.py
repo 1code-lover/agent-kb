@@ -15,6 +15,50 @@ from config import DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODEL_PATH, MODEL_DIR
 from server.utils.hf_mirror import use_hf_mirror
 
 
+def get_embedding_model_diagnostics(model_name=DEFAULT_EMBEDDING_MODEL):
+    """
+    返回 embedding 模型加载前的路径与下载诊断。
+
+    Args:
+        model_name: 配置中的 embedding 模型名称键。
+
+    Returns:
+        dict: 当前模型映射、本地缓存路径、远程回退和建议动作。
+    """
+    import config
+
+    known_models = list(EMBEDDING_MODEL_PATH.keys())
+    model_path = EMBEDDING_MODEL_PATH.get(model_name)
+    local_path = None
+    local_path_exists = False
+    if model_path and MODEL_DIR is not None:
+        local_path = os.path.join(".", MODEL_DIR, model_path)
+        local_path_exists = os.path.exists(local_path)
+
+    allow_remote = not local_path_exists
+    recommendations = []
+    if model_name not in EMBEDDING_MODEL_PATH:
+        recommendations.append(f"Select one of supported embedding models: {', '.join(known_models)}.")
+    elif not local_path_exists:
+        recommendations.append(
+            f"Local embedding model cache is missing at {local_path}; first startup may download {model_path} from HuggingFace mirror."
+        )
+        recommendations.append("Pre-download the model into localmodels/ to avoid slow or hanging cold starts.")
+
+    return {
+        "model_name": model_name,
+        "known_models": known_models,
+        "hf_model_path": model_path,
+        "model_dir": MODEL_DIR,
+        "local_path": local_path,
+        "local_path_exists": local_path_exists,
+        "load_source": "local" if local_path_exists else "remote",
+        "allow_remote_download": allow_remote,
+        "hf_endpoint": getattr(config, "HF_ENDPOINT", ""),
+        "recommendations": recommendations,
+    }
+
+
 def create_embedding_model(model_name=DEFAULT_EMBEDDING_MODEL):
     """
     创建 embedding 模型并注册到全局 Settings。
@@ -31,12 +75,10 @@ def create_embedding_model(model_name=DEFAULT_EMBEDDING_MODEL):
     try:
         from llama_index.embeddings.huggingface import HuggingFaceEmbedding
         use_hf_mirror()
-        model_path = EMBEDDING_MODEL_PATH[model_name]
-        if MODEL_DIR is not None:
-            path = f"./{MODEL_DIR}/{model_path}"
-            if os.path.exists(path):
-                # 本地模型已准备好时优先使用，避免运行时拉取远端模型。
-                model_path = path
+        diagnostics = get_embedding_model_diagnostics(model_name)
+        if diagnostics["hf_model_path"] is None:
+            raise ValueError(f"Unknown embedding model: {model_name}")
+        model_path = diagnostics["local_path"] if diagnostics["local_path_exists"] else diagnostics["hf_model_path"]
         embed_model = HuggingFaceEmbedding(model_name=model_path)
         Settings.embed_model = embed_model
         print(f"created embed model: {model_path}")
