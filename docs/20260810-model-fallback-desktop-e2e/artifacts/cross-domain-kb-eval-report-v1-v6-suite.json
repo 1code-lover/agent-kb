@@ -1,0 +1,4898 @@
+{
+  "generated_at": "2026-08-12T04:27:07.219756+00:00",
+  "api_base": "http://127.0.0.1:18080",
+  "timeout": 60.0,
+  "slow_threshold_ms": 5000.0,
+  "preflight": {
+    "enabled": true,
+    "aborted": false,
+    "passed": true,
+    "case_id": "grain-positive-safety-policy",
+    "reason": ""
+  },
+  "summary": {
+    "total": 49,
+    "passed": 26,
+    "failed": 23,
+    "pass_rate": 0.5306,
+    "positive_total": 33,
+    "positive_pass_rate": 0.303,
+    "negative_total": 15,
+    "negative_pass_rate": 1.0,
+    "contract_total": 1,
+    "contract_pass_rate": 1.0,
+    "multi_turn_total": 4,
+    "turn_total": 54,
+    "turn_passed": 30,
+    "turn_failed": 24,
+    "turn_pass_rate": 0.5556,
+    "failed_case_ids": [
+      "grain-positive-safety-production",
+      "desktop-positive-passcode",
+      "desktop-positive-passcode-older",
+      "desktop-positive-preview",
+      "image-positive-boundary",
+      "pdf-positive-fallback",
+      "exttext-positive-extensionless-utf8-folder",
+      "exttext-positive-readme-utf16",
+      "utf16-positive-folder-boundary",
+      "extra-grain-positive-storage-scope",
+      "extra-grain-positive-one-card-scope",
+      "extra-v2-grain-long-storage-scope",
+      "extra-v2-grain-multihop-policy-and-production",
+      "extra-v2-mixed-multihop-approval-and-preview",
+      "extra-v2-pdf-scan-long-fallback-rule",
+      "extra-v3-grain-multiturn-policy-follow-up",
+      "extra-v3-desktop-multiturn-preview-follow-up",
+      "extra-v4-desktop-source-file-workflow",
+      "extra-v4-pdf-source-file-scan-fallback",
+      "extra-v4-image-source-file-ocr-boundary",
+      "extra-v5-desktop-evidence-text-preview",
+      "extra-v5-pdf-evidence-text-fallback",
+      "extra-v5-image-evidence-text-boundary"
+    ],
+    "failure_check_summary": {
+      "expected_terms_hit": {
+        "total": 24,
+        "case_ids": [
+          "desktop-positive-passcode",
+          "desktop-positive-passcode-older",
+          "desktop-positive-preview",
+          "extra-grain-positive-one-card-scope",
+          "extra-grain-positive-storage-scope",
+          "extra-v2-grain-long-storage-scope",
+          "extra-v2-grain-multihop-policy-and-production",
+          "extra-v2-mixed-multihop-approval-and-preview",
+          "extra-v2-pdf-scan-long-fallback-rule",
+          "extra-v3-desktop-multiturn-preview-follow-up",
+          "extra-v3-grain-multiturn-policy-follow-up",
+          "extra-v4-desktop-source-file-workflow",
+          "extra-v4-image-source-file-ocr-boundary",
+          "extra-v4-pdf-source-file-scan-fallback",
+          "extra-v5-desktop-evidence-text-preview",
+          "extra-v5-image-evidence-text-boundary",
+          "extra-v5-pdf-evidence-text-fallback",
+          "exttext-positive-extensionless-utf8-folder",
+          "exttext-positive-readme-utf16",
+          "grain-positive-safety-production",
+          "image-positive-boundary",
+          "pdf-positive-fallback",
+          "utf16-positive-folder-boundary"
+        ],
+        "turn_ids": [
+          "passcode",
+          "preview-follow-up",
+          "scope"
+        ]
+      },
+      "http_status_ok": {
+        "total": 2,
+        "case_ids": [
+          "extra-v3-desktop-multiturn-preview-follow-up",
+          "exttext-positive-extensionless-utf8-folder"
+        ],
+        "turn_ids": [
+          "preview-follow-up"
+        ]
+      },
+      "required_source_kb_hit": {
+        "total": 2,
+        "case_ids": [
+          "extra-v3-desktop-multiturn-preview-follow-up",
+          "exttext-positive-extensionless-utf8-folder"
+        ],
+        "turn_ids": [
+          "preview-follow-up"
+        ]
+      },
+      "source_presence_ok": {
+        "total": 2,
+        "case_ids": [
+          "extra-v3-desktop-multiturn-preview-follow-up",
+          "exttext-positive-extensionless-utf8-folder"
+        ],
+        "turn_ids": [
+          "preview-follow-up"
+        ]
+      }
+    },
+    "failure_case_summary": [
+      {
+        "id": "desktop-positive-passcode",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "desktop-positive-passcode-older",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "desktop-positive-preview",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-grain-positive-one-card-scope",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-grain-positive-storage-scope",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v2-grain-long-storage-scope",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v2-grain-multihop-policy-and-production",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v2-mixed-multihop-approval-and-preview",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v2-pdf-scan-long-fallback-rule",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v3-desktop-multiturn-preview-follow-up",
+        "failed_checks": [
+          "expected_terms_hit",
+          "http_status_ok",
+          "required_source_kb_hit",
+          "source_presence_ok"
+        ],
+        "failed_turns": [
+          "passcode",
+          "preview-follow-up"
+        ]
+      },
+      {
+        "id": "extra-v3-grain-multiturn-policy-follow-up",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": [
+          "scope"
+        ]
+      },
+      {
+        "id": "extra-v4-desktop-source-file-workflow",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v4-image-source-file-ocr-boundary",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v4-pdf-source-file-scan-fallback",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v5-desktop-evidence-text-preview",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v5-image-evidence-text-boundary",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "extra-v5-pdf-evidence-text-fallback",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "exttext-positive-extensionless-utf8-folder",
+        "failed_checks": [
+          "expected_terms_hit",
+          "http_status_ok",
+          "required_source_kb_hit",
+          "source_presence_ok"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "exttext-positive-readme-utf16",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "grain-positive-safety-production",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "image-positive-boundary",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "pdf-positive-fallback",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      },
+      {
+        "id": "utf16-positive-folder-boundary",
+        "failed_checks": [
+          "expected_terms_hit"
+        ],
+        "failed_turns": []
+      }
+    ],
+    "duration_summary": {
+      "slow_threshold_ms": 5000.0,
+      "case_total_ms": 426607.139,
+      "case_avg_ms": 8706.268,
+      "case_max_ms": 61053.192,
+      "case_max_id": "extra-v3-desktop-multiturn-preview-follow-up",
+      "slow_case_ids": [
+        "boundary-negative-manual-structure",
+        "extra-desktop-negative-one-card-scope",
+        "extra-grain-negative-desktop-preview",
+        "extra-v2-grain-long-storage-scope",
+        "extra-v2-image-negative-pdf-fallback-rule",
+        "extra-v3-desktop-multiturn-preview-follow-up",
+        "extra-v3-grain-negative-desktop-follow-up",
+        "extra-v4-image-source-file-ocr-boundary",
+        "extra-v5-image-evidence-text-boundary",
+        "exttext-positive-extensionless-utf8-folder",
+        "exttext-positive-readme-utf16",
+        "grain-negative-utf8-exact-boundary",
+        "image-negative-pdf-fallback",
+        "image-positive-boundary",
+        "pdf-negative-image-boundary",
+        "utf16-positive-folder-boundary",
+        "utf8-positive-boundary"
+      ],
+      "turn_total_ms": 426604.084,
+      "turn_avg_ms": 7900.076,
+      "turn_max_ms": 60004.427,
+      "turn_max_id": "exttext-positive-extensionless-utf8-folder",
+      "turn_max_turn_id": "",
+      "slow_turns": [
+        {
+          "id": "boundary-negative-manual-structure",
+          "turn_id": "",
+          "duration_ms": 7854.073
+        },
+        {
+          "id": "extra-desktop-negative-one-card-scope",
+          "turn_id": "",
+          "duration_ms": 8183.922
+        },
+        {
+          "id": "extra-grain-negative-desktop-preview",
+          "turn_id": "",
+          "duration_ms": 37909.923
+        },
+        {
+          "id": "extra-v2-grain-long-storage-scope",
+          "turn_id": "",
+          "duration_ms": 6432.494
+        },
+        {
+          "id": "extra-v2-image-negative-pdf-fallback-rule",
+          "turn_id": "",
+          "duration_ms": 7209.804
+        },
+        {
+          "id": "extra-v3-desktop-multiturn-preview-follow-up",
+          "turn_id": "preview-follow-up",
+          "duration_ms": 60003.166
+        },
+        {
+          "id": "extra-v3-grain-negative-desktop-follow-up",
+          "turn_id": "desktop-passcode-follow-up",
+          "duration_ms": 43156.835
+        },
+        {
+          "id": "extra-v4-image-source-file-ocr-boundary",
+          "turn_id": "",
+          "duration_ms": 7063.572
+        },
+        {
+          "id": "extra-v5-image-evidence-text-boundary",
+          "turn_id": "",
+          "duration_ms": 7220.804
+        },
+        {
+          "id": "exttext-positive-extensionless-utf8-folder",
+          "turn_id": "",
+          "duration_ms": 60004.427
+        },
+        {
+          "id": "exttext-positive-readme-utf16",
+          "turn_id": "",
+          "duration_ms": 23299.41
+        },
+        {
+          "id": "grain-negative-utf8-exact-boundary",
+          "turn_id": "",
+          "duration_ms": 31746.431
+        },
+        {
+          "id": "image-negative-pdf-fallback",
+          "turn_id": "",
+          "duration_ms": 6714.893
+        },
+        {
+          "id": "image-positive-boundary",
+          "turn_id": "",
+          "duration_ms": 7056.951
+        },
+        {
+          "id": "pdf-negative-image-boundary",
+          "turn_id": "",
+          "duration_ms": 9100.84
+        },
+        {
+          "id": "utf16-positive-folder-boundary",
+          "turn_id": "",
+          "duration_ms": 23625.589
+        },
+        {
+          "id": "utf8-positive-boundary",
+          "turn_id": "",
+          "duration_ms": 7957.911
+        }
+      ]
+    },
+    "systemic_failure_summary": {
+      "suspected": false,
+      "reason": "",
+      "turn_total": 54,
+      "http_failure_total": 2,
+      "http_failure_rate": 0.037,
+      "dominant_error_kind": "network_error",
+      "error_kind_counts": {
+        "network_error": 2
+      },
+      "sample_case_ids": [
+        "exttext-positive-extensionless-utf8-folder",
+        "extra-v3-desktop-multiturn-preview-follow-up"
+      ]
+    },
+    "focus_summary": {
+      "boundary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "contract": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "cross-domain": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "cross-domain-extra": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "desktop": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3,
+        "pass_rate": 0.0
+      },
+      "desktop-evidence": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "desktop-extra": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "desktop-source": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "exttext": {
+        "total": 4,
+        "passed": 1,
+        "failed": 3,
+        "pass_rate": 0.25
+      },
+      "grain": {
+        "total": 2,
+        "passed": 1,
+        "failed": 1,
+        "pass_rate": 0.5
+      },
+      "grain-extra": {
+        "total": 5,
+        "passed": 0,
+        "failed": 5,
+        "pass_rate": 0.0
+      },
+      "grain-source": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "grain-table": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "image-ocr": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "image-ocr-evidence": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "image-ocr-source": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "mixed-batch": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "mixed-batch-evidence": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "mixed-batch-extra": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "mixed-batch-long-turn": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "mixed-batch-source": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "pdf-scan": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "pdf-scan-evidence": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "pdf-scan-extra": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "pdf-scan-source": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0
+      },
+      "utf8": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    },
+    "case_source_summary": {
+      "default": {
+        "total": 23,
+        "passed": 14,
+        "failed": 9,
+        "pass_rate": 0.6087
+      },
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "pass_rate": 0.5
+      },
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json": {
+        "total": 6,
+        "passed": 2,
+        "failed": 4,
+        "pass_rate": 0.3333
+      },
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "pass_rate": 0.3333
+      },
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json": {
+        "total": 5,
+        "passed": 2,
+        "failed": 3,
+        "pass_rate": 0.4
+      },
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v5.json": {
+        "total": 4,
+        "passed": 1,
+        "failed": 3,
+        "pass_rate": 0.25
+      },
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    },
+    "tag_summary": {
+      "cross-kb-isolation": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "desktop": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "pass_rate": 0.0
+      },
+      "evidence-preview": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "pass_rate": 0.0
+      },
+      "evidence-text": {
+        "total": 4,
+        "passed": 1,
+        "failed": 3,
+        "pass_rate": 0.25
+      },
+      "follow-up": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "pass_rate": 0.5
+      },
+      "long-question": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3,
+        "pass_rate": 0.0
+      },
+      "long-turn": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "mixed-batch": {
+        "total": 5,
+        "passed": 4,
+        "failed": 1,
+        "pass_rate": 0.8
+      },
+      "multi-hop": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "pass_rate": 0.0
+      },
+      "multi-turn": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "pass_rate": 0.5
+      },
+      "ocr": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "pass_rate": 0.5
+      },
+      "refusal": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "pass_rate": 1.0
+      },
+      "scan": {
+        "total": 4,
+        "passed": 1,
+        "failed": 3,
+        "pass_rate": 0.25
+      },
+      "single-kb": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "pass_rate": 0.5
+      },
+      "source-grounding": {
+        "total": 11,
+        "passed": 5,
+        "failed": 6,
+        "pass_rate": 0.4545
+      },
+      "table": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "pass_rate": 1.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "grain-positive-safety-policy",
+      "kind": "positive",
+      "focus": "grain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::grain-positive-safety-policy::9e3c64b033b54374bce79126aab5a059",
+      "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+      "expected_terms": [
+        "预防为主",
+        "综合防治"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“预防为主、综合防治”。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 1093.904,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "grain-positive-safety-production",
+      "kind": "positive",
+      "focus": "grain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::grain-positive-safety-production::7eca16ae8e5542e1afe8c879ca4b176c",
+      "question": "《粮库安全生产守则》遵循什么安全生产理念和方针？",
+      "expected_terms": [
+        "以人为本",
+        "生命至上",
+        "安全发展",
+        "安全第一",
+        "预防为主",
+        "综合治理"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮库 安全生产守则》遵循“以人为本、生命至上的 安全发展”理念，贯彻“安全第一、预防为主、 综合 Symmetry 的方。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MDE4Y2E0Mi01OWJmLTQzNWQtYTcxOC00ODQ4YTdiYWM1ZDYiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJlMjM4ZDMxMy01ODI2LTQ1YmUtODE2ZS1lYmNiZTY2NjljMzMifX0\", \"file\": \"粮库安全生",
+      "duration_ms": 2056.351,
+      "source_record_count": 10,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "粮库安全生产守则_55486fad.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "20超高大平房仓安全储粮技术规程_c802a581.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "粮库安全生产守则_434562c6.docx",
+        "粮库安全生产守则_55486fad.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "20超高大平房仓安全储粮技术规程_c802a581.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "粮库安全生产守则_434562c6.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "desktop-positive-passcode",
+      "kind": "positive",
+      "focus": "desktop",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::desktop-positive-passcode::87b34251c67d4545b84f92a54c356dc4",
+      "question": "What is the unique desktop workflow passcode in the diagnostic document?",
+      "expected_terms": [
+        "northagent-desktop-e2e-1786353063"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent desktop-e2e-1786353063.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 963.601,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "desktop-positive-passcode-older",
+      "kind": "positive",
+      "focus": "desktop",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-desktop-e2e-1786352564"
+      ],
+      "session_id": "cross-domain-eval::desktop-positive-passcode-older::5de5291537804a3081c35938330a3988",
+      "question": "What is the unique desktop workflow passcode in the older diagnostic document?",
+      "expected_terms": [
+        "northagent-desktop-e2e-1786352564"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786352564"
+      ],
+      "required_source_kb_ids": [
+        "diag-desktop-e2e-1786352564"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "The unique desktop workflow passcode in the older diagonal document is northagent desktop-e2e-1786352564.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI5ZmJkMTc1MC0xNTQzLTQ1NjUtYmE3OC0xOGM5N2NjZTQ2Y2MiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MjU2NCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMzQwMDExNWQtZjI3My00YzkxLTlkNGEtYzIyOTRjZDRiMTRiIn19\", \"file",
+      "duration_ms": 964.345,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786352564",
+        "diag-desktop-e2e-1786352564"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "desktop-positive-preview",
+      "kind": "positive",
+      "focus": "desktop",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::desktop-positive-preview::50f0dc861917481c85b0b8e953cc6b23",
+      "question": "What should evidence preview resolve after chat returns sources?",
+      "expected_terms": [
+        "resolve this file after chat returns sources"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": " evidence preview should resolve the file after chat returns sources.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 601.696,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "utf8-positive-boundary",
+      "kind": "positive",
+      "focus": "utf8",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-kb-utf8-1785505921"
+      ],
+      "session_id": "cross-domain-eval::utf8-positive-boundary::ac89dc5c8ed5405086248459e1f2ca8e",
+      "question": "这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？",
+      "expected_terms": [
+        "知识库",
+        "授权边界",
+        "组织作用"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-kb-utf8-1785505921"
+      ],
+      "required_source_kb_ids": [
+        "diag-kb-utf8-1785505921"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "份_utf-8 诊断文档描述了知识库和文件夹的边界如下：\n\n1. **文件路径**：文件路径为 `C:\\Users\\ethan1.zhao\\ downloads\\ agent-kb main\\githubagent-kb\\ data\\ diag-kb-ute8-1785505921\\ diag\\ diagimport-ute8 md`。\n\n2. **文件名**：文件名是 `diagimport-ute8 md`。\n\n3. **文件类型**：文件类型为 `text(markdo",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzY2VjMThhYi0wMjg0LTQ5NzQtYmM5ZC1kMTgyMGI1YzMzOWUiLCJrYl9pZCI6ImRpYWcta2ItdXRmOC0xNzg1NTA1OTIxIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4NzVmNzg3Yi1lNDcwLTQ2ODgtYjcyNC01M2VhM2MwNDE3YzcifX0\", \"file\": \"d",
+      "duration_ms": 7957.911,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-kb-utf8-1785505921",
+        "diag-kb-utf8-1785505921"
+      ],
+      "source_files": [
+        "diag-import-utf8.md",
+        "diag-import-utf8.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "image-positive-boundary",
+      "kind": "positive",
+      "focus": "image-ocr",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::image-positive-boundary::266999bbf86746f6b7cf28d45df76bee",
+      "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+      "expected_terms": [
+        "folder is for organization only",
+        "knowledge base is the authorization boundary"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the OCR diagonal document says about folder and knowledge base boundaries, we need to analyze the given context information. Let's break it down step by step:\n\n1. **Identify the relevant parts of the context:**\n   - The co",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 7056.951,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-image-ocr-20260807-r2",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "source_files": [
+        "diag-ocr.png",
+        "diag-ocr.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "pdf-positive-fallback",
+      "kind": "positive",
+      "focus": "pdf-scan",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::pdf-positive-fallback::61a09b9db5274d36b2ab48523cacd22e",
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "expected_terms": [
+        "OCR fallback must merge every predict batch per page"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": " Scanned PDF diagonal says that OCRfallback must merge every predict batch per page.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 724.426,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-pdf-scan-20260807-r2",
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "source_files": [
+        "diag-scan-fallback.pdf",
+        "diag-scan-fallback.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "mixed-positive-rollback",
+      "kind": "positive",
+      "focus": "mixed-batch",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::mixed-positive-rollback::80c1b5cd5fb04d63b17cac670e20eecd",
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "expected_terms": [],
+      "expected_any_term_groups": [
+        [
+          "平台值班主管",
+          "最终的回滚批准"
+        ],
+        [
+          "platform duty lead",
+          "final rollback approval"
+        ]
+      ],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "The Friday release cutover note explains who can approve rollback decisions. The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence. The team also keeps an escalation board image ne",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+      "duration_ms": 1816.295,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "mixed-positive-preview",
+      "kind": "positive",
+      "focus": "mixed-batch",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::mixed-positive-preview::c9101a40d8e94b93a47f653f35c8034e",
+      "question": "What should every evidence preview include?",
+      "expected_terms": [
+        "doc_id",
+        "preview_locator"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "每份证据 preview 必须包括 doc_id 和 preview_locator。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3ZjhlMzllZS03ZDk1LTRiMTYtYWE3Yi1lYWMyMTA1MzM2YjQiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjYzNGE5YTBkLWIwNzktNGY4ZS04ZWQwLTAwMmUwY2Y1ZjE0NiJ9fQ\", \"fi",
+      "duration_ms": 697.065,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "boundary-negative-manual-structure",
+      "kind": "negative",
+      "focus": "boundary",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-boundary-1785495036"
+      ],
+      "session_id": "cross-domain-eval::boundary-negative-manual-structure::7ab6152ed6674d3981e8aaae986b724b",
+      "question": "What exact sentence does the manual use to describe the authorization boundary?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "Knowledge Base remains the authorization boundary",
+        "Folder is organization only"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-boundary-1785495036"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-exttext-readme-utf16-1785506468",
+        "diag-exttext-readme-utf8-1785506464"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine the exact sentence the manual uses to describe the authorization boundary, we need to carefully analyze the given context information. Let's break it down step by step.\n\n1. **Identify the relevant sections:**\n   - The context i",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI0NzQ2MTk3My1mZWRmLTRiNjgtODliNi00ODQ2YzI5NGE2ZmEiLCJrYl9pZCI6ImRpYWctYm91bmRhcnktMTc4NTQ5NTAzNiIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiMTMwNTE2OTQtOTNkZS00ZWJhLWIxODctNzRlN2NhMjhkNDMzIn19\", \"file\": \"",
+      "duration_ms": 7854.073,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-boundary-1785495036",
+        "diag-boundary-1785495036"
+      ],
+      "source_files": [
+        "manual",
+        "manual"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "exttext-positive-readme-utf8",
+      "kind": "positive",
+      "focus": "exttext",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-exttext-readme-utf8-1785506464"
+      ],
+      "session_id": "cross-domain-eval::exttext-positive-readme-utf8::9dec032125124c34b0b3794f655aef3e",
+      "question": "What exact sentence does the README use to describe the authorization boundary?",
+      "expected_terms": [
+        "Knowledge Base remains the authorization boundary"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-exttext-readme-utf8-1785506464"
+      ],
+      "required_source_kb_ids": [
+        "diag-exttext-readme-utf8-1785506464"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine the exact sentence theREADME uses to describe the authorization boundary, we need to carefully analyze the given context information. Let's break it down step by step:\n\n1. **Identify the relevant part of the context:**\n   - The",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3NTRkZDJmOS0zMmI1LTQxZWItYmM3Zi1hYzk0OGM1YjI3NjMiLCJrYl9pZCI6ImRpYWctZXh0dGV4dC1yZWFkbWUtdXRmOC0xNzg1NTA2NDY0IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI1ODM0YTRkNy0xOWFiLTQ5ZjAtYjllYS0zMzUxMjExZjVjNDci",
+      "duration_ms": 4833.943,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-exttext-readme-utf8-1785506464",
+        "diag-exttext-readme-utf8-1785506464"
+      ],
+      "source_files": [
+        "README",
+        "README"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "exttext-positive-extensionless-utf8-folder",
+      "kind": "positive",
+      "focus": "exttext",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-kb-extensionless-text-readme-utf8-1785506975"
+      ],
+      "session_id": "cross-domain-eval::exttext-positive-extensionless-utf8-folder::09e496dc968e4b09ac4c4e4e13ba6a91",
+      "question": "What does the extensionless UTF-8 README say about the folder?",
+      "expected_terms": [],
+      "expected_any_term_groups": [
+        [
+          "organization object only"
+        ],
+        [
+          "organization only"
+        ]
+      ],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-kb-extensionless-text-readme-utf8-1785506975"
+      ],
+      "required_source_kb_ids": [
+        "diag-kb-extensionless-text-readme-utf8-1785506975"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "",
+      "source_text_preview": "{\"sources\": [], \"evidence\": []}",
+      "duration_ms": 60004.427,
+      "source_record_count": 0,
+      "source_kb_ids": [],
+      "source_files": [],
+      "source_kb_id_missing_count": 0,
+      "http_status": -1,
+      "response_message": "timed out",
+      "checks": {
+        "http_status_ok": false,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": false,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": false,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": "timed out",
+      "note": null
+    },
+    {
+      "id": "exttext-positive-readme-utf16",
+      "kind": "positive",
+      "focus": "exttext",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-exttext-readme-utf16-1785506468"
+      ],
+      "session_id": "cross-domain-eval::exttext-positive-readme-utf16::d4c633f3db7d4b56ad0e6efa4c20c71c",
+      "question": "What exact sentence does the UTF-16 README use to describe the authorization boundary?",
+      "expected_terms": [
+        "Knowledge Base remains the authorization boundary"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-exttext-readme-utf16-1785506468"
+      ],
+      "required_source_kb_ids": [
+        "diag-exttext-readme-utf16-1785506468"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine the exact sentence the.UTF-16README uses to describe the authorization boundary, we need to carefully analyze the given context information. Let's break it down step by step.\n\nThe context information provided is:\n```\n['file_pat",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI5ODM0ZWJhMS1lNzlmLTRhOTktODg2Zi0xMmQ4NTM2ZDhlZjMiLCJrYl9pZCI6ImRpYWctZXh0dGV4dC1yZWFkbWUtdXRmMTYtMTc4NTUwNjQ2OCIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiZmU5NzEwMGMtMzIxZS00ZDdjLThmMmItMmQ4OTdkZTUzOGRi",
+      "duration_ms": 23299.41,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-exttext-readme-utf16-1785506468",
+        "diag-exttext-readme-utf16-1785506468"
+      ],
+      "source_files": [
+        "README-UTF16",
+        "README-UTF16"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "utf16-positive-folder-boundary",
+      "kind": "positive",
+      "focus": "exttext",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-kb-extensionless-text-readme-utf16-1785506975"
+      ],
+      "session_id": "cross-domain-eval::utf16-positive-folder-boundary::438334deeaad4746af23bb5986be0d54",
+      "question": "What does the UTF-16 README say about the authorization boundary?",
+      "expected_terms": [],
+      "expected_any_term_groups": [
+        [
+          "authorization boundary remains the base"
+        ],
+        [
+          "authorization boundary remains the knowledge base"
+        ]
+      ],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-kb-extensionless-text-readme-utf16-1785506975"
+      ],
+      "required_source_kb_ids": [
+        "diag-kb-extensionless-text-readme-utf16-1785506975"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the.UTF-16README says about the authorization boundary, we need to analyze the given context information and identify the relevant parts.\n\nThe context information provided is:\n\n['file_path: C:\\Users\\ethan1.zhao\\ downloads\\",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlMGNlMmRkOC05NTYzLTRkNGItODM2YS01NmQxNjZlM2Q0ZjYiLCJrYl9pZCI6ImRpYWcta2ItZXh0ZW5zaW9ubGVzcy10ZXh0LXJlYWRtZS11dGYxNi0xNzg1NTA2OTc1IiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI5Y2FhYTFiNS1kMWE4LTQ0YWMtOWE4",
+      "duration_ms": 23625.589,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-kb-extensionless-text-readme-utf16-1785506975",
+        "diag-kb-extensionless-text-readme-utf16-1785506975"
+      ],
+      "source_files": [
+        "README",
+        "README"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "desktop-negative-grain-question",
+      "kind": "negative",
+      "focus": "cross-domain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::desktop-negative-grain-question::681a095ca10e4a549abf525c73641509",
+      "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "预防为主",
+        "综合防治"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“ stratifier storage”的形式。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 781.131,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "desktop-negative-older-passcode",
+      "kind": "negative",
+      "focus": "cross-domain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::desktop-negative-older-passcode::03b90f2ce51b4aea91a4948f55d7f37b",
+      "question": "What is the unique desktop workflow passcode in the 1786352564 diagnostic document?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "northagent-desktop-e2e-1786352564"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-desktop-e2e-1786352564"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "The unique desktop workflow passcode in the 1786352564 diagonal document is northagent desktop-e2e-1786353063.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 1205.116,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "grain-negative-desktop-passcode",
+      "kind": "negative",
+      "focus": "cross-domain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::grain-negative-desktop-passcode::7dafd82e65864942aa3664ba8c8564ee",
+      "question": "What is the unique desktop workflow passcode in the diagnostic document?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "northagent-desktop-e2e-1786353063"
+      ],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine the unique desktop workflow passcode in the diagnostic document, we need to carefully analyze the given context and identify any specific information related to the passcode. However, the provided context does not contain any e",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJjYzQzOWYzOS03MzZkLTRlZjMtOWIwMS02Y2FmOTAxNTgyNDIiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4MDFkNjE1ZC0yZGMyLTRjOWEtYmNjOC00ODk5YzFmNWY3YjQifX0\", \"file\": \"相邻粮层温",
+      "duration_ms": 3301.967,
+      "source_record_count": 6,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "相邻粮层温差法补充说明_6e4f9ace.pdf",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "05谷物冷却机一机三仓冷却通风储粮技术规程t5_848b8a90.docx",
+        "相邻粮层温差法补充说明_6e4f9ace.pdf",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "05谷物冷却机一机三仓冷却通风储粮技术规程t5_848b8a90.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "grain-negative-utf8-exact-boundary",
+      "kind": "negative",
+      "focus": "cross-domain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::grain-negative-utf8-exact-boundary::43d911b755934aab90119cced96b3d14",
+      "question": "这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "文件夹只承担组织作用",
+        "不承担权限隔离"
+      ],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-kb-utf8-1785505921"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "份_utf-8 诊断文档描述了知识库和文件夹的边界如下：\n\n knowledge base located in the directory `data/grain-knowledge-base`.\n\n knowledge base located in the directory `data/grain-knowledge-base`.\n\n knowledge base located in the directory `data/grain-knowledge-base`",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4ODE4OTUxNy1lYmFmLTQxMGQtODVkMi1jZmM0NzUzNzM3OTkiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZWIxMjkxZC1lYjM5LTQ3NDgtYTUyYi0zNWVhZTA1MDJmYzQifX0\", \"file\": \"readm",
+      "duration_ms": 31746.431,
+      "source_record_count": 4,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "readme_f4b82287.md",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "readme_f4b82287.md",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": "允许 grain KB 回答相似的授权边界概念，但不能泄漏 UTF-8 诊断文档的精确证据短语。"
+    },
+    {
+      "id": "image-negative-pdf-fallback",
+      "kind": "negative",
+      "focus": "cross-domain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::image-negative-pdf-fallback::70a06efbd1474221bc51223d56084bb2",
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "OCR fallback must merge every predict batch per page"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the scanned PDF diagonal says about OCR falls back, we need to analyze the given context information. Let's break it down step by step:\n\n1. **File Name**: `diag-ocr.png`\n   - This is the name of the file containing the dia",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 6714.893,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-image-ocr-20260807-r2",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "source_files": [
+        "diag-ocr.png",
+        "diag-ocr.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "pdf-negative-image-boundary",
+      "kind": "negative",
+      "focus": "cross-domain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::pdf-negative-image-boundary::033281bfd07947f49120f6a0e50a2796",
+      "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "folder is organization only",
+        "knowledge base is the authorization boundary"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the OCR diagonal document says about folder and knowledge base boundaries, we need to analyze the given context information and identify the relevant statements.\n\nHere is the context information again:\n```\n['file_name: dia",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 9100.84,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-pdf-scan-20260807-r2",
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "source_files": [
+        "diag-scan-fallback.pdf",
+        "diag-scan-fallback.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "mixed-negative-grain-policy",
+      "kind": "negative",
+      "focus": "cross-domain",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::mixed-negative-grain-policy::b7679d384dc4489c932b813ab3010e12",
+      "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "预防为主",
+        "综合防治"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“五要、六不、四不、三不、二不、一不”，即：\n\n五要：要实名制、要实QR code、要实 phone number、要实 address、要实 unit number。\n\n六不：不要空罐、不要空 bin、不要空 box、不要空 bag、不要空 bottle、不要空 bag.\n\n四不：不要把 nested boxes装入 nested bags、不要把 nested bags装入 nested boxes、不要把 nested boxes",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJmNzgyZmYzMC1mZTExLTRlMjctODIzNC1jMjEwOGExY2EzNTgiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImYyNWIyMjExLTM1ZDItNGU0ZS05YmRhLTZiMWYzYTg5NDc3OCJ9fQ\", \"fi",
+      "duration_ms": 4046.202,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "escalation-board.png",
+        "preview-board.png",
+        "vendor-cutover.pdf",
+        "cutover.md",
+        "escalation-board.png",
+        "preview-board.png",
+        "vendor-cutover.pdf",
+        "cutover.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "multi-kb-contract-rejected",
+      "kind": "contract",
+      "focus": "contract",
+      "tags": [],
+      "case_source": "default",
+      "kb_ids": [
+        "grain-knowledge-base",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::multi-kb-contract-rejected::9a7bb8173adc4a8a8ad6798dd7293d3e",
+      "question": "Please compare the grain safety policy and the OCR boundary rule.",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [
+        "不支持多知识库查询"
+      ],
+      "expected_http_status": 400,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "",
+      "source_text_preview": "{\"sources\": [], \"evidence\": []}",
+      "duration_ms": 2.606,
+      "source_record_count": 0,
+      "source_kb_ids": [],
+      "source_files": [],
+      "source_kb_id_missing_count": 0,
+      "http_status": 400,
+      "response_message": "{\"code\":400,\"message\":\"P0 主线暂不支持多知识库查询，请拆分为单库请求\",\"data\":{},\"request_id\":\"356ff7c6-d7b9-4f94-84a7-412a633471a0\"}",
+      "checks": {
+        "http_status_ok": true,
+        "expected_error_terms_hit": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-grain-positive-storage-scope",
+      "kind": "positive",
+      "focus": "grain-extra",
+      "tags": [],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-grain-positive-storage-scope::7eba243c6c15496c9ef4377246d3e232",
+      "question": "《粮油安全储存守则》适用于哪些单位？",
+      "expected_terms": [
+        "各类粮油仓储单位"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮油安全储存守则》适用于所有从事粮油仓储活动的单位。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 1307.776,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-grain-positive-one-card-scope",
+      "kind": "positive",
+      "focus": "grain-extra",
+      "tags": [],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-grain-positive-one-card-scope::bac1d92a7cfa4c9c82271c8c13ae24f1",
+      "question": "非直属企业“一卡通”系统适用于哪些收储库点？",
+      "expected_terms": [],
+      "expected_any_term_groups": [
+        [
+          "租仓库点",
+          "委托库点"
+        ],
+        [
+          "中央事权粮食入库和出库业务",
+          "收储库点"
+        ]
+      ],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "非(sqrt)企业“一卡通”系统适用于中储粮非(sqrt)企业中的收储库点。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4YTNlNzhkOC1hYmFlLTQ0MWYtYjY4ZC0yYmE4NjgxMDBmNGMiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiJkZGRmYjA2ZS01MjM5LTRhNDgtYTdkYy04MDc1ZmMwM2Q2MjIifX0\", \"file\": \"中储粮非直",
+      "duration_ms": 1308.14,
+      "source_record_count": 4,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行)_0880c2cd.docx",
+        "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范_92ca8dfb.pdf",
+        "中储粮非直属企业“一卡通”出入库系统应用管理办法(暂行)_0880c2cd.docx",
+        "中国储备粮管理集团有限公司非直属企业储粮智慧监管平台数据接入技术规范_92ca8dfb.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-desktop-negative-one-card-scope",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::extra-desktop-negative-one-card-scope::0a1b738f68114f32a777092a20f7c05f",
+      "question": "非直属企业“一卡通”系统适用于哪些收储库点？",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "租仓库点",
+        "委托库点",
+        "中央事权粮食入库和出库业务"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "非直属企业“一卡通”系统适用于以下收储库点：\n\n1. 集体收储库点： such as libraries, bookstores, and other public places where books are stored in bulk.\n\n2.个人收储库点: such as personal libraries, book collections, and other places where books are stored by individuals.\n\n3. d",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 8183.922,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-grain-negative-desktop-preview",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v1.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-grain-negative-desktop-preview::8bf486078fbb41398e9291017da6b4b6",
+      "question": "What should evidence preview resolve after chat returns sources?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "resolve this file after chat returns sources"
+      ],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "\"is optimizes }\n\n\n\n\n\n\"is optimizes }\n\n\n\n\n\n-highlight;\"\n;\"\n;\"\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$\n$",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIxNmY0ZTgyMi01MTExLTQ2NjYtODY1Zi1mNGE3YTdlMzBhZTYiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI2MzFhYmQ5MS01ZmVkLTQwZDEtOTk1Ni0zYzM1Mzk0ZTBlMDgifX0\", \"file\": \"储备粮数字",
+      "duration_ms": 37909.923,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "储备粮数字监管方法及应用_b0b57361.pdf",
+        "基于粮温统计特征的粮仓库存状态检测方法_78b90fe8.pdf",
+        "基于粮温时空相关性的储粮数量监管方法研究_崔宏伟_c6d8f31a.pdf",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "储备粮数字监管方法及应用_b0b57361.pdf",
+        "基于粮温统计特征的粮仓库存状态检测方法_78b90fe8.pdf",
+        "基于粮温时空相关性的储粮数量监管方法研究_崔宏伟_c6d8f31a.pdf",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v2-grain-long-storage-scope",
+      "kind": "positive",
+      "focus": "grain-extra",
+      "tags": [
+        "long-question",
+        "single-kb"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v2-grain-long-storage-scope::720ca376ca4543f3907237658cefd1a2",
+      "question": "在这个问题里我会故意给很多上下文：如果我只选择粮仓知识库，请回答《粮油安全储存守则》适用于哪些单位，不要使用其他诊断知识库。",
+      "expected_terms": [
+        "各类粮油仓储单位"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮油安全储存守则》适用于所有从事粮油仓储活动的单位，包括粮食存储、油品存储、副食品存储等。该守则为这些单位提供了 masses 安全储存的建议和要求，以确保 food 安全和库内安全。在执行中，承储单位应当按照规定的质量等级收购政府储备粮源，准确计量并制作凭证，及时整理并达到储存安全的要求，平仓验证储存品质为宜存，食品安全指标符合国家规定，按照规定记录与收购有关的信息并存档备查。同时，承储单位应当遵守安全生产相关法律法规和标准规范，执行《粮油储存安全责任暂行规定》和《粮油安",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 6432.494,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v2-grain-multihop-policy-and-production",
+      "kind": "positive",
+      "focus": "grain-extra",
+      "tags": [
+        "multi-hop",
+        "long-question"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v2-grain-multihop-policy-and-production::66ffa2b112de427cb052dbbf6643e335",
+      "question": "请同时说明《粮油安全储存守则》制定的安全储粮方针，以及《粮库安全生产守则》遵循的安全生产理念。请只依据当前粮仓知识库回答。",
+      "expected_terms": [
+        "预防为主",
+        "综合防治",
+        "以人为本",
+        "生命至上",
+        "安全发展"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“预防为主、综合防治”，即要先预防，再进行处理。《粮库安全生产守则》遵循的安全生产理念是“谁储粮、谁负责，谁坏粮、谁担责”，即要负起责任，确保粮食安全。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 2057.232,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v2-mixed-multihop-approval-and-preview",
+      "kind": "positive",
+      "focus": "mixed-batch-extra",
+      "tags": [
+        "multi-hop",
+        "mixed-batch",
+        "evidence-preview"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v2-mixed-multihop-approval-and-preview::d3596875d01e41b58311eeba59800344",
+      "question": "In one answer, tell me who gives the final rollback approval and what every evidence preview should include.",
+      "expected_terms": [
+        "platform duty lead",
+        "final rollback approval",
+        "doc_id",
+        "preview_locator"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine who gives the final rolled back approval and what every evidence preview should include, let's analyze the given context step by step.\n\n1. **Identify the key information related to the rolled back approval:**\n   - The platform ",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3ZjhlMzllZS03ZDk1LTRiMTYtYWE3Yi1lYWMyMTA1MzM2YjQiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjYzNGE5YTBkLWIwNzktNGY4ZS04ZWQwLTAwMmUwY2Y1ZjE0NiJ9fQ\", \"fi",
+      "duration_ms": 4580.103,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "preview-board.png",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "cutover.md",
+        "preview-board.png",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "cutover.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v2-pdf-scan-long-fallback-rule",
+      "kind": "positive",
+      "focus": "pdf-scan-extra",
+      "tags": [
+        "scan",
+        "long-question"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json",
+      "kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v2-pdf-scan-long-fallback-rule::d0bf737ab2e1455bb84ac50f247c6cde",
+      "question": "What does the scanned PDF diagnostic say about OCR fallback? Please answer with the exact operational rule.",
+      "expected_terms": [
+        "OCR fallback must merge every predict batch per page"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the scanned PDF diagonal says about OCR falls back, we need to analyze the relevant information provided in the context. Let's break it down step by step:\n\n1. **Identify the relevant part of the context:**\n   - The context",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 4875.59,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-pdf-scan-20260807-r2",
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "source_files": [
+        "diag-scan-fallback.pdf",
+        "diag-scan-fallback.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v2-image-negative-pdf-fallback-rule",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [
+        "ocr",
+        "scan",
+        "cross-kb-isolation"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json",
+      "kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v2-image-negative-pdf-fallback-rule::d5b51a35ab30434e9f3d75b0f5b3be9f",
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "OCR fallback must merge every predict batch per page"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the scanned PDF diagonal says about OCR falls back, we need to analyze the given context information. Let's break it down step by step:\n\n1. **File Name**: `diag-ocr.png`\n   - This is the name of the file containing the dia",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 7209.804,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-image-ocr-20260807-r2",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "source_files": [
+        "diag-ocr.png",
+        "diag-ocr.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v2-grain-negative-older-desktop-passcode",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [
+        "refusal",
+        "cross-kb-isolation"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v2.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v2-grain-negative-older-desktop-passcode::187a8c911aa6466e8f624790df17f605",
+      "question": "What is the unique desktop workflow passcode in the 1786352564 diagnostic document?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "northagent-desktop-e2e-1786352564"
+      ],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-desktop-e2e-1786352564"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine the unique desktop workflow passcode in the 1786352564 diagonal document, we need to follow these steps:\n\n1. Identify the section of the document that contains the passcode.\n2. Extract the passcode from that section.\n3. Verify ",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJjYzQzOWYzOS03MzZkLTRlZjMtOWIwMS02Y2FmOTAxNTgyNDIiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4MDFkNjE1ZC0yZGMyLTRjOWEtYmNjOC00ODk5YzFmNWY3YjQifX0\", \"file\": \"相邻粮层温",
+      "duration_ms": 4806.275,
+      "source_record_count": 6,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "相邻粮层温差法补充说明_6e4f9ace.pdf",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "05谷物冷却机一机三仓冷却通风储粮技术规程t5_848b8a90.docx",
+        "相邻粮层温差法补充说明_6e4f9ace.pdf",
+        "06稻谷控温储藏技术规程t6_5a8d3dae.docx",
+        "05谷物冷却机一机三仓冷却通风储粮技术规程t5_848b8a90.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v3-grain-multiturn-policy-follow-up",
+      "kind": "positive",
+      "focus": "grain-extra",
+      "tags": [
+        "multi-turn",
+        "follow-up",
+        "single-kb"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::5a48ac44b25d481fb9644e311a38f71b",
+      "is_multi_turn": true,
+      "turn_count": 2,
+      "passed_turn_count": 1,
+      "failed_turn_ids": [
+        "scope"
+      ],
+      "duration_ms": 2588.466,
+      "turn_duration_total_ms": 2587.836,
+      "source_record_count": 18,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "基于粮温统计特征的粮仓库存状态检测方法_78b90fe8.pdf",
+        "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+        "基于温湿度场云图的稻谷粮堆状态和结露风险分析_2df82bbb.pdf",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "基于粮温统计特征的粮仓库存状态检测方法_78b90fe8.pdf",
+        "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+        "基于温湿度场云图的稻谷粮堆状态和结露风险分析_2df82bbb.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "checks": {
+        "turns_passed": false,
+        "turn_count_ok": true,
+        "source_kb_known": true
+      },
+      "passed": false,
+      "turns": [
+        {
+          "id": "extra-v3-grain-multiturn-policy-follow-up::scope",
+          "kind": "positive",
+          "focus": "grain-extra",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "single-kb"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+          "kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::5a48ac44b25d481fb9644e311a38f71b",
+          "question": "《粮油安全储存守则》适用于哪些单位？",
+          "expected_terms": [
+            "各类粮油仓储单位"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "required_source_kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "《粮油安全储存守则》适用于所有从事粮油仓储活动的单位。",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 1364.006,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base"
+          ],
+          "source_files": [
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "政府储备粮食仓储管理办法_6841ec95.docx",
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "政府储备粮食仓储管理办法_6841ec95.docx"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": false,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": false,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v3-grain-multiturn-policy-follow-up",
+          "turn_index": 1,
+          "turn_id": "scope"
+        },
+        {
+          "id": "extra-v3-grain-multiturn-policy-follow-up::policy-follow-up",
+          "kind": "positive",
+          "focus": "grain-extra",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "single-kb"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+          "kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "session_id": "cross-domain-eval::extra-v3-grain-multiturn-policy-follow-up::5a48ac44b25d481fb9644e311a38f71b",
+          "question": "这个守则制定的安全储粮方针是什么？",
+          "expected_terms": [
+            "预防为主",
+            "综合防治"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "required_source_kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "这个守则制定的安全储粮方针是“预防为主、综合防治”。",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 1223.83,
+          "source_record_count": 10,
+          "source_kb_ids": [
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base"
+          ],
+          "source_files": [
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "基于粮温统计特征的粮仓库存状态检测方法_78b90fe8.pdf",
+            "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+            "基于温湿度场云图的稻谷粮堆状态和结露风险分析_2df82bbb.pdf",
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "基于粮温统计特征的粮仓库存状态检测方法_78b90fe8.pdf",
+            "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+            "基于温湿度场云图的稻谷粮堆状态和结露风险分析_2df82bbb.pdf"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v3-grain-multiturn-policy-follow-up",
+          "turn_index": 2,
+          "turn_id": "policy-follow-up"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "extra-v3-desktop-multiturn-preview-follow-up",
+      "kind": "positive",
+      "focus": "desktop-extra",
+      "tags": [
+        "multi-turn",
+        "follow-up",
+        "evidence-preview"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::6581bdd885e543a7971304c5049b6115",
+      "is_multi_turn": true,
+      "turn_count": 2,
+      "passed_turn_count": 0,
+      "failed_turn_ids": [
+        "passcode",
+        "preview-follow-up"
+      ],
+      "duration_ms": 61053.192,
+      "turn_duration_total_ms": 61052.61,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "checks": {
+        "turns_passed": false,
+        "turn_count_ok": true,
+        "source_kb_known": true
+      },
+      "passed": false,
+      "turns": [
+        {
+          "id": "extra-v3-desktop-multiturn-preview-follow-up::passcode",
+          "kind": "positive",
+          "focus": "desktop-extra",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "evidence-preview"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+          "kb_ids": [
+            "diag-desktop-e2e-1786353063"
+          ],
+          "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::6581bdd885e543a7971304c5049b6115",
+          "question": "What is the unique desktop workflow passcode in the diagnostic document?",
+          "expected_terms": [
+            "northagent-desktop-e2e-1786353063"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-desktop-e2e-1786353063"
+          ],
+          "required_source_kb_ids": [
+            "diag-desktop-e2e-1786353063"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent desktop-e2e-1786353063.",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+          "duration_ms": 1049.444,
+          "source_record_count": 2,
+          "source_kb_ids": [
+            "diag-desktop-e2e-1786353063",
+            "diag-desktop-e2e-1786353063"
+          ],
+          "source_files": [
+            "desktop-model-workflow.md",
+            "desktop-model-workflow.md"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": false,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": false,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v3-desktop-multiturn-preview-follow-up",
+          "turn_index": 1,
+          "turn_id": "passcode"
+        },
+        {
+          "id": "extra-v3-desktop-multiturn-preview-follow-up::preview-follow-up",
+          "kind": "positive",
+          "focus": "desktop-extra",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "evidence-preview"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+          "kb_ids": [
+            "diag-desktop-e2e-1786353063"
+          ],
+          "session_id": "cross-domain-eval::extra-v3-desktop-multiturn-preview-follow-up::6581bdd885e543a7971304c5049b6115",
+          "question": "And what should it say evidence preview resolves after chat returns sources?",
+          "expected_terms": [
+            "resolve this file after chat returns sources"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-desktop-e2e-1786353063"
+          ],
+          "required_source_kb_ids": [
+            "diag-desktop-e2e-1786353063"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "",
+          "source_text_preview": "{\"sources\": [], \"evidence\": []}",
+          "duration_ms": 60003.166,
+          "source_record_count": 0,
+          "source_kb_ids": [],
+          "source_files": [],
+          "source_kb_id_missing_count": 0,
+          "http_status": -1,
+          "response_message": "timed out",
+          "checks": {
+            "http_status_ok": false,
+            "expected_terms_hit": false,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": false,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": false,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": false,
+          "error": "timed out",
+          "note": null,
+          "case_id": "extra-v3-desktop-multiturn-preview-follow-up",
+          "turn_index": 2,
+          "turn_id": "preview-follow-up"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "extra-v3-grain-negative-desktop-follow-up",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [
+        "multi-turn",
+        "follow-up",
+        "cross-kb-isolation",
+        "refusal"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::0b3c287b2b2349cd804f67268d4a49d8",
+      "is_multi_turn": true,
+      "turn_count": 2,
+      "passed_turn_count": 2,
+      "failed_turn_ids": [],
+      "duration_ms": 44463.108,
+      "turn_duration_total_ms": 44462.251,
+      "source_record_count": 18,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "粮油储存安全责任暂行规定_8b661ef9.docx",
+        "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "粮油储存安全责任暂行规定_8b661ef9.docx",
+        "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "checks": {
+        "turns_passed": true,
+        "turn_count_ok": true,
+        "source_kb_known": true
+      },
+      "passed": true,
+      "turns": [
+        {
+          "id": "extra-v3-grain-negative-desktop-follow-up::grain-policy",
+          "kind": "positive",
+          "focus": "cross-domain-extra",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "cross-kb-isolation",
+            "refusal"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+          "kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::0b3c287b2b2349cd804f67268d4a49d8",
+          "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+          "expected_terms": [
+            "预防为主",
+            "综合防治"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "required_source_kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“预防为主、综合防治”。",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 1305.416,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base"
+          ],
+          "source_files": [
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "政府储备粮食仓储管理办法_6841ec95.docx",
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "政府储备粮食仓储管理办法_6841ec95.docx"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v3-grain-negative-desktop-follow-up",
+          "turn_index": 1,
+          "turn_id": "grain-policy"
+        },
+        {
+          "id": "extra-v3-grain-negative-desktop-follow-up::desktop-passcode-follow-up",
+          "kind": "negative",
+          "focus": "cross-domain-extra",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "cross-kb-isolation",
+            "refusal"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v3.json",
+          "kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "session_id": "cross-domain-eval::extra-v3-grain-negative-desktop-follow-up::0b3c287b2b2349cd804f67268d4a49d8",
+          "question": "What about that desktop diagnostic passcode?",
+          "expected_terms": [],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [
+            "northagent-desktop-e2e-1786353063",
+            "northagent-desktop-e2e-1786352564"
+          ],
+          "allowed_source_kb_ids": [
+            "grain-knowledge-base"
+          ],
+          "required_source_kb_ids": [],
+          "forbidden_source_kb_ids": [
+            "diag-desktop-e2e-1786352564",
+            "diag-desktop-e2e-1786353063"
+          ],
+          "required_source_files": [],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "\"is optimizes the accuracy of the search results by using natural language processing techniques to understand the context and meaning of the user's question. It then generate a response that is relevant and accurate based on the context an",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+          "duration_ms": 43156.835,
+          "source_record_count": 10,
+          "source_kb_ids": [
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base",
+            "grain-knowledge-base"
+          ],
+          "source_files": [
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "粮油储存安全责任暂行规定_8b661ef9.docx",
+            "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+            "AAA粮油安全储存守则_0119014f.docx",
+            "政府储备粮食仓储管理办法_7e650077.docx",
+            "粮油储存安全责任暂行规定_8b661ef9.docx",
+            "不同仓型的粮堆温度场重现及对比分析_7cf14cbb.pdf",
+            "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v3-grain-negative-desktop-follow-up",
+          "turn_index": 2,
+          "turn_id": "desktop-passcode-follow-up"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "extra-v4-grain-source-file-safety-policy",
+      "kind": "positive",
+      "focus": "grain-source",
+      "tags": [
+        "source-grounding",
+        "single-kb"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v4-grain-source-file-safety-policy::93056e64770d4304bb08c5d23412cf3e",
+      "question": "《粮油安全储存守则》制定的安全储粮方针是什么？",
+      "expected_terms": [
+        "预防为主",
+        "综合防治"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "AAA粮油安全储存守则"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "《粮油安全储存守则》制定的安全储粮方针是“预防为主、综合防治”。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJkMjUwYWY0My0zYTI2LTRiNjktOTI4Ny05MzcxMDAxMGIwNzUiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZTc3ZGMwMi1jNDQzLTQ5MjYtYjhkYS1mM2M3MzQ1MjRlOWEifX0\", \"file\": \"AAA粮油",
+      "duration_ms": 1164.038,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx",
+        "AAA粮油安全储存守则_0119014f.docx",
+        "政府储备粮食仓储管理办法_7e650077.docx",
+        "TCCOA 12-2020 简易仓囤储粮异常粮情应急处置操作规范_5106ab51.docx",
+        "政府储备粮食仓储管理办法_6841ec95.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v4-desktop-source-file-workflow",
+      "kind": "positive",
+      "focus": "desktop-source",
+      "tags": [
+        "source-grounding",
+        "desktop"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::extra-v4-desktop-source-file-workflow::5f7a74c1c6734a13a37322d15a841090",
+      "question": "What is the unique desktop workflow passcode in the diagnostic document?",
+      "expected_terms": [
+        "northagent-desktop-e2e-1786353063"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "desktop-model-workflow.md"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "The unique desktop workflow passcode in the diagnostic document is northagent desktop-e2e-1786353063.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 987.912,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v4-pdf-source-file-scan-fallback",
+      "kind": "positive",
+      "focus": "pdf-scan-source",
+      "tags": [
+        "source-grounding",
+        "scan"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json",
+      "kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v4-pdf-source-file-scan-fallback::9faa852b0f62431e920a0f72b39fa4c0",
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "expected_terms": [
+        "OCR fallback must merge every predict batch per page"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "diag-scan-fallback.pdf"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": " Scanned PDF diagonal says that OCRfallback must merge every predict batch per page.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 648.864,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-pdf-scan-20260807-r2",
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "source_files": [
+        "diag-scan-fallback.pdf",
+        "diag-scan-fallback.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v4-image-source-file-ocr-boundary",
+      "kind": "positive",
+      "focus": "image-ocr-source",
+      "tags": [
+        "source-grounding",
+        "ocr"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json",
+      "kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v4-image-source-file-ocr-boundary::cc3690fc2fba49b791e239cc21ff2329",
+      "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+      "expected_terms": [
+        "folder is for organization only",
+        "knowledge base is the authorization boundary"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "diag-ocr.png"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the OCR diagonal document says about folder and knowledge base boundaries, we need to analyze the given context information. Let's break it down step by step:\n\n1. **Identify the relevant parts of the context:**\n   - The co",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 7063.572,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-image-ocr-20260807-r2",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "source_files": [
+        "diag-ocr.png",
+        "diag-ocr.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v4-mixed-source-file-cutover",
+      "kind": "positive",
+      "focus": "mixed-batch-source",
+      "tags": [
+        "source-grounding",
+        "mixed-batch"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v4.json",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v4-mixed-source-file-cutover::d9bb420a05e6403c9b083d3a5f99c86e",
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "expected_terms": [],
+      "expected_any_term_groups": [
+        [
+          "平台值班主管",
+          "最终的回滚批准"
+        ],
+        [
+          "platform duty lead",
+          "final rollback approval"
+        ]
+      ],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "cutover.md"
+      ],
+      "forbidden_source_files": [
+        "diag-scan-fallback.pdf",
+        "desktop-model-workflow.md"
+      ],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "The Friday release cutover note explains who can approve rollback decisions. The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence. The team also keeps an escalation board image ne",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+      "duration_ms": 1668.086,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v5-desktop-evidence-text-preview",
+      "kind": "positive",
+      "focus": "desktop-evidence",
+      "tags": [
+        "evidence-text",
+        "source-grounding",
+        "desktop"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v5.json",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::extra-v5-desktop-evidence-text-preview::cc880bb1422d4af5aae9b9b3e7d76e3c",
+      "question": "What should evidence preview resolve after chat returns sources?",
+      "expected_terms": [
+        "resolve this file after chat returns sources"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "desktop-model-workflow.md"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [
+        "Evidence preview must resolve this file after chat returns sources."
+      ],
+      "forbidden_source_text_terms": [],
+      "answer_preview": " evidence preview should resolve the file after chat returns sources.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 582.439,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v5-pdf-evidence-text-fallback",
+      "kind": "positive",
+      "focus": "pdf-scan-evidence",
+      "tags": [
+        "evidence-text",
+        "source-grounding",
+        "scan"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v5.json",
+      "kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v5-pdf-evidence-text-fallback::4766301a4a5c413982ac4ec7ce11f182",
+      "question": "What does the scanned PDF diagnostic say about OCR fallback?",
+      "expected_terms": [
+        "OCR fallback must merge every predict batch per page"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "diag-scan-fallback.pdf"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [
+        "OCR fallback must merge every predict batch per page"
+      ],
+      "forbidden_source_text_terms": [],
+      "answer_preview": " Scanned PDF diagonal says that OCRfallback must merge every predict batch per page.",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJhY2Y1NGRmMi01ZTUwLTRkMGYtOWIwNy1jNjdhMzhlMDFkYTUiLCJrYl9pZCI6ImRpYWctcGRmLXNjYW4tMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjRlYWVmNzdmLWYxMmEtNDc2MC05YWQ2LWQ4NmQwZTFmYWY3ZiJ9fQ\", \"file\":",
+      "duration_ms": 693.967,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-pdf-scan-20260807-r2",
+        "diag-pdf-scan-20260807-r2"
+      ],
+      "source_files": [
+        "diag-scan-fallback.pdf",
+        "diag-scan-fallback.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v5-image-evidence-text-boundary",
+      "kind": "positive",
+      "focus": "image-ocr-evidence",
+      "tags": [
+        "evidence-text",
+        "source-grounding",
+        "ocr"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v5.json",
+      "kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v5-image-evidence-text-boundary::987ad131b7284edcbcf4cf12b0a2313b",
+      "question": "What does the OCR diagnostic document say about folder and knowledge base boundaries?",
+      "expected_terms": [
+        "folder is for organization only",
+        "knowledge base is the authorization boundary"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "diag-ocr.png"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [
+        "Folder is organization only",
+        "Knowledge Base is the authorization boundary"
+      ],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine what the OCR diagonal document says about folder and knowledge base boundaries, we need to analyze the given context information. Let's break it down step by step:\n\n1. **Identify the relevant parts of the context:**\n   - The co",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 7220.804,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-image-ocr-20260807-r2",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "source_files": [
+        "diag-ocr.png",
+        "diag-ocr.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": false,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": false,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v5-mixed-evidence-text-approval",
+      "kind": "positive",
+      "focus": "mixed-batch-evidence",
+      "tags": [
+        "evidence-text",
+        "source-grounding",
+        "mixed-batch"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v5.json",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v5-mixed-evidence-text-approval::74b9bf94ad194eef9c373ffd0bc8b61f",
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "expected_terms": [],
+      "expected_any_term_groups": [
+        [
+          "平台值班主管",
+          "最终的回滚批准"
+        ],
+        [
+          "platform duty lead",
+          "final rollback approval"
+        ]
+      ],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "cutover.md"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [
+        "platform duty lead",
+        "final rollback approval"
+      ],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "The Friday release cutover note explains who can approve rollback decisions. The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence. The team also keeps an escalation board image ne",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+      "duration_ms": 1687.513,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v6-grain-readme-table-format",
+      "kind": "positive",
+      "focus": "grain-table",
+      "tags": [
+        "table",
+        "source-grounding",
+        "single-kb"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-grain-readme-table-format::d955783fdee04165b4f2819264b4fc3b",
+      "question": "粮仓知识库 README 的基本信息表里，推荐 kb_id 和主要格式分别是什么？",
+      "expected_terms": [
+        "grain-knowledge-base",
+        ".pdf",
+        ".docx"
+      ],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [],
+      "allowed_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "forbidden_source_kb_ids": [],
+      "required_source_files": [
+        "readme"
+      ],
+      "forbidden_source_files": [],
+      "required_source_text_terms": [
+        "推荐 kb_id",
+        "主要格式"
+      ],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "推荐 kb_id是 grain-knowledge-base，主要格式是 .pdf 157 个，.docx 98 个。",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4ODE4OTUxNy1lYmFmLTQxMGQtODVkMi1jZmM0NzUzNzM3OTkiLCJrYl9pZCI6ImdyYWluLWtub3dsZWRnZS1iYXNlIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI4ZWIxMjkxZC1lYjM5LTQ3NDgtYTUyYi0zNWVhZTA1MDJmYzQifX0\", \"file\": \"readm",
+      "duration_ms": 4602.855,
+      "source_record_count": 8,
+      "source_kb_ids": [
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base",
+        "grain-knowledge-base"
+      ],
+      "source_files": [
+        "readme_f4b82287.md",
+        "基于降维算法从少量测量数据中重构温度场_0844c71f.pdf",
+        "相邻粮层温差法补充说明_6e4f9ace.pdf",
+        "04谷物冷却机经济运行技术规程T4_da3312d6.docx",
+        "readme_f4b82287.md",
+        "基于降维算法从少量测量数据中重构温度场_0844c71f.pdf",
+        "相邻粮层温差法补充说明_6e4f9ace.pdf",
+        "04谷物冷却机经济运行技术规程T4_da3312d6.docx"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v6-mixed-three-turn-release-follow-up",
+      "kind": "positive",
+      "focus": "mixed-batch-long-turn",
+      "tags": [
+        "multi-turn",
+        "follow-up",
+        "long-turn",
+        "mixed-batch",
+        "source-grounding"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::aa2d5ae996eb49748a6096ee10a809fa",
+      "is_multi_turn": true,
+      "turn_count": 3,
+      "passed_turn_count": 3,
+      "failed_turn_ids": [],
+      "duration_ms": 3365.73,
+      "turn_duration_total_ms": 3364.744,
+      "source_record_count": 24,
+      "source_kb_ids": [
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2",
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "source_files": [
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "preview-board.png",
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "preview-board.png",
+        "escalation-board.png",
+        "cutover.md",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "cutover.md",
+        "preview-board.png",
+        "vendor-cutover.pdf",
+        "escalation-board.png",
+        "cutover.md",
+        "preview-board.png",
+        "vendor-cutover.pdf"
+      ],
+      "source_kb_id_missing_count": 0,
+      "checks": {
+        "turns_passed": true,
+        "turn_count_ok": true,
+        "source_kb_known": true
+      },
+      "passed": true,
+      "turns": [
+        {
+          "id": "extra-v6-mixed-three-turn-release-follow-up::approval",
+          "kind": "positive",
+          "focus": "mixed-batch-long-turn",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "long-turn",
+            "mixed-batch",
+            "source-grounding"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+          "kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::aa2d5ae996eb49748a6096ee10a809fa",
+          "question": "Who gives the final rollback approval in the Friday release cutover note?",
+          "expected_terms": [
+            "platform duty lead",
+            "final rollback approval"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "required_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [
+            "cutover.md"
+          ],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [
+            "platform duty lead",
+            "final rollback approval"
+          ],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "The Friday release cutover note explains who can approve rollback decisions. The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence. The team also keeps an escalation board image ne",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJlYzkyN2Y0OC0yNzNiLTRjY2UtYTBkZC1mNDJkZjU1MzQ3MTEiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImZhYmEyYjg5LWI4MDktNGZiNy1hNGIwLThiNDY4NjlkZjE1YSJ9fQ\", \"fi",
+          "duration_ms": 1726.649,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "source_files": [
+            "cutover.md",
+            "vendor-cutover.pdf",
+            "escalation-board.png",
+            "preview-board.png",
+            "cutover.md",
+            "vendor-cutover.pdf",
+            "escalation-board.png",
+            "preview-board.png"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v6-mixed-three-turn-release-follow-up",
+          "turn_index": 1,
+          "turn_id": "approval"
+        },
+        {
+          "id": "extra-v6-mixed-three-turn-release-follow-up::preview",
+          "kind": "positive",
+          "focus": "mixed-batch-long-turn",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "long-turn",
+            "mixed-batch",
+            "source-grounding"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+          "kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::aa2d5ae996eb49748a6096ee10a809fa",
+          "question": "And what should every evidence preview include?",
+          "expected_terms": [
+            "doc_id",
+            "preview_locator"
+          ],
+          "expected_any_term_groups": [],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "required_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [
+            "preview-board.png"
+          ],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [
+            "doc_id",
+            "preview_locator"
+          ],
+          "forbidden_source_text_terms": [],
+          "answer_preview": " evidence preview must include doc_id and preview_locator.",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI3ZjhlMzllZS03ZDk1LTRiMTYtYWE3Yi1lYWMyMTA1MzM2YjQiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6IjYzNGE5YTBkLWIwNzktNGY4ZS04ZWQwLTAwMmUwY2Y1ZjE0NiJ9fQ\", \"fi",
+          "duration_ms": 562.223,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "source_files": [
+            "preview-board.png",
+            "escalation-board.png",
+            "cutover.md",
+            "vendor-cutover.pdf",
+            "preview-board.png",
+            "escalation-board.png",
+            "cutover.md",
+            "vendor-cutover.pdf"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v6-mixed-three-turn-release-follow-up",
+          "turn_index": 2,
+          "turn_id": "preview"
+        },
+        {
+          "id": "extra-v6-mixed-three-turn-release-follow-up::scope-reminder",
+          "kind": "positive",
+          "focus": "mixed-batch-long-turn",
+          "tags": [
+            "multi-turn",
+            "follow-up",
+            "long-turn",
+            "mixed-batch",
+            "source-grounding"
+          ],
+          "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+          "kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "session_id": "cross-domain-eval::extra-v6-mixed-three-turn-release-follow-up::aa2d5ae996eb49748a6096ee10a809fa",
+          "question": "Finally, what image does the team keep next to the runbook for scope reminders?",
+          "expected_terms": [],
+          "expected_any_term_groups": [
+            [
+              "escalation board image",
+              "scope reminders"
+            ],
+            [
+              "escalations board image",
+              "scope reminders"
+            ],
+            [
+              "Escalation board",
+              "scope reminders"
+            ]
+          ],
+          "expected_error_terms": [],
+          "expected_http_status": 200,
+          "forbidden_terms": [],
+          "allowed_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "required_source_kb_ids": [
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "forbidden_source_kb_ids": [],
+          "required_source_files": [
+            "cutover.md"
+          ],
+          "forbidden_source_files": [],
+          "required_source_text_terms": [
+            "escalation board image",
+            "scope reminders"
+          ],
+          "forbidden_source_text_terms": [],
+          "answer_preview": "根据上下文信息， team 保持 next to the runbook for scope reminders 的图像是escalation board image。因此，答案是：\n\n!( Escalation board image)",
+          "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiJmNzgyZmYzMC1mZTExLTRlMjctODIzNC1jMjEwOGExY2EzNTgiLCJrYl9pZCI6ImRpYWctbWl4ZWQtYmF0Y2gtMjAyNjA4MDctcjIiLCJwcmV2aWV3X2xvY2F0b3IiOnsibm9kZV9pZCI6ImYyNWIyMjExLTM1ZDItNGU0ZS05YmRhLTZiMWYzYTg5NDc3OCJ9fQ\", \"fi",
+          "duration_ms": 1075.872,
+          "source_record_count": 8,
+          "source_kb_ids": [
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2",
+            "diag-mixed-batch-20260807-r2"
+          ],
+          "source_files": [
+            "escalation-board.png",
+            "cutover.md",
+            "preview-board.png",
+            "vendor-cutover.pdf",
+            "escalation-board.png",
+            "cutover.md",
+            "preview-board.png",
+            "vendor-cutover.pdf"
+          ],
+          "source_kb_id_missing_count": 0,
+          "http_status": 200,
+          "response_message": "ok",
+          "checks": {
+            "http_status_ok": true,
+            "expected_terms_hit": true,
+            "forbidden_terms_clean": true,
+            "source_presence_ok": true,
+            "source_kb_known": true,
+            "source_kb_allowed": true,
+            "required_source_kb_hit": true,
+            "forbidden_source_kb_clean": true,
+            "required_source_file_hit": true,
+            "forbidden_source_file_clean": true,
+            "required_source_text_hit": true,
+            "forbidden_source_text_clean": true
+          },
+          "passed": true,
+          "error": null,
+          "note": null,
+          "case_id": "extra-v6-mixed-three-turn-release-follow-up",
+          "turn_index": 3,
+          "turn_id": "scope-reminder"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "extra-v6-desktop-negative-grain-readme-table",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [
+        "table",
+        "refusal",
+        "cross-kb-isolation"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-desktop-negative-grain-readme-table::e422c667b2324c50aa2fee188287e482",
+      "question": "粮仓知识库 README 的基本信息表里，主要格式和总体量分别是什么？",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "775744.1 KB",
+        ".pdf 157",
+        ".docx 98"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-desktop-e2e-1786353063"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "grain-knowledge-base"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [
+        "readme"
+      ],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "根据给定的上下文信息，我们可以找到粮仓知识库 README 的 basic information 表。该表包括以下列：\n\n1. file_path: /Users/zhaojianyong/python/agent-kb的数据/diag desktop-e2e-1786353063 desktop-e2e desktop model-workflow.md\n2. file_name: desktop model-workflow MD\n3. file_type: text(",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiI4MzllMDBkMy01OTUyLTRhYTctOTczOC04Yzc3MGU1M2QxMDUiLCJrYl9pZCI6ImRpYWctZGVza3RvcC1lMmUtMTc4NjM1MzA2MyIsInByZXZpZXdfbG9jYXRvciI6eyJub2RlX2lkIjoiY2JmZTAzYjMtOWViOC00OWI5LWJjYzQtYzc4ZDMzMGM4NjU5In19\", \"file",
+      "duration_ms": 4933.238,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-desktop-e2e-1786353063",
+        "diag-desktop-e2e-1786353063"
+      ],
+      "source_files": [
+        "desktop-model-workflow.md",
+        "desktop-model-workflow.md"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    },
+    {
+      "id": "extra-v6-image-negative-mixed-rollback-approval",
+      "kind": "negative",
+      "focus": "cross-domain-extra",
+      "tags": [
+        "ocr",
+        "mixed-batch",
+        "refusal",
+        "cross-kb-isolation"
+      ],
+      "case_source": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-extra-cases-v6.json",
+      "kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "session_id": "cross-domain-eval::extra-v6-image-negative-mixed-rollback-approval::bdb3b20c2ef34561933fbf3210bf47ce",
+      "question": "Who gives the final rollback approval in the Friday release cutover note?",
+      "expected_terms": [],
+      "expected_any_term_groups": [],
+      "expected_error_terms": [],
+      "expected_http_status": 200,
+      "forbidden_terms": [
+        "platform duty lead"
+      ],
+      "allowed_source_kb_ids": [
+        "diag-image-ocr-20260807-r2"
+      ],
+      "required_source_kb_ids": [],
+      "forbidden_source_kb_ids": [
+        "diag-mixed-batch-20260807-r2"
+      ],
+      "required_source_files": [],
+      "forbidden_source_files": [
+        "cutover.md"
+      ],
+      "required_source_text_terms": [],
+      "forbidden_source_text_terms": [],
+      "answer_preview": "To determine who gives the final rollback approval in the Friday release cut-off note, we need to analyze the given context information and identify any relevant details.\n\nThe context information provided is:\n- File name: diag-ocr.png\n- Ima",
+      "source_text_preview": "{\"sources\": [{\"id\": \"ev:eyJkb2NfaWQiOiIzNDVmZGE5ZS1hMzkzLTQ4NzQtOWNhMC00M2ViZWI5ZDU4Y2UiLCJrYl9pZCI6ImRpYWctaW1hZ2Utb2NyLTIwMjYwODA3LXIyIiwicHJldmlld19sb2NhdG9yIjp7Im5vZGVfaWQiOiI3ZjBlYTQyNS1lNTc0LTQ3OTItOTA1ZS05NGNiZmNlOTVjYWEifX0\", \"file\"",
+      "duration_ms": 4762.923,
+      "source_record_count": 2,
+      "source_kb_ids": [
+        "diag-image-ocr-20260807-r2",
+        "diag-image-ocr-20260807-r2"
+      ],
+      "source_files": [
+        "diag-ocr.png",
+        "diag-ocr.png"
+      ],
+      "source_kb_id_missing_count": 0,
+      "http_status": 200,
+      "response_message": "ok",
+      "checks": {
+        "http_status_ok": true,
+        "expected_terms_hit": true,
+        "forbidden_terms_clean": true,
+        "source_presence_ok": true,
+        "source_kb_known": true,
+        "source_kb_allowed": true,
+        "required_source_kb_hit": true,
+        "forbidden_source_kb_clean": true,
+        "required_source_file_hit": true,
+        "forbidden_source_file_clean": true,
+        "required_source_text_hit": true,
+        "forbidden_source_text_clean": true
+      },
+      "passed": true,
+      "error": null,
+      "note": null
+    }
+  ]
+}

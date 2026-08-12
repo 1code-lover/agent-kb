@@ -150,6 +150,33 @@ runtime ready 后复跑 v6 extra：
 
 结果：`4/4 passed`、逐轮 `6/6 passed`，`systemic_failure_summary.suspected=false`。README 表格字段、mixed batch 三轮追问、桌面对 grain README 的负向隔离、图片 OCR 对 mixed rollback approval 的负向隔离均通过。
 
+## 2026-08-12 v1-v6 全量 suite 基线
+
+本轮把跨领域真实评测从“手工拼多个 `--extra-cases`”推进为可复用的一键 suite。`scripts/diag_cross_domain_kb_eval.py` 新增 `--suite v1-v6`，会在默认 23 条基线后追加 `cross-domain-extra-cases-v1.json` 到 `cross-domain-extra-cases-v6.json` 的 26 条外部真实样本。CLI 同时新增逐 case 进度输出，避免 49 条全量评测长时间无反馈。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/scripts/test_diag_cross_domain_kb_eval.py -q
+```
+
+结果：`29 passed, 1 warning`。新增覆盖命名 suite 加载、未知 suite 报错和逐 case progress 回调。
+
+全量 suite 复跑：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --timeout 60 \
+  --preflight \
+  --suite v1-v6 \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite.json
+```
+
+结果：`26/49 passed`、逐轮 `30/54 passed`。其中负向隔离 `15/15 passed`、contract `1/1 passed`，说明跨 KB 泄漏和多 KB contract 拒绝仍稳定；正向用例 `positive_pass_rate=0.303`，失败主要集中在 `expected_terms_hit`、长多轮、UTF-16/extensionless 文本、桌面诊断正向、PDF/图片 OCR source grounding 和 evidence text grounding。
+
+本轮结论：v6 定向样本已稳定跑绿，但 v1-v6 全量 suite 暴露出当前临时模型 `qwen-math-turbo` 下的正向泛化不足。报告 `systemic_failure_summary.suspected=false`，因此这不是大面积模型/API 不可用；下一步应优先恢复更合适的通用模型或针对正向 source/answer grounding 做优化。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。

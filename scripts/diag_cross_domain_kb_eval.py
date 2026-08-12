@@ -11,12 +11,23 @@ import uuid
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 DEFAULT_API_BASE = "http://127.0.0.1:18080"
 DEFAULT_TIMEOUT = 120.0
 DEFAULT_SLOW_THRESHOLD_MS = 5000.0
+CROSS_DOMAIN_ARTIFACT_DIR = Path("docs/20260810-model-fallback-desktop-e2e/artifacts")
+CROSS_DOMAIN_SUITES: dict[str, list[Path]] = {
+    "v1-v6": [
+        CROSS_DOMAIN_ARTIFACT_DIR / "cross-domain-extra-cases-v1.json",
+        CROSS_DOMAIN_ARTIFACT_DIR / "cross-domain-extra-cases-v2.json",
+        CROSS_DOMAIN_ARTIFACT_DIR / "cross-domain-extra-cases-v3.json",
+        CROSS_DOMAIN_ARTIFACT_DIR / "cross-domain-extra-cases-v4.json",
+        CROSS_DOMAIN_ARTIFACT_DIR / "cross-domain-extra-cases-v5.json",
+        CROSS_DOMAIN_ARTIFACT_DIR / "cross-domain-extra-cases-v6.json",
+    ],
+}
 
 DEFAULT_CASES: list[dict[str, Any]] = [
     {
@@ -297,12 +308,33 @@ def _ensure_unique_case_ids(cases: list[dict[str, Any]]) -> None:
         raise ValueError(f"duplicate cross-domain case ids: {', '.join(sorted(set(duplicates)))}")
 
 
-def load_cases(path: str | Path | None = None, extra_paths: list[str | Path] | None = None) -> list[dict[str, Any]]:
-    """读取 JSON 用例；未传路径时返回内置诊断用例，可追加外部真实样本。"""
+def _suite_case_paths(suite_names: list[str] | None = None) -> list[Path]:
+    """按 suite 名称解析内置外部样本文件列表。"""
+    paths: list[Path] = []
+    for suite_name in suite_names or []:
+        normalized = str(suite_name or "").strip()
+        if not normalized:
+            continue
+        suite_paths = CROSS_DOMAIN_SUITES.get(normalized)
+        if suite_paths is None:
+            available = ", ".join(sorted(CROSS_DOMAIN_SUITES))
+            raise ValueError(f"unknown cross-domain suite: {normalized}. Available suites: {available}")
+        paths.extend(suite_paths)
+    return paths
+
+
+def load_cases(
+    path: str | Path | None = None,
+    extra_paths: list[str | Path] | None = None,
+    suites: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """读取 JSON 用例；未传路径时返回内置诊断用例，可追加 suite 或外部真实样本。"""
     if path is None:
         cases = [_copy_case(item, "default") for item in DEFAULT_CASES]
     else:
         cases = _read_cases_file(path)
+    for suite_path in _suite_case_paths(suites):
+        cases.extend(_read_cases_file(suite_path))
     for extra_path in extra_paths or []:
         cases.extend(_read_cases_file(extra_path))
     _ensure_unique_case_ids(cases)
@@ -1043,6 +1075,7 @@ def build_report(
     timeout: float,
     slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS,
     preflight: bool = False,
+    progress: Callable[[int, int, dict[str, Any], dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """执行全部用例并构造报告。"""
     preflight_summary = _default_preflight_summary(preflight)
@@ -1069,7 +1102,13 @@ def build_report(
                 "summary": summary,
                 "cases": [preflight_result],
             }
-    results = [evaluate_case(case, api_base, timeout) for case in cases]
+    results: list[dict[str, Any]] = []
+    total = len(cases)
+    for index, case in enumerate(cases, start=1):
+        result = evaluate_case(case, api_base, timeout)
+        results.append(result)
+        if progress is not None:
+            progress(index, total, case, result)
     return {
         "generated_at": _now_iso(),
         "api_base": api_base.rstrip("/"),
@@ -1088,11 +1127,13 @@ def run_evaluation(
     output: str,
     cases_path: str | None = None,
     extra_cases_paths: list[str] | None = None,
+    suites: list[str] | None = None,
     slow_threshold_ms: float = DEFAULT_SLOW_THRESHOLD_MS,
     preflight: bool = False,
+    progress: Callable[[int, int, dict[str, Any], dict[str, Any]], None] | None = None,
 ) -> tuple[dict[str, Any], int]:
     """执行跨领域评测并写出报告。"""
-    cases = load_cases(cases_path, extra_cases_paths)
+    cases = load_cases(cases_path, extra_cases_paths, suites=suites)
     if not cases:
         return {"summary": {"total": 0, "passed": 0, "failed": 0}}, 2
     report = build_report(
@@ -1101,6 +1142,7 @@ def run_evaluation(
         timeout=timeout,
         slow_threshold_ms=slow_threshold_ms,
         preflight=preflight,
+        progress=progress,
     )
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1126,6 +1168,13 @@ def main() -> None:
         help="先用首个用例做模型/API 探活；若疑似系统性故障则提前写出诊断报告",
     )
     parser.add_argument(
+        "--suite",
+        action="append",
+        default=[],
+        choices=sorted(CROSS_DOMAIN_SUITES),
+        help="可重复；追加内置真实样本套件，例如 v1-v6",
+    )
+    parser.add_argument(
         "--extra-cases",
         action="append",
         default=[],
@@ -1138,14 +1187,26 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    def _print_progress(index: int, total: int, case: dict[str, Any], result: dict[str, Any]) -> None:
+        """向 stderr 输出逐 case 进度，避免长评测无反馈。"""
+        status = "PASS" if result.get("passed") else "FAIL"
+        duration_ms = float(result.get("duration_ms") or 0.0)
+        print(
+            f"[{index}/{total}] {status} {case.get('id') or result.get('id')} ({duration_ms:.0f} ms)",
+            file=sys.stderr,
+            flush=True,
+        )
+
     report, exit_code = run_evaluation(
         api_base=args.api_base,
         timeout=args.timeout,
         output=args.output,
         cases_path=args.cases,
         extra_cases_paths=args.extra_cases,
+        suites=args.suite,
         slow_threshold_ms=args.slow_threshold_ms,
         preflight=args.preflight,
+        progress=_print_progress,
     )
     print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
     print(f"报告已写入: {Path(args.output)}")

@@ -623,6 +623,39 @@ def test_run_evaluation_preflight_continues_when_probe_passes(tmp_path: Path, mo
     assert report["summary"]["passed"] == 2
 
 
+def test_build_report_emits_progress_after_each_case(monkeypatch) -> None:
+    """长评测应能逐 case 输出进度，避免 CLI 长时间无反馈。"""
+
+    def fake_evaluate(case, _api_base, _timeout):
+        return {
+            "id": str(case["id"]),
+            "kind": "positive",
+            "focus": "grain",
+            "case_source": "test",
+            "passed": case["id"] != "case-b",
+            "checks": {"http_status_ok": True},
+        }
+
+    progress_events: list[tuple[int, int, str, bool]] = []
+    monkeypatch.setattr(cross_eval, "evaluate_case", fake_evaluate)
+
+    report = cross_eval.build_report(
+        cases=[
+            {"id": "case-a", "kind": "positive", "kb_ids": ["kb"], "question": "qa"},
+            {"id": "case-b", "kind": "positive", "kb_ids": ["kb"], "question": "qb"},
+        ],
+        api_base="http://127.0.0.1:18080",
+        timeout=1.0,
+        progress=lambda index, total, case, result: progress_events.append(
+            (index, total, str(case["id"]), bool(result["passed"]))
+        ),
+    )
+
+    assert progress_events == [(1, 2, "case-a", True), (2, 2, "case-b", False)]
+    assert report["summary"]["total"] == 2
+    assert report["summary"]["failed"] == 1
+
+
 def test_load_cases_accepts_object_payload_and_extra_cases(tmp_path: Path) -> None:
     """外部真实样本可用 {cases: [...]} 格式追加到默认基线。"""
 
@@ -650,6 +683,31 @@ def test_load_cases_accepts_object_payload_and_extra_cases(tmp_path: Path) -> No
 
     assert len(cases) == len(cross_eval.DEFAULT_CASES) + 1
     assert external[0]["case_source"] == str(extra_path)
+
+
+def test_load_cases_accepts_named_v1_v6_suite() -> None:
+    """命名 suite 应把 v1-v6 外部真实样本追加到默认基线。"""
+
+    cases = cross_eval.load_cases(suites=["v1-v6"])
+    case_ids = {str(item.get("id")) for item in cases}
+
+    assert len(cases) == 49
+    assert "extra-grain-positive-storage-scope" in case_ids
+    assert "extra-v6-grain-readme-table-format" in case_ids
+    v6_case = next(item for item in cases if item.get("id") == "extra-v6-grain-readme-table-format")
+    assert v6_case["case_source"].endswith("cross-domain-extra-cases-v6.json")
+
+
+def test_load_cases_rejects_unknown_suite() -> None:
+    """未知 suite 名称应给出明确错误，避免悄悄少跑真实样本。"""
+
+    try:
+        cross_eval.load_cases(suites=["missing-suite"])
+    except ValueError as exc:
+        assert "unknown cross-domain suite" in str(exc)
+        assert "v1-v6" in str(exc)
+    else:
+        raise AssertionError("expected unknown suite to fail")
 
 
 def test_load_cases_rejects_duplicate_case_ids(tmp_path: Path) -> None:
