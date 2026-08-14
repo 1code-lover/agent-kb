@@ -541,6 +541,7 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `4945621` | fix(model): preserve fallback transition source |
 | `0a95d8c` | feat(agent): fallback to ollama models |
 | `5976343` | chore: update dev story capture state |
 | `5e0826a` | fix(chat): refresh model health after fallback |
