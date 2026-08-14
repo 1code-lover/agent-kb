@@ -1,8 +1,8 @@
 {
-  "last_generated_hash": "c4f2abb97da89da534e0389377d2ce85d45fd243",
-  "last_capture_time": "2026-08-14T14:28:09+0800",
-  "last_story_file": "2026-08-14-feature-source-backed-cross-domain-regression-closure.md",
+  "last_generated_hash": "f12d28d49f6956d5d42d086996f03a4967915b03",
+  "last_capture_time": "2026-08-14T14:52:12+0800",
+  "last_story_file": "2026-08-14-bug-macos-duplicate-notarization-guard.md",
   "last_prompt_decision": "generated",
   "last_generated_push_hash": null,
-  "last_prompted_hash": "c4f2abb97da89da534e0389377d2ce85d45fd243"
+  "last_prompted_hash": "f12d28d49f6956d5d42d086996f03a4967915b03"
 }

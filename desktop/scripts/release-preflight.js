@@ -2,6 +2,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
+const {
+  formatNotarizationCredentialDiagnostics,
+  resolveNotarizationCredentials,
+} = require("./notarization-credentials");
 
 const projectRoot = path.resolve(__dirname, "..", "..");
 const electronAppPath = path.join(projectRoot, "desktop", "node_modules", "electron", "dist", "Electron.app");
@@ -10,7 +14,6 @@ const legacyAppBuilderBinaryCandidates = [
   path.join(projectRoot, "desktop", "node_modules", "app-builder-bin", "mac", "app-builder_x64"),
 ];
 const strictMode = process.argv.includes("--strict");
-const requiredReleaseEnv = ["APPLE_ID", "APPLE_APP_SPECIFIC_PASSWORD", "APPLE_TEAM_ID"];
 
 function runXattr(args) {
   const result = spawnSync("xattr", args, { stdio: "pipe" });
@@ -31,7 +34,7 @@ function fail(message) {
 }
 
 function getMissingReleaseEnv(env = process.env) {
-  return requiredReleaseEnv.filter((name) => !env[name]);
+  return resolveNotarizationCredentials(env).missing;
 }
 
 function ensureExecutable(targetPath, logger = report) {
@@ -101,7 +104,10 @@ function runPreflight(options = {}) {
     electronAppPath: currentElectronAppPath,
     appBuilderBinaryPath: currentAppBuilderBinaryPath,
     appBuilderExecutable: null,
+    failures: [],
     missingReleaseEnv: [],
+    notarizationStrategy: null,
+    partialNotarizationStrategies: [],
     developerIdReady: null,
     developerIdIdentities: [],
     notaryToolReady: null,
@@ -121,10 +127,7 @@ function runPreflight(options = {}) {
       if (!executableCheck.ok) {
         const message = `app-builder binary missing at ${currentAppBuilderBinaryPath}`;
         summary.ok = false;
-        if (strict) {
-          failFn(message);
-          return summary;
-        }
+        summary.failures.push(message);
         reportFn(message);
       }
     } else {
@@ -144,18 +147,21 @@ function runPreflight(options = {}) {
       }
     }
 
-    const missingReleaseEnv = getMissingReleaseEnv(env);
-    summary.missingReleaseEnv = missingReleaseEnv;
-    if (missingReleaseEnv.length > 0) {
-      const message = `mac release signing/notarization env missing: ${missingReleaseEnv.join(", ")}`;
+    const credentialResolution = resolveNotarizationCredentials(env);
+    const credentialDiagnostics = formatNotarizationCredentialDiagnostics(credentialResolution);
+    summary.missingReleaseEnv = credentialResolution.missing;
+    summary.notarizationStrategy = credentialResolution.strategy;
+    summary.partialNotarizationStrategies = credentialResolution.partial;
+    for (const diagnostic of credentialDiagnostics) {
+      reportFn(diagnostic);
+    }
+    if (!credentialResolution.strategy) {
+      const message = `mac release notarization credentials missing: ${credentialDiagnostics.join("; ")}`;
       summary.ok = false;
-      if (strict) {
-        failFn(message);
-        return summary;
-      }
+      summary.failures.push(message);
       reportFn(message);
     } else {
-      reportFn("mac signing/notarization env looks ready");
+      reportFn(`mac signing/notarization env looks ready with strategy ${credentialResolution.strategy}`);
     }
 
     const identityCheck = findDeveloperIdApplicationIdentities(spawn);
@@ -164,10 +170,7 @@ function runPreflight(options = {}) {
     if (!identityCheck.ok) {
       const message = "Developer ID Application signing identity missing";
       summary.ok = false;
-      if (strict) {
-        failFn(message);
-        return summary;
-      }
+      summary.failures.push(message);
       reportFn(message);
     } else {
       reportFn(`Developer ID Application identity ready: ${identityCheck.identities[0]}`);
@@ -179,10 +182,7 @@ function runPreflight(options = {}) {
     if (!notaryTool.ok) {
       const message = "xcrun notarytool not available";
       summary.ok = false;
-      if (strict) {
-        failFn(message);
-        return summary;
-      }
+      summary.failures.push(message);
       reportFn(message);
     } else {
       reportFn(`notarytool ready: ${notaryTool.path}`);
@@ -190,6 +190,9 @@ function runPreflight(options = {}) {
   }
 
   reportFn(`Electron bundle present: ${currentElectronAppPath}`);
+  if (strict && summary.failures.length > 0) {
+    failFn(summary.failures.join("; "));
+  }
   return summary;
 }
 

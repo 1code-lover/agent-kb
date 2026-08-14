@@ -9,3 +9,6 @@
 | QA eval 断点续跑 | FR-05 | `tests/scripts/test_run_grain_qa_eval.py` |
 | 桌面真实工作流 E2E | FR-06 | 诊断脚本输出 E2E 报告 |
 | 项目文档收口 | 文档更新 | `docs/project.md`、测试报告、评审建议 |
+| macOS 三种公证凭证策略 | FR-07 | `desktop/scripts/notarization-credentials.test.js`、`desktop/scripts/notarize-mac.test.js`、`desktop/scripts/release-preflight.test.js` |
+| 单次公证且不重复提交 | FR-07 | `desktop/scripts/verify-release-config.test.js` 检查 `afterSign` 与 `mac.notarize=false` |
+| 正式签名、公证和安装后验证 | FR-07 | `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release`、桌面工作流报告 |

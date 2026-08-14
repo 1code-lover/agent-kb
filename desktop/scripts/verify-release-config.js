@@ -39,6 +39,9 @@ function verifyReleaseConfig(pkg) {
   if (build.afterSign !== "scripts/notarize-mac.js") {
     failures.push("build.afterSign must run scripts/notarize-mac.js");
   }
+  if (mac.notarize !== false) {
+    failures.push("build.mac.notarize must be false so afterSign is the only notarization submission point");
+  }
   if (build.asar !== true) {
     failures.push("build.asar must be true");
   }

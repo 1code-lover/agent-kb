@@ -1,22 +1,20 @@
-最终评审建议（2026-08-14）
+代码与测试报告评审建议（2026-08-14，macOS 单次公证与多凭证策略）
 
 评审结论：
-代码实现、测试方案执行结果、最终测试报告和提交前工作区审计均通过，可以进入 commit / push 阶段。正式 macOS 签名、公证、stapling 和安装后回归不在本机通过，必须继续保持为外部阻塞项，不能随本次代码提交宣称发布完成。
+本轮实现与已审核的 PRD、FRD、RTM、实施计划和测试方案一致。共享凭证解析、单次公证配置不变量、严格预检诊断、真实非正式打包及跨层回归均有直接证据，测试报告已更新，可以进入开发故事沉淀和提交阶段。正式 Apple 签名、公证、stapling 与安装后回归仍属于明确记录的外部凭证阻塞，不得在当前提交中标记为完成。
 
 优点：
-1. 模型不可用 fallback 已覆盖额度、鉴权、模型不存在、网络异常和 request_incompatible；Ollama 动态候选、服务不可达、无本地模型、目标模型未安装及自动切换提示具备后端和前端测试证据。
-2. source-backed 修复没有放宽知识库 metadata 隔离，而是基于 source 的 kb_id/doc_id 回看同库原文，并对 boundary、scope、preview、多事实和 exact 拒答采用窄触发策略；相关 12 个新增 Chat Service 测试和真实评测均通过。
-3. 最终测试报告已明确区分当前权威结论与历史优化过程，当前结果与 artifact 一致：Python 783 passed、Web 89 passed、Electron 44 passed、v1-v6 49/49 cases 和 54/54 turns。
-4. 评测产物已清理为有文档引用的 scope-merge 历史报告和 regression-closure 最终报告；最终报告没有失败项、系统性故障或明显凭证字段。
-5. 两份开发故事已基于真实改动、真实命令和真实权衡生成，状态文件已覆盖当前 HEAD 之前的历史窗口。
+1. `notarization-credentials.js` 作为纯解析模块同时被 `notarize-mac.js` 和 `release-preflight.js` 复用，避免 hook 与预检对凭证完整性和优先级产生漂移。
+2. Keychain profile、App Store Connect API Key、Apple ID 三种策略的 payload 与优先级均有单测；最高优先级部分配置不会阻止后续完整策略，诊断保留缺失字段但不泄露凭证值。
+3. `build.mac.notarize=false` 与 `afterSign=scripts/notarize-mac.js` 共同形成单次提交不变量，配置校验器对缺失和 `true` 都失败；真实 `build:mac` 已证明 electron-builder 26.15.3 接受该配置且只进入一次自定义 hook。
+4. 严格 preflight 改为汇总独立硬门禁，一次输出公证凭证、Developer ID Application 和 notarytool 状态，避免发布人员逐项修复后反复运行才发现下一处缺失。
+5. 测试证据完整：Electron `64 passed`，Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过；`build:preflight`、真实 `build:mac` 和 `verify:package` 均通过。
 
-需要持续关注的地方：
-1. docstore 原文回看依赖历史节点具有正确 kb_id/doc_id；当前实现已做异常回落，但后续重建索引和旧数据迁移时仍需保留跨 KB 隔离门禁。
-2. 多事实 source 合并属于受控后处理；新增领域或问题表达发生变化时，应继续用真实 case 扩展，而不是无条件扩大触发范围。
-3. 当前 desktop/dist 不是有效签名/公证产物，严格 release:preflight 和 verify:mac-release 按预期失败。必须在 Apple 凭证和 Developer ID Application 证书到位后重新生成 release 产物，不能复用现有 dist 作为正式发布包。
+需要改进的地方：
+1. 当前机器没有有效 Developer ID Application 身份，也没有任一完整公证凭证策略，因此只能验证“配置单次提交”和“无凭证时 hook 单次安全跳过”，不能验证 Apple 服务侧真实 submission、accepted 状态和 stapled ticket。
+2. 当前生成的 app 仍是 ad-hoc 产物，非严格 `verify-mac-release` 会报告 codesign、Gatekeeper 和 stapler 失败；这不是本轮代码回归，但正式发布前必须关闭。
 
-提交建议：
-1. 使用 conventional commits，按“模型 request_incompatible fallback”和“source-backed 跨领域收口”两个功能边界拆分提交；文档、最终评测 artifact 和对应测试跟随各自功能提交。
-2. 功能提交后更新 dev-story capture state 到最新功能提交边界，再单独提交状态更新。
-3. push 前再次检查 last_generated_hash..HEAD、git diff --check、git status 和分支远程差异。
-4. Apple 条件具备后继续执行 release:preflight、release:mac、verify:package、verify:mac-release 和安装后桌面工作流诊断；全部通过后再补正式发布报告。
+具体建议：
+1. 保持当前代码和测试实现，不再扩大本提交范围。
+2. 提交前生成本轮 bug 开发故事并推进 capture state；执行 `git diff --check` 和最终桌面定向门禁。
+3. Apple 凭证到位后严格按 release checklist 执行 `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release` 和安装后桌面工作流，并保留仅一次 notarization submission 的真实日志证据。

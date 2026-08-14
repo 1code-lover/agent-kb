@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
 const path = require("node:path");
 const { notarize } = require("@electron/notarize");
-
-const requiredEnv = ["APPLE_ID", "APPLE_APP_SPECIFIC_PASSWORD", "APPLE_TEAM_ID"];
+const {
+  formatNotarizationCredentialDiagnostics,
+  resolveNotarizationCredentials,
+} = require("./notarization-credentials");
 
 function getMissingNotarizeEnv(env = process.env) {
-  return requiredEnv.filter((name) => !env[name]);
+  return resolveNotarizationCredentials(env).missing;
 }
 
 function shouldRequireNotarize(env = process.env) {
@@ -21,6 +23,7 @@ function resolveAppPath(context) {
   return path.join(appOutDir, `${productFilename}.app`);
 }
 
+/** 使用共享策略选择器提交一次 macOS 公证。 */
 async function notarizeMac(context, options = {}) {
   const env = options.env || process.env;
   const platform = options.platform || process.platform;
@@ -32,14 +35,18 @@ async function notarizeMac(context, options = {}) {
     return { skipped: true, reason: "not_macos" };
   }
 
-  const missing = getMissingNotarizeEnv(env);
-  if (missing.length > 0) {
-    const message = `missing notarization env: ${missing.join(", ")}`;
+  const resolution = resolveNotarizationCredentials(env);
+  const diagnostics = formatNotarizationCredentialDiagnostics(resolution);
+  for (const diagnostic of diagnostics) {
+    logger.log(`[notarize] ${diagnostic}`);
+  }
+  if (!resolution.strategy) {
+    const message = `missing notarization env: ${diagnostics.join("; ")}`;
     if (shouldRequireNotarize(env)) {
       throw new Error(message);
     }
     logger.log(`[notarize] skipped: ${message}`);
-    return { skipped: true, reason: "missing_env", missing };
+    return { skipped: true, reason: "missing_env", missing: resolution.missing, partial: resolution.partial };
   }
 
   const appPath = resolveAppPath(context);
@@ -48,16 +55,14 @@ async function notarizeMac(context, options = {}) {
   }
 
   const appBundleId = context.packager.appInfo.appId;
-  logger.log(`[notarize] submitting ${appPath}`);
+  logger.log(`[notarize] submitting ${appPath} with strategy ${resolution.strategy}`);
   await notarizeFn({
     appBundleId,
     appPath,
-    appleId: env.APPLE_ID,
-    appleIdPassword: env.APPLE_APP_SPECIFIC_PASSWORD,
-    teamId: env.APPLE_TEAM_ID,
+    ...resolution.credentials,
   });
-  logger.log("[notarize] completed");
-  return { skipped: false, appPath, appBundleId };
+  logger.log(`[notarize] completed with strategy ${resolution.strategy}`);
+  return { skipped: false, appPath, appBundleId, strategy: resolution.strategy };
 }
 
 module.exports = notarizeMac;

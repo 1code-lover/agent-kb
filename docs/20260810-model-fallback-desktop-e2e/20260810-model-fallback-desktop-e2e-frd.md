@@ -63,3 +63,18 @@
 - 调用 preview API 校验证据可预览。
 - 对 `default` 范围发起隔离问题，确认不泄露 grain 来源。
 - 可启动 webapp dev server 和 Electron shell，并产出启动日志。
+
+
+### FR-07 macOS 单次公证与多凭证策略
+
+正式 `release:mac` 使用自定义 `afterSign` hook 调用 `@electron/notarize`，并在 mac build 配置中显式设置 `notarize=false`，关闭 electron-builder 内建自动公证，保证同一 app 每次构建只提交一次。
+
+公证凭证按以下优先级选择第一组完整策略：
+
+1. `APPLE_KEYCHAIN_PROFILE`，可选 `APPLE_KEYCHAIN`。
+2. `APPLE_API_KEY` + `APPLE_API_KEY_ID` + `APPLE_API_ISSUER`。
+3. `APPLE_ID` + `APPLE_APP_SPECIFIC_PASSWORD` + `APPLE_TEAM_ID`。
+
+如果某种策略只配置了一部分，预检返回策略名和缺失字段，不输出任何密码、私钥内容或凭证值。三种策略都未配置时，非严格预检输出可操作诊断，严格预检失败。
+
+Developer ID Application 签名身份、`notarytool`、Electron bundle、hardened runtime、entitlements、CSP、包内容、codesign、Gatekeeper 和 stapler 仍是独立发布门禁；完整公证凭证不能替代签名证书。

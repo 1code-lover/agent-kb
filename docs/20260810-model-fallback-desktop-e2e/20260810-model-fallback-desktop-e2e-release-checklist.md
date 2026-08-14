@@ -6,7 +6,7 @@
 
 ## 当前阻塞
 
-- 本机未配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`。
+- 本机尚未配置任一完整公证策略：Keychain profile、App Store Connect API Key 或 Apple ID app-specific password。
 - `security find-identity -v -p codesigning` 当前未发现有效 `Developer ID Application` 证书。
 - `xcrun --find notarytool` 可用，路径为 `/Library/Developer/CommandLineTools/usr/bin/notarytool`。
 
@@ -16,11 +16,34 @@
 
 - Apple Developer 账号可用。
 - Keychain 中存在有效 `Developer ID Application` 签名身份。
-- shell 环境已设置：
-  - `APPLE_ID`
-  - `APPLE_APP_SPECIFIC_PASSWORD`
-  - `APPLE_TEAM_ID`
+- 以下公证策略至少完整配置一种，推荐优先使用 Keychain profile：
+  1. `APPLE_KEYCHAIN_PROFILE`，自定义 keychain 时附加 `APPLE_KEYCHAIN`。
+  2. `APPLE_API_KEY`（`.p8` 绝对路径）+ `APPLE_API_KEY_ID` + `APPLE_API_ISSUER`。
+  3. `APPLE_ID` + `APPLE_APP_SPECIFIC_PASSWORD` + `APPLE_TEAM_ID`。
+- 不要把 app-specific password、`.p8` 内容或 Keychain 密码写入仓库、日志或 shell history。
 - `NORTHAGENT_PYTHON` 指向 `/opt/miniconda3/envs/agent-kb/bin/python`，或桌面端能自动发现该解释器。
+
+推荐先把凭证安全存入 Keychain：
+
+```bash
+xcrun notarytool store-credentials "northagent-notary" \
+  --apple-id "<AppleID>" \
+  --team-id "<DeveloperTeamID>" \
+  --password "<AppSpecificPassword>"
+
+export APPLE_KEYCHAIN_PROFILE=northagent-notary
+```
+
+也可以使用 App Store Connect Team API Key：
+
+```bash
+xcrun notarytool store-credentials "northagent-notary" \
+  --key "/absolute/path/AuthKey_<KeyID>.p8" \
+  --key-id "<KeyID>" \
+  --issuer "<IssuerID>"
+
+export APPLE_KEYCHAIN_PROFILE=northagent-notary
+```
 
 ## 执行命令
 
@@ -40,7 +63,7 @@ cd desktop && npm run release:preflight
 cd desktop && npm run build:preflight
 ```
 
-通过标准：`verify-release-config` 通过，确认 `afterSign`、hardened runtime、entitlements、`dmg/zip` target、notarization requirement 和 packaged runtime resources 未被破坏；非严格环境预检只允许继续提示本机缺少 Apple 凭证或 Developer ID。
+通过标准：`verify-release-config` 通过，确认 `afterSign`、`mac.notarize=false`、hardened runtime、entitlements、`dmg/zip` target、notarization requirement 和 packaged runtime resources 未被破坏；自定义 hook 是唯一公证提交点。非严格环境预检只允许继续提示本机缺少完整公证策略或 Developer ID。
 
 ```bash
 cd desktop && npm run release:mac
@@ -93,7 +116,7 @@ cd webapp && npm run build
 
 - 严格 `release:preflight` 通过。
 - `build:preflight` 的 release config verifier 通过。
-- `release:mac` 完成签名和公证，未跳过 notarization。
+- `release:mac` 完成签名和公证，未跳过 notarization，且日志中只出现一次公证 submission。
 - `verify:package` 通过。
 - 签名/公证后的 app 能安装并启动。
 - `diag_desktop_model_workflow` 在安装后 app 拉起的 API 上通过。

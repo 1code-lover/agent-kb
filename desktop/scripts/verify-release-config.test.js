@@ -25,6 +25,7 @@ function buildPackage(overrides = {}) {
         { from: "../requirements.txt", to: "requirements.txt" },
       ],
       mac: {
+        notarize: false,
         hardenedRuntime: true,
         entitlements: "resources/entitlements.mac.plist",
         entitlementsInherit: "resources/entitlements.mac.inherit.plist",
@@ -87,4 +88,19 @@ test("verifyReleaseConfig rejects missing packaged runtime resources", () => {
 
   assert.equal(result.ok, false);
   assert.match(result.failures.join("\n"), /\.\.\/server -> server/);
+});
+
+test("verifyReleaseConfig requires electron-builder built-in notarization to be explicitly disabled", () => {
+  const missing = buildPackage();
+  delete missing.build.mac.notarize;
+  const enabled = buildPackage();
+  enabled.build.mac.notarize = true;
+
+  const missingResult = verifyReleaseConfig(missing);
+  const enabledResult = verifyReleaseConfig(enabled);
+
+  assert.equal(missingResult.ok, false);
+  assert.match(missingResult.failures.join("\n"), /build\.mac\.notarize must be false/);
+  assert.equal(enabledResult.ok, false);
+  assert.match(enabledResult.failures.join("\n"), /build\.mac\.notarize must be false/);
 });

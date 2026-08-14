@@ -4,9 +4,9 @@
 
 截至 2026-08-14，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；前端能展示最近探测摘要和“请求超出模型能力”等明确提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
 
-当前最终门禁为：Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `44 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
+当前最终门禁为：Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
 
-正式 macOS 签名、公证、stapling 和安装后回归尚未完成：本机缺少 Apple Developer 凭证、有效的 Developer ID Application 证书，以及 `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` 环境变量。因此当前可以判定“发布实现、非严格预检、包内容和校验链路通过”，不能判定“正式 macOS release 完成”。
+正式 macOS 签名、公证、stapling 和安装后回归尚未完成：本机缺少 Apple Developer 凭证、有效的 Developer ID Application 证书，且三种公证凭证策略（Keychain profile、App Store Connect API Key、Apple ID）均未配置。因此当前可以判定“发布实现、非严格预检、包内容和校验链路通过”，不能判定“正式 macOS release 完成”。
 
 ## 验证项
 
@@ -23,7 +23,7 @@
 | 桌面端独立启动 API | 通过 | `storage/logs/desktop_runtime.log` |
 | 桌面工作流 E2E | 通过 | `artifacts/desktop-model-workflow-report-after-electron-fix.json` |
 | macOS dmg/zip 打包与 packaged resources | 通过 | `desktop/dist/` + `desktop/scripts/verify-package.js` |
-| Electron CSP 与发布配置单测 | 通过，`44 passed` | `desktop/src/*.test.js`、`desktop/scripts/*.test.js` |
+| Electron CSP 与发布配置单测 | 通过，`64 passed` | `desktop/src/*.test.js`、`desktop/scripts/*.test.js` |
 | macOS release 后置签名/公证校验链路 | 代码与单测通过 | `desktop/scripts/verify-mac-release.js` |
 | 正式 macOS 签名、公证和 stapling | 待外部凭证 | `APPLE_*` 环境变量和 Developer ID Application 证书尚未配置 |
 | 跨知识库 v1-v6 真实评测 | 通过，`49/49 cases`、`54/54 turns` | `artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json` |
@@ -39,7 +39,7 @@
 | Python 非 slow 全量测试 | `783 passed, 1 deselected, 35 warnings` |
 | Web domain/API/store 测试 | `89 passed` |
 | Web Vite build | 通过 |
-| Electron CSP/runtime/release 测试 | `44 passed` |
+| Electron CSP/runtime/release 测试 | `64 passed` |
 | v1-v6 跨领域 case | `49/49 passed` |
 | v1-v6 跨领域 turn | `54/54 passed` |
 | 正向 / 负向 / contract | `100% / 100% / 100%` |
@@ -58,7 +58,50 @@
 
 最终报告的 `failure_check_summary={}`、`failure_case_summary=[]`，且 `systemic_failure_summary.suspected=false`。覆盖多知识库隔离、Markdown、PDF、扫描 PDF、图片 OCR、UTF-8、UTF-16、无扩展名文档、source/evidence grounding、多跳、多轮、mixed batch、preview 定位以及正向/负向回答。
 
-发布侧已通过 `npm run build:preflight` 和 `npm run verify:package`。严格 `npm run release:preflight` 与 `npm run verify:mac-release` 在当前机器按预期失败，因为没有 Apple 凭证、Developer ID Application 签名身份和已公证 ticket。补齐外部条件后必须继续执行 `npm run release:mac`，并以 codesign、Gatekeeper、stapler 和安装后桌面工作流全部通过作为正式发布判定。
+发布侧已通过 `npm run build:preflight`、真实 `npm run build:mac` 和 `npm run verify:package`。`build.mac.notarize=false` 已关闭 electron-builder 内建公证，自定义 `afterSign` 是唯一提交点；无凭证构建中该 hook 只执行一次并输出安全的缺项诊断。严格 `npm run release:preflight` 与 `npm run verify:mac-release` 在当前机器按预期失败，因为三类公证策略均未配置、缺少 Developer ID Application 签名身份且产物没有已公证 ticket。补齐外部条件后必须继续执行 `npm run release:mac`，并以单次 submission、codesign、Gatekeeper、stapler 和安装后桌面工作流全部通过作为正式发布判定。
+
+### macOS 单次公证与多凭证策略验证
+
+实现证据：
+
+- `desktop/scripts/notarization-credentials.js` 统一选择 Keychain profile、App Store Connect API Key、Apple ID 三类凭证，优先级为 `keychain_profile > api_key > apple_id`。
+- 高优先级策略部分配置时保留缺失字段警告，但不会阻止后续完整策略；诊断只包含策略名和环境变量名，不记录密码、私钥路径、账号、Team ID 等任何凭证值。
+- `desktop/package.json` 显式设置 `build.mac.notarize=false`，`desktop/scripts/verify-release-config.js` 对缺失或 `true` 均判定失败，保证 electron-builder 内建公证不会与 `afterSign` 重复提交。
+- 严格 preflight 会一次汇总公证凭证、Developer ID Application 和 `notarytool` 三类独立门禁，不再只暴露首个错误。
+
+执行结果：
+
+```bash
+cd desktop && node --test src/*.test.js scripts/*.test.js
+```
+
+结果：`64 passed`。
+
+```bash
+cd desktop && npm run build:preflight
+```
+
+结果：通过。release config 确认 `afterSign=scripts/notarize-mac.js`、`mac.notarize=false`、hardened runtime、entitlements 和 dmg/zip target 均符合要求；非严格环境预检完整列出三类未配置凭证和缺失的 Developer ID Application，`notarytool` 可用。
+
+```bash
+cd desktop && npm run build:mac
+```
+
+结果：通过，生成 `NorthAgent-0.1.0-arm64.dmg` 和 `NorthAgent-0.1.0-arm64-mac.zip`。electron-builder 接受 `mac.notarize=false`，自定义 hook 执行一次并因无完整凭证安全跳过公证；构建同时明确提示本机没有有效 Developer ID Application 身份。
+
+```bash
+cd desktop && npm run verify:package
+```
+
+结果：通过，packaged runtime contents ready。
+
+```bash
+cd desktop && npm run release:preflight
+```
+
+结果：按预期以退出码 `1` 失败，并在一次诊断中同时列出 Keychain profile、API Key、Apple ID 三类凭证缺失，以及 `Developer ID Application signing identity missing`；`notarytool` 路径为 `/Library/Developer/CommandLineTools/usr/bin/notarytool`。
+
+当前 ad-hoc app 的非严格 `verify-mac-release` 继续报告 codesign、Gatekeeper 和 stapler 未通过，符合“尚未完成正式发布”的验收口径。正式凭证到位前不能验证真实 Apple submission 次数、notarization accepted 状态和 stapled ticket。
 
 ## 历史执行记录
 

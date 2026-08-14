@@ -76,6 +76,7 @@
       "buildResources": "resources"
     },
     "mac": {
+      "notarize": false,
       "icon": "resources/icon.png",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,

@@ -10,7 +10,9 @@
 6. 在 webapp 模型页和 Agent 页展示模型健康状态。
 7. 为 `scripts.run_grain_qa_eval` 增加 `--resume` 和 `--stop-on-api-error`。
 8. 增加桌面 E2E 诊断脚本，输出验证报告。
-9. 更新 `docs/project.md`、`评审建议.txt` 和测试报告。
+9. 抽取 notarization credentials 纯函数模块，按 TDD 支持 Keychain profile、API Key、Apple ID 三种策略。
+10. 让 notarize hook 和 release preflight 复用凭证模块；配置 `mac.notarize=false` 并补 release config 防重复公证校验。
+11. 更新 release checklist、`docs/project.md`、`评审建议.txt` 和测试报告。
 
 ## 关键测试命令
 
@@ -25,6 +27,10 @@ node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/stor
 
 cd webapp && npm run build
 
+cd desktop && node --test src/*.test.js scripts/*.test.js
+cd desktop && npm run build:preflight
+cd desktop && npm run verify:package
+
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"
 ```
 
@@ -34,3 +40,5 @@ cd webapp && npm run build
 - 不在日志和 API 响应里泄露 API key。
 - 若没有候选模型可用，保留原错误并记录健康状态为 `unavailable`。
 - 评测脚本断点续跑只复用无 API 错误的用例，避免固化失败结果。
+- 公证凭证只通过环境变量或 macOS Keychain 读取；日志和测试 fixture 不写入真实秘密。
+- 自定义 afterSign 是唯一公证提交点，`mac.notarize=false` 必须由配置 verifier 强制检查，防止 electron-builder 内建流程重复提交。

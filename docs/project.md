@@ -111,27 +111,21 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 - 当前分支：`codex/desktop-agent-stage3`
 - 远端跟踪：`origin/codex/desktop-agent-stage3`
-- 同步状态：2026-08-12 复核 `HEAD...@{u}` 为 `0 0`，当前分支与远端一致；本轮进一步补齐 embedding 预热卡住时的 stale 诊断。
+- 同步状态：2026-08-14 开始本轮前 `HEAD...@{u}` 为 `0 0`；当前存在待评审的单次公证与多凭证策略改动，尚未提交推送。
 - 最近已推送提交：
-  - `fb0ec89 chore: update dev story capture state`
-  - `2b6c74d feat(chat): ground table field answers from sources`
-  - `9e037b8 chore: update dev story capture state`
-  - `9ce1be3 feat(desktop): reuse running api on launch`
-  - `06f72a8 chore: update dev story capture state`
-  - `a182ba5 feat(eval): add cross-domain preflight`
-  - `9a04909 chore: update dev story capture state`
-  - `1391d4d feat(eval): flag systemic model failures`
-  - `9b7e5b8 chore: update dev story capture state`
-  - `bd4a190 feat(model): probe selected model health`
-  - `8e9257f chore: update dev story capture state`
-  - `e084e4c feat(eval): expand cross-domain v6 diagnostics`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`。embedding 本地缓存诊断、runtime 默认禁止远程下载、Knowledge Workspace 缓存缺失提示和 `scripts.prepare_embedding_model_cache` 已完成，本机已通过 ModelScope 准备 `bge-small-zh-v1.5`，当前 API health 显示 `load_source=local` 且 embedding/OCR warmup 均为 ready。source-backed 边界、scope、preview、精确短语和多事实合并兜底已完成，最终 v1-v6 真实评测达到 `49/49 cases`、`54/54 turns`，正向、负向和 contract 通过率均为 `100%`。正式 macOS 签名、公证、stapling 和安装后回归仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+  - `f12d28d chore: update dev story capture state`
+  - `c4f2abb feat(chat): close cross-domain grounding regressions`
+  - `d15a42f feat(model): fallback on request incompatibility`
+  - `1e53953 chore: update dev story capture state`
+  - `a17a01f feat(chat): ground preview answers from sources`
+  - `898a142 chore: update dev story capture state`
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`。embedding 本地缓存诊断、runtime 默认禁止远程下载、Knowledge Workspace 缓存缺失提示和 `scripts.prepare_embedding_model_cache` 已完成，本机已通过 ModelScope 准备 `bge-small-zh-v1.5`，当前 API health 显示 `load_source=local` 且 embedding/OCR warmup 均为 ready。source-backed 边界、scope、preview、精确短语和多事实合并兜底已完成，最终 v1-v6 真实评测达到 `49/49 cases`、`54/54 turns`，正向、负向和 contract 通过率均为 `100%`。正式 macOS 签名、公证、stapling 和安装后回归仍未完成，原因是本机尚未配置 Keychain profile、App Store Connect API Key、Apple ID 三种公证策略中的任一种，且缺少 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
 - **优先收口桌面依赖安全**：`desktop npm audit` 已清零，`electron-builder` 升级到 `26.15.3` 后重新跑通 release config、mac 打包和 packaged resource 校验；`release-preflight` 也已兼容新版不再安装 `app-builder-bin` 的情况。
 - **发布入口已经串起配置预检和后置校验**：`desktop/package.json` 的 `release:mac` 现在会先跑 `build:preflight`，再进入严格 `release:preflight`、`electron-builder --mac`、`verify:package` 和 `verify:mac-release`；`desktop/scripts/build-target.js` 也让 `npm run build` 在 macOS 上先跑配置校验和非严格预检，`verify-package` 也已模块化并补齐多布局产物校验单测，`verify-mac-release` 会验证 codesign、Gatekeeper 和 stapler。
-- **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
+- **Apple 凭证到位后完成正式发布闭环**：补齐有效 Developer ID Application 证书，并配置 Keychain profile、App Store Connect API Key、Apple ID 三种公证策略中的任一种后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
 - **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；`/api/model/select` 也会在保存模型后即时探活并把失败写入 `model_health`，桌面启动时若发现 `18080` API 已可用会复用现有服务，不再额外拉起一个失败的 API 子进程；配置落盘已改为缩进 JSON，方便人工恢复模型配置时核对。下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
 - **保持 embedding 本地缓存路径稳定**：本机已通过 ModelScope 准备 `localmodels/BAAI/bge-small-zh-v1.5`，新 API embedding 预热从数百秒降到约 `4.5s`；下一步应把 `--provider modelscope` 写入日常运维/桌面排障口径，并避免提交被 `.gitignore` 忽略的模型文件。
 - **保持跨领域真实回归门禁**：跨领域门禁已支持 `--extra-cases`、`--suite v1-v6`、多轮、来源文件级和 evidence 文本级断言；最新 v6 定向为 `4/4`，当前分支全量 v1-v6 已到 `49/49 cases`、`54/54 turns`，正向、负向和 contract 通过率均为 `100%`。下一步应把这套门禁作为回归基线，继续扩展新领域、新文档格式和不同模型配置，而不是继续针对已关闭的 5 个历史失败做局部修补。
@@ -455,6 +449,15 @@ cd webapp && npm run build
 - v6 定向复跑：`4/4 passed`、逐轮 `6/6 passed`，报告为 `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-after-source-preview-answer.json`。
 - 当前分支 v1-v6 最终全量复跑：`49/49 passed`、逐轮 `54/54 passed`、positive/negative/contract pass rate 均为 `1.0`；`failure_check_summary={}`、`failure_case_summary=[]`、`systemic_failure_summary.suspected=false`。最终报告为 `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json`，历史 `44/49` 报告保留为 scope merge 阶段证据。
 
+### 5.33 2026-08-14 macOS 单次公证与多凭证策略
+
+- 新增 `desktop/scripts/notarization-credentials.js`，统一支持 Keychain profile、App Store Connect API Key、Apple ID 三种 `@electron/notarize` 凭证 payload，优先级为 `keychain_profile > api_key > apple_id`；部分高优先级配置只产生无秘密警告，不阻止后续完整策略。
+- `desktop/package.json` 显式设置 `build.mac.notarize=false`，关闭 electron-builder 26.15.3 内建自动公证；`afterSign=scripts/notarize-mac.js` 成为唯一公证提交点，配置校验器会拒绝缺失或启用内建公证的配置。
+- `release-preflight` 与 `notarize-mac` 复用同一解析器；严格预检一次汇总凭证、Developer ID Application 和 `notarytool` 独立门禁，日志只输出策略名和缺失字段。
+- `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`64 passed`；Python 非 slow 全量：`783 passed, 1 deselected, 35 warnings`；Web：`89 passed` 且 Vite build 通过。
+- `cd desktop && npm run build:mac`：真实打包通过，生成 arm64 dmg/zip；自定义 hook 执行一次并因无凭证安全跳过。`npm run verify:package` 通过。
+- `cd desktop && npm run release:preflight`：按预期退出 `1`，一次列出三类凭证均未配置和 `Developer ID Application signing identity missing`；正式签名、公证、stapling 与安装后回归仍等待外部 Apple 凭证。
+
 ---
 
 ## 6. 已知问题和限制
@@ -522,57 +525,17 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
-| `f86e030` | chore: update dev story capture state |
-| `a4ce181` | feat(eval): summarize cross-domain failure checks |
-| `3cee902` | chore: update dev story capture state |
-| `3d3edc3` | feat(eval): assert cross-domain evidence text |
-| `74bcf37` | chore: update dev story capture state |
-| `fd19749` | feat(eval): assert cross-domain source files |
-| `0236357` | chore: update dev story capture state |
-| `7363acc` | feat(eval): add multi-turn cross-domain diagnostics |
-| `80dfa50` | docs(project): sync matching artifact verifier status |
-| `e488c87` | chore: update dev story capture state |
-| `92238b9` | fix(desktop): prefer matching mac package artifacts |
-| `e182ea4` | docs(project): sync universal package layout status |
-| `ab1bc99` | chore: update dev story capture state |
-| `d96e991` | test(desktop): cover universal package layout |
-| `268071d` | docs(project): sync package layout verifier status |
-| `3b408de` | chore: update dev story capture state |
-| `af71677` | fix(desktop): discover mac package layouts |
-| `5110e46` | docs(project): sync package verifier status |
-| `bf89aa3` | chore: update dev story capture state |
-| `e09bbf3` | refactor(desktop): make package verifier testable |
-| `9ad676f` | chore: update dev story capture state |
-| `06f26eb` | fix(desktop): gate mac build target with release preflight |
-| `630bbee` | chore: update dev story capture state |
-| `5a905a1` | fix(desktop): chain build preflight into release mac |
-| `6b8bea9` | chore: update dev story capture state |
-| `8b007f0` | feat(eval): add tagged cross-domain expansion |
-| `e482db2` | chore: update dev story capture state |
-| `c43bf1e` | feat(model): add structured fallback probe summary |
-| `7968ac1` | docs(project): sync fallback probe status |
-| `e6f5c41` | feat(eval): support extra cross-domain cases |
-| `d85bcae` | chore: update dev story capture state |
-| `3a7df45` | fix(desktop): upgrade builder release preflight |
-| `005fc60` | docs(project): sync current project status |
-| `4565955` | chore: update dev story capture state |
-| `88044b7` | feat(desktop): verify release config gates |
-| `b065cc7` | chore: update release story state |
-| `63b4606` | docs(desktop): add mac release checklist |
-| `537fe7a` | chore: update dev story capture state |
-| `85795af` | feat(desktop): add csp unit coverage |
-| `470bdf3` | chore: update dev story capture state |
-| `3e17026` | feat(eval): expand cross-domain v5 coverage |
-| `8e0cb12` | chore: update dev story capture state |
-| `b6e3837` | docs(project): sync cross-domain expansion |
-| `40ff7d8` | feat(ui): surface fallback probe summaries |
-| `f82d316` | fix(model): support local ollama fallback discovery |
-| `e9855fd` | test(eval): expand cross-domain kb diagnostics |
-| `caad7b9` | docs(desktop): document fallback and release checks |
-| `6005d4e` | feat(desktop): add release preflight checks |
-| `fcf951f` | chore(desktop): update electron dependencies |
-| `233f84c` | feat(desktop): add csp header |
-| `4b5bab0` | feat(desktop): add mac release verification |
-| `3d679d7` | chore: update dev story capture state |
+| `f12d28d` | chore: update dev story capture state |
+| `c4f2abb` | feat(chat): close cross-domain grounding regressions |
+| `d15a42f` | feat(model): fallback on request incompatibility |
+| `1e53953` | chore: update dev story capture state |
+| `a17a01f` | feat(chat): ground preview answers from sources |
+| `898a142` | chore: update dev story capture state |
+| `815ae97` | feat(runtime): cache embeddings via modelscope |
+| `4fdb5be` | chore: update dev story capture state |
+| `60f6df1` | feat(runtime): import embedding cache from source |
+| `8b73948` | chore: update dev story capture state |
+| `2489cd8` | feat(runtime): surface embedding diagnostics |
+| `d005958` | chore: update dev story capture state |
 
 查看完整历史：`git log --oneline -30`
