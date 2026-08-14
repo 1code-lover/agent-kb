@@ -63,3 +63,5 @@
 - 非可恢复错误不切换；没有可用候选时保留原错误。
 - fallback 后实际调用再次失败时不继续循环，健康状态更新为 `unavailable`。
 - `agent_runtime.run_agent` 返回 `model_health` 和 fallback 元数据，step 摘要能说明自动切换。
+- 成功 fallback 后 `model_health.fallback_from` 保留原 provider/model/api_base，不能被 `select_model` 重置为空。
+- 真实 Ollama E2E 覆盖当前 Ollama 直接 Agent 推理，以及不可达云端模型通过动态 `/api/tags` 候选切换到本地模型；报告不使用真实 API Key，也不写 session/receipt。

@@ -492,6 +492,7 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
             last_error=str(error)[:500],
             last_checked_at=now_iso(),
             last_fallback_at=now_iso(),
+            fallback_from=base_status["fallback_from"],
             fallback_to={
                 "service_provider": selected["service_provider"],
                 "model": selected["model"],

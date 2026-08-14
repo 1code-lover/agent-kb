@@ -55,3 +55,4 @@ cd desktop && npm run verify:package
 16. 将 Agent 直连调用拆为当前配置读取、OpenAI 兼容调用和 Ollama 原生调用；`run_llm_chat` 统一负责单次 fallback。
 17. 在 `agent_runtime.run_agent` 结果、step 和 receipt 中透传最终模型健康与切换摘要，前端沿用已有 model options 主动刷新。
 18. 执行 Agent 定向测试、Python 非 slow 全量测试、Web 测试/build 和 Electron 测试，更新报告、评审和开发故事后提交推送。
+19. 安装并启动 Ollama、拉取小型模型，执行 Agent 直接推理和坏云端模型到动态 Ollama 候选的真实 E2E；将结果固化为 JSON artifact，并依据真实结果修复状态回显缺口。

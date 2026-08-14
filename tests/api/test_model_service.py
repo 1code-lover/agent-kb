@@ -521,6 +521,11 @@ def test_attempt_model_fallback_selects_first_reachable_candidate(monkeypatch: p
     assert store.values["current_llm_info"]["model"] == "good-chat"
     assert store.values["model_health_status"]["state"] == "fallback_applied"
     assert store.values["model_health_status"]["last_error_kind"] == "quota_exhausted"
+    assert store.values["model_health_status"]["fallback_from"] == {
+        "service_provider": "Acme",
+        "model": "bad-chat",
+        "api_base": "https://acme.example/v1",
+    }
     assert store.values["model_health_status"]["fallback_to"]["model"] == "good-chat"
     assert store.values["model_health_status"]["fallback_attempt_summary"] == {
         "total": 1,

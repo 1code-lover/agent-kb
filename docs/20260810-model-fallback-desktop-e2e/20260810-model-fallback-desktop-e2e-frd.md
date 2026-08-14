@@ -89,3 +89,4 @@ Agent 高级模式的 `llm_chat` 工具使用当前模型配置直接调用 prov
 4. fallback 未应用时保留原异常；重试仍失败时将健康状态更新为 `unavailable`，不进行无限重试。
 5. Agent 结果和工具回执记录最终 provider/model、`model_health` 与结构化 fallback 来源/目标，不记录 API Key。
 6. 前端 Agent 成功回调继续刷新 model options，以显示“已自动切换”和最终模型。
+7. 成功切换后必须保留切换前模型快照；`select_model` 的健康状态重置不能丢失 `fallback_from`。

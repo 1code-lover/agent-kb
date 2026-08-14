@@ -13,4 +13,5 @@
 | 单次公证且不重复提交 | FR-07 | `desktop/scripts/verify-release-config.test.js` 检查 `afterSign` 与 `mac.notarize=false` |
 | 正式签名、公证和安装后验证 | FR-07 | `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release`、桌面工作流报告 |
 | Agent 直连 Ollama | FR-08 | `tests/api/test_agent_tools.py` Ollama 原生 `/api/chat` 请求测试 |
-| Agent 直连模型自动 fallback | FR-08 | `tests/api/test_agent_tools.py` 首次失败、切换、单次重试和失败状态测试；`tests/api/test_agent_runtime.py` 结果透传测试 |
+| Agent 直连模型自动 fallback | FR-08 | `tests/api/test_agent_tools.py` 首次失败、切换、单次重试和失败状态测试；`tests/api/test_agent_runtime.py` 结果透传测试；`artifacts/agent-ollama-fallback-e2e-report-20260815.json` 真实本地模型报告 |
+| fallback 来源/目标完整回显 | FR-03、FR-08 | `tests/api/test_model_service.py` 来源快照回归；真实 Ollama E2E 报告的 `fallback_from/fallback_to` |

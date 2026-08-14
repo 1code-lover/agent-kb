@@ -29,3 +29,4 @@
 - 云端或 Ollama 首次调用出现可恢复错误时，自动切换到首个探活成功候选并只重试一次。
 - Agent 返回结果包含最终 `model_health` 和 fallback 元数据，receipt 记录最终模型及切换摘要。
 - fallback 不可用或第二次调用失败时返回明确错误，并保持可诊断健康状态。
+- 切换成功后的健康状态同时保留 `fallback_from` 和 `fallback_to`；真实 Ollama E2E 报告必须验证动态发现、原生推理和明确切换摘要。

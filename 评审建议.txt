@@ -1,26 +1,25 @@
-代码与测试报告评审建议（2026-08-15，Agent 直连 Ollama 与自动 fallback）
+代码与测试报告评审建议（2026-08-15，真实 Ollama Agent fallback E2E 与来源回显修复）
 
 评审结论：
-本轮实现完成了原目标中真实遗漏的 Agent 高级模式模型韧性：Ollama 不再被硬编码拒绝，云端或本地模型出现可恢复错误时会复用统一候选探测并自动切换一次。实现、测试、最新 ad-hoc 打包和测试报告相互一致，代码审核通过，可以进入开发故事沉淀和提交阶段。
+本轮补齐了此前明确缺失的真实 Ollama 运行证据，并依据真实链路发现和修复了 `fallback_from` 被 `select_model` 重置的问题。真实 Agent 直接推理、坏云端模型到动态 Ollama 候选切换、状态/step/receipt 回显、全量测试和最新 ad-hoc 打包均有直接证据，代码与测试报告审核通过，可以进入开发故事沉淀和提交阶段。
 
-正式 Apple 签名、公证、stapling 与安装后回归仍受外部凭证阻塞；本机也没有 Ollama 服务或本地模型，因此不得宣称正式 macOS release 或真实 Ollama 推理 E2E 已完成。
+正式 Apple 签名、公证、stapling 与正式安装后回归仍受 Developer ID Application 和公证凭证阻塞，不得标记为完成。
 
 优点：
-1. provider 调用被拆为配置读取、共享 JSON 请求、OpenAI 兼容调用和 Ollama 原生调用，云端兼容性与本地协议均有独立测试。
-2. `run_llm_chat` 复用 `attempt_model_fallback`，切换后重新读取当前配置，只重试一次；没有引入第二套候选逻辑。
-3. fallback 后真实重试失败会覆盖健康状态为 `unavailable`，避免保留误导性的 `fallback_applied`。
-4. 对外 fallback 结果主动裁掉 `selected.api_key`；receipt 和日志只保留错误类别、候选数、来源/目标和最终模型。
-5. Agent API 返回 `fallback`、`model_health`，step 摘要明确显示“已自动切换到 provider / model”，前端已有 model options 刷新会立即展示状态。
-6. Ollama 常见 `model 'name' not found` 已纳入 `model_unavailable` 分类；真实云端隔离链路证明缺失模型可自动切换到可用候选。
-7. 验证完整：定向 `74 passed`，Python 全量 `790 passed, 1 deselected`，Web `89 passed` 且 build 通过，Electron `64 passed`，最新 `build:mac` 和 `verify:package` 通过。
+1. 使用官方签名有效的 Ollama 0.32.13 App 包和真实 `qwen2.5:0.5b` 模型，验证不再停留在 mock 或协议单测。
+2. 真实报告覆盖当前 Ollama 直接 Agent 推理，以及不可达云端模型通过空模型列表的动态 `/api/tags` 发现切换到 Ollama，正好对应原始目标。
+3. 两个 case 都通过 `agent_runtime.run_agent`，同时验证 task status、最终 provider/model、明确 step 摘要和模型健康状态。
+4. E2E 首次暴露 `fallback_from=null`，随后先补失败测试，再在最终健康状态写入中恢复 `base_status.fallback_from`；来源/目标现均完整。
+5. JSON 报告记录 Ollama 版本、模型 digest/size/量化、隔离策略和每例结果，不包含真实 API Key，也不写 session/receipt。
+6. 回归结果稳定：Python `790 passed, 1 deselected`，Electron `64 passed`，Web build 通过；最新 `build:mac`、`verify:package` 通过且 packaged code 包含修复。
 
 需要改进的地方：
-1. 当前机器没有 Ollama 可执行文件、服务和本地模型，原生 `/api/chat` 仅有请求级自动化测试，尚无真实本地推理证据。
-2. 当前机器仍无有效 Developer ID Application 身份和任一完整公证凭证，严格 release preflight、codesign、Gatekeeper 和 stapler 按预期失败。
-3. 最新 DMG/ZIP 是 ad-hoc 产物，只能用于包内容验证，不能作为正式发布候选。
+1. Homebrew formula 因当前 Homebrew 与 Python 3.14 bottle 的 `set_permissions` 安装步骤不兼容而失败，本轮使用官方 App zip 解压到用户 Applications；这不影响验证，但不是标准 Homebrew service 安装。
+2. Ollama 服务需要独立运行，NorthAgent 当前不会自动安装、启动或拉取模型；新机器仍需运行时准备。
+3. 当前 Apple 发布条件仍为空：`0 valid identities found`，三类公证凭证均未配置；最新产物仍是 ad-hoc。
 
 具体建议：
-1. 生成本轮开发故事，推进 capture state，提交前执行 `git diff --check` 并复核未提交窗口。
-2. 提交并推送 Agent Ollama/fallback 实现后确认本地远程 `0 0`。
-3. 后续安装 Ollama 并拉取一个小型模型，执行 Agent 原生聊天和“坏云端模型 -> Ollama”真实切换 E2E。
-4. Apple 证书和公证凭证到位后执行 `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release` 和安装后桌面工作流。
+1. 生成本轮真实 E2E/bugfix 开发故事并推进 capture state。
+2. 提交 JSON artifact、`fallback_from` 修复、测试和文档，push 前复核未沉淀窗口。
+3. 后续可把 Ollama 安装/启动检查纳入桌面 release checklist 或独立诊断命令，但不要让 NorthAgent 静默下载数百 MB 模型。
+4. Apple 条件到位后继续执行严格 release、codesign、notarization、stapler、Gatekeeper 和正式安装后工作流。

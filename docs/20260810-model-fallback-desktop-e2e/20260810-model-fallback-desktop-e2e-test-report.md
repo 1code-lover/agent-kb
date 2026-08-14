@@ -17,6 +17,7 @@
 | chat query 返回最新 model health | 通过 | `tests/api/test_chat_service.py` |
 | Agent 直连 Ollama 原生协议 | 通过 | `tests/api/test_agent_tools.py` |
 | Agent 模型错误自动 fallback | 通过 | `tests/api/test_agent_tools.py`、`tests/api/test_agent_runtime.py` |
+| Agent 真实 Ollama 推理与动态 fallback | 通过，`2/2 cases` | `artifacts/agent-ollama-fallback-e2e-report-20260815.json` |
 | `GET /api/model/health` | 通过 | `tests/api/test_settings_routes.py` |
 | QA eval `--resume` / `--stop-on-api-error` | 通过 | `tests/scripts/test_run_grain_qa_eval.py` |
 | 前端模型健康状态映射 | 通过 | `webapp/src/domain/modelHealth.test.js` |
@@ -41,19 +42,22 @@
 - fallback 探活成功但真实重试仍失败时停止重试并把健康状态覆盖为 `unavailable`。
 - `agent_runtime.run_agent` 返回 `fallback`、`model_health`，step 摘要明确显示“已自动切换到 provider / model”；前端已有成功回调会立即刷新 model options。
 - Ollama 常见的 `model 'name' not found` 错误现在能归类为 `model_unavailable` 并触发候选切换。
+- 真实 E2E 首次发现 `select_model` 会把之前记录的 `fallback_from` 重置为 `None`；最终 `fallback_applied` 写入现在显式恢复原模型快照，来源和目标均可回显。
 
-TDD 红灯证据：新增测试初次执行为 `5 failed, 4 passed`，覆盖缺失 `_call_configured_model`、无 fallback、无状态透传等真实缺口；Ollama 带模型名的 404 文本分类测试初次结果为 `1 failed`。实现后 Agent/model/chat 定向测试为 `74 passed`。
+TDD 红灯证据：新增测试初次执行为 `5 failed, 4 passed`，覆盖缺失 `_call_configured_model`、无 fallback、无状态透传等真实缺口；Ollama 带模型名的 404 文本分类测试初次结果为 `1 failed`；真实 E2E 暴露的 `fallback_from` 回归测试初次也为 `1 failed`。修复后 Agent/model/chat 定向测试为 `74 passed`，Python 全量继续通过。
 
 最终回归：Python `790 passed, 1 deselected, 35 warnings`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`。重新执行真实 `build:mac` 和 `verify:package` 均通过，最新 packaged app 已包含 `_call_ollama`、`attempt_model_fallback` 和“已自动切换到”逻辑。产物校验值：
 
 ```text
-93b10adbb1dbdcfb4c0c286c532116142f1a05f2399b55b85acdfa3e9512e0a5  NorthAgent-0.1.0-arm64.dmg
-9ccccb9616e8bcc3dcc8d8d7c5a863eae43323e9fd1f6b28c44c3fcba21f0e32  NorthAgent-0.1.0-arm64-mac.zip
+e2c5f636df57a5caeb5b1a4830fe5b89d514c20485349ca2254e5af18a733f40  NorthAgent-0.1.0-arm64.dmg
+f18400345f466f022253b01c3fe6ceceb03860161c3daf19d3836eb6c2e0a674  NorthAgent-0.1.0-arm64-mac.zip
 ```
 
 真实云端链路验证使用当前已配置的 `qwen-math-turbo`：Agent 直连调用成功；随后在单进程隔离配置中把当前模型设为明确不存在的模型、把真实可用模型设为候选，`run_llm_chat` 得到 `error_kind=model_unavailable`、`fallback_applied=true`、`candidate_count=1`、`health_state=fallback_applied`，最终通过 `GoodCloud / qwen-math-turbo` 返回响应。隔离脚本使用内存 store、禁用 session/receipt 持久化，未输出或修改真实 API Key。
 
-当前机器没有安装或启动 Ollama，`http://127.0.0.1:11434/api/tags` 返回 connection refused，因此本轮 Ollama 原生协议已通过请求级单测和 packaged contents 验证，但未宣称完成真实本地模型推理 E2E。正式 Apple 签名、公证和安装后回归仍受原外部凭证阻塞。
+真实 Ollama 验证使用官方 `0.32.13` App 包和 `qwen2.5:0.5b`（397,821,319 bytes、494.03M、Q4_K_M）。`ollama-direct-agent-runtime` 返回精确答案 `OLLAMA_AGENT_DIRECT_OK`；`bad-cloud-to-dynamic-ollama-candidate` 从不可达 `BadCloud / offline-model` 自动发现本地模型并返回 `OLLAMA_AGENT_FALLBACK_OK`，最终 `fallback_applied=true`、`candidate_count=1`、`ollama_candidate_count=1`、来源/目标完整、step 为“已自动切换到 Ollama / qwen2.5:0.5b”。报告 `run_passed=true`，两例均使用内存配置且关闭 session/receipt 持久化，不使用真实 API Key。
+
+正式 Apple 签名、公证和安装后回归仍受原外部凭证阻塞；Ollama 运行时也需要在 NorthAgent 之外独立启动。
 
 ## 2026-08-14 fallback 状态即时同步补充
 
@@ -77,6 +81,7 @@ TDD 红灯证据：新增测试初次执行为 `5 failed, 4 passed`，覆盖缺�
 | Web domain/API/store 测试 | `89 passed` |
 | Web Vite build | 通过 |
 | Electron CSP/runtime/release 测试 | `64 passed` |
+| Agent 真实 Ollama E2E | `2/2 passed`、`run_passed=true` |
 | v1-v6 跨领域 case | `49/49 passed` |
 | v1-v6 跨领域 turn | `54/54 passed` |
 | 正向 / 负向 / contract | `100% / 100% / 100%` |
