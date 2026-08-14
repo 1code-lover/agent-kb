@@ -227,6 +227,7 @@ def classify_model_error(error: Any, status_code: int | None = None) -> str:
         return "forbidden"
     if (
         "model not found" in lowered
+        or ("model" in lowered and "not found" in lowered)
         or "model_not_found" in lowered
         or "does not exist" in lowered
         or "unsupported model" in lowered

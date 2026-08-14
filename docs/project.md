@@ -458,6 +458,17 @@ cd webapp && npm run build
 - `cd desktop && npm run build:mac`：真实打包通过，生成 arm64 dmg/zip；自定义 hook 执行一次并因无凭证安全跳过。`npm run verify:package` 通过。
 - `cd desktop && npm run release:preflight`：按预期退出 `1`，一次列出三类凭证均未配置和 `Developer ID Application signing identity missing`；正式签名、公证、stapling 与安装后回归仍等待外部 Apple 凭证。
 
+### 5.34 2026-08-15 Agent 直连 Ollama 与自动 fallback
+
+- 复核发现 `api/services/agent_tools.py` 在 Agent 高级模式选择 Ollama 时仍直接抛出未实现异常，且云端直连模型失败不会进入基础问答已有的自动 fallback。
+- Agent 直连调用现按 provider 分派：云端使用 OpenAI 兼容 `/chat/completions`，Ollama 使用原生 `/api/chat`、`stream=false`，无需 API Key。
+- `run_llm_chat` 首次遇到可恢复模型错误后复用 `attempt_model_fallback`，切换后重读当前配置并只重试一次；第二次调用失败会将健康状态更新为 `unavailable`。
+- Agent API 结果、step、receipt 和安全日志现在包含不带凭证的 fallback 摘要；前端能通过已有 model options 刷新显示最终模型和“已自动切换”。
+- Ollama 常见 `model 'name' not found` 404 文本已归类为 `model_unavailable`，可触发其他 Ollama/云端候选。
+- TDD 初始为 `5 failed, 4 passed`，修复后 Agent/model/chat 定向测试 `74 passed`；Python 非 slow 全量 `790 passed, 1 deselected, 35 warnings`，Web `89 passed` 且 build 通过，Electron `64 passed`。
+- 当前真实云端模型直连成功；隔离内存配置下，缺失模型自动切换到 `qwen-math-turbo` 的真实链路得到 `fallback_applied=true`、`error_kind=model_unavailable`、`health_state=fallback_applied`，且未输出或持久化 API Key。
+- 最新 ad-hoc `build:mac` 和 `verify:package` 通过，packaged app 已包含 Agent Ollama/fallback 实现；本机未安装或启动 Ollama，因此真实本地模型推理 E2E 尚无证据。
+
 ---
 
 ## 6. 已知问题和限制
@@ -472,6 +483,7 @@ cd webapp && npm run build
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
 - **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包、packaged app 启动验证、包内容校验和 mac release 后置签名/公证校验；preflight 已能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，`verify-mac-release` 已能检查 codesign、Gatekeeper 和 stapler，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
+- **Ollama 真实推理 E2E 尚未执行**：Agent 原生 `/api/chat`、候选切换和 packaged contents 已通过自动化测试，但当前机器没有 Ollama 可执行文件、服务或本地模型，`127.0.0.1:11434` connection refused；不能把协议级验证表述为真实模型推理通过。
 - **桌面端依赖安全已收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，`electron-builder` 也已升级到 `26.15.3`，`desktop npm audit` 当前为 `0 vulnerabilities`。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
 
@@ -525,6 +537,10 @@ cd webapp && npm run build
 
 | hash | 说明 |
 |---|---|
+| `5976343` | chore: update dev story capture state |
+| `5e0826a` | fix(chat): refresh model health after fallback |
+| `3792506` | chore: update dev story capture state |
+| `f797461` | fix(desktop): prevent duplicate mac notarization |
 | `f12d28d` | chore: update dev story capture state |
 | `c4f2abb` | feat(chat): close cross-domain grounding regressions |
 | `d15a42f` | feat(model): fallback on request incompatibility |

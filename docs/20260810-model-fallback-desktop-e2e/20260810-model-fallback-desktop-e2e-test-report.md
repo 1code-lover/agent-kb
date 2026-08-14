@@ -2,9 +2,9 @@
 
 ## 结论
 
-截至 2026-08-14，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；问答响应现在同步返回最新 `model_health`，Agent 问答成功后主动刷新模型 options，不再等待 60 秒缓存过期；前端能展示最近探测摘要和“请求超出模型能力”等明确提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
+截至 2026-08-15，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；基础问答、知识库问答和 Agent 高级模式均复用自动 fallback，Agent 直连聊天已支持 Ollama 原生 `/api/chat`；问答响应同步返回最新 `model_health`，前端能展示最近探测摘要和明确切换提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
 
-当前最终门禁为：Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
+当前最终门禁为：Python `790 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
 
 正式 macOS 签名、公证、stapling 和安装后回归尚未完成：本机缺少 Apple Developer 凭证、有效的 Developer ID Application 证书，且三种公证凭证策略（Keychain profile、App Store Connect API Key、Apple ID）均未配置。因此当前可以判定“发布实现、非严格预检、包内容和校验链路通过”，不能判定“正式 macOS release 完成”。
 
@@ -15,6 +15,8 @@
 | 模型错误分类与 fallback 单测 | 通过 | `tests/api/test_model_service.py` |
 | chat query 模型失败后 fallback 重试 | 通过 | `tests/api/test_chat_service.py` |
 | chat query 返回最新 model health | 通过 | `tests/api/test_chat_service.py` |
+| Agent 直连 Ollama 原生协议 | 通过 | `tests/api/test_agent_tools.py` |
+| Agent 模型错误自动 fallback | 通过 | `tests/api/test_agent_tools.py`、`tests/api/test_agent_runtime.py` |
 | `GET /api/model/health` | 通过 | `tests/api/test_settings_routes.py` |
 | QA eval `--resume` / `--stop-on-api-error` | 通过 | `tests/scripts/test_run_grain_qa_eval.py` |
 | 前端模型健康状态映射 | 通过 | `webapp/src/domain/modelHealth.test.js` |
@@ -29,6 +31,30 @@
 | 正式 macOS 签名、公证和 stapling | 待外部凭证 | `APPLE_*` 环境变量和 Developer ID Application 证书尚未配置 |
 | 跨知识库 v1-v6 真实评测 | 通过，`49/49 cases`、`54/54 turns` | `artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json` |
 
+## 2026-08-15 Agent 直连 Ollama 与自动 fallback 补充
+
+本次完成了原目标中尚未覆盖的 Agent 高级模式：原实现检测到当前 provider 为 Ollama 时直接抛出未实现异常，云端直连调用失败也不会进入已有 fallback。当前实现：
+
+- `api/services/agent_tools.py` 按 provider 分派调用：云端保留 OpenAI 兼容 `/chat/completions`，Ollama 使用原生 `/api/chat`、`stream=false` 和无 API Key 请求。
+- `run_llm_chat` 首次调用失败后复用 `model_service.attempt_model_fallback`，读取切换后的 `current_llm_info` 并只重试一次。
+- 对外 fallback 摘要只包含错误类别、候选数、来源/目标和探测摘要，主动裁掉 `selected.api_key`；receipt 和 Agent 日志不记录凭证。
+- fallback 探活成功但真实重试仍失败时停止重试并把健康状态覆盖为 `unavailable`。
+- `agent_runtime.run_agent` 返回 `fallback`、`model_health`，step 摘要明确显示“已自动切换到 provider / model”；前端已有成功回调会立即刷新 model options。
+- Ollama 常见的 `model 'name' not found` 错误现在能归类为 `model_unavailable` 并触发候选切换。
+
+TDD 红灯证据：新增测试初次执行为 `5 failed, 4 passed`，覆盖缺失 `_call_configured_model`、无 fallback、无状态透传等真实缺口；Ollama 带模型名的 404 文本分类测试初次结果为 `1 failed`。实现后 Agent/model/chat 定向测试为 `74 passed`。
+
+最终回归：Python `790 passed, 1 deselected, 35 warnings`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`。重新执行真实 `build:mac` 和 `verify:package` 均通过，最新 packaged app 已包含 `_call_ollama`、`attempt_model_fallback` 和“已自动切换到”逻辑。产物校验值：
+
+```text
+93b10adbb1dbdcfb4c0c286c532116142f1a05f2399b55b85acdfa3e9512e0a5  NorthAgent-0.1.0-arm64.dmg
+9ccccb9616e8bcc3dcc8d8d7c5a863eae43323e9fd1f6b28c44c3fcba21f0e32  NorthAgent-0.1.0-arm64-mac.zip
+```
+
+真实云端链路验证使用当前已配置的 `qwen-math-turbo`：Agent 直连调用成功；随后在单进程隔离配置中把当前模型设为明确不存在的模型、把真实可用模型设为候选，`run_llm_chat` 得到 `error_kind=model_unavailable`、`fallback_applied=true`、`candidate_count=1`、`health_state=fallback_applied`，最终通过 `GoodCloud / qwen-math-turbo` 返回响应。隔离脚本使用内存 store、禁用 session/receipt 持久化，未输出或修改真实 API Key。
+
+当前机器没有安装或启动 Ollama，`http://127.0.0.1:11434/api/tags` 返回 connection refused，因此本轮 Ollama 原生协议已通过请求级单测和 packaged contents 验证，但未宣称完成真实本地模型推理 E2E。正式 Apple 签名、公证和安装后回归仍受原外部凭证阻塞。
+
 ## 2026-08-14 fallback 状态即时同步补充
 
 本次复核发现：服务端 fallback 已经更新持久化健康状态，但问答页的 `/api/model/options` 查询设置了 60 秒 `staleTime`，聊天成功回调此前没有主动刷新，因此自动切换后页面可能短时间继续展示旧模型。已按 TDD 补齐：
@@ -39,7 +65,7 @@
 
 定向验证：Python `tests/api/test_chat_service.py` 为 `43 passed`；Web API/domain/store 测试为 `89 passed`，Vite build 通过。随后重新执行非 slow Python 全量测试为 `783 passed, 1 deselected, 35 warnings`，Electron 测试为 `64 passed`。
 
-## 2026-08-14 最终收口复核
+## 2026-08-15 当前最终收口复核
 
 本节是当前最终结论；后续按日期保留的 `37/49`、`44/49`、embedding 缓存缺失和定向失败结果均为优化过程中的历史证据，不代表当前状态。
 
@@ -47,7 +73,7 @@
 
 | 门禁 | 最终结果 |
 |---|---:|
-| Python 非 slow 全量测试 | `783 passed, 1 deselected, 35 warnings` |
+| Python 非 slow 全量测试 | `790 passed, 1 deselected, 35 warnings` |
 | Web domain/API/store 测试 | `89 passed` |
 | Web Vite build | 通过 |
 | Electron CSP/runtime/release 测试 | `64 passed` |

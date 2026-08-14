@@ -14,7 +14,7 @@ from typing import Any
 
 from api.schemas import QueryRequest
 from api.services.evidence_service import normalize_evidence as build_evidence_items
-from api.services import chat_service
+from api.services import chat_service, model_service
 from api.services.fallback_store import FALLBACK_CONFIG_STORE
 from api.services.tool_receipt_store import append_receipt
 from server.security.command_validator import CommandValidator
@@ -41,48 +41,93 @@ def _get_config_store():
         return FALLBACK_CONFIG_STORE
 
 
-def _call_openai_compatible(question: str) -> dict[str, Any]:
+def _load_current_model_config() -> dict[str, Any]:
+    """读取 Agent 直连模型所需的当前配置。"""
     config_store = _get_config_store()
     current_llm_info = config_store.get("current_llm_info") or {}
     current_llm_settings = config_store.get("current_llm_settings") or {}
 
-    provider = current_llm_info.get("service_provider", "")
-    model = current_llm_info.get("model", "")
+    provider = str(current_llm_info.get("service_provider") or "").strip()
+    model = str(current_llm_info.get("model") or "").strip()
     api_base = (current_llm_info.get("api_base") or "").strip().rstrip("/")
     api_key = current_llm_info.get("api_key") or ""
     temperature = current_llm_settings.get("temperature", 0.1)
     system_prompt = current_llm_settings.get("system_prompt", "")
 
-    if provider == "Ollama":
-        raise RuntimeError("Ollama direct agent chat is not implemented in the lightweight runtime yet.")
-    if not api_base or not api_key or not model:
+    if provider == "Ollama" and not api_base:
+        api_base = config.OLLAMA_API_URL.rstrip("/")
+    if not provider or not api_base or not model:
+        raise RuntimeError("Current model is not configured. Please save a provider and model first.")
+    if provider != "Ollama" and not api_key:
         raise RuntimeError("Current model is not configured. Please save a provider and model first.")
 
-    url = f"{api_base}/chat/completions"
-    payload = json.dumps(
-        {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_prompt or "You are a helpful desktop agent."},
-                {"role": "user", "content": question},
-            ],
-            "temperature": temperature,
-        }
-    ).encode("utf-8")
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
+    return {
+        "provider": provider,
+        "model": model,
+        "api_base": api_base,
+        "api_key": api_key,
+        "temperature": temperature,
+        "system_prompt": system_prompt,
     }
-    request = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+
+
+def _request_json(url: str, payload: dict[str, Any], headers: dict[str, str]) -> dict[str, Any]:
+    """发送模型 JSON 请求，并把网络/协议错误统一为可分类异常。"""
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
 
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
-            body = json.loads(response.read().decode("utf-8"))
+            raw_body = response.read().decode("utf-8", errors="ignore")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="ignore")
         raise RuntimeError(f"Model request failed with HTTP {exc.code}: {detail[:400]}") from exc
     except Exception as exc:
         raise RuntimeError(f"Model request failed: {exc}") from exc
+
+    try:
+        body = json.loads(raw_body or "{}")
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Model response was not valid JSON: {raw_body[:200]}") from exc
+    if not isinstance(body, dict):
+        raise RuntimeError("Model response was not a JSON object.")
+    return body
+
+
+def _build_messages(question: str, system_prompt: str) -> list[dict[str, str]]:
+    """构造云端与 Ollama 共用的消息列表。"""
+    return [
+        {"role": "system", "content": system_prompt or "You are a helpful desktop agent."},
+        {"role": "user", "content": question},
+    ]
+
+
+def _call_openai_compatible(
+    question: str,
+    model_config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """调用 OpenAI 兼容的 chat completions。"""
+    model_config = model_config or _load_current_model_config()
+    provider = model_config["provider"]
+    model = model_config["model"]
+    api_base = model_config["api_base"]
+    api_key = model_config["api_key"]
+
+    url = f"{api_base}/chat/completions"
+    payload = {
+        "model": model,
+        "messages": _build_messages(question, str(model_config.get("system_prompt") or "")),
+        "temperature": model_config.get("temperature", 0.1),
+    }
+    body = _request_json(
+        url,
+        payload,
+        {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+    )
 
     choices = body.get("choices") or []
     if not choices:
@@ -99,16 +144,95 @@ def _call_openai_compatible(question: str) -> dict[str, Any]:
     }
 
 
+def _call_ollama(question: str, model_config: dict[str, Any]) -> dict[str, Any]:
+    """使用 Ollama 原生 /api/chat 协议调用本地模型。"""
+    provider = model_config["provider"]
+    model = model_config["model"]
+    api_base = model_config["api_base"]
+    payload = {
+        "model": model,
+        "messages": _build_messages(question, str(model_config.get("system_prompt") or "")),
+        "options": {"temperature": model_config.get("temperature", 0.1)},
+        "stream": False,
+    }
+    body = _request_json(f"{api_base}/api/chat", payload, {"Content-Type": "application/json"})
+    if body.get("error"):
+        raise RuntimeError(f"Model request failed: {str(body['error'])[:400]}")
+    message = body.get("message") or {}
+    answer = message.get("content") if isinstance(message, dict) else ""
+    if not answer:
+        raise RuntimeError("Model response did not contain an assistant message.")
+    return {
+        "provider": provider,
+        "model": model,
+        "api_base": api_base,
+        "answer": answer,
+        "raw": body,
+    }
+
+
+def _call_configured_model(question: str) -> dict[str, Any]:
+    """按当前 provider 调用云端 OpenAI 兼容接口或本地 Ollama。"""
+    model_config = _load_current_model_config()
+    if model_config["provider"] == "Ollama":
+        return _call_ollama(question, model_config)
+    return _call_openai_compatible(question, model_config)
+
+
+def _public_fallback_result(fallback: dict[str, Any], health: dict[str, Any]) -> dict[str, Any]:
+    """裁剪 fallback 结果，避免 selected 中的 API Key 进入响应或回执。"""
+    return {
+        "applied": True,
+        "error_kind": fallback.get("error_kind"),
+        "candidate_count": fallback.get("candidate_count", 0),
+        "fallback_from": health.get("fallback_from"),
+        "fallback_to": health.get("fallback_to"),
+        "fallback_attempt_summary": fallback.get("fallback_attempt_summary", {}),
+    }
+
+
 def run_llm_chat(session_id: str, question: str) -> dict[str, Any]:
-    result = _call_openai_compatible(question)
+    """执行 Agent 直连聊天，并在可恢复模型错误后自动切换一次。"""
+    fallback_info: dict[str, Any] | None = None
+    try:
+        result = _call_configured_model(question)
+    except Exception as first_error:
+        fallback = model_service.attempt_model_fallback(first_error, session_id=session_id)
+        if not fallback.get("applied"):
+            raise
+        try:
+            result = _call_configured_model(question)
+        except Exception as retry_error:
+            model_service.update_model_health(
+                state="unavailable",
+                last_error_kind=model_service.classify_model_error(retry_error),
+                last_error=str(retry_error)[:500],
+                last_checked_at=now_iso(),
+            )
+            raise
+        health = model_service.get_model_health()
+        fallback_info = _public_fallback_result(fallback, health)
+
+    model_health = model_service.get_model_health()
     receipt = append_receipt(
         session_id=session_id,
         tool_name="llm_chat",
         input_data={"question": question, "provider": result["provider"], "model": result["model"]},
-        output_data={"answer": result["answer"], "provider": result["provider"], "model": result["model"]},
+        output_data={
+            "answer": result["answer"],
+            "provider": result["provider"],
+            "model": result["model"],
+            "fallback": fallback_info,
+        },
         status="ok",
     )
-    return {"result": result, "receipt": receipt, "evidence": []}
+    return {
+        "result": result,
+        "receipt": receipt,
+        "evidence": [],
+        "fallback": fallback_info,
+        "model_health": model_health,
+    }
 
 
 def run_kb_search(session_id: str, question: str, kb_ids: list[str] | None = None) -> dict[str, Any]:

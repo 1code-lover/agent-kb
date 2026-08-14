@@ -48,3 +48,10 @@ cd desktop && npm run verify:package
 12. 先在 `tests/api/test_chat_service.py` 增加正常 query 与 fallback query 的 `model_health` 响应契约测试。
 13. 在 `api/services/chat_service.py` 返回服务端最新健康快照；在 `webapp/src/pages/AgentPage.jsx` 的问答成功处理器中主动刷新模型 options。
 14. 运行定向 Python/Web 测试和 Web build；更新测试报告与评审建议后再提交。
+
+## 2026-08-15 Agent Ollama 与 fallback 补充
+
+15. 先新增 `tests/api/test_agent_tools.py`，覆盖 Ollama 原生请求、云端失败后切换到 Ollama、非可恢复错误和重试失败状态。
+16. 将 Agent 直连调用拆为当前配置读取、OpenAI 兼容调用和 Ollama 原生调用；`run_llm_chat` 统一负责单次 fallback。
+17. 在 `agent_runtime.run_agent` 结果、step 和 receipt 中透传最终模型健康与切换摘要，前端沿用已有 model options 主动刷新。
+18. 执行 Agent 定向测试、Python 非 slow 全量测试、Web 测试/build 和 Electron 测试，更新报告、评审和开发故事后提交推送。

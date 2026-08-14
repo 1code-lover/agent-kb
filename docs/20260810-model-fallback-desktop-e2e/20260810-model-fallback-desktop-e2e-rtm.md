@@ -12,3 +12,5 @@
 | macOS 三种公证凭证策略 | FR-07 | `desktop/scripts/notarization-credentials.test.js`、`desktop/scripts/notarize-mac.test.js`、`desktop/scripts/release-preflight.test.js` |
 | 单次公证且不重复提交 | FR-07 | `desktop/scripts/verify-release-config.test.js` 检查 `afterSign` 与 `mac.notarize=false` |
 | 正式签名、公证和安装后验证 | FR-07 | `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release`、桌面工作流报告 |
+| Agent 直连 Ollama | FR-08 | `tests/api/test_agent_tools.py` Ollama 原生 `/api/chat` 请求测试 |
+| Agent 直连模型自动 fallback | FR-08 | `tests/api/test_agent_tools.py` 首次失败、切换、单次重试和失败状态测试；`tests/api/test_agent_runtime.py` 结果透传测试 |

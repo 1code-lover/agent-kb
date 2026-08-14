@@ -104,6 +104,8 @@ def run_agent(request) -> dict:
     evidence: list[dict] = []
     answer = ""
     status = "completed"
+    fallback_info: dict[str, Any] | None = None
+    model_health: dict[str, Any] | None = None
 
     try:
         if tool_name == "read_file":
@@ -193,7 +195,12 @@ def run_agent(request) -> dict:
 
         else:
             output = run_llm_chat(session_id, question)
+            fallback_info = output.get("fallback")
+            model_health = output.get("model_health")
             mark_completed(plan, "plan-model", "plan-answer", "plan-trace")
+            step_summary = f"{output['result']['provider']} / {output['result']['model']}"
+            if fallback_info and fallback_info.get("applied"):
+                step_summary = f"已自动切换到 {step_summary}"
             steps.append(
                 {
                     "step": "llm_chat",
@@ -201,7 +208,7 @@ def run_agent(request) -> dict:
                     "status": "completed",
                     "risk_level": "low",
                     "receipt_id": output["receipt"]["id"],
-                    "summary": f"{output['result']['provider']} / {output['result']['model']}",
+                    "summary": step_summary,
                 }
             )
             answer = output["result"]["answer"] or "Model returned no answer."
@@ -218,6 +225,7 @@ def run_agent(request) -> dict:
                     "provider": output["result"]["provider"],
                     "model": output["result"]["model"],
                     "api_base": output["result"]["api_base"],
+                    "fallback": fallback_info,
                     "answer_preview": safe_preview(output["result"]["answer"]),
                 },
             )
@@ -265,6 +273,8 @@ def run_agent(request) -> dict:
         "evidence": evidence,
         "receipts": list_receipts(session_id=session_id, limit=20),
         "pending_actions": pending_actions,
+        "fallback": fallback_info,
+        "model_health": model_health,
     }
 
     replace_run_artifacts(

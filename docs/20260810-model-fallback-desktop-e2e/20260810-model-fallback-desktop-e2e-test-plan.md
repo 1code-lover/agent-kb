@@ -54,3 +54,12 @@
 - `/api/chat/query` 正常回答返回 `model_health` 快照。
 - `/api/chat/query` fallback 重试后返回 `fallback_applied` 及来源/目标模型。
 - Agent 问答成功后主动刷新模型 options，确保切换提示不等待缓存过期。
+
+## Agent 直连 Ollama 与 fallback 补充
+
+- Ollama 当前模型调用 `{api_base}/api/chat`，请求包含 `stream=false`、system/user messages 和 temperature，不携带 Authorization。
+- 云端当前模型第一次返回额度/401/403/模型不可用/网络错误时，Agent 自动切换到候选并重试一次。
+- fallback 切到 Ollama 后，第二次调用按 Ollama 原生协议执行，并在结果、回执和健康状态中记录最终模型。
+- 非可恢复错误不切换；没有可用候选时保留原错误。
+- fallback 后实际调用再次失败时不继续循环，健康状态更新为 `unavailable`。
+- `agent_runtime.run_agent` 返回 `model_health` 和 fallback 元数据，step 摘要能说明自动切换。

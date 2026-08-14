@@ -101,3 +101,45 @@ def test_kb_search_passes_knowledge_scope_as_kb_ids() -> None:
     mock_run_kb_search.assert_called_once_with(session_id, "帮我查产品文档", kb_ids=["my-kb"])
     assert result["task_state"]["status"] == "completed"
     assert result["answer"] == "ok"
+
+
+def test_agent_llm_chat_returns_fallback_health_and_switch_summary() -> None:
+    """Agent 直连模型切换后应把健康状态和明确切换摘要返回给前端。"""
+    session_id = "test-agent-runtime-fallback"
+    reset_session(session_id)
+    fallback = {
+        "applied": True,
+        "error_kind": "quota_exhausted",
+        "fallback_from": {"service_provider": "Cloud", "model": "expired"},
+        "fallback_to": {"service_provider": "Ollama", "model": "qwen2.5:7b"},
+    }
+    model_health = {
+        "state": "fallback_applied",
+        "current_provider": "Ollama",
+        "current_model": "qwen2.5:7b",
+        "fallback_from": fallback["fallback_from"],
+        "fallback_to": fallback["fallback_to"],
+    }
+
+    with (
+        patch("api.services.agent_runtime.route_agent_task", return_value={"tool_name": "llm_chat"}),
+        patch("api.services.agent_runtime.run_llm_chat") as mock_run_llm_chat,
+    ):
+        mock_run_llm_chat.return_value = {
+            "result": {
+                "provider": "Ollama",
+                "model": "qwen2.5:7b",
+                "api_base": "http://localhost:11434",
+                "answer": "fallback answer",
+            },
+            "receipt": {"id": "receipt-agent-fallback"},
+            "evidence": [],
+            "fallback": fallback,
+            "model_health": model_health,
+        }
+        result = agent_runtime.run_agent(_request("hello", session_id, mode="agent"))
+
+    assert result["answer"] == "fallback answer"
+    assert result["fallback"] == fallback
+    assert result["model_health"] == model_health
+    assert result["steps"][0]["summary"] == "已自动切换到 Ollama / qwen2.5:7b"

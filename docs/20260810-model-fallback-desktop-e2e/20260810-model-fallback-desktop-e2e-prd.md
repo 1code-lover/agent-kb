@@ -18,6 +18,7 @@
 ### 本轮包含
 
 - 后端模型错误分类、候选模型枚举、fallback 选择和状态持久化。
+- Agent 高级模式直连聊天支持 Ollama，并在当前模型不可用时复用同一套自动 fallback。
 - `/api/model/options` 或新增 API 输出模型健康状态。
 - 前端模型页/Agent 页显示当前模型健康状态。
 - `scripts.run_grain_qa_eval` 支持恢复已有报告并跳过已完成用例。
@@ -37,6 +38,7 @@
 
 - 单元测试覆盖 401、403、额度耗尽、模型不可用的分类与 fallback 选择。
 - 模型 fallback 后 `current_llm_info` 更新为可用模型，健康状态记录最近错误和切换结果。
+- 基础问答、知识库问答和 Agent 直连聊天均能在可恢复模型错误后自动切换并重试一次；Agent 直连 Ollama 不要求 API Key。
 - API 能返回模型健康状态，前端能显示健康状态文本。
 - QA eval 支持 `--resume`，已有报告中成功用例不会重复请求 API。
 - 桌面端 E2E 报告覆盖模型配置、KB 问答、引用来源、preview、跨 KB 隔离。

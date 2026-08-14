@@ -451,6 +451,12 @@ def test_classify_model_error_covers_quota_auth_forbidden_and_unavailable() -> N
     assert model_service.classify_model_error("bad key", status_code=401) == "unauthorized"
     assert model_service.classify_model_error("Error code: 403 forbidden") == "forbidden"
     assert model_service.classify_model_error("model not found") == "model_unavailable"
+    assert (
+        model_service.classify_model_error(
+            "Model request failed with HTTP 404: {\"error\":\"model 'missing:latest' not found\"}"
+        )
+        == "model_unavailable"
+    )
     assert model_service.classify_model_error("request timeout") == "network_error"
     assert (
         model_service.classify_model_error(

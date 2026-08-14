@@ -78,3 +78,14 @@
 如果某种策略只配置了一部分，预检返回策略名和缺失字段，不输出任何密码、私钥内容或凭证值。三种策略都未配置时，非严格预检输出可操作诊断，严格预检失败。
 
 Developer ID Application 签名身份、`notarytool`、Electron bundle、hardened runtime、entitlements、CSP、包内容、codesign、Gatekeeper 和 stapler 仍是独立发布门禁；完整公证凭证不能替代签名证书。
+
+### FR-08 Agent 直连模型的 Ollama 与 fallback
+
+Agent 高级模式的 `llm_chat` 工具使用当前模型配置直接调用 provider：
+
+1. 云端/OpenAI 兼容 provider 继续调用 `{api_base}/chat/completions` 并携带 Bearer API Key。
+2. Ollama 调用 `{api_base}/api/chat`，使用 `stream=false` 的原生消息协议，不要求 API Key。
+3. 首次调用遇到可恢复错误时，复用 `attempt_model_fallback` 探测并切换候选，然后读取更新后的 `current_llm_info` 重试一次。
+4. fallback 未应用时保留原异常；重试仍失败时将健康状态更新为 `unavailable`，不进行无限重试。
+5. Agent 结果和工具回执记录最终 provider/model、`model_health` 与结构化 fallback 来源/目标，不记录 API Key。
+6. 前端 Agent 成功回调继续刷新 model options，以显示“已自动切换”和最终模型。

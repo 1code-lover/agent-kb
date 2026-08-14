@@ -1,24 +1,26 @@
-代码与测试报告评审建议（2026-08-14，fallback 问答后状态即时同步）
+代码与测试报告评审建议（2026-08-15，Agent 直连 Ollama 与自动 fallback）
 
 评审结论：
-本轮补充实现与新增 spec、原 fallback 设计和验收口径一致，已按 TDD 增加正常回答、无相关来源拒答和 fallback 重试三条 API 响应契约测试，并通过 Python、Web 和 Electron 定向/全量门禁。服务端现在返回最新 model_health，Agent 问答成功后主动刷新 model options，已关闭自动切换后页面状态滞后的边角问题。代码与测试报告审核通过，可以进入开发故事沉淀和提交阶段。
+本轮实现完成了原目标中真实遗漏的 Agent 高级模式模型韧性：Ollama 不再被硬编码拒绝，云端或本地模型出现可恢复错误时会复用统一候选探测并自动切换一次。实现、测试、最新 ad-hoc 打包和测试报告相互一致，代码审核通过，可以进入开发故事沉淀和提交阶段。
 
-正式 Apple 签名、公证、stapling 与安装后回归仍然受外部凭证阻塞，不得标记为完成。
+正式 Apple 签名、公证、stapling 与安装后回归仍受外部凭证阻塞；本机也没有 Ollama 服务或本地模型，因此不得宣称正式 macOS release 或真实 Ollama 推理 E2E 已完成。
 
 优点：
-1. `api/services/chat_service.py` 在正常回答、无相关来源拒答和 fallback 重试路径统一返回 `model_health`，客户端不需要猜测本次请求是否发生过切换。
-2. `webapp/src/pages/AgentPage.jsx` 保留历史刷新，同时在聊天成功后主动刷新模型 options，解决 60 秒 staleTime 导致的旧模型/旧提示滞后。
-3. 新增测试覆盖健康、fallback_applied 和无来源分支；`webapp/src/api/chat.test.js` 继续验证响应封装对 model_health 的透传。
-4. 本轮未改变 fallback 候选排序、Ollama 动态发现、单次重试、知识库范围和 evidence 处理，回归面可控。
-5. 验证结果完整：Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`。
+1. provider 调用被拆为配置读取、共享 JSON 请求、OpenAI 兼容调用和 Ollama 原生调用，云端兼容性与本地协议均有独立测试。
+2. `run_llm_chat` 复用 `attempt_model_fallback`，切换后重新读取当前配置，只重试一次；没有引入第二套候选逻辑。
+3. fallback 后真实重试失败会覆盖健康状态为 `unavailable`，避免保留误导性的 `fallback_applied`。
+4. 对外 fallback 结果主动裁掉 `selected.api_key`；receipt 和日志只保留错误类别、候选数、来源/目标和最终模型。
+5. Agent API 返回 `fallback`、`model_health`，step 摘要明确显示“已自动切换到 provider / model”，前端已有 model options 刷新会立即展示状态。
+6. Ollama 常见 `model 'name' not found` 已纳入 `model_unavailable` 分类；真实云端隔离链路证明缺失模型可自动切换到可用候选。
+7. 验证完整：定向 `74 passed`，Python 全量 `790 passed, 1 deselected`，Web `89 passed` 且 build 通过，Electron `64 passed`，最新 `build:mac` 和 `verify:package` 通过。
 
 需要改进的地方：
-1. 本机仍没有有效 `Developer ID Application` 身份。
-2. Keychain profile、App Store Connect API Key、Apple ID 三类公证策略均未配置，正式 submission、accepted、stapled ticket 和安装后回归仍无真实证据。
-3. 当前 ad-hoc 产物的 `verify-mac-release` 仍会报告 codesign、Gatekeeper 和 stapler 失败；这是外部签名条件缺失的预期结果，不是本轮 fallback 改动回归。
+1. 当前机器没有 Ollama 可执行文件、服务和本地模型，原生 `/api/chat` 仅有请求级自动化测试，尚无真实本地推理证据。
+2. 当前机器仍无有效 Developer ID Application 身份和任一完整公证凭证，严格 release preflight、codesign、Gatekeeper 和 stapler 按预期失败。
+3. 最新 DMG/ZIP 是 ad-hoc 产物，只能用于包内容验证，不能作为正式发布候选。
 
 具体建议：
-1. 生成本轮开发故事并检查 capture state，提交前确认没有新的未沉淀功能窗口。
-2. 提交并推送后复核远程同步状态。
-3. Apple 凭证和证书到位后，严格执行 `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release`，再安装正式产物运行桌面工作流诊断。
-4. 正式发布判定必须保留仅一次公证 submission、codesign、Gatekeeper、stapler 和安装后 fallback/引用/跨 KB 隔离证据。
+1. 生成本轮开发故事，推进 capture state，提交前执行 `git diff --check` 并复核未提交窗口。
+2. 提交并推送 Agent Ollama/fallback 实现后确认本地远程 `0 0`。
+3. 后续安装 Ollama 并拉取一个小型模型，执行 Agent 原生聊天和“坏云端模型 -> Ollama”真实切换 E2E。
+4. Apple 证书和公证凭证到位后执行 `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release` 和安装后桌面工作流。

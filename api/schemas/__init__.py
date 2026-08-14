@@ -231,6 +231,8 @@ class AgentRunData(BaseModel):
     evidence: list[EvidenceItem] = Field(default_factory=list)
     receipts: list[dict[str, Any]] = Field(default_factory=list)
     pending_actions: list[PendingActionItem] = Field(default_factory=list)
+    fallback: dict[str, Any] | None = None
+    model_health: dict[str, Any] | None = None
 
 
 class AgentSessionSnapshot(BaseModel):
@@ -264,4 +266,3 @@ class AgentSessionUpdateRequest(BaseModel):
 
 class AgentSessionResetRequest(BaseModel):
     session_id: str = Field(default="desktop-default")
-
