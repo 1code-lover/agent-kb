@@ -125,7 +125,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `bd4a190 feat(model): probe selected model health`
   - `8e9257f chore: update dev story capture state`
   - `e084e4c feat(eval): expand cross-domain v6 diagnostics`
-- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`。2026-08-12 已补齐 embedding 本地缓存诊断、runtime 默认禁止远程下载、Knowledge Workspace 缓存缺失提示和 `scripts.prepare_embedding_model_cache`。HuggingFace mirror 下载仍会超时，但本机已通过 `--provider modelscope` 下载 `bge-small-zh-v1.5` 到 `localmodels/BAAI/bge-small-zh-v1.5`，最新临时 API `18084` 显示 `embedding_diagnostics.load_source=local`。跨领域 v6 最新定向复跑 `4/4 cases`、`6/6 turns` 通过；本地缓存后的 `--suite v1-v6` 全量基线先提升到 `34/49 passed`，当前分支复跑进一步到 `37/49 passed`、逐轮 `42/54 passed`，负向隔离 `14/15`、contract `1/1`。本轮新增 source-backed preview 原句兜底后，`desktop-positive-preview` 与 `mixed-positive-preview` targeted 复跑 `2/2 passed`。剩余失败主要集中在 image OCR boundary、UTF-16/extensionless 文本、桌面多轮 preview follow-up、一卡通适用范围，以及 1 个 `Range of input length should be [1, 3072]` 负向 API 错误。正式 macOS 签名/公证仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
+- 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`。embedding 本地缓存诊断、runtime 默认禁止远程下载、Knowledge Workspace 缓存缺失提示和 `scripts.prepare_embedding_model_cache` 已完成，本机已通过 ModelScope 准备 `bge-small-zh-v1.5`，当前 API health 显示 `load_source=local` 且 embedding/OCR warmup 均为 ready。source-backed 边界、scope、preview、精确短语和多事实合并兜底已完成，最终 v1-v6 真实评测达到 `49/49 cases`、`54/54 turns`，正向、负向和 contract 通过率均为 `100%`。正式 macOS 签名、公证、stapling 和安装后回归仍未完成，原因是本机缺少 Apple 发布环境变量和 Developer ID Application 证书。
 
 ### 4.4 下一步建议
 
@@ -134,7 +134,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 - **Apple 凭证到位后完成正式发布闭环**：补齐 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书后，按 release checklist 执行严格 preflight、签名、公证、安装后桌面工作流回归。
 - **fallback 继续补真实失败提示**：当前已能区分云端候选失败、Ollama 模型未安装、Ollama 服务不可达和 Ollama 已连接但没有本地模型；`/api/model/select` 也会在保存模型后即时探活并把失败写入 `model_health`，桌面启动时若发现 `18080` API 已可用会复用现有服务，不再额外拉起一个失败的 API 子进程；配置落盘已改为缩进 JSON，方便人工恢复模型配置时核对。下一步可把这些结构化原因接入桌面 E2E 报告，复核用户重新配置模型后的恢复路径。
 - **保持 embedding 本地缓存路径稳定**：本机已通过 ModelScope 准备 `localmodels/BAAI/bge-small-zh-v1.5`，新 API embedding 预热从数百秒降到约 `4.5s`；下一步应把 `--provider modelscope` 写入日常运维/桌面排障口径，并避免提交被 `.gitignore` 忽略的模型文件。
-- **优先修正跨领域正向 grounding**：跨领域门禁已支持 `--extra-cases`、`--suite v1-v6`、多轮、来源文件级和 evidence 文本级断言；最新 v6 定向为 `4/4`，当前分支全量 v1-v6 为 `37/49`。下一步不宜继续盲目扩样本，应先处理剩余 12 个失败：image OCR boundary 原句保真、UTF-16/extensionless 文本清洗、桌面多轮 preview follow-up、一卡通适用范围，以及 1 个 `Range of input length should be [1, 3072]` 的负向 API 错误。
+- **保持跨领域真实回归门禁**：跨领域门禁已支持 `--extra-cases`、`--suite v1-v6`、多轮、来源文件级和 evidence 文本级断言；最新 v6 定向为 `4/4`，当前分支全量 v1-v6 已到 `49/49 cases`、`54/54 turns`，正向、负向和 contract 通过率均为 `100%`。下一步应把这套门禁作为回归基线，继续扩展新领域、新文档格式和不同模型配置，而不是继续针对已关闭的 5 个历史失败做局部修补。
 - **保留粮仓质量门禁作为基础回归**：粮仓检索质量已达到 `Recall@5=1.0`、`MRR@5=1.0`；后续导入、重建索引或调整检索参数时仍应保留 coverage / retrieval-only / API QA 三段验证。
 - **补发布后的桌面安装体验验证**：当前已验证 packaged app 主进程、API 和前端加载；签名/公证后还需要覆盖首次安装、模型重新配置、文件上传/导入、preview、引用来源和跨 KB 隔离。
 
@@ -453,7 +453,7 @@ cd webapp && npm run build
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_chat_service.py tests/scripts/test_prepare_embedding_model_cache.py tests/api/test_runtime_model_loading.py tests/test_embedding_model_diagnostics.py -q`：`77 passed, 7 warnings`。
 - Targeted preview 评测：`desktop-positive-preview` 与 `mixed-positive-preview` 复跑 `2/2 passed`，报告为 `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-preview-target-after-source-answer.json`。
 - v6 定向复跑：`4/4 passed`、逐轮 `6/6 passed`，报告为 `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v6-after-source-preview-answer.json`。
-- 当前分支 v1-v6 全量复跑：`37/49 passed`、逐轮 `42/54 passed`、positive pass rate `0.6667`、negative pass rate `0.9333`、contract pass rate `1.0`；剩余失败 12 个，报告为 `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-current-branch-check.json`。
+- 当前分支 v1-v6 最终全量复跑：`49/49 passed`、逐轮 `54/54 passed`、positive/negative/contract pass rate 均为 `1.0`；`failure_check_summary={}`、`failure_case_summary=[]`、`systemic_failure_summary.suspected=false`。最终报告为 `docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json`，历史 `44/49` 报告保留为 scope merge 阶段证据。
 
 ---
 
@@ -463,7 +463,7 @@ cd webapp && npm run build
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
 - **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
 - **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向跨领域正向泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 或 `--suite v1-v6` 追加外部真实样本、`turns` 多轮追问样本、来源文件级断言和 evidence 文本级断言；当前 v1-v6 全量 suite 已提升到 `37/49`，但 image OCR、UTF-16/extensionless 和少量多轮 grounding 仍不足，负向隔离和 contract 基本稳定。
+- **粮仓知识库检索质量已收口，下一步转向跨领域正向泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 或 `--suite v1-v6` 追加外部真实样本、`turns` 多轮追问样本、来源文件级断言和 evidence 文本级断言；当前 v1-v6 全量 suite 已提升到 `49/49 cases`、`54/54 turns`，正向、负向、contract、多轮、source grounding 和 evidence text 门禁均通过；后续重点转为持续扩样本和不同模型配置下的回归监控。
 - **embedding 初始化风险已从启动阻塞转为缓存运维问题**：本机已通过 ModelScope 准备 `localmodels/BAAI/bge-small-zh-v1.5`，新 API health 显示本地加载约 `4.5s`；runtime 仍默认禁用远程下载，缓存缺失时快速失败并给出诊断。后续风险主要是新机器或清理 `localmodels/` 后需要重新执行 `scripts.prepare_embedding_model_cache --download --provider modelscope` 或通过 `--source-dir` 离线导入。
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。

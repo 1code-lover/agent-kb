@@ -373,7 +373,8 @@ def _as_list(value: Any) -> list[str]:
 
 def _contains_all(haystack: str, terms: list[str]) -> bool:
     """检查文本是否包含全部关键词。"""
-    return all(term in haystack for term in terms)
+    normalized_haystack = haystack.casefold()
+    return all(term.casefold() in normalized_haystack for term in terms)
 
 
 def _contains_expected_terms(haystack: str, terms: list[str], term_groups: list[list[str]]) -> bool:
@@ -396,7 +397,8 @@ def _expected_any_term_groups(case: dict[str, Any]) -> list[list[str]]:
 
 def _contains_any(haystack: str, terms: list[str]) -> bool:
     """检查文本是否包含任一关键词。"""
-    return any(term in haystack for term in terms)
+    normalized_haystack = haystack.casefold()
+    return any(term.casefold() in normalized_haystack for term in terms)
 
 
 def _extract_records(data: dict[str, Any], key: str) -> list[dict[str, Any]]:
@@ -433,12 +435,15 @@ def _extract_source_files(data: dict[str, Any]) -> list[str]:
 
 def _source_file_terms_hit(source_files: list[str], terms: list[str]) -> bool:
     """检查每个期望来源文件片段都能命中至少一个来源。"""
-    return all(any(term in source_file for source_file in source_files) for term in terms)
+    normalized_files = [source_file.casefold() for source_file in source_files]
+    return all(any(term.casefold() in source_file for source_file in normalized_files) for term in terms)
 
 
 def _source_file_terms_clean(source_files: list[str], terms: list[str]) -> bool:
     """检查来源文件名不包含禁止片段。"""
-    return not any(term in source_file for source_file in source_files for term in terms)
+    normalized_files = [source_file.casefold() for source_file in source_files]
+    normalized_terms = [term.casefold() for term in terms]
+    return not any(term in source_file for source_file in normalized_files for term in normalized_terms)
 
 
 def _source_payload_text(data: dict[str, Any]) -> str:

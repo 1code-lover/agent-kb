@@ -1,14 +1,22 @@
-最新评审建议（2026-08-11）
+最终评审建议（2026-08-14）
+
+评审结论：
+代码实现、测试方案执行结果、最终测试报告和提交前工作区审计均通过，可以进入 commit / push 阶段。正式 macOS 签名、公证、stapling 和安装后回归不在本机通过，必须继续保持为外部阻塞项，不能随本次代码提交宣称发布完成。
 
 优点：
-1. 后端把 fallback 探测结果沉到 `fallback_attempts`，前端再用 `probeSummary` 展示，模型健康链路比之前更可诊断。
-2. Models 页和 Agent 页同步展示相同摘要，排查时不会出现一边有提示、另一边没有提示的割裂感。
-3. 相关单测和 `cd webapp && npm run build` 已通过，当前增量没有引入明显回归。
+1. 模型不可用 fallback 已覆盖额度、鉴权、模型不存在、网络异常和 request_incompatible；Ollama 动态候选、服务不可达、无本地模型、目标模型未安装及自动切换提示具备后端和前端测试证据。
+2. source-backed 修复没有放宽知识库 metadata 隔离，而是基于 source 的 kb_id/doc_id 回看同库原文，并对 boundary、scope、preview、多事实和 exact 拒答采用窄触发策略；相关 12 个新增 Chat Service 测试和真实评测均通过。
+3. 最终测试报告已明确区分当前权威结论与历史优化过程，当前结果与 artifact 一致：Python 783 passed、Web 89 passed、Electron 44 passed、v1-v6 49/49 cases 和 54/54 turns。
+4. 评测产物已清理为有文档引用的 scope-merge 历史报告和 regression-closure 最终报告；最终报告没有失败项、系统性故障或明显凭证字段。
+5. 两份开发故事已基于真实改动、真实命令和真实权衡生成，状态文件已覆盖当前 HEAD 之前的历史窗口。
 
-需要改进的地方：
-1. 现在页面只展示最近一次探测摘要，多候选失败的完整细节还看不到；如果一次 fallback 经过多个候选，排障仍要回到 health payload 或日志。
-2. 这次只是文本级提示增强，还没有做更细的浏览器视觉回归，窄屏下长模型名是否换行自然还需要再看一眼。
+需要持续关注的地方：
+1. docstore 原文回看依赖历史节点具有正确 kb_id/doc_id；当前实现已做异常回落，但后续重建索引和旧数据迁移时仍需保留跨 KB 隔离门禁。
+2. 多事实 source 合并属于受控后处理；新增领域或问题表达发生变化时，应继续用真实 case 扩展，而不是无条件扩大触发范围。
+3. 当前 desktop/dist 不是有效签名/公证产物，严格 release:preflight 和 verify:mac-release 按预期失败。必须在 Apple 凭证和 Developer ID Application 证书到位后重新生成 release 产物，不能复用现有 dist 作为正式发布包。
 
-具体建议：
-1. 保持当前实现先合并，下一步如果要继续增强诊断能力，可以把 `fallback_attempts` 做成可展开明细。
-2. 后续桌面回归时顺手确认一次模型页和 Agent 页的提示在窄宽度下没有挤压布局。
+提交建议：
+1. 使用 conventional commits，按“模型 request_incompatible fallback”和“source-backed 跨领域收口”两个功能边界拆分提交；文档、最终评测 artifact 和对应测试跟随各自功能提交。
+2. 功能提交后更新 dev-story capture state 到最新功能提交边界，再单独提交状态更新。
+3. push 前再次检查 last_generated_hash..HEAD、git diff --check、git status 和分支远程差异。
+4. Apple 条件具备后继续执行 release:preflight、release:mac、verify:package、verify:mac-release 和安装后桌面工作流诊断；全部通过后再补正式发布报告。

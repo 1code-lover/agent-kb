@@ -149,6 +149,35 @@ def test_query_does_not_record_history_when_disabled(chat_service_module, monkey
     normalize_evidence.assert_called_once_with(sources)
 
 
+def test_query_exact_question_refuses_before_llm_when_retrieval_has_no_grounded_source(
+    chat_service_module,
+    monkeypatch,
+    single_kb_scope,
+):
+    """唯一值问题在限定 KB 内没有相关证据时，应直接拒答，避免无上下文模型错误或跨库泄漏。"""
+    engine, _ = _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="should not run")
+    engine.retrieve.return_value = [
+        SimpleNamespace(
+            node=SimpleNamespace(
+                metadata={"file_name": "grain-policy.pdf", "kb_id": "kb-a", "doc_id": "grain-doc"},
+                text="Reserve grain supervision policy and warehouse temperature checks.",
+            ),
+            score=0.72,
+        )
+    ]
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What is the unique desktop workflow passcode in diagnostic document 1786352564?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "No confirmable information is available in the active knowledge base."
+    assert result["sources"] == []
+    assert result["evidence"] == []
+    engine.query.assert_not_called()
+
+
 def test_query_fallbacks_model_once_and_retries(chat_service_module, monkeypatch, single_kb_scope):
     """模型调用失败时，chat query 应触发 fallback 并用新引擎重试一次。"""
     first_engine = MagicMock()
@@ -305,6 +334,404 @@ def test_query_expands_brief_answer_with_grounded_image_ocr_clause(chat_service_
     )
 
     assert result["answer"] == "Knowledge Base is the authorization boundary for image OCR answers."
+
+
+def test_query_answers_boundary_from_ocr_source_sentences(chat_service_module, monkeypatch, single_kb_scope):
+    """边界类 OCR 问题应保留 source 中 folder / knowledge base 原句。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text=(
+            "The folder is the organization's property and the knowledge base is the authorization boundary."
+        ),
+    )
+    sources = [
+        {
+                "file": "diag-ocr.png",
+                "text": (
+                    "Image OCRdiagnostic\n"
+                    "Folder is organization only\n"
+                    "Knowledge Base is the authorization boundary\n"
+                    "Preview should resolve to OCRchunk"
+                ),
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What does the OCR diagnostic document say about folder and knowledge base boundaries?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == (
+        "Folder is for organization only. Knowledge Base is the authorization boundary."
+    )
+
+
+def test_query_answers_boundary_from_chinese_source_sentence(chat_service_module, monkeypatch, single_kb_scope):
+    """中文边界问题应优先保留 source 中的授权边界和组织作用表述。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="知识库在文件夹边界内，文件夹负责组织。",
+    )
+    sources = [
+        {
+            "file": "diag-import-utf8.md",
+            "text": "知识库仍然是授权边界，文件夹只承担组织作用，不承担权限隔离。",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "知识库仍然是授权边界，文件夹只承担组织作用，不承担权限隔离。"
+
+
+def test_query_answers_boundary_from_ref_doc_when_source_chunk_is_truncated(
+    chat_service_module,
+    monkeypatch,
+    single_kb_scope,
+):
+    """当检索 chunk 截断边界原句时，应从同一 ref doc 回看完整文本。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="文档明确说明：知识库仍然是授。",
+    )
+    sources = [
+        {
+            "file": "diag-import-utf8.md",
+            "kb_id": "kb-a",
+            "doc_id": "doc-1",
+            "text": "Markdown 诊断文档。\n\n文档明确说明：知识库仍然是授",
+        }
+    ]
+    document = SimpleNamespace(text="# UTF-8 诊断知识库\n\n知识库仍然是授权边界，文件夹只承担组织作用，不承担权限隔离。\n")
+    doc_store = SimpleNamespace(get_document=MagicMock(return_value=document))
+    manager = SimpleNamespace(storage_context=SimpleNamespace(docstore=doc_store))
+
+    monkeypatch.setattr(chat_service_module.runtime_state, "get_index_manager", MagicMock(return_value=manager))
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="这份 UTF-8 诊断文档如何描述知识库和文件夹的边界？"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "知识库仍然是授权边界，文件夹只承担组织作用，不承担权限隔离。"
+
+
+def test_query_answers_boundary_scope_from_utf16_source_sentence(chat_service_module, monkeypatch, single_kb_scope):
+    """UTF-16 边界问句应从 source 中回到完整授权边界原句。"""
+    _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="Knowledge Base remains the authorization.")
+    sources = [
+        {
+            "file": "README-UTF16",
+            "text": "Knowledge Base remains the authorization boundary.\nFolder is organization only.",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What exact sentence does the UTF-16 README use to describe the authorization boundary?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "Knowledge Base remains the authorization boundary."
+
+
+def test_query_answers_boundary_from_ref_doc_when_question_mentions_only_authorization_boundary(
+    chat_service_module,
+    monkeypatch,
+    single_kb_scope,
+):
+    """只问 authorization boundary 时，也应从完整 ref doc 补齐被截断的 UTF-16 原句。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="Knowledge Base remains the authorization.",
+    )
+    sources = [
+        {
+            "file": "README-UTF16",
+            "kb_id": "kb-a",
+            "doc_id": "doc-utf16",
+            "text": "Knowledge Base remains the authorization",
+        }
+    ]
+    document = SimpleNamespace(
+        text="Knowledge\x00 Base\x00 remains\x00 the\x00 authorization\x00 boundary\x00.\nFolder is organization only."
+    )
+    doc_store = SimpleNamespace(get_document=MagicMock(return_value=document))
+    manager = SimpleNamespace(storage_context=SimpleNamespace(docstore=doc_store))
+
+    monkeypatch.setattr(chat_service_module.runtime_state, "get_index_manager", MagicMock(return_value=manager))
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="What does the UTF-16 README say about the authorization boundary?"),
+        record_history=False,
+    )
+
+    assert result["answer"] == "Knowledge Base remains the authorization boundary."
+
+
+@pytest.mark.parametrize(
+    ("question", "answer_text", "sources", "required_terms"),
+    [
+        (
+            "Across the workflow boundary note and the folder boundary model, what remains the authorization boundary?",
+            (
+                "workflow-boundary.md: Folder path is not an authorization boundary. "
+                "Query scope and access control remain at the knowledge base level. "
+                "folder-boundary.md: Folders are organizational objects inside one knowledge base."
+            ),
+            [
+                {
+                    "file": "workflow-boundary.md",
+                    "text": (
+                        "Folder path is not an authorization boundary. "
+                        "Query scope and access control remain at the knowledge base level."
+                    ),
+                },
+                {
+                    "file": "folder-boundary.md",
+                    "text": "Folders are organizational objects inside one knowledge base.",
+                },
+            ],
+            ("knowledge base", "authorization boundary"),
+        ),
+        (
+            "Across the scope manual and the folder boundary note, what remains the authorization boundary rule?",
+            (
+                "folder-boundary.pdf: Knowledge Base remains the range and authorization boundary. "
+                "scope-manual.pdf: requested_scope_type must remain single_kb."
+            ),
+            [
+                {
+                    "file": "folder-boundary.pdf",
+                    "text": "Knowledge Base remains the range and authorization boundary.",
+                },
+                {
+                    "file": "scope-manual.pdf",
+                    "text": "requested_scope_type must remain single_kb.",
+                },
+            ],
+            ("single_kb", "authorization boundary"),
+        ),
+    ],
+)
+def test_query_preserves_complete_grounded_multi_source_boundary_answer(
+    chat_service_module,
+    monkeypatch,
+    single_kb_scope,
+    question,
+    answer_text,
+    sources,
+    required_terms,
+):
+    """多来源原答已覆盖边界锚点时，不应被压缩到丢失 knowledge base/single_kb。"""
+    _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text=answer_text)
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(_build_request(question=question), record_history=False)
+
+    for term in required_terms:
+        assert term.lower() in result["answer"].lower()
+
+
+def test_query_answers_scope_definition_from_source_sentence(chat_service_module, monkeypatch, single_kb_scope):
+    """范围/定义类问题应优先返回完整定义句。"""
+    _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="非直属企业适用于收储库点。")
+    sources = [
+        {
+            "file": "一卡通.docx",
+            "text": "非直属企业是指中储粮直属企业以外的参与中央事权粮食入库和出库业务的收储库点（包括租仓库点、委托库点）。",
+        }
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="非直属企业“一卡通”系统适用于哪些收储库点？"),
+        record_history=False,
+    )
+
+    assert "租仓库点" in result["answer"]
+    assert "委托库点" in result["answer"]
+
+
+def test_query_answers_scope_definition_from_ref_doc_when_retrieved_chunk_is_incomplete(
+    chat_service_module,
+    monkeypatch,
+    single_kb_scope,
+):
+    """范围问题的检索 chunk 不完整时，应回看 ref doc 并保留括号中的完整适用库点。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="非(sqrt)企业‘一卡通’系统适用于中储粮非(sqrt)企业中的收储库点。",
+    )
+    sources = [
+        {
+            "file": "一卡通.docx",
+            "kb_id": "kb-a",
+            "doc_id": "one-card-doc",
+            "text": "非直属企业中的收储库点。",
+        }
+    ]
+    document = SimpleNamespace(
+        text=(
+            "第二条 非直属企业是指中储粮直属企业以外的参与中央事权粮食入库和出库业务的"
+            "收储库点（包括租仓库点、委托库点），其在入库和出库业务中必须使用一卡通系统。"
+        )
+    )
+    doc_store = SimpleNamespace(get_document=MagicMock(return_value=document))
+    manager = SimpleNamespace(storage_context=SimpleNamespace(docstore=doc_store))
+
+    monkeypatch.setattr(chat_service_module.runtime_state, "get_index_manager", MagicMock(return_value=manager))
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="非直属企业‘一卡通’系统适用于哪些收储库点？"),
+        record_history=False,
+    )
+
+    assert "中央事权粮食入库和出库业务" in result["answer"]
+    assert "租仓库点" in result["answer"]
+    assert "委托库点" in result["answer"]
+
+
+def test_query_merges_multi_fact_answer_from_sources(chat_service_module, monkeypatch, single_kb_scope):
+    """一问两事实时，服务端应能合并来自不同 source 的最小完整句。"""
+    _stub_query_runtime(chat_service_module, monkeypatch, single_kb_scope, answer_text="Every evidence preview should include doc_id.")
+    sources = [
+        {
+            "file": "cutover.md",
+            "text": "The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence.",
+        },
+        {
+            "file": "preview-board.png",
+            "text": "Every evidence preview must include doc_id and preview_locator.",
+        },
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="In one answer, tell me who gives the final rollback approval and what every evidence preview should include."),
+        record_history=False,
+    )
+
+    assert "platform duty lead" in result["answer"]
+    assert "final rollback approval" in result["answer"]
+    assert "doc_id" in result["answer"]
+    assert "preview_locator" in result["answer"]
+
+
+def test_query_merges_best_multi_fact_sentences_when_preview_source_has_heading(
+    chat_service_module,
+    monkeypatch,
+    single_kb_scope,
+):
+    """多事实合并应跳过 preview 标题和泛化说明，选择各子问题最完整的事实句。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="Every evidence preview must include doc_id and preview_locator.",
+    )
+    sources = [
+        {
+            "file": "preview-board.png",
+            "text": "Evidence preview checklist\nEvery evidence preview must include doc_id and preview_locator",
+        },
+        {
+            "file": "cutover.md",
+            "text": (
+                "The Friday release cutover note explains who can approve rollback decisions.\n"
+                "The platform duty lead gives the final rollback approval after the deployment coordinator summarizes the evidence."
+            ),
+        },
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(question="In one answer, tell me who gives the final rollback approval and what every evidence preview should include."),
+        record_history=False,
+    )
+
+    assert "platform duty lead" in result["answer"]
+    assert "final rollback approval" in result["answer"]
+    assert "doc_id" in result["answer"]
+    assert "preview_locator" in result["answer"]
+    assert "checklist" not in result["answer"].lower()
+
+
+def test_query_merges_boundary_and_preview_facts_for_compare_question(
+    chat_service_module,
+    monkeypatch,
+    single_kb_scope,
+):
+    """compare 问题使用 and does 连接两个子问题时，也应合并边界和 preview 事实。"""
+    _stub_query_runtime(
+        chat_service_module,
+        monkeypatch,
+        single_kb_scope,
+        answer_text="Evidence preview checklist.",
+    )
+    sources = [
+        {
+            "file": "escalation-board.png",
+            "text": "Knowledge Base is the authorization boundary. Folder remains organization only.",
+        },
+        {
+            "file": "preview-board.png",
+            "text": "Evidence preview checklist. Every evidence preview must include doc_id and preview_locator.",
+        },
+    ]
+
+    monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
+    monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+
+    result = chat_service_module.query(
+        _build_request(
+            question=(
+                "Compare the escalation board image and the evidence preview board: "
+                "what remains the authorization boundary, and does the preview board "
+                "explicitly require doc_id and preview_locator?"
+            )
+        ),
+        record_history=False,
+    )
+
+    assert "knowledge base" in result["answer"].lower()
+    assert "authorization boundary" in result["answer"].lower()
+    assert "doc_id" in result["answer"]
+    assert "preview_locator" in result["answer"]
 
 
 def test_query_expands_brief_preview_answer_from_source(chat_service_module, monkeypatch, single_kb_scope):

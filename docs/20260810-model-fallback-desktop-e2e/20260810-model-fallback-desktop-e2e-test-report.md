@@ -2,9 +2,11 @@
 
 ## 结论
 
-本轮模型配置韧性、评测断点续跑、模型健康 API/UI、桌面端真实工作流诊断、macOS 打包内容校验和跨知识库泛化诊断均已完成验证。macOS 启动桌面端时出现的“危险 App / Electron.app 被移除”问题已定位为旧 Electron 31.7.7 公证撤销，升级到 Electron 43.3.0 后桌面端可独立启动，并能使用 conda `agent-kb` 环境拉起 API。本次增量还把 fallback 探测结果写入 `fallback_attempts`，并在 Models 页和 Agent 页展示 `probeSummary`，让用户能直接看到最近一次候选探测摘要。
+截至 2026-08-14，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；前端能展示最近探测摘要和“请求超出模型能力”等明确提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
 
-正式签名/公证尚未完成：本机缺少 Apple Developer 凭证、Developer ID 证书和 `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` 环境变量，因此当前结论只覆盖发布配置、预检、打包、packaged app 启动和内容校验。
+当前最终门禁为：Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `44 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
+
+正式 macOS 签名、公证、stapling 和安装后回归尚未完成：本机缺少 Apple Developer 凭证、有效的 Developer ID Application 证书，以及 `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` 环境变量。因此当前可以判定“发布实现、非严格预检、包内容和校验链路通过”，不能判定“正式 macOS release 完成”。
 
 ## 验证项
 
@@ -21,10 +23,46 @@
 | 桌面端独立启动 API | 通过 | `storage/logs/desktop_runtime.log` |
 | 桌面工作流 E2E | 通过 | `artifacts/desktop-model-workflow-report-after-electron-fix.json` |
 | macOS dmg/zip 打包与 packaged resources | 通过 | `desktop/dist/` + `desktop/scripts/verify-package.js` |
-| macOS release 后置签名/公证校验链路 | 通过 | `desktop/scripts/verify-mac-release.js` |
-| 跨知识库泛化诊断 | 通过 | `artifacts/cross-domain-kb-eval-report.json` |
+| Electron CSP 与发布配置单测 | 通过，`44 passed` | `desktop/src/*.test.js`、`desktop/scripts/*.test.js` |
+| macOS release 后置签名/公证校验链路 | 代码与单测通过 | `desktop/scripts/verify-mac-release.js` |
+| 正式 macOS 签名、公证和 stapling | 待外部凭证 | `APPLE_*` 环境变量和 Developer ID Application 证书尚未配置 |
+| 跨知识库 v1-v6 真实评测 | 通过，`49/49 cases`、`54/54 turns` | `artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json` |
 
-## 已执行命令
+## 2026-08-14 最终收口复核
+
+本节是当前最终结论；后续按日期保留的 `37/49`、`44/49`、embedding 缓存缺失和定向失败结果均为优化过程中的历史证据，不代表当前状态。
+
+最终验证结果：
+
+| 门禁 | 最终结果 |
+|---|---:|
+| Python 非 slow 全量测试 | `783 passed, 1 deselected, 35 warnings` |
+| Web domain/API/store 测试 | `89 passed` |
+| Web Vite build | 通过 |
+| Electron CSP/runtime/release 测试 | `44 passed` |
+| v1-v6 跨领域 case | `49/49 passed` |
+| v1-v6 跨领域 turn | `54/54 passed` |
+| 正向 / 负向 / contract | `100% / 100% / 100%` |
+| 多轮 case | `4/4 passed` |
+| 系统性故障判断 | `suspected=false` |
+| macOS 正式签名/公证 | 等待 Apple 凭证和 Developer ID Application 证书 |
+
+真实跨领域评测命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --suite v1-v6 \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json
+```
+
+最终报告的 `failure_check_summary={}`、`failure_case_summary=[]`，且 `systemic_failure_summary.suspected=false`。覆盖多知识库隔离、Markdown、PDF、扫描 PDF、图片 OCR、UTF-8、UTF-16、无扩展名文档、source/evidence grounding、多跳、多轮、mixed batch、preview 定位以及正向/负向回答。
+
+发布侧已通过 `npm run build:preflight` 和 `npm run verify:package`。严格 `npm run release:preflight` 与 `npm run verify:mac-release` 在当前机器按预期失败，因为没有 Apple 凭证、Developer ID Application 签名身份和已公证 ticket。补齐外部条件后必须继续执行 `npm run release:mac`，并以 codesign、Gatekeeper、stapler 和安装后桌面工作流全部通过作为正式发布判定。
+
+## 历史执行记录
+
+以下命令和结果按优化过程保留；当前权威结论以“2026-08-14 最终收口复核”为准。
 
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"
@@ -411,6 +449,37 @@ v6 定向回归：
 
 结果：`37/49 passed`、逐轮 `42/54 passed`，positive pass rate `0.6667`、negative pass rate `0.9333`、contract pass rate `1.0`。剩余失败 12 个，主要集中在 image OCR boundary 原句保真、UTF-16/extensionless 文本清洗、桌面多轮 preview follow-up、一卡通适用范围，以及 1 个负向 case 的 3072 输入长度 API 错误。
 
+## 2026-08-13 source-backed scope merge
+
+本轮继续推进 source-backed 兜底，新增两类更稳的修复：一类是边界/定义问句的完整句回看，另一类是 one-answer 多事实合并。`api/services/chat_service.py` 现在会在问句明显要求边界、范围或定义时，优先回到完整 source 句；对 `In one answer...` 这类多事实问题，则会从不同 source 里拼出最小完整回答，避免只答出 preview 或只答出 approval 的一半。
+
+已执行命令：
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/api/test_chat_service.py -q
+```
+
+结果：`36 passed, 7 warnings`
+
+```bash
+/opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_cross_domain_kb_eval \
+  --api-base http://127.0.0.1:18080 \
+  --timeout 120 \
+  --preflight \
+  --suite v1-v6 \
+  --output docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-scope-merge.json
+```
+
+结果：`44/49 passed`、逐轮 `49/54 passed`、positive pass rate `0.8788`、negative pass rate `0.9333`、contract pass rate `1.0`。本轮稳定修复 `mixed-positive-rollback`、`mixed-positive-preview`，但仍有 5 个失败：
+
+- `exttext-positive-readme-utf16`
+- `utf16-positive-folder-boundary`
+- `extra-grain-positive-one-card-scope`
+- `extra-v2-mixed-multihop-approval-and-preview`
+- `extra-v2-grain-negative-older-desktop-passcode`
+
+其中最后一个属于 API 负向边界错误，其余 4 个仍是 source grounding 问题，下一轮应继续沿 source/docstore 结构查证。
+
 ## 2026-08-12 模型选择即时探活
 
 本轮补齐模型配置恢复路径的一处空档：过去 `/api/model/select` 只要保存了 provider/model/api_key，就会把 `model_health.state` 写成 `healthy`，即使真实调用会返回 401、403、额度耗尽或模型不存在。现在选择模型后会立即复用已有的 OpenAI-compatible / Ollama 轻量探活逻辑，把成功写为 `healthy`，失败写为 `unavailable`，并同步记录 `last_error_kind`、`fallback_attempts` 和 `fallback_attempt_summary`。自动 fallback 已经探活过候选时，会把探活结果传给 `select_model` 复用，避免成功切换时重复打一轮网络请求。
@@ -557,7 +626,7 @@ notarization indicates this code has been revoked
 - Electron CSP 已补到主进程响应头，并允许本地 API、Vite dev websocket 和文件资源；packaged app 已完成启动和首页 API 请求复核，后续仍需在签名/公证后的安装包中复核上传、preview 和更多静态资源加载。
 - macOS release preflight、hardened runtime 与 entitlements 已补充，但本机未配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 且未发现有效 Developer ID 证书，严格签名/公证预检和真实 notarization 尚未执行。
 - 本机 `localmodels/BAAI/bge-small-zh-v1.5` 已通过 ModelScope 准备完成，新 API 可从本地加载；但新机器、清理缓存或换模型后仍需重新执行 `scripts.prepare_embedding_model_cache --download --provider modelscope`，或用 `--source-dir` 离线导入。runtime 仍默认禁止远程下载，这是为了避免桌面/API 启动被网络下载长期卡住。
-- v1-v6 全量 suite 当前为 `37/49 passed`，还不能宣称跨领域正向泛化完成；下一轮应优先处理 image OCR boundary、UTF-16/extensionless 文本、桌面多轮 preview follow-up、一卡通适用范围，另查一个负向 case 的 3072 输入长度 API 错误。
+- v1-v6 全量 suite 已由历史阶段的 `37/49`、`44/49` 提升到最终 `49/49 cases passed`、`54/54 turns passed`；当前风险从“已知失败”转为新增领域、新文档格式和不同模型配置下的持续泛化监控。
 
 ## 2026-08-10 增量复核
 
