@@ -187,3 +187,17 @@ test("buildModelHealthSummary 会提示 Ollama 已连接但没有本地模型", 
   assert.match(summary.actionHint, /ollama pull qwen2\.5:7b/);
   assert.match(summary.actionHint, /已安装模型/);
 });
+
+
+test("buildModelHealthSummary 会解释模型请求能力不兼容并提示已自动切换", () => {
+  const summary = buildModelHealthSummary({
+    state: "fallback_applied",
+    last_error_kind: "request_incompatible",
+    fallback_from: { service_provider: "CloudA", model: "short-context" },
+    fallback_to: { service_provider: "Ollama", model: "qwen2.5:7b" },
+  });
+
+  assert.equal(summary.chipLabel, "已自动切换");
+  assert.match(summary.detail, /请求超出模型能力/);
+  assert.match(summary.actionHint, /本地 Ollama 候选模型/);
+});

@@ -452,6 +452,15 @@ def test_classify_model_error_covers_quota_auth_forbidden_and_unavailable() -> N
     assert model_service.classify_model_error("Error code: 403 forbidden") == "forbidden"
     assert model_service.classify_model_error("model not found") == "model_unavailable"
     assert model_service.classify_model_error("request timeout") == "network_error"
+    assert (
+        model_service.classify_model_error(
+            "InternalError.Algo.InvalidParameter: Range of input length should be [1, 3072]"
+        )
+        == "request_incompatible"
+    )
+    assert model_service.is_recoverable_model_error(
+        "InternalError.Algo.InvalidParameter: Range of input length should be [1, 3072]"
+    ) is True
     assert model_service.classify_model_error("other") == "unknown"
 
 

@@ -26,6 +26,7 @@ RECOVERABLE_MODEL_ERROR_KINDS = {
     "unauthorized",
     "model_unavailable",
     "network_error",
+    "request_incompatible",
 }
 
 
@@ -232,6 +233,17 @@ def classify_model_error(error: Any, status_code: int | None = None) -> str:
         or "model unavailable" in lowered
     ):
         return "model_unavailable"
+    if any(
+        marker in lowered
+        for marker in (
+            "range of input length should be",
+            "maximum context length",
+            "context_length_exceeded",
+            "prompt is too long",
+            "input is too long",
+        )
+    ):
+        return "request_incompatible"
     if any(marker in lowered for marker in ("timed out", "timeout", "connection refused", "connection reset", "network")):
         return "network_error"
     return "unknown"

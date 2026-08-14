@@ -41,6 +41,7 @@ function formatReason(kind) {
     unauthorized: "401 未授权",
     model_unavailable: "模型不可用",
     network_error: "网络异常",
+    request_incompatible: "请求超出模型能力",
     unknown: "未知错误",
   };
   return labels[normalized] || normalized;
