@@ -132,16 +132,19 @@ def test_query_does_not_record_history_when_disabled(chat_service_module, monkey
     sources = [{"file": "mobile-build-guide.md", "text": "GPU memory requirement is 8GB."}]
     append_chat_message = MagicMock()
     normalize_evidence = MagicMock(return_value=[{"id": "ev-1"}])
+    model_health = {"state": "healthy", "current_model": "gpt-test"}
 
     monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=sources))
     monkeypatch.setattr(chat_service_module, "append_chat_message", append_chat_message)
     monkeypatch.setattr(chat_service_module, "normalize_evidence", normalize_evidence)
+    monkeypatch.setattr(chat_service_module.model_service, "get_model_health", MagicMock(return_value=model_health))
 
     result = chat_service_module.query(_build_request(), record_history=False)
 
     assert result["answer"] == "GPU memory is 8GB."
     assert result["sources"] == sources
     assert result["evidence"] == [{"id": "ev-1"}]
+    assert result["model_health"] == model_health
     assert result["effective_kb_ids"] == ["kb-a"]
     build_query_engine.assert_called_once_with(kb_ids=["kb-a"])
     engine.query.assert_called_once_with("What is the GPU memory requirement?")
@@ -166,6 +169,8 @@ def test_query_exact_question_refuses_before_llm_when_retrieval_has_no_grounded_
         )
     ]
     monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
+    model_health = {"state": "healthy", "current_model": "gpt-test"}
+    monkeypatch.setattr(chat_service_module.model_service, "get_model_health", MagicMock(return_value=model_health))
 
     result = chat_service_module.query(
         _build_request(question="What is the unique desktop workflow passcode in diagnostic document 1786352564?"),
@@ -175,6 +180,7 @@ def test_query_exact_question_refuses_before_llm_when_retrieval_has_no_grounded_
     assert result["answer"] == "No confirmable information is available in the active knowledge base."
     assert result["sources"] == []
     assert result["evidence"] == []
+    assert result["model_health"] == model_health
     engine.query.assert_not_called()
 
 
@@ -187,18 +193,27 @@ def test_query_fallbacks_model_once_and_retries(chat_service_module, monkeypatch
     build_query_engine = MagicMock(side_effect=[first_engine, second_engine])
     fallback = MagicMock(return_value={"applied": True, "selected": {"model": "good-chat"}})
     invalidate_llm = MagicMock()
+    model_health = {
+        "state": "fallback_applied",
+        "current_provider": "Cloud",
+        "current_model": "good-chat",
+        "fallback_from": {"service_provider": "OpenAI", "model": "bad-chat"},
+        "fallback_to": {"service_provider": "Cloud", "model": "good-chat"},
+    }
 
     monkeypatch.setattr(chat_service_module, "resolve_chat_query_scope", MagicMock(return_value=single_kb_scope))
     monkeypatch.setattr(chat_service_module.runtime_state, "ensure_index_loaded", MagicMock(return_value=True))
     monkeypatch.setattr(chat_service_module.runtime_state, "build_query_engine", build_query_engine)
     monkeypatch.setattr(chat_service_module.runtime_state, "invalidate_llm", invalidate_llm)
     monkeypatch.setattr(chat_service_module.model_service, "attempt_model_fallback", fallback)
+    monkeypatch.setattr(chat_service_module.model_service, "get_model_health", MagicMock(return_value=model_health))
     monkeypatch.setattr(chat_service_module, "_normalize_sources", MagicMock(return_value=[]))
     monkeypatch.setattr(chat_service_module, "append_chat_message", MagicMock())
 
     result = chat_service_module.query(_build_request(), record_history=False)
 
     assert result["answer"] == "fallback answer"
+    assert result["model_health"] == model_health
     assert build_query_engine.call_count == 2
     fallback.assert_called_once()
     invalidate_llm.assert_called_once_with()

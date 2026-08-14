@@ -1189,13 +1189,16 @@ function AgentPageContent() {
       setChatPreview(null);
       setChatPreviewError("");
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       setPendingQuestion("");
       setChatQuestion("");
       setChatSources(result.sources || []);
       setChatEvidence(result.evidence || []);
       setChatMessages(result.messages || []);
       historyQuery.refetch();
+      // 问答可能在服务端触发模型 fallback；主动刷新而不是等待 60 秒缓存过期，
+      // 让当前模型名称和“已自动切换”提示立即与服务端状态一致。
+      await modelOptionsQuery.refetch();
     },
     onError: (error) => {
       setPendingQuestion("");

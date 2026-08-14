@@ -48,3 +48,9 @@
 - 前端 Node 测试和 build 通过。
 - E2E 报告 `run_passed=true`。
 - 正式发布环境下 `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release` 全部通过；公证日志只出现一次 submission。
+
+## fallback 状态即时同步补充
+
+- `/api/chat/query` 正常回答返回 `model_health` 快照。
+- `/api/chat/query` fallback 重试后返回 `fallback_applied` 及来源/目标模型。
+- Agent 问答成功后主动刷新模型 options，确保切换提示不等待缓存过期。

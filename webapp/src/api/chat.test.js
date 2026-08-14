@@ -1,6 +1,6 @@
 /**
  * 文件功能：
- * - 回归聊天 evidence 透传。
+ * - 回归聊天 evidence 与 model_health 透传。
  * - 校验证据 / 文档 / 资产预览 API 的封装与优先级。
  */
 
@@ -27,6 +27,7 @@ test("queryChat 会透传 evidence 字段", async () => {
     data: {
       answer: "done",
       evidence: [{ id: "ev-1", title: "manual.pdf", doc_id: "doc-1", asset_id: "asset-1" }],
+      model_health: { state: "fallback_applied", current_model: "qwen-plus" },
     },
   };
   client.post = async (...args) => {
@@ -39,6 +40,7 @@ test("queryChat 会透传 evidence 字段", async () => {
     assert.deepEqual(result, response);
     assert.deepEqual(result.data.evidence, response.data.evidence);
     assert.equal(result.data.evidence[0].asset_id, "asset-1");
+    assert.deepEqual(result.data.model_health, response.data.model_health);
     assert.deepEqual(calls[0], ["/api/chat/query", payload]);
   } finally {
     client.post = originalPost;

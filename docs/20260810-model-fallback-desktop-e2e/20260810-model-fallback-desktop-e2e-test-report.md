@@ -2,7 +2,7 @@
 
 ## 结论
 
-截至 2026-08-14，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；前端能展示最近探测摘要和“请求超出模型能力”等明确提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
+截至 2026-08-14，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；问答响应现在同步返回最新 `model_health`，Agent 问答成功后主动刷新模型 options，不再等待 60 秒缓存过期；前端能展示最近探测摘要和“请求超出模型能力”等明确提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
 
 当前最终门禁为：Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
 
@@ -14,6 +14,7 @@
 |---|---:|---|
 | 模型错误分类与 fallback 单测 | 通过 | `tests/api/test_model_service.py` |
 | chat query 模型失败后 fallback 重试 | 通过 | `tests/api/test_chat_service.py` |
+| chat query 返回最新 model health | 通过 | `tests/api/test_chat_service.py` |
 | `GET /api/model/health` | 通过 | `tests/api/test_settings_routes.py` |
 | QA eval `--resume` / `--stop-on-api-error` | 通过 | `tests/scripts/test_run_grain_qa_eval.py` |
 | 前端模型健康状态映射 | 通过 | `webapp/src/domain/modelHealth.test.js` |
@@ -27,6 +28,16 @@
 | macOS release 后置签名/公证校验链路 | 代码与单测通过 | `desktop/scripts/verify-mac-release.js` |
 | 正式 macOS 签名、公证和 stapling | 待外部凭证 | `APPLE_*` 环境变量和 Developer ID Application 证书尚未配置 |
 | 跨知识库 v1-v6 真实评测 | 通过，`49/49 cases`、`54/54 turns` | `artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json` |
+
+## 2026-08-14 fallback 状态即时同步补充
+
+本次复核发现：服务端 fallback 已经更新持久化健康状态，但问答页的 `/api/model/options` 查询设置了 60 秒 `staleTime`，聊天成功回调此前没有主动刷新，因此自动切换后页面可能短时间继续展示旧模型。已按 TDD 补齐：
+
+- `api/services/chat_service.py` 的正常回答、无相关来源拒答和 fallback 重试响应均返回 `model_health` 快照。
+- `webapp/src/pages/AgentPage.jsx` 的 chat mutation 成功回调主动执行 `modelOptionsQuery.refetch()`，即时刷新当前模型名称和切换提示。
+- `webapp/src/api/chat.test.js` 增加 `model_health` 透传回归；Python chat service 增加正常路径、无来源路径和 fallback 路径契约测试。
+
+定向验证：Python `tests/api/test_chat_service.py` 为 `43 passed`；Web API/domain/store 测试为 `89 passed`，Vite build 通过。随后重新执行非 slow Python 全量测试为 `783 passed, 1 deselected, 35 warnings`，Electron 测试为 `64 passed`。
 
 ## 2026-08-14 最终收口复核
 

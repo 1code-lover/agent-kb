@@ -1066,6 +1066,7 @@ def _build_no_source_result(request: QueryRequest, scope: Any, *, record_history
         "answer": answer_text,
         "sources": [],
         "evidence": [],
+        "model_health": model_service.get_model_health(),
     }
     result.update(scope.to_dict())
     return result
@@ -1114,6 +1115,7 @@ def query(request: QueryRequest, record_history: bool = True) -> dict[str, Any]:
         "answer": answer_text,
         "sources": sources,
         "evidence": normalize_evidence(sources),
+        "model_health": model_service.get_model_health(),
     }
     result.update(scope.to_dict())
     return result

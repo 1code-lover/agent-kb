@@ -1,20 +1,24 @@
-代码与测试报告评审建议（2026-08-14，macOS 单次公证与多凭证策略）
+代码与测试报告评审建议（2026-08-14，fallback 问答后状态即时同步）
 
 评审结论：
-本轮实现与已审核的 PRD、FRD、RTM、实施计划和测试方案一致。共享凭证解析、单次公证配置不变量、严格预检诊断、真实非正式打包及跨层回归均有直接证据，测试报告已更新，可以进入开发故事沉淀和提交阶段。正式 Apple 签名、公证、stapling 与安装后回归仍属于明确记录的外部凭证阻塞，不得在当前提交中标记为完成。
+本轮补充实现与新增 spec、原 fallback 设计和验收口径一致，已按 TDD 增加正常回答、无相关来源拒答和 fallback 重试三条 API 响应契约测试，并通过 Python、Web 和 Electron 定向/全量门禁。服务端现在返回最新 model_health，Agent 问答成功后主动刷新 model options，已关闭自动切换后页面状态滞后的边角问题。代码与测试报告审核通过，可以进入开发故事沉淀和提交阶段。
+
+正式 Apple 签名、公证、stapling 与安装后回归仍然受外部凭证阻塞，不得标记为完成。
 
 优点：
-1. `notarization-credentials.js` 作为纯解析模块同时被 `notarize-mac.js` 和 `release-preflight.js` 复用，避免 hook 与预检对凭证完整性和优先级产生漂移。
-2. Keychain profile、App Store Connect API Key、Apple ID 三种策略的 payload 与优先级均有单测；最高优先级部分配置不会阻止后续完整策略，诊断保留缺失字段但不泄露凭证值。
-3. `build.mac.notarize=false` 与 `afterSign=scripts/notarize-mac.js` 共同形成单次提交不变量，配置校验器对缺失和 `true` 都失败；真实 `build:mac` 已证明 electron-builder 26.15.3 接受该配置且只进入一次自定义 hook。
-4. 严格 preflight 改为汇总独立硬门禁，一次输出公证凭证、Developer ID Application 和 notarytool 状态，避免发布人员逐项修复后反复运行才发现下一处缺失。
-5. 测试证据完整：Electron `64 passed`，Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过；`build:preflight`、真实 `build:mac` 和 `verify:package` 均通过。
+1. `api/services/chat_service.py` 在正常回答、无相关来源拒答和 fallback 重试路径统一返回 `model_health`，客户端不需要猜测本次请求是否发生过切换。
+2. `webapp/src/pages/AgentPage.jsx` 保留历史刷新，同时在聊天成功后主动刷新模型 options，解决 60 秒 staleTime 导致的旧模型/旧提示滞后。
+3. 新增测试覆盖健康、fallback_applied 和无来源分支；`webapp/src/api/chat.test.js` 继续验证响应封装对 model_health 的透传。
+4. 本轮未改变 fallback 候选排序、Ollama 动态发现、单次重试、知识库范围和 evidence 处理，回归面可控。
+5. 验证结果完整：Python `783 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`。
 
 需要改进的地方：
-1. 当前机器没有有效 Developer ID Application 身份，也没有任一完整公证凭证策略，因此只能验证“配置单次提交”和“无凭证时 hook 单次安全跳过”，不能验证 Apple 服务侧真实 submission、accepted 状态和 stapled ticket。
-2. 当前生成的 app 仍是 ad-hoc 产物，非严格 `verify-mac-release` 会报告 codesign、Gatekeeper 和 stapler 失败；这不是本轮代码回归，但正式发布前必须关闭。
+1. 本机仍没有有效 `Developer ID Application` 身份。
+2. Keychain profile、App Store Connect API Key、Apple ID 三类公证策略均未配置，正式 submission、accepted、stapled ticket 和安装后回归仍无真实证据。
+3. 当前 ad-hoc 产物的 `verify-mac-release` 仍会报告 codesign、Gatekeeper 和 stapler 失败；这是外部签名条件缺失的预期结果，不是本轮 fallback 改动回归。
 
 具体建议：
-1. 保持当前代码和测试实现，不再扩大本提交范围。
-2. 提交前生成本轮 bug 开发故事并推进 capture state；执行 `git diff --check` 和最终桌面定向门禁。
-3. Apple 凭证到位后严格按 release checklist 执行 `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release` 和安装后桌面工作流，并保留仅一次 notarization submission 的真实日志证据。
+1. 生成本轮开发故事并检查 capture state，提交前确认没有新的未沉淀功能窗口。
+2. 提交并推送后复核远程同步状态。
+3. Apple 凭证和证书到位后，严格执行 `release:preflight`、`release:mac`、`verify:package`、`verify:mac-release`，再安装正式产物运行桌面工作流诊断。
+4. 正式发布判定必须保留仅一次公证 submission、codesign、Gatekeeper、stapler 和安装后 fallback/引用/跨 KB 隔离证据。

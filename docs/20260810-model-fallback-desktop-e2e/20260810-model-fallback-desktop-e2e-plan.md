@@ -42,3 +42,9 @@ cd desktop && npm run verify:package
 - 评测脚本断点续跑只复用无 API 错误的用例，避免固化失败结果。
 - 公证凭证只通过环境变量或 macOS Keychain 读取；日志和测试 fixture 不写入真实秘密。
 - 自定义 afterSign 是唯一公证提交点，`mac.notarize=false` 必须由配置 verifier 强制检查，防止 electron-builder 内建流程重复提交。
+
+## 2026-08-14 fallback 状态即时同步补充
+
+12. 先在 `tests/api/test_chat_service.py` 增加正常 query 与 fallback query 的 `model_health` 响应契约测试。
+13. 在 `api/services/chat_service.py` 返回服务端最新健康快照；在 `webapp/src/pages/AgentPage.jsx` 的问答成功处理器中主动刷新模型 options。
+14. 运行定向 Python/Web 测试和 Web build；更新测试报告与评审建议后再提交。
