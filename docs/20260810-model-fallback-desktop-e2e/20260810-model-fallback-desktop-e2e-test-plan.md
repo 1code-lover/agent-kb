@@ -100,3 +100,23 @@
 - Resources 启动前后哈希完全一致，不出现新增、删除或变更文件。
 - data/model 诊断路径分别指向 userData/runtime 和 Resources/localmodels。
 - Apple 凭证缺失时可以完成 ad-hoc runtime 验证，但不得据此宣称正式签名、公证或 release 完成。
+
+## 外部 Python runtime 发布门禁测试补充
+
+### verifier 单元测试
+
+- 显式 Python 3.12、核心模块完整且 `pip check` 通过时返回 ready，并记录 resolved command/version。
+- Python 3.11/3.13 等非 3.12 版本失败，不执行或不接受后续 pip gate。
+- 核心模块缺失时列出稳定模块名；诊断不得包含环境变量中的秘密。
+- `llama-index` 或 `llama-index-core` 不是 `0.11.19` 时失败，并返回实际锁定包版本。
+- `pip check` 非零时保留有限错误摘要并失败。
+- 默认候选首个失败后选择下一个完整 runtime；显式 override 失败时不得回退。
+- Python 命令不存在或探针输出非法 JSON 时返回可操作错误而不是抛出未处理异常。
+- stderr/pip check 多行和超长内容会折叠为单行并截断到 500 字符。
+
+### 发布链路集成测试
+
+- `build:preflight` 和 `release:preflight` 脚本包含 `verify:python-runtime`。
+- `build-target` 的 macOS 路径在 verifier 失败时不调用 release preflight 或 electron-builder；通过时顺序为 release config、Python runtime、release preflight、electron-builder。
+- `verify-release-config` 拒绝任一 preflight 脚本遗漏 Python runtime verifier。
+- 真实 `/opt/miniconda3/envs/agent-kb/bin/python` 输出 CPython 3.12.13、`llama-index=0.11.19`、`llama-index-core=0.11.19`、核心模块完整且 `pip check` 通过。

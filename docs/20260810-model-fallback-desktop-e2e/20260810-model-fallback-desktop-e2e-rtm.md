@@ -19,3 +19,4 @@
 | Python 数据/模型绝对根目录 | FR-09 | `tests/test_runtime_paths.py`、embedding/reranker 路径定向测试 |
 | 默认 embedding 随包发布 | FR-10 | `desktop/scripts/verify-package.test.js`、`npm run verify:package` |
 | packaged runtime 真实启动 | FR-09、FR-10 | `artifacts/packaged-runtime-release-e2e-report-20260816.json`（独立 userData、API/embedding health、Agent Ollama/fallback、退出回收） |
+| 外部 Python runtime 构建前门禁 | FR-11 | `desktop/scripts/verify-python-runtime.test.js`、`desktop/scripts/build-target.test.js`、`desktop/scripts/verify-release-config.test.js`、真实 `npm run build:preflight` |

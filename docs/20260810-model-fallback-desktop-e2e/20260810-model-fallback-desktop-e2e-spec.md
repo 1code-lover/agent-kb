@@ -51,3 +51,11 @@ runtimeRoot 初始化采用 fail-closed：创建或写权限探测失败即终�
 ### 不变性验证
 
 真实 packaged E2E 使用独立 userData 目录，启动前后分别计算 Resources 下所有常规文件的相对路径、大小和 SHA-256。两份清单必须完全一致；同时必须观察到 runtime 日志及至少一类 Python 持久化文件写入 `<userData>/runtime`。API health 中默认 embedding 必须 ready，模型诊断的本地路径必须指向 Resources/localmodels。报告同时记录实际 resolved Python 路径、Python 版本和 `pip check`，不得隐含宣称安装包已包含自包含 Python runtime。
+
+## 2026-08-16 Python runtime verifier 契约
+
+verifier 输出稳定结构：`ok`、`pythonCommand`、`explicit`、`implementation`、`version`、`missingModules`、`packageVersions`、`pipCheck`、`attempts` 和 `failures`。候选探针与 `pip check` 分离，确保错误能区分解释器不可执行、Python 版本不符、锁定包版本漂移、模块缺失和包依赖冲突。
+
+显式解释器具有 fail-closed 语义：只要用户指定了桌面 Python override，构建门禁和桌面启动必须指向同一个值；该值失败时不得用系统 Python 让 preflight 假通过。默认候选模式允许继续探测下一个候选，但最终报告保留每次失败的安全摘要。
+
+所有外部 stderr/stdout 错误摘要折叠换行为单行并限制为 500 字符；真实报告只记录 Python、`llama-index`、`llama-index-core` 和 `pip check` 结果，不写完整 `pip freeze` 或环境变量值。

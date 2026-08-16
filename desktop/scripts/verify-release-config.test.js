@@ -6,6 +6,10 @@ const { verifyReleaseConfig } = require("./verify-release-config");
 function buildPackage(overrides = {}) {
   const pkg = {
     scripts: {
+      "verify:python-runtime": "node scripts/verify-python-runtime.js",
+      "build:preflight":
+        "node scripts/verify-release-config.js && npm run verify:python-runtime && node scripts/release-preflight.js",
+      "release:preflight": "npm run verify:python-runtime && node scripts/release-preflight.js --strict",
       "verify:mac-release": "node scripts/verify-mac-release.js --strict",
       "release:mac":
         "npm run build:web && npm run build:preflight && npm run release:preflight && NORTHAGENT_REQUIRE_NOTARIZE=1 node ./node_modules/electron-builder/cli.js --mac && npm run verify:package && npm run verify:mac-release",
@@ -104,4 +108,40 @@ test("verifyReleaseConfig requires electron-builder built-in notarization to be 
   assert.match(missingResult.failures.join("\n"), /build\.mac\.notarize must be false/);
   assert.equal(enabledResult.ok, false);
   assert.match(enabledResult.failures.join("\n"), /build\.mac\.notarize must be false/);
+});
+
+test("verifyReleaseConfig rejects a build preflight that omits Python runtime verification", () => {
+  const pkg = buildPackage({
+    scripts: {
+      "build:preflight": "node scripts/verify-release-config.js && node scripts/release-preflight.js",
+    },
+  });
+
+  const result = verifyReleaseConfig(pkg);
+
+  assert.equal(result.ok, false);
+  assert.match(result.failures.join("\n"), /build:preflight.*verify:python-runtime/);
+});
+
+test("verifyReleaseConfig rejects a strict release preflight that omits Python runtime verification", () => {
+  const pkg = buildPackage({
+    scripts: {
+      "release:preflight": "node scripts/release-preflight.js --strict",
+    },
+  });
+
+  const result = verifyReleaseConfig(pkg);
+
+  assert.equal(result.ok, false);
+  assert.match(result.failures.join("\n"), /release:preflight.*verify:python-runtime/);
+});
+
+test("verifyReleaseConfig rejects a missing Python runtime verifier command", () => {
+  const pkg = buildPackage();
+  delete pkg.scripts["verify:python-runtime"];
+
+  const result = verifyReleaseConfig(pkg);
+
+  assert.equal(result.ok, false);
+  assert.match(result.failures.join("\n"), /verify:python-runtime.*verify-python-runtime\.js/);
 });

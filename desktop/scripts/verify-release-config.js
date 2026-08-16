@@ -72,6 +72,18 @@ function verifyReleaseConfig(pkg) {
   }
 
   const releaseMac = scripts["release:mac"] || "";
+  const verifyPythonRuntime = scripts["verify:python-runtime"] || "";
+  const buildPreflight = scripts["build:preflight"] || "";
+  const releasePreflight = scripts["release:preflight"] || "";
+  if (!verifyPythonRuntime.includes("verify-python-runtime.js")) {
+    failures.push("scripts.verify:python-runtime must run verify-python-runtime.js");
+  }
+  if (!buildPreflight.includes("verify:python-runtime")) {
+    failures.push("scripts.build:preflight must run verify:python-runtime");
+  }
+  if (!releasePreflight.includes("verify:python-runtime")) {
+    failures.push("scripts.release:preflight must run verify:python-runtime");
+  }
   if (!releaseMac.includes("build:preflight")) {
     failures.push("scripts.release:mac must run build:preflight");
   }

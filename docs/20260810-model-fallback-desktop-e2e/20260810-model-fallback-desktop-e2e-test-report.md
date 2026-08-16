@@ -4,7 +4,7 @@
 
 截至 2026-08-16，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；基础问答、知识库问答和 Agent 高级模式均复用自动 fallback，Agent 直连聊天已支持 Ollama 原生 `/api/chat`；问答响应同步返回最新 `model_health`，前端能展示最近探测摘要和明确切换提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
 
-当前最终门禁为：Python `791 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `69 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
+当前最终门禁为：Python `791 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `86 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。外部 Python runtime 已从报告披露提升为 build/release 自动阻断门禁，真实验证为 CPython `3.12.13`、`llama-index=0.11.19`、`llama-index-core=0.11.19` 且 `pip check` 通过。
 
 正式 macOS 签名、公证、stapling 和安装后回归尚未完成：本机缺少 Apple Developer 凭证、有效的 Developer ID Application 证书，且三种公证凭证策略（Keychain profile、App Store Connect API Key、Apple ID）均未配置。因此当前可以判定“发布实现、非严格预检、包内容和校验链路通过”，不能判定“正式 macOS release 完成”。
 
@@ -28,10 +28,49 @@
 | 桌面工作流 E2E | 通过 | `artifacts/desktop-model-workflow-report-after-electron-fix.json` |
 | macOS dmg/zip 打包与 packaged resources | 通过 | `desktop/dist/` + `desktop/scripts/verify-package.js` |
 | packaged runtime 数据隔离、embedding ready、Resources 不变性 | 通过 | `artifacts/packaged-runtime-release-e2e-report-20260816.json` |
-| Electron CSP 与发布配置单测 | 通过，`69 passed` | `desktop/src/*.test.js`、`desktop/scripts/*.test.js` |
+| 外部 Python runtime 发布门禁 | 通过 | `desktop/scripts/verify-python-runtime.js`、`artifacts/python-runtime-verifier-tdd-red-20260816.txt` |
+| Electron CSP 与发布配置单测 | 通过，`86 passed` | `desktop/src/*.test.js`、`desktop/scripts/*.test.js` |
 | macOS release 后置签名/公证校验链路 | 代码与单测通过 | `desktop/scripts/verify-mac-release.js` |
 | 正式 macOS 签名、公证和 stapling | 待外部凭证 | `APPLE_*` 环境变量和 Developer ID Application 证书尚未配置 |
 | 跨知识库 v1-v6 真实评测 | 通过，`49/49 cases`、`54/54 turns` | `artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json` |
+
+## 2026-08-16 外部 Python runtime 发布门禁补充
+
+packaged app 当前复用安装机器上的外部 Python，而不是内置解释器。此前 release 报告虽记录了真实 Python 与 `pip check`，但 build/release preflight 不会阻止 Python 版本错误、模块缺失、LlamaIndex 锁版本漂移或依赖冲突，存在包已经生成却无法启动 API 的风险。
+
+本轮按 TDD 新增 `desktop/scripts/verify-python-runtime.js`：
+
+- 显式 override 按 `NORTHAGENT_PYTHON`、`THINKRAG_PYTHON`、`FOXGLOVE_PYTHON` 优先级解析；显式命令失败时 fail-closed，不回退系统 Python。
+- 默认候选覆盖 macOS/Linux conda `agent-kb`、项目 `.venv`、`venv`、`python3`，以及 Windows 项目 `.venv`、`venv`、`python`。
+- 强制 CPython 3.12，检查 `fastapi`、`uvicorn`、`llama_index`、`sentence_transformers`、`httpx`。
+- 强制 `llama-index=0.11.19`、`llama-index-core=0.11.19`，然后执行 `<python> -m pip check`。
+- 输出稳定结构，所有外部错误摘要折叠换行并限制为 500 字符；secret-like 环境变量值进入日志前替换为 `[REDACTED]`，不输出完整 `pip freeze` 或其他环境变量值。
+- `build:preflight`、严格 `release:preflight` 和通用 macOS `build-target` 均在 electron-builder 前执行 verifier；release config verifier 会拒绝任一 preflight 旁路。
+
+TDD 红灯证据为 `artifacts/python-runtime-verifier-tdd-red-20260816.txt`：首次执行 `5 failed, 6 passed`，分别暴露 verifier 文件不存在、build-target 未调用 Python 门禁和 release config 未拒绝旁路。代码评审又通过一条失败测试确认外部 stderr 可能携带环境秘密，完成统一脱敏后定向结果为 `24 passed`，覆盖 override 优先级、显式成功、非 3.12、核心模块缺失、锁版本漂移、`pip check` 失败、默认候选回退、显式失败不回退、命令不存在、非法 JSON、500 字符限制和秘密脱敏。
+
+真实门禁输出仅记录必要版本信息：
+
+```text
+pythonCommand=/opt/miniconda3/envs/agent-kb/bin/python
+implementation=CPython
+version=3.12.13
+llama-index=0.11.19
+llama-index-core=0.11.19
+pipCheck=No broken requirements found.
+```
+
+最终执行结果：
+
+- `node --test desktop/src/*.test.js desktop/scripts/*.test.js`：`86 passed`。
+- `cd desktop && npm run build:preflight`：通过；先完成 release config 与 Python runtime 门禁，再输出非严格 Apple 环境诊断。
+- `cd desktop && npm run build:mac`：通过；新产物 SHA-256 为 DMG `ac20e4e1248198f86045ed8904f4f5f5c20e9f31a92373f261432bf8e8f2150c`、ZIP `03e0567c13d30322df18cd049c141a36d92abfecdb5dbe94f47a99f08b2948d2`。
+- `cd desktop && npm run verify:package`：通过。
+- `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"`：`791 passed, 1 deselected, 35 warnings`。
+- Web domain/API/store：`89 passed`，Vite build 通过。
+- `cd desktop && npm run release:preflight`：Python runtime 门禁先通过，随后严格 Apple 门禁按预期退出 `1`；证据为 `artifacts/release-preflight-external-blocker-20260816.txt`。
+
+正式 Apple release 的阻塞没有变化：仍是 `0 valid identities found`，且 Keychain profile、App Store Connect API Key、Apple ID 三类公证策略均未配置。该外部阻塞不能用本轮 Python 门禁通过替代。
 
 ## 2026-08-15 Agent 直连 Ollama 与自动 fallback 补充
 

@@ -74,3 +74,12 @@ cd desktop && npm run verify:package
 - Python 定向测试证明环境变量产生绝对 storage/data/model 路径，且持久化不进入源码/resources。
 - `npm run build:mac` 和 `npm run verify:package` 通过，产物包含默认 embedding。
 - packaged E2E 报告中 `resources_unchanged=true`、`runtime_writes_outside_resources=true`、`embedding_ready=true`、`python_stopped_after_quit=true`。
+
+## 2026-08-16 外部 Python runtime 门禁补充
+
+28. 更新需求、设计、RTM、测试计划和评审建议，明确外部 Python 是当前发布前提，不能只在报告里披露而缺少自动阻断。
+29. 先增加 `desktop/scripts/verify-python-runtime.test.js`，覆盖显式解释器成功、版本错误、模块缺失、pip check 失败、默认候选回退和显式失败不回退。
+30. 先扩展 `desktop/scripts/build-target.test.js` 与 `verify-release-config.test.js`，证明 Python runtime verifier 缺失或失败会阻止 Electron builder。
+31. 实现 runtime verifier，接入 npm build/release preflight 和 macOS build target；输出安全、稳定诊断。
+32. 执行 Node 定向/全量测试、真实 Python runtime 验证、build preflight、macOS build、package verifier、Python/Web 回归。
+33. 更新测试报告、release checklist、评审和开发故事；审核后提交并 push。

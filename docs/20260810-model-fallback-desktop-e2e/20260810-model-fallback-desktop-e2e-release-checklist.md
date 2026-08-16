@@ -20,6 +20,7 @@
 - Python cwd、日志、session、KB、receipt 和 config 写入 userData/runtime；退出后 Python 进程已回收。
 - packaged Agent Ollama 直连和坏云端到动态 Ollama 候选 fallback 均通过，报告为 `artifacts/packaged-runtime-release-e2e-report-20260816.json`。
 - 当前验证使用 `/opt/miniconda3/envs/agent-kb/bin/python` 3.12.13；安装包尚未内置 Python 解释器和依赖，不能宣称清洁机自包含。
+- `verify:python-runtime` 已进入 build/release preflight，强制 CPython 3.12、核心模块、`llama-index=0.11.19`、`llama-index-core=0.11.19` 和 `pip check`；显式 override 失败时不会回退其他 Python。
 
 ## 凭证要求
 
@@ -68,13 +69,19 @@ security find-identity -v -p codesigning
 cd desktop && npm run release:preflight
 ```
 
-通过标准：严格预检通过，release env、Developer ID Application、`notarytool` 和 Electron bundle 均 ready。
+通过标准：先通过外部 Python runtime 门禁，再通过严格 Apple 预检；release env、Developer ID Application、`notarytool` 和 Electron bundle 均 ready。
+
+```bash
+cd desktop && npm run verify:python-runtime
+```
+
+通过标准：输出 `ok=true`、CPython 3.12、核心模块完整、两个 LlamaIndex 包均为 `0.11.19` 且 `pipCheck` 通过；只记录必要版本和安全摘要，不输出完整环境清单。
 
 ```bash
 cd desktop && npm run build:preflight
 ```
 
-通过标准：`verify-release-config` 通过，确认 `afterSign`、`mac.notarize=false`、hardened runtime、entitlements、`dmg/zip` target、notarization requirement 和 packaged runtime resources 未被破坏；自定义 hook 是唯一公证提交点。非严格环境预检只允许继续提示本机缺少完整公证策略或 Developer ID。
+通过标准：`verify-release-config` 通过，确认 Python verifier 不可旁路，以及 `afterSign`、`mac.notarize=false`、hardened runtime、entitlements、`dmg/zip` target、notarization requirement 和 packaged runtime resources 未被破坏；自定义 hook 是唯一公证提交点。Python runtime 错误必须阻断；非严格 Apple 环境预检只允许继续提示本机缺少完整公证策略或 Developer ID。
 
 ```bash
 cd desktop && npm run release:mac
@@ -128,6 +135,7 @@ cd webapp && npm run build
 只有同时满足以下证据，才能把 macOS release candidate 标记为通过：
 
 - 严格 `release:preflight` 通过。
+- 外部 Python runtime verifier 通过，且解释器与安装后实际启动口径一致。
 - `build:preflight` 的 release config verifier 通过。
 - `release:mac` 完成签名和公证，未跳过 notarization，且日志中只出现一次公证 submission。
 - `verify:package` 通过。

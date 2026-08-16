@@ -114,3 +114,17 @@ Python 配置在上述环境变量存在时将 `STORAGE_DIR`、`DATA_DIR` 和 `M
 `desktop/package.json` 通过 `extraResources` 将 `localmodels` 复制到 app resources。`verify:package` 将默认 embedding 的配置、权重、tokenizer、SentenceTransformer modules 和 pooling 配置列为必需 runtime 文件；任一文件缺失时构建验证失败，避免应用在远程下载关闭时生成不可用安装包。
 
 本轮不把源码和模型随包等同于自包含 Python runtime。packaged E2E 记录实际 resolved Python、Python 版本和 `pip check`；若面向没有兼容 Python 环境的清洁机分发，需独立设计 Python 解释器、原生依赖、体积和嵌套签名方案。
+
+### FR-11 外部 Python runtime 发布门禁
+
+新增 `desktop/scripts/verify-python-runtime.js`：
+
+1. 若设置 `NORTHAGENT_PYTHON`、`THINKRAG_PYTHON` 或 `FOXGLOVE_PYTHON`，只验证第一个显式值，不静默回退。
+2. 未显式设置时，macOS/Linux 按 conda `agent-kb`、项目 `.venv`、项目 `venv`、`python3` 顺序探测；Windows 按项目 `.venv`、项目 `venv`、`python` 顺序探测。
+3. 通过无副作用探针返回 Python implementation、major/minor/patch 和缺失核心模块；要求 CPython 3.12。
+4. 核心模块至少包括 `fastapi`、`uvicorn`、`llama_index`、`sentence_transformers` 和 `httpx`。
+5. 通过 `importlib.metadata` 验证 `llama-index=0.11.19` 和 `llama-index-core=0.11.19`，并在结果中记录这两个版本；任一漂移均失败。
+6. 模块与版本探针通过后执行 `<python> -m pip check`，只有退出码为 0 才判定 runtime ready。
+7. 子进程设置 `PYTHONDONTWRITEBYTECODE=1`、UTF-8，并以仓库资源根目录为 cwd；诊断只记录命令路径、版本、缺失模块、锁定包版本和经过清洗/截断的错误摘要。
+
+`desktop/package.json` 的 `build:preflight` 和 `release:preflight` 必须调用该 verifier；`desktop/scripts/build-target.js` 的 macOS 路径在 release preflight 和 electron-builder 之前执行 verifier。`verify-release-config.js` 对脚本缺失 verifier 的配置判定失败。

@@ -1,0 +1,20 @@
+
+> northagent-desktop@0.1.0 release:preflight
+> npm run verify:python-runtime && node scripts/release-preflight.js --strict
+
+
+> northagent-desktop@0.1.0 verify:python-runtime
+> node scripts/verify-python-runtime.js
+
+[verify-python-runtime] {"ok":true,"pythonCommand":"/opt/miniconda3/envs/agent-kb/bin/python","explicit":false,"implementation":"CPython","version":"3.12.13","missingModules":[],"packageVersions":{"llama-index":"0.11.19","llama-index-core":"0.11.19"},"pipCheck":"No broken requirements found.","attempts":[{"ok":true,"pythonCommand":"/opt/miniconda3/envs/agent-kb/bin/python","implementation":"CPython","version":"3.12.13","missingModules":[],"packageVersions":{"llama-index":"0.11.19","llama-index-core":"0.11.19"},"pipCheck":"No broken requirements found.","failures":[]}],"failures":[]}
+[release-preflight] legacy app-builder-bin executable not installed; skipping execute-bit repair
+[release-preflight] notarization strategy keychain_profile missing: APPLE_KEYCHAIN_PROFILE
+[release-preflight] notarization strategy api_key missing: APPLE_API_KEY, APPLE_API_KEY_ID, APPLE_API_ISSUER
+[release-preflight] notarization strategy apple_id missing: APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+[release-preflight] mac release notarization credentials missing: notarization strategy keychain_profile missing: APPLE_KEYCHAIN_PROFILE; notarization strategy api_key missing: APPLE_API_KEY, APPLE_API_KEY_ID, APPLE_API_ISSUER; notarization strategy apple_id missing: APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+[release-preflight] Developer ID Application signing identity missing
+[release-preflight] notarytool ready: /Library/Developer/CommandLineTools/usr/bin/notarytool
+[release-preflight] Electron bundle present: /Users/zhaojianyong/python/agent-kb/desktop/node_modules/electron/dist/Electron.app
+[release-preflight] mac release notarization credentials missing: notarization strategy keychain_profile missing: APPLE_KEYCHAIN_PROFILE; notarization strategy api_key missing: APPLE_API_KEY, APPLE_API_KEY_ID, APPLE_API_ISSUER; notarization strategy apple_id missing: APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID; Developer ID Application signing identity missing
+
+[exit_status] 1

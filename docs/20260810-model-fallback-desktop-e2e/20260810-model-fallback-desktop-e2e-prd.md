@@ -68,3 +68,23 @@
 - app 启动、API ready、embedding ready、知识库链路和 Ollama fallback 执行后，Resources 文件树和内容哈希保持不变，运行数据只出现在 userData/runtime。
 - `verify:package` 至少检查默认 embedding 的 `config.json`、`model.safetensors`、`tokenizer.json`、`vocab.txt`、`modules.json` 和 `1_Pooling/config.json`。
 - 本轮复用显式配置或本机兼容 Python 环境，不宣称安装包已内置完整 Python 解释器及原生依赖；真实 packaged E2E 必须记录实际 Python 路径、版本和依赖检查结果。
+
+## 2026-08-16 外部 Python runtime 发布门禁补充
+
+### 问题
+
+当前安装包明确依赖外部 Python，但 `build:preflight`、`release:preflight` 和通用 build target 只验证 Electron、Apple 和包配置。错误的系统 Python、非 3.12 版本、缺少核心模块或依赖冲突仍可能在签名、公证之后才暴露，产生“发布成功但首次启动失败”的产物。
+
+### 范围补充
+
+- 新增可独立执行和单元测试的 Python runtime verifier，复用桌面端解释器候选优先级。
+- 验证 Python 3.12、核心运行模块可发现、`pip check` 通过，并输出不含秘密的解释器路径和诊断。
+- 显式 `NORTHAGENT_PYTHON` 配置失败时不得静默切换到其他解释器，避免验证环境与实际启动环境不一致。
+- 将 verifier 接入 `build:preflight`、严格 `release:preflight` 和 macOS 通用 build target；发布配置校验器必须阻断丢失该门禁的脚本配置。
+
+### 验收标准补充
+
+- 正确的 `/opt/miniconda3/envs/agent-kb/bin/python` 3.12 runtime 通过并报告 `llama-index=0.11.19`、`llama-index-core=0.11.19` 和 `pip check` 无冲突。
+- Python 版本不符、锁定包版本漂移、核心模块缺失、`pip check` 失败、解释器不可执行均返回非零并给出可操作原因。
+- 显式解释器失败时结果记录该解释器，不回退到系统 Python；未显式配置时可按候选顺序选择首个完整 runtime。
+- `build:preflight`、`release:preflight` 和 `npm run build` 的 macOS 路径都必须先通过 runtime verifier，才允许进入 Electron 构建或 Apple 门禁。

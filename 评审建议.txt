@@ -1,22 +1,19 @@
-代码与测试报告评审建议（2026-08-16，Electron packaged runtime 数据隔离与本地模型随包）
+代码与测试报告最终评审建议（2026-08-16，外部 Python runtime 发布门禁）
 
 评审结论：
-本轮实现已完成 resourceRoot/runtimeRoot 拆分、Python 数据/模型根目录透传、默认 embedding 随包和 package verifier 门禁。TDD 定向测试、Python 非 slow 全量、Web 测试/build、Electron 全量和真实 packaged Agent/Ollama E2E 均有证据。首次真实 E2E 发现 Python __pycache__ 修改 Resources，补充 PYTHONDONTWRITEBYTECODE 后第二次 E2E 已证明 Resources 前后 114 项文件哈希完全一致，代码与发布实现审核通过，可以进入测试报告和提交阶段。
+审核通过。上一轮提出的外部诊断秘密脱敏和 override 优先级覆盖均已落实；代码、测试、发布清单、项目进度、测试报告和开发故事证据一致，可以进入提交与推送。
 
 优点：
-1. packaged Python script 仍从 Resources 读取，cwd、storage、session、config、KB、receipt 和日志均进入 userData/runtime，避免把可写数据放入签名 bundle。
-2. `NORTHAGENT_DATA_ROOT`、`NORTHAGENT_MODEL_ROOT` 和 `PYTHONDONTWRITEBYTECODE` 由 spawn 环境显式注入，且 runtimeRoot 初始化采用 fail-closed。
-3. `localmodels` 通过 extraResources 打包，verifier 检查 SentenceTransformer 的 config、权重、tokenizer、vocab、modules 和 pooling 配置；真实 embedding health 已从 Resources 本地加载并 ready。
-4. 真实 packaged API E2E 覆盖 Ollama 原生 Agent 直连和坏云端模型到动态 Ollama 候选的自动 fallback，返回精确答案、明确“已自动切换” step、来源/目标和 `fallback_applied=true`。
-5. 首次 E2E 的负结果没有被掩盖：Resources 生成 __pycache__ 后定位到 Python bytecode 写入并补测试/环境修复，第二次验证才作为通过证据。
-6. Python `791 passed, 1 deselected`、Web `89 passed`/build、Electron `69 passed`、真实 packaged embedding 和退出后 Python 回收均已验证；没有宣称 Apple 正式签名/公证已完成。
+1. runtime verifier 完整覆盖 CPython 3.12、核心模块、LlamaIndex 双包锁版本和 pip check，结构化失败信息可操作。
+2. 三个显式 override 的优先级已有回归测试，显式失败继续保持 fail-closed。
+3. Python/pip 外部诊断会先按 secret-like 环境变量值替换为 `[REDACTED]`，再折叠换行并截断到 500 字符。
+4. build-target、build/release preflight 和 release config verifier 形成了无旁路的前置门禁。
+5. TDD 红灯、定向与全量测试、真实 runtime、打包产物哈希、package verifier 和 Apple 外部阻塞均有明确证据。
+6. 测试报告继续明确当前包不是自包含 Python runtime，也没有把 ad-hoc 打包误判成正式签名公证完成。
 
 需要改进的地方：
-1. 当前安装包仍依赖外部兼容 Python 解释器和项目依赖；本轮报告必须明确这是当前发布前提，不得把安装包描述为清洁机自包含应用。
-2. 当前真实 packaged E2E 使用 `--user-data-dir` 和本机 conda Python，需在 release checklist 中固定记录 resolved Python、版本、`pip check` 和独立 userData 目录，方便后续签名包复现。
-3. `verify:package` 已检查模型文件，但 release checklist 的通过标准尚未显式列出 `localmodels` 和 Resources 前后不变性，应补齐文档追踪。
+无阻断问题。
 
 具体建议：
-1. 更新 release checklist/test report/docs/project，加入 packaged runtime artifact 路径、DMG/ZIP SHA-256、Resources 114 项哈希不变、embedding ready、Python stop 和 `localmodels` 文件清单。
-2. 记录当前 Apple 门禁仍为 `0 valid identities found`、三类 notarization credentials 均缺失；保留 ad-hoc 验证结果，但不得将其标为正式 release。
-3. 提交前按 dev-story-capture 规则检查未沉淀改动，确认 `评审建议.txt` 已被读取并逐项落实；push 前再次复核 capture state。
+1. 后续补齐 Apple Developer 凭证后，必须重新执行严格 `release:preflight`、`release:mac`、`verify:mac-release` 和安装后回归，不能复用本轮 ad-hoc 结论。
+2. 若未来改为内置 Python runtime，应单独设计跨架构依赖、嵌套签名、体积和清洁机验证，本轮外部 runtime verifier 不能替代该验收。

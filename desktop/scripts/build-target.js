@@ -9,6 +9,7 @@ function runBuildTarget(options = {}) {
   const stdio = options.stdio || "inherit";
   const target = currentPlatform === "darwin" ? "--mac" : "--win";
   const verifyReleaseConfigPath = path.join(__dirname, "verify-release-config.js");
+  const verifyPythonRuntimePath = path.join(__dirname, "verify-python-runtime.js");
   const releasePreflightPath = path.join(__dirname, "release-preflight.js");
   const electronBuilderPath = path.join(__dirname, "..", "node_modules", "electron-builder", "cli.js");
 
@@ -16,6 +17,11 @@ function runBuildTarget(options = {}) {
     const configPreflight = spawn("node", [verifyReleaseConfigPath], { stdio });
     if (configPreflight.status !== 0) {
       return { status: configPreflight.status ?? 1, target, platform: currentPlatform, stage: "build-preflight" };
+    }
+
+    const pythonRuntime = spawn("node", [verifyPythonRuntimePath], { stdio });
+    if (pythonRuntime.status !== 0) {
+      return { status: pythonRuntime.status ?? 1, target, platform: currentPlatform, stage: "python-runtime" };
     }
 
     const preflight = spawn("node", [releasePreflightPath], { stdio });

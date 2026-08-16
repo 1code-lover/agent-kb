@@ -482,6 +482,16 @@ cd webapp && npm run build
 - 真实 packaged Agent API E2E 通过：直连返回 `PACKAGED_OLLAMA_OK`；坏云端模型自动发现 Ollama `qwen2.5:0.5b` 并返回 `PACKAGED_FALLBACK_OK`，step 为“已自动切换到 Ollama / qwen2.5:0.5b”，来源/目标完整。
 - 报告：`docs/20260810-model-fallback-desktop-e2e/artifacts/packaged-runtime-release-e2e-report-20260816.json`；当前产物为 ad-hoc，正式 Apple Developer ID 签名、公证、stapling、Gatekeeper 和安装后回归仍受 `0 valid identities found` 与三类凭证缺失阻塞。
 
+### 5.36 2026-08-16 外部 Python runtime 发布门禁
+
+- packaged app 当前依赖安装机器的外部 Python；此前 build/release preflight 不检查解释器和依赖，错误 Python 版本、模块缺失或 LlamaIndex 版本漂移仍可能生成不可启动的安装包。
+- 新增 `desktop/scripts/verify-python-runtime.js`：按桌面端 override 优先级解析解释器，显式失败 fail-closed；默认候选可继续探测。强制 CPython 3.12、五个核心模块、`llama-index=0.11.19`、`llama-index-core=0.11.19` 和 `pip check`。
+- verifier 输出稳定结构，外部诊断折叠换行并截断为 500 字符，不输出 `pip freeze` 或其他环境变量值。
+- `build:preflight`、严格 `release:preflight`、macOS `build-target` 和 release config verifier 已接入该门禁，Python 失败时不会继续 release preflight 或 electron-builder。
+- TDD 红灯为 `5 failed, 6 passed`；代码评审补充秘密脱敏红灯后，最终定向 `24 passed`、Electron 全量 `86 passed`。真实 runtime 为 `/opt/miniconda3/envs/agent-kb/bin/python`、CPython `3.12.13`，两个 LlamaIndex 包均为 `0.11.19`，`pip check` 通过；外部诊断中的 secret-like 环境变量值会替换为 `[REDACTED]`。
+- `npm run build:preflight`、`npm run build:mac`、`npm run verify:package` 均通过；Python 非 slow 全量仍为 `791 passed, 1 deselected, 35 warnings`，Web `89 passed` 且 Vite build 通过。
+- 严格 `release:preflight` 会先通过 Python 门禁，再因 `0 valid identities found` 和三类公证凭证均缺失按预期退出 `1`；正式签名、公证、stapling、Gatekeeper 和安装回归仍是外部阻塞。
+
 ---
 
 ## 6. 已知问题和限制
@@ -495,7 +505,7 @@ cd webapp && npm run build
 - **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
 - **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
-- **桌面端正式发布尚未完成**：已补 CSP、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包、packaged app 启动验证、包内容校验和 mac release 后置签名/公证校验；preflight 已能检查 Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，`verify-mac-release` 已能检查 codesign、Gatekeeper 和 stapler，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
+- **桌面端正式发布尚未完成**：已补 CSP、外部 Python runtime 门禁、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包、packaged app 启动验证、包内容校验和 mac release 后置签名/公证校验；preflight 已能检查 Python 3.12/核心依赖、Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，`verify-mac-release` 已能检查 codesign、Gatekeeper 和 stapler，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
 - **Ollama 服务需要独立运行**：本机已用 Ollama `0.32.13` + `qwen2.5:0.5b` 完成真实 Agent 原生推理和动态 fallback E2E；NorthAgent 只连接 `127.0.0.1:11434`，不会自动安装、启动或拉取 Ollama 模型，新机器仍需单独准备运行时。
 - **桌面端依赖安全已收口**：Electron 已从被 macOS 撤销公证的 `31.7.7` 升级到 `43.3.0` 并恢复启动，`electron-builder` 也已升级到 `26.15.3`，`desktop npm audit` 当前为 `0 vulnerabilities`。
 - **占位词扫描仍会命中规范和历史计划文本**：当前占位词扫描命中 `AGENTS.md` 的禁用规则本身，以及 `docs/superpowers/plans/2026-05-28-desktop-knowledge-agent-mvp.md` 的历史自查项；旧 Streamlit `frontend/state.py` 的占位注释已清理。
