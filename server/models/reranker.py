@@ -12,6 +12,7 @@ import os
 from llama_index.core.postprocessor import SentenceTransformerRerank
 from config import DEFAULT_RERANKER_MODEL, RERANKER_MODEL_TOP_N, RERANKER_MODEL_PATH, MODEL_DIR
 from server.utils.hf_mirror import use_hf_mirror
+from server.utils.model_paths import resolve_local_model_path
 
 
 def create_reranker_model(model_name=DEFAULT_RERANKER_MODEL, top_n=RERANKER_MODEL_TOP_N) -> SentenceTransformerRerank:
@@ -29,7 +30,7 @@ def create_reranker_model(model_name=DEFAULT_RERANKER_MODEL, top_n=RERANKER_MODE
         use_hf_mirror()
         model_path = RERANKER_MODEL_PATH[model_name]
         if MODEL_DIR is not None:
-            path = f"./{MODEL_DIR}/{model_path}"
+            path = resolve_local_model_path(MODEL_DIR, model_path)
             if os.path.exists(path):
                 # 本地路径命中时优先加载，避免冷启动下载模型。
                 model_path = path

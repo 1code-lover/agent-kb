@@ -4,7 +4,12 @@ const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
 
-const { requiredRuntimeFiles, resolvePackageLayout, verifyPackage } = require("./verify-package");
+const {
+  requiredEmbeddingFiles,
+  requiredRuntimeFiles,
+  resolvePackageLayout,
+  verifyPackage,
+} = require("./verify-package");
 
 function createPackagedFixture(options = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "verify-package-"));
@@ -22,7 +27,7 @@ function createPackagedFixture(options = {}) {
     fs.mkdirSync(path.dirname(artifactPath), { recursive: true });
     fs.writeFileSync(artifactPath, "artifact");
   }
-  for (const runtimeFile of requiredRuntimeFiles) {
+  for (const runtimeFile of [...requiredRuntimeFiles, ...requiredEmbeddingFiles]) {
     const target = path.join(layout.resourcesRoot, runtimeFile);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, "runtime");
@@ -66,7 +71,7 @@ test("verifyPackage discovers x64 mac app layout and artifacts without arch suff
   fs.writeFileSync(path.join(resourcesRoot, "app.asar"), "asar");
   fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0.dmg"), "artifact");
   fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0-mac.zip"), "artifact");
-  for (const runtimeFile of requiredRuntimeFiles) {
+  for (const runtimeFile of [...requiredRuntimeFiles, ...requiredEmbeddingFiles]) {
     const target = path.join(resourcesRoot, runtimeFile);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, "runtime");
@@ -100,7 +105,7 @@ test("verifyPackage prefers no-arch x64 artifacts over stale arm64 artifacts", (
   fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0-arm64-mac.zip"), "stale artifact");
   fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0.dmg"), "artifact");
   fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0-mac.zip"), "artifact");
-  for (const runtimeFile of requiredRuntimeFiles) {
+  for (const runtimeFile of [...requiredRuntimeFiles, ...requiredEmbeddingFiles]) {
     const target = path.join(resourcesRoot, runtimeFile);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, "runtime");
@@ -131,7 +136,7 @@ test("verifyPackage discovers mac-universal layout and universal artifacts", () 
   fs.writeFileSync(path.join(resourcesRoot, "app.asar"), "asar");
   fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0-universal.dmg"), "artifact");
   fs.writeFileSync(path.join(root, "dist", "NorthAgent-0.1.0-universal-mac.zip"), "artifact");
-  for (const runtimeFile of requiredRuntimeFiles) {
+  for (const runtimeFile of [...requiredRuntimeFiles, ...requiredEmbeddingFiles]) {
     const target = path.join(resourcesRoot, runtimeFile);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, "runtime");
@@ -178,6 +183,30 @@ test("verifyPackage reports missing runtime files", () => {
   assert.equal(result.ok, false);
   assert.match(result.failures.join("\n"), /missing runtime file/);
   assert.match(result.failures.join("\n"), /server\/index\.py/);
+});
+
+test("verifyPackage requires a loadable default SentenceTransformer embedding", () => {
+  assert.deepEqual(requiredEmbeddingFiles, [
+    "localmodels/BAAI/bge-small-zh-v1.5/config.json",
+    "localmodels/BAAI/bge-small-zh-v1.5/model.safetensors",
+    "localmodels/BAAI/bge-small-zh-v1.5/tokenizer.json",
+    "localmodels/BAAI/bge-small-zh-v1.5/vocab.txt",
+    "localmodels/BAAI/bge-small-zh-v1.5/modules.json",
+    "localmodels/BAAI/bge-small-zh-v1.5/1_Pooling/config.json",
+  ]);
+
+  const missingModelFile = requiredEmbeddingFiles[1];
+  const { packageJson, root } = createPackagedFixture({ removeRuntimeFile: missingModelFile });
+  const result = verifyPackage({
+    arch: "arm64",
+    asar: { listPackage: () => [] },
+    desktopRoot: root,
+    packageJson,
+  });
+
+  assert.equal(result.ok, false);
+  assert.match(result.failures.join("\n"), /missing runtime file/);
+  assert.match(result.failures.join("\n"), /model\.safetensors/);
 });
 
 test("verifyPackage rejects packaged test files inside app.asar", () => {

@@ -10,6 +10,17 @@
 - `security find-identity -v -p codesigning` 当前未发现有效 `Developer ID Application` 证书。
 - `xcrun --find notarytool` 可用，路径为 `/Library/Developer/CommandLineTools/usr/bin/notarytool`。
 
+## 2026-08-16 本地 packaged 门禁状态
+
+以下内部发布门禁已通过，但不等同于 Apple 正式签名/公证：
+
+- `npm run build:mac`、`npm run verify:package` 通过。
+- `localmodels/BAAI/bge-small-zh-v1.5/` 已随包发布，包含 config、model.safetensors、tokenizer、vocab、modules 和 `1_Pooling/config.json`。
+- 独立 `--user-data-dir` packaged E2E 中，embedding `ready` 且 `load_source=local`；Resources 启动前后 114 项文件哈希完全一致，未产生 `__pycache__`。
+- Python cwd、日志、session、KB、receipt 和 config 写入 userData/runtime；退出后 Python 进程已回收。
+- packaged Agent Ollama 直连和坏云端到动态 Ollama 候选 fallback 均通过，报告为 `artifacts/packaged-runtime-release-e2e-report-20260816.json`。
+- 当前验证使用 `/opt/miniconda3/envs/agent-kb/bin/python` 3.12.13；安装包尚未内置 Python 解释器和依赖，不能宣称清洁机自包含。
+
 ## 凭证要求
 
 签名/公证前必须满足：
@@ -76,6 +87,7 @@ cd desktop && npm run verify:package
 ```
 
 通过标准：packaged resources 包含 `webapp/dist`、Python API、`server/`、`utils/`、`run_api.py`、`config.py` 和 `requirements.txt`，且 `app.asar` 不包含 `.test.js`。
+同时必须包含 `localmodels/BAAI/bge-small-zh-v1.5/config.json`、`model.safetensors`、`tokenizer.json`、`vocab.txt`、`modules.json` 和 `1_Pooling/config.json`。
 
 ## 安装后回归
 
@@ -85,6 +97,7 @@ cd desktop && npm run verify:package
 - 主进程日志包含 `desktop_app_ready`、`python_api_starting`、`python_api_ready`。
 - 渲染进程加载 packaged `webapp/dist/index.html`。
 - 前端能请求 `/api/model/options`、`/api/kb`、`/api/chat/history`。
+- runtime log 和 Python cwd 必须位于 userData/runtime，不得在 `Contents/Resources` 生成运行文件或 `__pycache__`。
 
 继续执行桌面工作流诊断：
 
@@ -120,4 +133,5 @@ cd webapp && npm run build
 - `verify:package` 通过。
 - 签名/公证后的 app 能安装并启动。
 - `diag_desktop_model_workflow` 在安装后 app 拉起的 API 上通过。
+- packaged runtime 报告必须证明 Resources 前后文件清单/哈希一致、embedding ready、Python 退出后已回收，并记录 resolved Python、版本和 `pip check`。
 - 桌面 Node 单测和 Web build 通过。

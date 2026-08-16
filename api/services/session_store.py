@@ -15,8 +15,7 @@ from api.services.skill_registry import DEFAULT_ENABLED_SKILLS
 from utils.logging_utils import SESSION_LOG_FILE, append_json_log, now_iso, safe_preview
 
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
-_SESSION_DIR = _PROJECT_ROOT / config.STORAGE_DIR / "sessions"
+_SESSION_DIR = Path(config.STORAGE_DIR) / "sessions"
 _CURRENT_VERSION = 1
 
 # 记忆限制配置（支持长上下文模型，设置较大值）

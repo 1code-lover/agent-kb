@@ -13,6 +13,14 @@ const requiredRuntimeFiles = [
   "server/index.py",
   "utils/logging_utils.py",
 ];
+const requiredEmbeddingFiles = [
+  "localmodels/BAAI/bge-small-zh-v1.5/config.json",
+  "localmodels/BAAI/bge-small-zh-v1.5/model.safetensors",
+  "localmodels/BAAI/bge-small-zh-v1.5/tokenizer.json",
+  "localmodels/BAAI/bge-small-zh-v1.5/vocab.txt",
+  "localmodels/BAAI/bge-small-zh-v1.5/modules.json",
+  "localmodels/BAAI/bge-small-zh-v1.5/1_Pooling/config.json",
+];
 
 function loadPackageJson(packagePath = path.join(desktopRoot, "package.json"), fsModule = fs) {
   return JSON.parse(fsModule.readFileSync(packagePath, "utf8"));
@@ -105,6 +113,7 @@ function verifyPackage(options = {}) {
   const fsModule = options.fs || fs;
   const asarModule = options.asar || asar;
   const runtimeFiles = options.requiredRuntimeFiles || requiredRuntimeFiles;
+  const embeddingFiles = options.requiredEmbeddingFiles || requiredEmbeddingFiles;
   const layout = resolvePackageLayout({ ...options, fs: fsModule });
   const failures = [];
 
@@ -115,6 +124,13 @@ function verifyPackage(options = {}) {
   }
 
   for (const relativePath of runtimeFiles) {
+    const target = path.join(layout.resourcesRoot, relativePath);
+    if (!fsModule.existsSync(target)) {
+      failures.push(`missing runtime file: ${target}`);
+    }
+  }
+
+  for (const relativePath of embeddingFiles) {
     const target = path.join(layout.resourcesRoot, relativePath);
     if (!fsModule.existsSync(target)) {
       failures.push(`missing runtime file: ${target}`);
@@ -160,6 +176,7 @@ module.exports = {
   findExistingMacResourcesRoot,
   loadPackageJson,
   requiredRuntimeFiles,
+  requiredEmbeddingFiles,
   resolvePackageLayout,
   verifyPackage,
 };

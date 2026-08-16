@@ -30,3 +30,24 @@
 - Agent 返回结果包含最终 `model_health` 和 fallback 元数据，receipt 记录最终模型及切换摘要。
 - fallback 不可用或第二次调用失败时返回明确错误，并保持可诊断健康状态。
 - 切换成功后的健康状态同时保留 `fallback_from` 和 `fallback_to`；真实 Ollama E2E 报告必须验证动态发现、原生推理和明确切换摘要。
+
+## 2026-08-15 packaged runtime 路径规范
+
+### 路径契约
+
+| 名称 | 开发模式 | packaged 模式 | 权限 |
+|---|---|---|---|
+| `resourceRoot` | 仓库根目录 | `process.resourcesPath` | 只读 |
+| `runtimeRoot` | 仓库根目录 | `<userData>/runtime` | 可写 |
+| Python script | `<resourceRoot>/run_api.py` | `<resourceRoot>/run_api.py` | 只读 |
+| Python cwd | `runtimeRoot` | `runtimeRoot` | 可写 |
+| Data root env | `runtimeRoot` | `runtimeRoot` | 可写 |
+| Model root env | `<resourceRoot>/localmodels` | `<resourceRoot>/localmodels` | 只读 |
+
+Electron 主进程不在模块加载时调用依赖 ready 状态的 `app.getPath()`；由可测试的纯函数根据 `isPackaged`、resources path 和 userData path 生成路径，再在 `app.whenReady()` 后初始化目录和 Python API。
+
+runtimeRoot 初始化采用 fail-closed：创建或写权限探测失败即终止 API 启动并显示可操作错误，不允许改写 resourceRoot，也不允许退回当前工作目录。Python 子进程设置 `PYTHONDONTWRITEBYTECODE=1`，防止导入模块时在 Resources 产生 `__pycache__`。
+
+### 不变性验证
+
+真实 packaged E2E 使用独立 userData 目录，启动前后分别计算 Resources 下所有常规文件的相对路径、大小和 SHA-256。两份清单必须完全一致；同时必须观察到 runtime 日志及至少一类 Python 持久化文件写入 `<userData>/runtime`。API health 中默认 embedding 必须 ready，模型诊断的本地路径必须指向 Resources/localmodels。报告同时记录实际 resolved Python 路径、Python 版本和 `pip check`，不得隐含宣称安装包已包含自包含 Python runtime。

@@ -8,6 +8,7 @@ import os
 import logging
 from typing import Optional
 import config
+from server.utils.model_paths import resolve_local_model_path
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def resolve_model_path(
     
     # 尝试本地路径
     if model_dir is not None:
-        local_path = os.path.join(".", model_dir, hf_path)
+        local_path = resolve_local_model_path(model_dir, hf_path)
         if os.path.exists(local_path):
             logger.info(f"Using local model: {local_path}")
             return local_path

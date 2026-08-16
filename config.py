@@ -6,12 +6,27 @@ import os
 THINKRAG_ENV = os.getenv("THINKRAG_ENV", "development")
 DEV_MODE = THINKRAG_ENV == "development"
 
+# 项目根目录基于配置文件位置解析；packaged Electron 通过环境变量覆盖可写数据根目录。
+_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+def _resolve_runtime_root(env_name: str, default_value: str | None = None) -> str | None:
+    """解析桌面运行时传入的绝对根目录，空值时保留开发模式默认行为。"""
+    value = os.getenv(env_name, "").strip()
+    if not value:
+        return default_value
+    return os.path.abspath(os.path.expanduser(value))
+
+
+_DATA_ROOT = _resolve_runtime_root("NORTHAGENT_DATA_ROOT")
+_MODEL_ROOT = _resolve_runtime_root("NORTHAGENT_MODEL_ROOT")
+
 # ============================================================
 # 路径配置
 # ============================================================
-STORAGE_DIR = "storage"
-DATA_DIR = "data"
-MODEL_DIR = "localmodels"
+STORAGE_DIR = os.path.join(_DATA_ROOT, "storage") if _DATA_ROOT else "storage"
+DATA_DIR = os.path.join(_DATA_ROOT, "data") if _DATA_ROOT else "data"
+MODEL_DIR = _MODEL_ROOT or "localmodels"
 CONFIG_STORE_FILE = "config_store.json"
 
 # ============================================================
@@ -143,9 +158,6 @@ DEFAULT_INDEX_NAME = "knowledge_base"
 # 安全配置（与环境无关，DEV_MODE=True 时仍然生效）
 # 如需在开发模式下放宽限制，请修改 COMMAND_SECURITY 配置
 # ============================================================
-
-# 项目根目录（基于 config.py 文件位置，而非运行时 cwd）
-_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # 命令安全配置
 COMMAND_SECURITY = {

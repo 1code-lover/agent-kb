@@ -472,6 +472,16 @@ cd webapp && npm run build
 - 真实报告首次暴露成功切换后 `fallback_from=null`；根因是 `select_model` 重置健康状态，已在最终 `fallback_applied` 更新时恢复原模型快照并补回归测试。
 - 最新 ad-hoc `build:mac` 和 `verify:package` 通过，packaged app 已包含 Agent Ollama/fallback 与 `fallback_from` 修复。
 
+### 5.35 2026-08-16 packaged runtime 发布收口
+
+- 发现并修复 packaged Electron 把运行数据写入 `.app/Contents/Resources` 的问题：`resourceRoot` 只读，`runtimeRoot` 使用 `<userData>/runtime`；Python script 仍从 Resources 读取，cwd、数据、模型和日志根目录通过环境变量显式传入。
+- `config.py`、config/session/fallback store、embedding、reranker 和 model loader 已支持 `NORTHAGENT_DATA_ROOT`、`NORTHAGENT_MODEL_ROOT`；runtimeRoot 创建失败采用 fail-closed；`PYTHONDONTWRITEBYTECODE=1` 防止 Python 生成 Resources 下的 `__pycache__`。
+- `desktop/package.json` 增加 `localmodels` extraResource；`verify-package` 和 release config verifier 强制检查默认 bge-small SentenceTransformer 目录及 modules/pooling 文件。
+- TDD 定向测试通过；Electron 全量 `69 passed`；Python 非 slow 全量 `791 passed, 1 deselected, 35 warnings`；Web `89 passed`，Vite build 通过。
+- 首次真实 packaged E2E 发现 Resources 被 Python `__pycache__` 修改，修复环境变量后第二次报告证明 Resources 114 项文件哈希完全一致、embedding 从 Resources 本地 ready、runtime 数据只写 userData/runtime、退出后 Python 已停止。
+- 真实 packaged Agent API E2E 通过：直连返回 `PACKAGED_OLLAMA_OK`；坏云端模型自动发现 Ollama `qwen2.5:0.5b` 并返回 `PACKAGED_FALLBACK_OK`，step 为“已自动切换到 Ollama / qwen2.5:0.5b”，来源/目标完整。
+- 报告：`docs/20260810-model-fallback-desktop-e2e/artifacts/packaged-runtime-release-e2e-report-20260816.json`；当前产物为 ad-hoc，正式 Apple Developer ID 签名、公证、stapling、Gatekeeper 和安装后回归仍受 `0 valid identities found` 与三类凭证缺失阻塞。
+
 ---
 
 ## 6. 已知问题和限制

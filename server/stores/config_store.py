@@ -16,7 +16,7 @@ from config import STORAGE_DIR, CONFIG_STORE_FILE
 
 DATA_TYPE = Dict[str, Dict[str, dict]]
 
-PERSISIT_PATH = "./" + STORAGE_DIR + "/" + CONFIG_STORE_FILE
+PERSISIT_PATH = os.path.join(STORAGE_DIR, CONFIG_STORE_FILE)
 
 
 class LocalKVStore(SimpleKVStore):

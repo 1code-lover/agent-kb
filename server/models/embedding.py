@@ -13,6 +13,7 @@ import os
 from llama_index.core import Settings
 from config import DEFAULT_EMBEDDING_MODEL, EMBEDDING_MODEL_PATH, MODEL_DIR
 from server.utils.hf_mirror import use_hf_mirror
+from server.utils.model_paths import resolve_local_model_path
 
 
 def _remote_download_allowed(allow_remote_download=None):
@@ -41,7 +42,7 @@ def get_embedding_model_diagnostics(model_name=DEFAULT_EMBEDDING_MODEL, allow_re
     local_path = None
     local_path_exists = False
     if model_path and MODEL_DIR is not None:
-        local_path = os.path.join(".", MODEL_DIR, model_path)
+        local_path = resolve_local_model_path(MODEL_DIR, model_path)
         local_path_exists = os.path.exists(local_path)
 
     allow_remote = (not local_path_exists) and _remote_download_allowed(allow_remote_download)

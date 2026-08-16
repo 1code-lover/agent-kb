@@ -1,25 +1,22 @@
-代码与测试报告评审建议（2026-08-15，真实 Ollama Agent fallback E2E 与来源回显修复）
+代码与测试报告评审建议（2026-08-16，Electron packaged runtime 数据隔离与本地模型随包）
 
 评审结论：
-本轮补齐了此前明确缺失的真实 Ollama 运行证据，并依据真实链路发现和修复了 `fallback_from` 被 `select_model` 重置的问题。真实 Agent 直接推理、坏云端模型到动态 Ollama 候选切换、状态/step/receipt 回显、全量测试和最新 ad-hoc 打包均有直接证据，代码与测试报告审核通过，可以进入开发故事沉淀和提交阶段。
-
-正式 Apple 签名、公证、stapling 与正式安装后回归仍受 Developer ID Application 和公证凭证阻塞，不得标记为完成。
+本轮实现已完成 resourceRoot/runtimeRoot 拆分、Python 数据/模型根目录透传、默认 embedding 随包和 package verifier 门禁。TDD 定向测试、Python 非 slow 全量、Web 测试/build、Electron 全量和真实 packaged Agent/Ollama E2E 均有证据。首次真实 E2E 发现 Python __pycache__ 修改 Resources，补充 PYTHONDONTWRITEBYTECODE 后第二次 E2E 已证明 Resources 前后 114 项文件哈希完全一致，代码与发布实现审核通过，可以进入测试报告和提交阶段。
 
 优点：
-1. 使用官方签名有效的 Ollama 0.32.13 App 包和真实 `qwen2.5:0.5b` 模型，验证不再停留在 mock 或协议单测。
-2. 真实报告覆盖当前 Ollama 直接 Agent 推理，以及不可达云端模型通过空模型列表的动态 `/api/tags` 发现切换到 Ollama，正好对应原始目标。
-3. 两个 case 都通过 `agent_runtime.run_agent`，同时验证 task status、最终 provider/model、明确 step 摘要和模型健康状态。
-4. E2E 首次暴露 `fallback_from=null`，随后先补失败测试，再在最终健康状态写入中恢复 `base_status.fallback_from`；来源/目标现均完整。
-5. JSON 报告记录 Ollama 版本、模型 digest/size/量化、隔离策略和每例结果，不包含真实 API Key，也不写 session/receipt。
-6. 回归结果稳定：Python `790 passed, 1 deselected`，Electron `64 passed`，Web build 通过；最新 `build:mac`、`verify:package` 通过且 packaged code 包含修复。
+1. packaged Python script 仍从 Resources 读取，cwd、storage、session、config、KB、receipt 和日志均进入 userData/runtime，避免把可写数据放入签名 bundle。
+2. `NORTHAGENT_DATA_ROOT`、`NORTHAGENT_MODEL_ROOT` 和 `PYTHONDONTWRITEBYTECODE` 由 spawn 环境显式注入，且 runtimeRoot 初始化采用 fail-closed。
+3. `localmodels` 通过 extraResources 打包，verifier 检查 SentenceTransformer 的 config、权重、tokenizer、vocab、modules 和 pooling 配置；真实 embedding health 已从 Resources 本地加载并 ready。
+4. 真实 packaged API E2E 覆盖 Ollama 原生 Agent 直连和坏云端模型到动态 Ollama 候选的自动 fallback，返回精确答案、明确“已自动切换” step、来源/目标和 `fallback_applied=true`。
+5. 首次 E2E 的负结果没有被掩盖：Resources 生成 __pycache__ 后定位到 Python bytecode 写入并补测试/环境修复，第二次验证才作为通过证据。
+6. Python `791 passed, 1 deselected`、Web `89 passed`/build、Electron `69 passed`、真实 packaged embedding 和退出后 Python 回收均已验证；没有宣称 Apple 正式签名/公证已完成。
 
 需要改进的地方：
-1. Homebrew formula 因当前 Homebrew 与 Python 3.14 bottle 的 `set_permissions` 安装步骤不兼容而失败，本轮使用官方 App zip 解压到用户 Applications；这不影响验证，但不是标准 Homebrew service 安装。
-2. Ollama 服务需要独立运行，NorthAgent 当前不会自动安装、启动或拉取模型；新机器仍需运行时准备。
-3. 当前 Apple 发布条件仍为空：`0 valid identities found`，三类公证凭证均未配置；最新产物仍是 ad-hoc。
+1. 当前安装包仍依赖外部兼容 Python 解释器和项目依赖；本轮报告必须明确这是当前发布前提，不得把安装包描述为清洁机自包含应用。
+2. 当前真实 packaged E2E 使用 `--user-data-dir` 和本机 conda Python，需在 release checklist 中固定记录 resolved Python、版本、`pip check` 和独立 userData 目录，方便后续签名包复现。
+3. `verify:package` 已检查模型文件，但 release checklist 的通过标准尚未显式列出 `localmodels` 和 Resources 前后不变性，应补齐文档追踪。
 
 具体建议：
-1. 生成本轮真实 E2E/bugfix 开发故事并推进 capture state。
-2. 提交 JSON artifact、`fallback_from` 修复、测试和文档，push 前复核未沉淀窗口。
-3. 后续可把 Ollama 安装/启动检查纳入桌面 release checklist 或独立诊断命令，但不要让 NorthAgent 静默下载数百 MB 模型。
-4. Apple 条件到位后继续执行严格 release、codesign、notarization、stapler、Gatekeeper 和正式安装后工作流。
+1. 更新 release checklist/test report/docs/project，加入 packaged runtime artifact 路径、DMG/ZIP SHA-256、Resources 114 项哈希不变、embedding ready、Python stop 和 `localmodels` 文件清单。
+2. 记录当前 Apple 门禁仍为 `0 valid identities found`、三类 notarization credentials 均缺失；保留 ad-hoc 验证结果，但不得将其标为正式 release。
+3. 提交前按 dev-story-capture 规则检查未沉淀改动，确认 `评审建议.txt` 已被读取并逐项落实；push 前再次复核 capture state。

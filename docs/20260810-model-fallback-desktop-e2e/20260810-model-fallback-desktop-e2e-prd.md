@@ -46,3 +46,25 @@
 - macOS 构建只执行一次公证提交；release config verifier 必须确认自定义 afterSign hook 已启用且 electron-builder 内建 notarization 已关闭。
 - 正式 `release:mac` 产物通过 codesign、Gatekeeper、stapler、包内容和安装后工作流验证。
 - 全量非 slow 测试通过，前端 Node 测试和构建通过。
+
+## 2026-08-15 packaged runtime 数据隔离补充
+
+### 问题
+
+当前 packaged Electron 将 `process.resourcesPath` 同时作为程序资源目录、Python 工作目录和日志目录。正式签名后，运行数据写入 `.app/Contents/Resources` 可能因权限失败，也可能改变签名覆盖内容。与此同时，默认禁止 embedding 远程下载，但 `localmodels/` 尚未进入安装包，干净运行目录无法加载默认 embedding。
+
+### 范围补充
+
+- 将只读程序资源根目录与可写运行根目录分离：程序代码、Web 静态文件和模型从 app resources 读取，日志、配置、会话、知识库和索引只写入 Electron `userData/runtime`。
+- Electron 启动 Python 时，脚本仍来自 resources，`cwd` 改为 runtime 根目录，并显式传入数据根目录和模型根目录环境变量。
+- Python 所有显式配置、会话、fallback 配置和模型路径支持绝对根目录，不再强制回落到源码目录。
+- 将默认 `bge-small-zh-v1.5` 本地模型作为 packaged runtime 必需资源，并由 `verify:package` 阻断缺失模型文件的产物。
+
+### 验收标准补充
+
+- packaged 模式的桌面日志和 Python `cwd` 位于 `app.getPath("userData")/runtime`，不得位于 `process.resourcesPath`。
+- Python 子进程接收 `NORTHAGENT_DATA_ROOT=<runtimeRoot>` 与 `NORTHAGENT_MODEL_ROOT=<resourceRoot>/localmodels`，`run_api.py` 路径仍为 `<resourceRoot>/run_api.py`。
+- 默认开发模式路径行为保持兼容；设置环境变量后，storage/data/model 均解析为对应绝对目录。
+- app 启动、API ready、embedding ready、知识库链路和 Ollama fallback 执行后，Resources 文件树和内容哈希保持不变，运行数据只出现在 userData/runtime。
+- `verify:package` 至少检查默认 embedding 的 `config.json`、`model.safetensors`、`tokenizer.json`、`vocab.txt`、`modules.json` 和 `1_Pooling/config.json`。
+- 本轮复用显式配置或本机兼容 Python 环境，不宣称安装包已内置完整 Python 解释器及原生依赖；真实 packaged E2E 必须记录实际 Python 路径、版本和依赖检查结果。

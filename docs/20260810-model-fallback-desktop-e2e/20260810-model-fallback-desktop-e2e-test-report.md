@@ -2,9 +2,9 @@
 
 ## 结论
 
-截至 2026-08-15，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；基础问答、知识库问答和 Agent 高级模式均复用自动 fallback，Agent 直连聊天已支持 Ollama 原生 `/api/chat`；问答响应同步返回最新 `model_health`，前端能展示最近探测摘要和明确切换提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
+截至 2026-08-16，本轮模型配置韧性、自动 fallback、Ollama 候选发现、模型健康 API/UI、桌面端真实工作流诊断、Electron CSP、macOS 发布配置与后置校验链路，以及多知识库跨领域泛化均已完成代码和本地门禁验证。模型不可用时会分类错误、探测候选并自动切换；基础问答、知识库问答和 Agent 高级模式均复用自动 fallback，Agent 直连聊天已支持 Ollama 原生 `/api/chat`；问答响应同步返回最新 `model_health`，前端能展示最近探测摘要和明确切换提示。source-backed 回答已覆盖 UTF-16/无扩展名文本、OCR 边界句、preview、scope、多事实合并和精确短语保真。
 
-当前最终门禁为：Python `790 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `64 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
+当前最终门禁为：Python `791 passed, 1 deselected`，Web `89 passed` 且 Vite build 通过，Electron `69 passed`；v1-v6 真实跨领域评测为 `49/49 cases passed`、`54/54 turns passed`，正向、负向和 contract 通过率均为 `100%`，没有系统性故障。
 
 正式 macOS 签名、公证、stapling 和安装后回归尚未完成：本机缺少 Apple Developer 凭证、有效的 Developer ID Application 证书，且三种公证凭证策略（Keychain profile、App Store Connect API Key、Apple ID）均未配置。因此当前可以判定“发布实现、非严格预检、包内容和校验链路通过”，不能判定“正式 macOS release 完成”。
 
@@ -27,7 +27,8 @@
 | 桌面端独立启动 API | 通过 | `storage/logs/desktop_runtime.log` |
 | 桌面工作流 E2E | 通过 | `artifacts/desktop-model-workflow-report-after-electron-fix.json` |
 | macOS dmg/zip 打包与 packaged resources | 通过 | `desktop/dist/` + `desktop/scripts/verify-package.js` |
-| Electron CSP 与发布配置单测 | 通过，`64 passed` | `desktop/src/*.test.js`、`desktop/scripts/*.test.js` |
+| packaged runtime 数据隔离、embedding ready、Resources 不变性 | 通过 | `artifacts/packaged-runtime-release-e2e-report-20260816.json` |
+| Electron CSP 与发布配置单测 | 通过，`69 passed` | `desktop/src/*.test.js`、`desktop/scripts/*.test.js` |
 | macOS release 后置签名/公证校验链路 | 代码与单测通过 | `desktop/scripts/verify-mac-release.js` |
 | 正式 macOS 签名、公证和 stapling | 待外部凭证 | `APPLE_*` 环境变量和 Developer ID Application 证书尚未配置 |
 | 跨知识库 v1-v6 真实评测 | 通过，`49/49 cases`、`54/54 turns` | `artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json` |
@@ -69,9 +70,9 @@ f18400345f466f022253b01c3fe6ceceb03860161c3daf19d3836eb6c2e0a674  NorthAgent-0.1
 
 定向验证：Python `tests/api/test_chat_service.py` 为 `43 passed`；Web API/domain/store 测试为 `89 passed`，Vite build 通过。随后重新执行非 slow Python 全量测试为 `783 passed, 1 deselected, 35 warnings`，Electron 测试为 `64 passed`。
 
-## 2026-08-15 当前最终收口复核
+## 2026-08-15 Agent/Ollama 与跨领域收口复核（历史基线）
 
-本节是当前最终结论；后续按日期保留的 `37/49`、`44/49`、embedding 缓存缺失和定向失败结果均为优化过程中的历史证据，不代表当前状态。
+本节记录 2026-08-15 的 Agent/Ollama 与跨领域收口基线；后续按日期保留的 `37/49`、`44/49`、embedding 缓存缺失和定向失败结果均为优化过程中的历史证据。当前 packaged runtime 收口以 2026-08-16 小节和对应 artifact 为准。
 
 最终验证结果：
 
@@ -144,6 +145,43 @@ cd desktop && npm run release:preflight
 结果：按预期以退出码 `1` 失败，并在一次诊断中同时列出 Keychain profile、API Key、Apple ID 三类凭证缺失，以及 `Developer ID Application signing identity missing`；`notarytool` 路径为 `/Library/Developer/CommandLineTools/usr/bin/notarytool`。
 
 当前 ad-hoc app 的非严格 `verify-mac-release` 继续报告 codesign、Gatekeeper 和 stapler 未通过，符合“尚未完成正式发布”的验收口径。正式凭证到位前不能验证真实 Apple submission 次数、notarization accepted 状态和 stapled ticket。
+
+## 2026-08-16 packaged runtime 路径与真实桌面 E2E 收口
+
+本轮针对签名 app bundle 不应写入 `Contents/Resources` 的发布阻断问题完成修复：
+
+- packaged Electron 使用 `resourceRoot=<app>/Contents/Resources` 读取代码、Web 静态资源和 `localmodels`；使用 `runtimeRoot=<userData>/runtime` 写入 Python cwd、Electron 日志、配置、session、KB、receipt 和 API 日志。
+- Python 子进程脚本仍为 `<resourceRoot>/run_api.py`，并接收 `NORTHAGENT_DATA_ROOT`、`NORTHAGENT_MODEL_ROOT`、`PYTHONDONTWRITEBYTECODE=1` 和 `PYTHONIOENCODING=utf-8`。
+- `config.py`、KV/config store、session/fallback store、embedding、reranker 和通用 model loader 支持绝对数据/模型根目录；runtimeRoot 初始化失败时 fail-closed，不回落到 Resources。
+- `desktop/package.json` 通过 `extraResources` 打包 `localmodels`；`verify:package` 检查默认 `bge-small-zh-v1.5` 的 config、权重、tokenizer、vocab、modules 和 pooling 文件。
+
+真实 packaged E2E 报告：`artifacts/packaged-runtime-release-e2e-report-20260816.json`。
+
+执行证据：
+
+```text
+Python: 791 passed, 1 deselected, 35 warnings
+Web: 89 passed，Vite build 通过
+Electron: 69 passed
+packaged embedding: ready，load_source=local
+Resources: 启动前后 114 项文件清单和 SHA-256 完全一致
+Resources __pycache__: 未生成
+runtime writes: 全部位于独立 userData/runtime
+Python stop after quit: true
+Agent direct: PACKAGED_OLLAMA_OK
+Agent fallback: PACKAGED_FALLBACK_OK，step=已自动切换到 Ollama / qwen2.5:0.5b
+fallback_from: BadCloud / offline-model
+fallback_to: Ollama / qwen2.5:0.5b
+```
+
+本次 packaged E2E 使用 `/opt/miniconda3/envs/agent-kb/bin/python`（Python 3.12.13）和独立 `--user-data-dir`；安装包当前仍依赖外部兼容 Python 环境及项目依赖，不宣称为清洁机自包含 runtime。DMG/ZIP SHA-256 为：
+
+```text
+d7bfadb42c4de715c34c909784491fb4847405e34535afe921663002b0db7eab  NorthAgent-0.1.0-arm64.dmg
+c2733c08e65ce4a9bfe0672ca8746bd47fc044e0405ea90ebfd1a71fb7ce6a7c  NorthAgent-0.1.0-arm64-mac.zip
+```
+
+该证据证明 packaged runtime 和 ad-hoc 包内容门禁通过；Apple Developer ID 签名、公证、stapling、Gatekeeper 和正式安装回归仍等待外部 Apple 凭证。
 
 ## 历史执行记录
 

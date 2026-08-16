@@ -2,7 +2,13 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const test = require("node:test");
 
-const { ensurePythonApi, resolvePythonCommand } = require("./python-process");
+const { ensurePythonApi, resolvePythonCommand, stopPythonApi } = require("./python-process");
+
+const runtimePaths = {
+  modelRoot: "/tmp/resources/localmodels",
+  resourceRoot: "/tmp/resources",
+  runtimeRoot: "/tmp/user-data/runtime",
+};
 
 test("resolvePythonCommand respects explicit desktop python override", () => {
   const previous = process.env.NORTHAGENT_PYTHON;
@@ -37,7 +43,7 @@ test("resolvePythonCommand prefers macOS agent-kb conda runtime when available",
 
 test("ensurePythonApi reuses an already running API without spawning", async () => {
   const spawnCalls = [];
-  const ready = await ensurePythonApi("/tmp/project", {
+  const ready = await ensurePythonApi(runtimePaths, {
     fetchImpl: async () => ({ ok: true, status: 200 }),
     spawnImpl: () => {
       spawnCalls.push("spawned");
@@ -50,7 +56,7 @@ test("ensurePythonApi reuses an already running API without spawning", async () 
   assert.deepEqual(spawnCalls, []);
 });
 
-test("ensurePythonApi starts Python API when health check is not ready", async () => {
+test("ensurePythonApi starts Python from resources with writable cwd and explicit roots", async () => {
   const spawnCalls = [];
   const fakeProcess = {
     pid: 1234,
@@ -61,7 +67,7 @@ test("ensurePythonApi starts Python API when health check is not ready", async (
   };
   let healthCalls = 0;
 
-  const ready = await ensurePythonApi("/tmp/project", {
+  const ready = await ensurePythonApi(runtimePaths, {
     fetchImpl: async () => {
       healthCalls += 1;
       if (healthCalls === 1) {
@@ -69,8 +75,8 @@ test("ensurePythonApi starts Python API when health check is not ready", async (
       }
       return { ok: true, status: 200 };
     },
-    spawnImpl: (cmd, args) => {
-      spawnCalls.push({ cmd, args });
+    spawnImpl: (cmd, args, options) => {
+      spawnCalls.push({ cmd, args, options });
       return fakeProcess;
     },
     sleep: async () => {},
@@ -78,5 +84,11 @@ test("ensurePythonApi starts Python API when health check is not ready", async (
 
   assert.equal(ready, true);
   assert.equal(spawnCalls.length, 1);
-  assert.deepEqual(spawnCalls[0].args, ["/tmp/project/run_api.py"]);
+  assert.deepEqual(spawnCalls[0].args, ["/tmp/resources/run_api.py"]);
+  assert.equal(spawnCalls[0].options.cwd, "/tmp/user-data/runtime");
+  assert.equal(spawnCalls[0].options.env.NORTHAGENT_DATA_ROOT, "/tmp/user-data/runtime");
+  assert.equal(spawnCalls[0].options.env.NORTHAGENT_MODEL_ROOT, "/tmp/resources/localmodels");
+  assert.equal(spawnCalls[0].options.env.PYTHONDONTWRITEBYTECODE, "1");
+  assert.equal(spawnCalls[0].options.env.PYTHONIOENCODING, "utf-8");
+  stopPythonApi(runtimePaths);
 });

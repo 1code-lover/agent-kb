@@ -9,8 +9,7 @@ from typing import Any
 import config
 
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
-_STORE_FILE = _PROJECT_ROOT / config.STORAGE_DIR / config.CONFIG_STORE_FILE
+_STORE_FILE = Path(config.STORAGE_DIR) / config.CONFIG_STORE_FILE
 def _ensure_parent_dir() -> None:
     _STORE_FILE.parent.mkdir(parents=True, exist_ok=True)
 

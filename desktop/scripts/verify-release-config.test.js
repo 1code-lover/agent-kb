@@ -23,6 +23,7 @@ function buildPackage(overrides = {}) {
         { from: "../config.py", to: "config.py" },
         { from: "../run_api.py", to: "run_api.py" },
         { from: "../requirements.txt", to: "requirements.txt" },
+        { from: "../localmodels", to: "localmodels" },
       ],
       mac: {
         notarize: false,

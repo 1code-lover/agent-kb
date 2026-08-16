@@ -90,3 +90,27 @@ Agent 高级模式的 `llm_chat` 工具使用当前模型配置直接调用 prov
 5. Agent 结果和工具回执记录最终 provider/model、`model_health` 与结构化 fallback 来源/目标，不记录 API Key。
 6. 前端 Agent 成功回调继续刷新 model options，以显示“已自动切换”和最终模型。
 7. 成功切换后必须保留切换前模型快照；`select_model` 的健康状态重置不能丢失 `fallback_from`。
+
+### FR-09 packaged runtime 只读/可写目录隔离
+
+Electron 在 ready 后解析两个独立根目录：
+
+- `resourceRoot`：开发模式为仓库根目录，packaged 模式为 `process.resourcesPath`，只用于读取 `run_api.py`、Web 静态文件、图标和 `localmodels`。
+- `runtimeRoot`：开发模式继续使用仓库根目录，packaged 模式为 `path.join(app.getPath("userData"), "runtime")`，用于 Python `cwd` 和 Electron/Python 运行数据。
+
+启动 Python 时必须满足：
+
+1. 命令解析从 `resourceRoot` 查找项目虚拟环境或显式 `NORTHAGENT_PYTHON`。
+2. 脚本为 `path.join(resourceRoot, "run_api.py")`。
+3. `cwd` 为 `runtimeRoot`，启动前递归创建该目录。
+4. 环境变量包含 `NORTHAGENT_DATA_ROOT=runtimeRoot`、`NORTHAGENT_MODEL_ROOT=path.join(resourceRoot, "localmodels")`、`PYTHONDONTWRITEBYTECODE=1` 和 `PYTHONIOENCODING=utf-8`，避免 Python 在只读 Resources 下创建 `__pycache__`。
+5. Electron runtime log 写入 `runtimeRoot/storage/logs/desktop_runtime.log`。
+6. runtimeRoot 创建失败时终止启动并向用户显示日志位置或错误原因；不得静默使用 resourceRoot 作为可写 fallback。
+
+Python 配置在上述环境变量存在时将 `STORAGE_DIR`、`DATA_DIR` 和 `MODEL_DIR` 解析为绝对目录；未设置时继续兼容仓库根目录开发方式。会话、fallback 配置、KV 配置、embedding 和 reranker 不得通过字符串拼接破坏绝对路径。
+
+### FR-10 packaged embedding 资源门禁
+
+`desktop/package.json` 通过 `extraResources` 将 `localmodels` 复制到 app resources。`verify:package` 将默认 embedding 的配置、权重、tokenizer、SentenceTransformer modules 和 pooling 配置列为必需 runtime 文件；任一文件缺失时构建验证失败，避免应用在远程下载关闭时生成不可用安装包。
+
+本轮不把源码和模型随包等同于自包含 Python runtime。packaged E2E 记录实际 resolved Python、Python 版本和 `pip check`；若面向没有兼容 Python 环境的清洁机分发，需独立设计 Python 解释器、原生依赖、体积和嵌套签名方案。

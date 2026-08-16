@@ -56,3 +56,21 @@ cd desktop && npm run verify:package
 17. 在 `agent_runtime.run_agent` 结果、step 和 receipt 中透传最终模型健康与切换摘要，前端沿用已有 model options 主动刷新。
 18. 执行 Agent 定向测试、Python 非 slow 全量测试、Web 测试/build 和 Electron 测试，更新报告、评审和开发故事后提交推送。
 19. 安装并启动 Ollama、拉取小型模型，执行 Agent 直接推理和坏云端模型到动态 Ollama 候选的真实 E2E；将结果固化为 JSON artifact，并依据真实结果修复状态回显缺口。
+
+## 2026-08-15 packaged runtime 数据隔离补充
+
+20. 更新 PRD、FRD、RTM、spec、计划和测试方案，明确 Resources 只读、userData/runtime 可写及默认 embedding 随包发布的验收口径；完成文档评审后再编码。
+21. 先增加 `desktop/src/runtime-paths.test.js` 和 `desktop/src/python-process.test.js` 失败测试，覆盖 packaged 路径解析、Python script/cwd/env 和日志目录。
+22. 先增加 `tests/test_runtime_paths.py` 失败测试，使用隔离子进程验证数据/模型环境变量，并覆盖 KV、session、fallback、embedding、reranker 的绝对路径。
+23. 先扩展 `desktop/scripts/verify-package.test.js`，证明默认 embedding 文件缺失会阻断 package verifier。
+24. 实现 `resourceRoot`/`runtimeRoot` 拆分，修正 Python 路径解析和持久化路径；在 `desktop/package.json` 增加 `localmodels` extraResource 并强化 verifier。
+25. 运行 Electron/Python 定向测试和全部既有测试；重新构建 Web 与 macOS 包并执行 `verify:package`。
+26. 使用独立 userData 启动 packaged app，生成 Resources 启动前后 SHA-256 清单，验证 API/embedding ready、知识库问答、Ollama 直连/fallback 和退出后 Python 进程回收。
+27. 更新测试报告、release checklist、`docs/project.md`、评审建议和开发故事；审核通过后按 Task 提交并 push。
+
+### 预期结果
+
+- Node 定向测试新增路径和 package 模型资源门禁并全部通过。
+- Python 定向测试证明环境变量产生绝对 storage/data/model 路径，且持久化不进入源码/resources。
+- `npm run build:mac` 和 `npm run verify:package` 通过，产物包含默认 embedding。
+- packaged E2E 报告中 `resources_unchanged=true`、`runtime_writes_outside_resources=true`、`embedding_ready=true`、`python_stopped_after_quit=true`。

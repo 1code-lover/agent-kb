@@ -70,6 +70,13 @@
       {
         "from": "../requirements.txt",
         "to": "requirements.txt"
+      },
+      {
+        "from": "../localmodels",
+        "to": "localmodels",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "directories": {
