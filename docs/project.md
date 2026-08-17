@@ -581,3 +581,14 @@ cd webapp && npm run build
 | `d005958` | chore: update dev story capture state |
 
 查看完整历史：`git log --oneline -30`
+
+
+## 2026-08-17：物理隔离、Embedding 缓存恢复与 OCR 版面增强
+
+- 证书、签名和公证按当前决策暂时跳过，不阻塞本地功能开发；正式 macOS 发布仍保持外部阻塞状态。
+- 非 default 知识库改为 `storage/kbs/{kb_id}/` 物理索引隔离，显式 `persist_dir` 在所有环境均创建/恢复独立 StorageContext；`default` 继续兼容 `storage/`。
+- chat scope 与评测 fixture 的当前隔离口径更新为 `physical_isolated`，历史 artifacts 保留旧值作为当时证据。
+- 新增 `/api/embedding/cache` 和 `/api/embedding/cache/prepare`；Knowledge Workspace 可通过 ModelScope 白名单准备缺失缓存，并轮询下载、失败重试及重新预热状态。
+- OCR 利用几何框恢复阅读顺序，扫描 PDF 保留 `[Page N]`，规则表格恢复为 Markdown，并输出布局、表格行列与平均置信度。
+- `scripts/pdf_ocr_quality.py` 增加行顺序和表格单元格召回指标。
+- 历史共享索引中的非 default 数据不会被静默标记为已迁移；升级后需重新导入或重建对应知识库。

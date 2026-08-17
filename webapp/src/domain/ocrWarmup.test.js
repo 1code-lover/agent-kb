@@ -94,6 +94,7 @@ test('buildEmbeddingWarmupSummary 会突出本地缓存缺失和远程下载禁�
   assert.match(summary.summary, /运行时已禁止远程下载/);
   assert.ok(summary.detail.includes('localmodels/BAAI/bge-small-zh-v1.5'));
   assert.equal(summary.isReady, false);
+  assert.equal(summary.canPrepareCache, true);
 });
 
 test('buildEmbeddingWarmupSummary 会回显普通预热失败原因', () => {

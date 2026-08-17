@@ -18,7 +18,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from api.routers import agent, chat, health, kb, settings
+from api.routers import agent, chat, embedding_cache, health, kb, settings
 from api.runtime import bootstrap_runtime, runtime_state
 from server.readers.image_ocr import start_ocr_warmup_in_background
 from utils.api_response import error_response
@@ -81,6 +81,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(embedding_cache.router)
 app.include_router(chat.router)
 app.include_router(kb.router)
 app.include_router(settings.router)

@@ -385,7 +385,7 @@ def _run_question_case(base_url: str, kb_id: str, case: dict[str, Any], timeout:
             and payload.get("effective_scope_type") == "single_kb"
             and payload.get("effective_kb_ids") == [kb_id]
             and payload.get("is_default_deny_applied") is False
-            and payload.get("isolation_level") == "logical_filter_only"
+            and payload.get("isolation_level") == "physical_isolated"
         ),
         "answer_has_expected_terms": _contains_all(answer, list(case["expected_terms"])),
         "answer_is_refusal_like": True,

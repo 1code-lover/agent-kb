@@ -98,6 +98,7 @@ def _build_ocr_result(
     failure_category: str | None = None,
     missing_dependency: str | None = None,
     dependency_status: str | None = None,
+    layout_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """构造统一的 OCR 结果结构，便于上层诊断。"""
     payload = {
@@ -117,6 +118,8 @@ def _build_ocr_result(
         if dependency_status is not None:
             payload["dependency_status"] = dependency_status
     payload.update(timing_metrics)
+    if layout_metadata:
+        payload.update(layout_metadata)
     return payload
 
 
@@ -325,6 +328,128 @@ def _has_meaningful_text(text: str) -> bool:
     return bool(re.search(r"[\u4e00-\u9fffA-Za-z0-9]", text))
 
 
+def _coerce_ocr_box(raw_box: Any) -> tuple[float, float, float, float] | None:
+    """把 rec_boxes 或 dt_polys 统一转换为矩形边界。"""
+    if hasattr(raw_box, "tolist"):
+        raw_box = raw_box.tolist()
+    if not isinstance(raw_box, (list, tuple)):
+        return None
+    try:
+        if len(raw_box) == 4 and all(isinstance(value, (int, float)) for value in raw_box):
+            x1, y1, x2, y2 = (float(value) for value in raw_box)
+            return min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)
+        points = []
+        for point in raw_box:
+            if hasattr(point, "tolist"):
+                point = point.tolist()
+            if isinstance(point, (list, tuple)) and len(point) >= 2:
+                points.append((float(point[0]), float(point[1])))
+        if points:
+            xs = [point[0] for point in points]
+            ys = [point[1] for point in points]
+            return min(xs), min(ys), max(xs), max(ys)
+    except (TypeError, ValueError):
+        return None
+    return None
+
+
+def _collect_ocr_items(result: Any) -> list[dict[str, Any]]:
+    """提取文本、几何框和置信度，保留原始序号作为稳定回退。"""
+    items: list[dict[str, Any]] = []
+    sequence = 0
+    for ocr_item in result or []:
+        payload = getattr(ocr_item, "json", None)
+        if not isinstance(payload, dict):
+            continue
+        res_payload = payload.get("res") or {}
+        if not isinstance(res_payload, dict):
+            continue
+        texts = res_payload.get("rec_texts")
+        boxes = res_payload.get("rec_boxes")
+        if boxes is None:
+            boxes = res_payload.get("dt_polys")
+        scores = res_payload.get("rec_scores")
+        texts = texts.tolist() if hasattr(texts, "tolist") else (texts if texts is not None else [])
+        boxes = boxes.tolist() if hasattr(boxes, "tolist") else (boxes if boxes is not None else [])
+        scores = scores.tolist() if hasattr(scores, "tolist") else (scores if scores is not None else [])
+        for index, raw_text in enumerate(texts):
+            text = str(raw_text or "").strip()
+            if not text:
+                continue
+            box = _coerce_ocr_box(boxes[index]) if index < len(boxes) else None
+            score = None
+            if index < len(scores):
+                try:
+                    score = float(scores[index])
+                except (TypeError, ValueError):
+                    score = None
+            item = {"text": text, "box": box, "confidence": score, "sequence": sequence}
+            if box:
+                x1, y1, x2, y2 = box
+                item.update(x1=x1, y1=y1, x2=x2, y2=y2, x_center=(x1 + x2) / 2, y_center=(y1 + y2) / 2, height=max(y2 - y1, 1.0))
+            items.append(item)
+            sequence += 1
+    return items
+
+
+def _cluster_ocr_rows(items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    """按 y 聚类为行，再按 x 排序；无 box 时回退原始顺序。"""
+    boxed = [item for item in items if item.get("box")]
+    if len(boxed) != len(items):
+        return [[item] for item in sorted(items, key=lambda item: item["sequence"])]
+    heights = sorted(float(item["height"]) for item in boxed)
+    median_height = heights[len(heights) // 2] if heights else 12.0
+    tolerance = max(median_height * 0.6, 4.0)
+    rows: list[list[dict[str, Any]]] = []
+    row_centers: list[float] = []
+    for item in sorted(boxed, key=lambda current: (current["y_center"], current["x_center"], current["sequence"])):
+        if not rows or abs(float(item["y_center"]) - row_centers[-1]) > tolerance:
+            rows.append([item])
+            row_centers.append(float(item["y_center"]))
+        else:
+            rows[-1].append(item)
+            row_centers[-1] = sum(float(cell["y_center"]) for cell in rows[-1]) / len(rows[-1])
+    for row in rows:
+        row.sort(key=lambda item: (item["x_center"], item["sequence"]))
+    return rows
+
+
+def _escape_markdown_cell(text: str) -> str:
+    """转义 Markdown 表格单元格。"""
+    return text.replace("|", r"\|").replace("\n", " ").strip()
+
+
+def extract_ocr_layout(result: Any) -> dict[str, Any]:
+    """从 OCR 几何结果恢复阅读顺序，并启发式重建规则表格。"""
+    items = _collect_ocr_items(result)
+    rows = _cluster_ocr_rows(items)
+    multi_cell_rows = [row for row in rows if len(row) >= 2]
+    column_counts = {len(row) for row in multi_cell_rows}
+    table_detected = len(multi_cell_rows) >= 2 and len(multi_cell_rows) == len(rows) and len(column_counts) == 1
+    table_column_count = next(iter(column_counts)) if table_detected else 0
+
+    if table_detected:
+        rendered_rows = ["| " + " | ".join(_escape_markdown_cell(cell["text"]) for cell in row) + " |" for row in rows]
+        separator = "| " + " | ".join("---" for _ in range(table_column_count)) + " |"
+        rendered_rows.insert(1, separator)
+        text = "\n".join(rendered_rows)
+        layout_mode = "table"
+    else:
+        text = "\n".join(" ".join(cell["text"] for cell in row) for row in rows).strip()
+        layout_mode = "geometry_lines" if items and all(item.get("box") for item in items) else "sequence"
+
+    confidences = [float(item["confidence"]) for item in items if item.get("confidence") is not None]
+    return {
+        "text": text,
+        "layout_mode": layout_mode,
+        "line_count": len(rows),
+        "table_detected": table_detected,
+        "table_row_count": len(rows) if table_detected else 0,
+        "table_column_count": table_column_count,
+        "mean_confidence": round(sum(confidences) / len(confidences), 4) if confidences else None,
+    }
+
+
 def _collect_rec_texts(result: Any) -> list[str]:
     """从 PaddleOCR 返回结果中提取识别文本列表。"""
     texts: list[str] = []
@@ -420,7 +545,8 @@ def extract_image_ocr_result(file_path: str | Path, *, content_type: str = "") -
         )
 
     postprocess_started_at = time.perf_counter()
-    normalized_text = _normalize_ocr_text("\n".join(_collect_rec_texts(result)))
+    layout = extract_ocr_layout(result)
+    normalized_text = _normalize_ocr_text(layout.pop("text"))
     timing_metrics["ocr_postprocess_ms"] += _elapsed_ms(postprocess_started_at)
     finalized_metrics = _finalize_ocr_timing_metrics(timing_metrics, request_started_at)
     if not _has_meaningful_text(normalized_text):
@@ -431,6 +557,7 @@ def extract_image_ocr_result(file_path: str | Path, *, content_type: str = "") -
             error=None,
             engine="paddleocr",
             timing_metrics=finalized_metrics,
+            layout_metadata=layout,
         )
 
     return _build_ocr_result(
@@ -440,4 +567,5 @@ def extract_image_ocr_result(file_path: str | Path, *, content_type: str = "") -
         error=None,
         engine="paddleocr",
         timing_metrics=finalized_metrics,
+        layout_metadata=layout,
     )

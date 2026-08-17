@@ -9,7 +9,7 @@ from api.services.kb_service import _ensure_kb_active
 from server.kb_errors import KBValidationError
 from server.utils.file import validate_kb_id
 
-_LOGICAL_FILTER_ONLY = "logical_filter_only"
+_PHYSICAL_ISOLATED = "physical_isolated"
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,7 +21,7 @@ class ChatQueryScope:
     effective_scope_type: str
     effective_kb_ids: list[str]
     is_default_deny_applied: bool
-    isolation_level: str = _LOGICAL_FILTER_ONLY
+    isolation_level: str = _PHYSICAL_ISOLATED
 
     def to_dict(self) -> dict[str, Any]:
         """返回可直接回传给 API 的范围回显字段。"""

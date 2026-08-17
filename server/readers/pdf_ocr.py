@@ -30,6 +30,13 @@ PDF_INDEX_EXCLUDED_METADATA_KEYS = (
     "failure_category",
     "missing_dependency",
     "dependency_status",
+    "layout_mode",
+    "line_count",
+    "page_count",
+    "table_detected",
+    "table_row_count",
+    "table_column_count",
+    "mean_confidence",
 )
 
 
@@ -156,7 +163,9 @@ class PDFOCRReader(BasePydanticReader):
         ocr_started_at = time.perf_counter()
         ocr = self._lazy_ocr(timing_metrics=ocr_timing_metrics)
         doc = fitz.open(file_path)
+        page_count = len(doc)
         pages_text: list[str] = []
+        page_layouts: list[dict] = []
         try:
             for page_num in range(len(doc)):
                 page = doc.load_page(page_num)
@@ -168,7 +177,7 @@ class PDFOCRReader(BasePydanticReader):
                 render_elapsed_ms = round(max(time.perf_counter() - render_started_at, 0.0) * 1000, 3)
                 ocr_timing_metrics["ocr_load_image_ms"] += render_elapsed_ms
 
-                from server.readers.image_ocr import run_ocr_predict
+                from server.readers.image_ocr import extract_ocr_layout, run_ocr_predict
 
                 predict_started_at = time.perf_counter()
                 result = run_ocr_predict(ocr, img_array)
@@ -176,10 +185,13 @@ class PDFOCRReader(BasePydanticReader):
                 ocr_timing_metrics["ocr_predict_ms"] += predict_elapsed_ms
 
                 postprocess_started_at = time.perf_counter()
-                page_text = "\n".join(self._collect_rec_texts(result)).strip()
+                layout = extract_ocr_layout(result)
+                page_text = str(layout.pop("text") or "").strip()
+                page_layouts.append(layout)
                 postprocess_elapsed_ms = round(max(time.perf_counter() - postprocess_started_at, 0.0) * 1000, 3)
                 ocr_timing_metrics["ocr_postprocess_ms"] += postprocess_elapsed_ms
-                pages_text.append(page_text)
+                if page_text:
+                    pages_text.append(f"[Page {page_num + 1}]\n{page_text}")
                 print(
                     f"  OCR 页 {page_num + 1}/{len(doc)} → {len(page_text)} 字 | "
                     f"render={render_elapsed_ms:.1f}ms predict={predict_elapsed_ms:.1f}ms "
@@ -189,8 +201,19 @@ class PDFOCRReader(BasePydanticReader):
             doc.close()
 
         ocr_timing_metrics["ocr_total_ms"] = round(max(time.perf_counter() - ocr_started_at, 0.0) * 1000, 3)
-        self._set_last_diagnostics({**(self._last_diagnostics or {}), **ocr_timing_metrics})
-        return "\n\n".join(text for text in pages_text if text)
+        layout_modes = {item.get("layout_mode") for item in page_layouts if item.get("layout_mode")}
+        confidences = [float(item["mean_confidence"]) for item in page_layouts if item.get("mean_confidence") is not None]
+        layout_diagnostics = {
+            "layout_mode": next(iter(layout_modes)) if len(layout_modes) == 1 else ("mixed" if layout_modes else "sequence"),
+            "line_count": sum(int(item.get("line_count") or 0) for item in page_layouts),
+            "page_count": page_count,
+            "table_detected": any(bool(item.get("table_detected")) for item in page_layouts),
+            "table_row_count": sum(int(item.get("table_row_count") or 0) for item in page_layouts),
+            "table_column_count": max((int(item.get("table_column_count") or 0) for item in page_layouts), default=0),
+            "mean_confidence": round(sum(confidences) / len(confidences), 4) if confidences else None,
+        }
+        self._set_last_diagnostics({**(self._last_diagnostics or {}), **ocr_timing_metrics, **layout_diagnostics})
+        return "\n\n".join(pages_text)
     def load_data(self, file_path, **kwargs):
         resolved_path = os.fspath(file_path)
         filename = os.path.basename(resolved_path)

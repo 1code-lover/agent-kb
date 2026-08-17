@@ -9,3 +9,13 @@ import client from './client.js';
 export async function getHealthStatus() {
   return client.get('/api/health');
 }
+
+/** 获取 embedding 缓存恢复任务状态 */
+export async function getEmbeddingCacheStatus() {
+  return client.get('/api/embedding/cache');
+}
+
+/** 通过白名单 ModelScope 来源准备 embedding 本地缓存 */
+export async function prepareEmbeddingCache() {
+  return client.post('/api/embedding/cache/prepare', { provider: 'modelscope' });
+}

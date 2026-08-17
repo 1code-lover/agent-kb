@@ -1,4 +1,4 @@
-﻿"""KB folder 列表与文档路径语义测试。"""
+"""KB folder 列表与文档路径语义测试。"""
 
 from __future__ import annotations
 
@@ -87,3 +87,4 @@ def test_list_kb_folders_route_returns_only_requested_kb(monkeypatch: pytest.Mon
     payload = resp.json()["data"]["folders"]
     assert [item["path"] for item in payload] == ["design", "design/specs"]
     assert all(item["kb_id"] == "kb-a" for item in payload)
+    folder_service.runtime_state.get_index_manager.assert_called_once_with("kb-a")

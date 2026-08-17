@@ -1,8 +1,8 @@
 {
-  "last_generated_hash": "8c982b2",
-  "last_capture_time": "2026-08-16T12:17:07+08:00",
-  "last_story_file": "2026-08-16-feature-python-runtime-release-gate.md",
+  "last_generated_hash": "2edf09087c3ce294e4d48c344a3690efb27db0ba",
+  "last_capture_time": "2026-08-17T21:56:14+08:00",
+  "last_story_file": "2026-08-17-feature-kb-isolation-cache-ocr-hardening.md",
   "last_prompt_decision": "generated",
   "last_generated_push_hash": null,
-  "last_prompted_hash": "8c982b2"
+  "last_prompted_hash": "2edf09087c3ce294e4d48c344a3690efb27db0ba"
 }

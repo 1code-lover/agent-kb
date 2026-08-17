@@ -30,12 +30,13 @@ def test_normalize_persist_dir_defaults_to_storage_root(
     assert storage_context_module._normalize_persist_dir() == storage_root
 
 
-def test_create_storage_context_uses_shared_stores_in_non_development(
+def test_create_storage_context_uses_isolated_directory_in_non_development(
     monkeypatch: pytest.MonkeyPatch,
     storage_context_module,
     tmp_path: Path,
 ) -> None:
-    """非开发环境下显式传 persist_dir 也应复用共享 doc/index/vector store。"""
+    """显式 persist_dir 在非开发环境下也必须创建 KB 独立存储上下文。"""
+    persist_dir = tmp_path / "storage" / "kbs" / "kb-a"
     captured: list[dict[str, object]] = []
 
     def fake_from_defaults(**kwargs):
@@ -45,16 +46,10 @@ def test_create_storage_context_uses_shared_stores_in_non_development(
     monkeypatch.setattr(storage_context_module, "THINKRAG_ENV", "production")
     monkeypatch.setattr(StorageContext, "from_defaults", staticmethod(fake_from_defaults))
 
-    result = storage_context_module.create_storage_context(persist_dir=tmp_path / "storage" / "kbs" / "kb-a")
+    result = storage_context_module.create_storage_context(persist_dir=persist_dir)
 
     assert result.name == "storage-context"
-    assert captured == [
-        {
-            "docstore": storage_context_module.DOC_STORE,
-            "index_store": storage_context_module.INDEX_STORE,
-            "vector_store": storage_context_module.VECTOR_STORE,
-        }
-    ]
+    assert captured == [{}]
 
 
 def test_create_storage_context_loads_existing_development_persist_dir(
@@ -162,3 +157,35 @@ def test_create_storage_context_without_persist_dir_reuses_default_context(
     monkeypatch.setattr(storage_context_module, "get_default_storage_context", lambda: default_context)
 
     assert storage_context_module.create_storage_context() is default_context
+
+
+def test_explicit_kb_storage_contexts_remain_physically_isolated_after_reload(
+    monkeypatch: pytest.MonkeyPatch,
+    storage_context_module,
+    tmp_path: Path,
+) -> None:
+    """两个 KB 持久化后应拥有独立文件集，重载时不得看到对方节点。"""
+    from llama_index.core.schema import TextNode
+
+    monkeypatch.setattr(storage_context_module, "THINKRAG_ENV", "production")
+    kb_a_dir = tmp_path / "storage" / "kbs" / "kb-a"
+    kb_b_dir = tmp_path / "storage" / "kbs" / "kb-b"
+
+    kb_a_context = storage_context_module.create_storage_context(persist_dir=kb_a_dir)
+    kb_b_context = storage_context_module.create_storage_context(persist_dir=kb_b_dir)
+
+    assert kb_a_context is not kb_b_context
+    assert kb_a_context.docstore is not kb_b_context.docstore
+
+    node_a = TextNode(id_="kb-a-node", text="alpha only", metadata={"kb_id": "kb-a"})
+    kb_a_context.docstore.add_documents([node_a])
+    kb_a_context.persist(persist_dir=str(kb_a_dir))
+    kb_b_context.persist(persist_dir=str(kb_b_dir))
+
+    reloaded_a = storage_context_module.create_storage_context(persist_dir=kb_a_dir)
+    reloaded_b = storage_context_module.create_storage_context(persist_dir=kb_b_dir)
+
+    assert reloaded_a.docstore.document_exists("kb-a-node") is True
+    assert reloaded_b.docstore.document_exists("kb-a-node") is False
+    assert (kb_a_dir / "docstore.json").is_file()
+    assert (kb_b_dir / "docstore.json").is_file()

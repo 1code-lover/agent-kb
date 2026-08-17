@@ -563,3 +563,57 @@ def test_start_ocr_warmup_in_background_force_restarts_even_when_ready(
     assert status["state"] == "ready"
     assert status["is_ready"] is True
     assert status["attempt_count"] == 1
+
+
+def test_extract_ocr_layout_sorts_geometry_and_restores_markdown_table() -> None:
+    """乱序 box 应按行列重排，并把稳定的二维结构恢复为 Markdown 表格。"""
+    result = [
+        SimpleNamespace(
+            json={
+                "res": {
+                    "rec_texts": ["20", "名称", "数量", "大米", "10", "小麦"],
+                    "rec_boxes": [
+                        [120, 70, 170, 90],
+                        [10, 10, 80, 30],
+                        [120, 10, 170, 30],
+                        [10, 40, 80, 60],
+                        [120, 40, 170, 60],
+                        [10, 70, 80, 90],
+                    ],
+                    "rec_scores": [0.91, 0.99, 0.98, 0.96, 0.95, 0.94],
+                }
+            }
+        )
+    ]
+
+    layout = image_ocr.extract_ocr_layout(result)
+
+    assert layout["text"].splitlines() == [
+        "| 名称 | 数量 |",
+        "| --- | --- |",
+        "| 大米 | 10 |",
+        "| 小麦 | 20 |",
+    ]
+    assert layout["layout_mode"] == "table"
+    assert layout["table_detected"] is True
+    assert layout["table_row_count"] == 3
+    assert layout["table_column_count"] == 2
+    assert layout["line_count"] == 3
+    assert layout["mean_confidence"] == pytest.approx(0.955)
+
+
+def test_extract_ocr_layout_accepts_numpy_geometry_arrays() -> None:
+    """真实 PaddleOCR 常返回 numpy 数组，后处理不得触发布尔值歧义。"""
+    import numpy as np
+
+    result = [SimpleNamespace(json={"res": {
+        "rec_texts": np.asarray(["左", "右"]),
+        "rec_boxes": np.asarray([[10, 10, 40, 30], [80, 10, 110, 30]]),
+        "rec_scores": np.asarray([0.9, 0.8]),
+    }})]
+
+    layout = image_ocr.extract_ocr_layout(result)
+
+    assert layout["text"] == "左 右"
+    assert layout["layout_mode"] == "geometry_lines"
+    assert layout["mean_confidence"] == pytest.approx(0.85)

@@ -711,7 +711,7 @@ def test_mixed_batch_semireal_qa_suite(imported_mixed_kb: dict[str, Any]) -> Non
             expected_scope_type="single_kb",
             expected_effective_scope_type="single_kb",
             expected_default_deny=False,
-            expected_isolation_level="logical_filter_only",
+            expected_isolation_level="physical_isolated",
             preview_payload=preview,
             required_evidence_docs=case["required_evidence_docs"],
             preview_required=int(case["expected_source_count"]) > 0,

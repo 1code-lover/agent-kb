@@ -109,6 +109,7 @@ export function buildEmbeddingWarmupSummary(embeddingWarmup, embeddingDiagnostic
       summary: '本地向量模型缓存不存在，运行时已禁止远程下载以避免桌面启动卡住。',
       detail: `请先准备 ${localPath}`,
       isReady: false,
+      canPrepareCache: true,
     };
   }
 

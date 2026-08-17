@@ -150,7 +150,7 @@ def test_single_kb_qa_smoke_contract(case, monkeypatch, isolated_registry):
     assert data["effective_scope_type"] == "single_kb"
     assert data["effective_kb_ids"] == [case["kb_id"]]
     assert data["is_default_deny_applied"] is False
-    assert data["isolation_level"] == "logical_filter_only"
+    assert data["isolation_level"] == "physical_isolated"
 
     answer = data["answer"]
     for keypoint in case["expected_keypoints"]:
@@ -179,7 +179,7 @@ def test_single_kb_qa_smoke_contract(case, monkeypatch, isolated_registry):
         },
         data,
         expected_kb_ids=[case["kb_id"]],
-        expected_isolation_level="logical_filter_only",
+        expected_isolation_level="physical_isolated",
     )
     assert report["passed"] is True
     assert report["keypoint_coverage"] == 1.0
@@ -207,7 +207,7 @@ def test_single_kb_smoke_suite_metrics(monkeypatch, isolated_registry) -> None:
                 },
                 data,
                 expected_kb_ids=[case["kb_id"]],
-                expected_isolation_level="logical_filter_only",
+                expected_isolation_level="physical_isolated",
             )
         )
 

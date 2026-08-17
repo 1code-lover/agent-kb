@@ -164,6 +164,22 @@ class RuntimeState:
             )
             self._embedding_warmup_thread = None
 
+    def reset_embedding_runtime(self) -> None:
+        """清除失败或过期的 embedding 实例，供缓存恢复后重新加载。"""
+        try:
+            from llama_index.core import Settings
+        except Exception:
+            Settings = None
+
+        with self.model_lock:
+            if Settings is not None:
+                Settings._embed_model = None
+            self.embedding_model_name = None
+        with self.lock:
+            attempt_count = int(self.embedding_warmup_status.get("attempt_count") or 0)
+            self.embedding_warmup_status = _new_embedding_warmup_status()
+            self.embedding_warmup_status["attempt_count"] = attempt_count
+
     def start_embedding_warmup_in_background(self, force: bool = False) -> bool:
         """按需启动 embedding 后台预热线程。"""
         with self.lock:

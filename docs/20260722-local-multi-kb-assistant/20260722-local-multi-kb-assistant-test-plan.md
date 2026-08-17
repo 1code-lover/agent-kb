@@ -1,7 +1,8 @@
 # 本地多知识库知识助手平台 v0.2 测试方案（Stage 5，扩展 QA 基线）
 
-日期：2026-07-31  
-版本：v0.6  
+原始日期：2026-07-31
+最新更新：2026-08-17
+版本：v0.7
 对应测试报告：`docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-test-report.md`
 
 ## 1. 文档目的
@@ -13,7 +14,7 @@
 
 ## 2. 固定产品口径
 本轮测试基于以下冻结决议设计，不能再回退到旧口径：
-1. 多知识库现状仍是**共享单索引 + `metadata["kb_id"]` 逻辑过滤**，不是物理隔离；
+1. 多知识库当前采用**知识库级物理索引隔离**：`default` 兼容 `storage/`，非 default 使用 `storage/kbs/{kb_id}/` 独立文件集；`kb_id` 范围过滤继续作为纵深防御；
 2. chat 查询范围契约采用 **default-deny**：未声明 `kb_ids` = 拒绝；
 3. KB 是授权边界，folder 只是组织层，不是授权边界；
 4. 图片策略当前只验证 **OCR 提取 + 图片资产入库**，不把深度图像理解 / VQA / 流程图语义理解纳入本轮结论；
@@ -30,7 +31,7 @@
 7. 疑似 follow-up 问题在同 session 下至少具备最小 history-grounded 检索能力，且不破坏 scope 契约。
 
 ### 3.2 不在本轮证明范围内
-1. 多知识库物理隔离；
+1. 历史共享索引中非 default 数据的自动拆分迁移；
 2. 外部 Agent 接入后的完整授权模型；
 3. 真实 embedding 召回率对比；
 4. 真实多模态图像理解质量；
@@ -181,7 +182,7 @@
 测试报告写作时，必须遵守以下原则：
 1. 只写**真实执行结果**，不能写计划数字；
 2. 区分“基础链路可回归”与“最终检索/问答效果优秀”；
-3. 不把逻辑隔离写成物理隔离；
+3. 只有在独立目录持久化、跨库不可见和重载测试全部通过时才写成物理隔离；历史 artifacts 的 `logical_filter_only` 不改写；
 4. 不把 OCR 支持写成完整图像理解；
 5. 不把 deterministic semi-real QA 写成真实生产效果基准。
 
@@ -223,3 +224,13 @@
 - `weak_signal_kb_count >= 2`
 - `weak_signal_modality_count >= 2`
 - JSON / Markdown 报告必须成功落盘，并出现 `diagnostic`、`Diagnostic Gate` 与三类弱信号标签
+
+
+## 2026-08-17 增量测试方案
+
+1. **物理隔离**：创建 KB A/B 独立 StorageContext；仅向 A 写节点；分别持久化并重载；断言 B 不存在 A 节点，且目录文件集独立。
+2. **缓存恢复**：验证 GET 状态、POST ModelScope 白名单、非白名单 422、后台成功/失败状态、重复点击不启动第二线程、成功后 reset + warmup。
+3. **前端恢复**：验证 health API 封装、固定 ModelScope payload、缓存缺失摘要暴露恢复动作，并执行 Vite production build。
+4. **OCR 版面**：使用 fake PaddleOCR geometry 验证 y/x 排序、Markdown 表格、置信度、PDF `[Page N]` 和聚合元数据。
+5. **质量指标**：验证关键词召回、行顺序准确率、表格单元格召回。
+6. **回归**：Python `-m "not slow"`、Web 全量 node tests + build、Electron 全量 node tests、`git diff --check`。

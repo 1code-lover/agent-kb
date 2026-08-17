@@ -50,7 +50,7 @@ PDF_IMPORTS = {
         Scope contract for PDF knowledge base queries.
         requested_scope_type must remain single_kb.
         effective_kb_ids must echo the active PDF knowledge base.
-        isolation_level remains logical_filter_only in the current architecture.
+        isolation_level remains physical_isolated in the current architecture.
         """,
     },
     "preview-guide.pdf": {
@@ -409,7 +409,7 @@ def test_chat_pdf_semireal_contract(case: dict[str, object], imported_pdf_kb: di
     assert payload["effective_scope_type"] == "single_kb"
     assert payload["effective_kb_ids"] == [KB_ID]
     assert payload["is_default_deny_applied"] is False
-    assert payload["isolation_level"] == "logical_filter_only"
+    assert payload["isolation_level"] == "physical_isolated"
 
     answer = payload["answer"]
     for keypoint in case["expected_keypoints"]:
@@ -446,7 +446,7 @@ def test_chat_pdf_semireal_contract(case: dict[str, object], imported_pdf_kb: di
         case,
         payload,
         expected_kb_ids=[KB_ID],
-        expected_isolation_level="logical_filter_only",
+        expected_isolation_level="physical_isolated",
         preview_payload=preview,
     )
     assert report["passed"] is True
@@ -474,7 +474,7 @@ def test_chat_pdf_semireal_suite_metrics(imported_pdf_kb: dict[str, object]) -> 
                 case,
                 payload,
                 expected_kb_ids=[KB_ID],
-                expected_isolation_level="logical_filter_only",
+                expected_isolation_level="physical_isolated",
                 preview_payload=preview,
             )
         )

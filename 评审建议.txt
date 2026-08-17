@@ -1,19 +1,20 @@
-代码与测试报告最终评审建议（2026-08-16，外部 Python runtime 发布门禁）
+本轮代码与测试报告评审建议（2026-08-17）
 
-评审结论：
-审核通过。上一轮提出的外部诊断秘密脱敏和 override 优先级覆盖均已落实；代码、测试、发布清单、项目进度、测试报告和开发故事证据一致，可以进入提交与推送。
+一、优点
+1. 多知识库物理隔离保留了 default 知识库对历史 storage/ 的兼容，同时让非 default 知识库进入 storage/kbs/{kb_id}/ 独立目录；持久化、重载和跨库不可见测试证据完整。
+2. Embedding 缓存恢复接口采用 ModelScope 白名单和固定 provider，不接受任意 URL、命令、凭证或下载源；前端具备下载中、失败重试、成功后重新预热的闭环。
+3. OCR 改动兼容 rec_boxes、dt_polys 和 NumPy 数组，阅读顺序、规则表格、页标记与质量指标均有单元测试。
+4. Python、Web、Electron 和 Vite build 均已执行完整回归，修改模块覆盖率超过 80% 目标。
+5. 文档明确保留历史 artifacts，不伪造迁移结果，也没有把未完成的证书、签名和公证描述为正式发布完成。
 
-优点：
-1. runtime verifier 完整覆盖 CPython 3.12、核心模块、LlamaIndex 双包锁版本和 pip check，结构化失败信息可操作。
-2. 三个显式 override 的优先级已有回归测试，显式失败继续保持 fail-closed。
-3. Python/pip 外部诊断会先按 secret-like 环境变量值替换为 `[REDACTED]`，再折叠换行并截断到 500 字符。
-4. build-target、build/release preflight 和 release config verifier 形成了无旁路的前置门禁。
-5. TDD 红灯、定向与全量测试、真实 runtime、打包产物哈希、package verifier 和 Apple 外部阻塞均有明确证据。
-6. 测试报告继续明确当前包不是自包含 Python runtime，也没有把 ad-hoc 打包误判成正式签名公证完成。
+二、需要改进的地方
+1. EmbeddingCacheService 原实现在线程对象登记后、thread.start() 前释放锁；此时 is_alive() 仍为 false，并发 POST 可能创建第二个下载线程。
+2. 测试报告、Spec、FRD、RTM 和测试方案中仍有部分“当前是共享单索引/逻辑隔离”的历史表述，与本轮 physical_isolated 实现冲突。
+3. 最终测试报告需要使用并发修复后的真实数字，并明确历史共享索引数据需要重建、正式 macOS 发布仍受外部门禁阻塞。
+4. 需要执行最终 whitespace、隔离口径残留和工作区范围检查，避免把历史 artifacts 与当前代码口径混为一谈。
 
-需要改进的地方：
-无阻断问题。
-
-具体建议：
-1. 后续补齐 Apple Developer 凭证后，必须重新执行严格 `release:preflight`、`release:mac`、`verify:mac-release` 和安装后回归，不能复用本轮 ad-hoc 结论。
-2. 若未来改为内置 Python runtime，应单独设计跨架构依赖、嵌套签名、体积和清洁机验证，本轮外部 runtime verifier 不能替代该验收。
+三、具体建议
+1. 将下载线程的判重、状态写入、线程登记和 thread.start() 放在同一服务锁边界内；增加可稳定复现“已登记但尚未启动”窗口的并发回归测试。
+2. 为历史设计文档增加明确的 2026-08-17 supersession 说明；当前验收文档统一使用 physical_isolated，历史 logical_filter_only 只保留在明确标注的旧基线或 artifacts 中。
+3. 在测试报告顶部增加当前验证附录，记录 Python 803 passed、Web 90 passed、Electron 86 passed、Vite build 通过、修改模块覆盖率 85%，并写清迁移与发布边界。
+4. 最后执行 git diff --check、当前代码/测试 fixture 的 logical_filter_only 扫描、git status --short 和 git diff --stat；若无阻断项，再生成本轮开发故事，但不要在测试报告审核前 commit/push。

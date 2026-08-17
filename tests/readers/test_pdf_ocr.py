@@ -386,3 +386,34 @@ def test_short_english_text_layer_pdf_uses_pymupdf_without_ocr(tmp_path: Path) -
     assert len(docs) == 1
     assert "Product Overview" in docs[0].text
     assert "clean text layer" in docs[0].text
+
+
+def test_pdf_ocr_preserves_page_markers_and_layout_metadata(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """扫描 PDF 应保留页边界，并汇总版面与表格诊断元数据。"""
+    import fitz
+
+    pdf_path = tmp_path / "layout-pages.pdf"
+    fixture = fitz.open()
+    fixture.new_page()
+    fixture.new_page()
+    fixture.save(pdf_path)
+    fixture.close()
+    page_results = iter(
+        [
+            [SimpleNamespace(json={"res": {"rec_texts": ["标题", "正文"], "rec_boxes": [[10, 10, 80, 30], [10, 40, 80, 60]]}})],
+            [SimpleNamespace(json={"res": {"rec_texts": ["名称", "数量", "大米", "10"], "rec_boxes": [[10, 10, 80, 30], [120, 10, 170, 30], [10, 40, 80, 60], [120, 40, 170, 60]]}})],
+        ]
+    )
+    reader = PDFOCRReader()
+    monkeypatch.setattr(reader, "_lazy_ocr", lambda timing_metrics=None: object())
+    monkeypatch.setattr(image_ocr, "run_ocr_predict", lambda ocr, image: next(page_results))
+
+    docs = reader.load_data(str(pdf_path))
+
+    assert "[Page 1]\n标题\n正文" in docs[0].text
+    assert "[Page 2]\n| 名称 | 数量 |" in docs[0].text
+    assert docs[0].metadata["layout_mode"] == "mixed"
+    assert docs[0].metadata["page_count"] == 2
+    assert docs[0].metadata["table_detected"] is True
+    assert docs[0].metadata["table_row_count"] == 2
+    assert docs[0].metadata["table_column_count"] == 2

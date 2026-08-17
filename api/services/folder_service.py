@@ -1,4 +1,4 @@
-﻿"""知识库 Folder 服务。"""
+"""知识库 Folder 服务。"""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ def list_folders(kb_id: str) -> list[dict[str, Any]]:
     safe_kb_id = validate_kb_id(kb_id)
     kb_service._ensure_kb_active(safe_kb_id)
 
-    manager = runtime_state.get_index_manager()
+    manager = runtime_state.get_index_manager(safe_kb_id)
     doc_store = manager.storage_context.docstore
     ref_doc_info = doc_store.get_all_ref_doc_info() if len(doc_store.docs) > 0 else {}
     relative_paths: list[str] = []

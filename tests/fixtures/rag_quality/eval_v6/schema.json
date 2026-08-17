@@ -55,7 +55,7 @@
     "single_kb"
   ],
   "allowed_isolation_levels": [
-    "logical_filter_only"
+    "physical_isolated"
   ],
   "allowed_judge_dimensions": [
     "factual_accuracy",

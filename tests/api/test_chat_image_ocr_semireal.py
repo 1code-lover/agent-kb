@@ -255,7 +255,7 @@ def test_chat_image_ocr_semireal_contract(case: dict[str, object], imported_imag
     assert payload["effective_scope_type"] == "single_kb"
     assert payload["effective_kb_ids"] == [KB_ID]
     assert payload["is_default_deny_applied"] is False
-    assert payload["isolation_level"] == "logical_filter_only"
+    assert payload["isolation_level"] == "physical_isolated"
 
     answer = payload["answer"]
     for keypoint in case["expected_keypoints"]:
@@ -292,7 +292,7 @@ def test_chat_image_ocr_semireal_contract(case: dict[str, object], imported_imag
         case,
         payload,
         expected_kb_ids=[KB_ID],
-        expected_isolation_level="logical_filter_only",
+        expected_isolation_level="physical_isolated",
         preview_payload=preview,
     )
     assert report["passed"] is True
@@ -319,7 +319,7 @@ def test_chat_image_ocr_semireal_suite_metrics(imported_image_kb: dict[str, obje
                 case,
                 payload,
                 expected_kb_ids=[KB_ID],
-                expected_isolation_level="logical_filter_only",
+                expected_isolation_level="physical_isolated",
                 preview_payload=preview,
             )
         )

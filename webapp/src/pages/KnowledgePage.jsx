@@ -5,9 +5,9 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from '../router';
-import { getHealthStatus } from '../api/health';
+import { getEmbeddingCacheStatus, getHealthStatus, prepareEmbeddingCache } from '../api/health';
 import { getLatestImportReceipt } from '../api/kb';
 import { readApiData } from '../api/response';
 import { KbProvider, useKb } from '../components/kb/KbContext';
@@ -116,6 +116,16 @@ function KnowledgeContent() {
     [latestReceiptQuery.data],
   );
 
+  const embeddingCacheQuery = useQuery({
+    queryKey: ['embedding-cache-prepare'],
+    retry: false,
+    refetchInterval: (query) => query.state.data?.state === 'downloading' ? 2000 : false,
+    queryFn: async () => {
+      const response = await getEmbeddingCacheStatus();
+      return readApiData(response) || null;
+    },
+  });
+
   const healthQuery = useQuery({
     queryKey: ['health', 'runtime-warmup'],
     retry: false,
@@ -129,6 +139,20 @@ function KnowledgeContent() {
       return readApiData(response) || null;
     },
   });
+
+  const prepareEmbeddingCacheMutation = useMutation({
+    mutationFn: prepareEmbeddingCache,
+    onSuccess: async () => {
+      await embeddingCacheQuery.refetch();
+      await healthQuery.refetch();
+    },
+  });
+
+  useEffect(() => {
+    if (embeddingCacheQuery.data?.state === 'ready') {
+      healthQuery.refetch();
+    }
+  }, [embeddingCacheQuery.data?.state]);
 
   const embeddingWarmupSummary = useMemo(() => {
     if (healthQuery.isLoading && !healthQuery.data) {
@@ -252,6 +276,10 @@ function KnowledgeContent() {
           actionMode={actionMode}
           onToggleActionMode={handleToggleActionMode}
           embeddingWarmupSummary={embeddingWarmupSummary}
+          embeddingCacheStatus={embeddingCacheQuery.data}
+          embeddingCacheError={prepareEmbeddingCacheMutation.error?.message || embeddingCacheQuery.error?.message || null}
+          onPrepareEmbeddingCache={() => prepareEmbeddingCacheMutation.mutate()}
+          isPreparingEmbeddingCache={prepareEmbeddingCacheMutation.isPending || embeddingCacheQuery.data?.state === 'downloading'}
           ocrWarmupSummary={ocrWarmupSummary}
         />
 

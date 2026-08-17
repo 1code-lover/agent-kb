@@ -416,7 +416,7 @@ class TestM2ChatServiceKbIds:
             effective_scope_type="single_kb",
             effective_kb_ids=["kb1"],
             is_default_deny_applied=False,
-            isolation_level="logical_filter_only",
+            isolation_level="physical_isolated",
         )
 
         with patch("api.services.chat_service.runtime_state.ensure_index_loaded", return_value=True):

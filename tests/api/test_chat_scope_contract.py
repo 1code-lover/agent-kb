@@ -77,7 +77,7 @@ def test_response_echoes_effective_scope(monkeypatch, isolated_registry):
     assert data["requested_kb_ids"] == ["kb-a"]
     assert data["effective_scope_type"] == "single_kb"
     assert data["effective_kb_ids"] == ["kb-a"]
-    assert data["isolation_level"] == "logical_filter_only"
+    assert data["isolation_level"] == "physical_isolated"
 
 
 def test_unspecified_scope_is_rejected(monkeypatch, isolated_registry):

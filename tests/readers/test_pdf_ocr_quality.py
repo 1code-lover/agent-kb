@@ -31,3 +31,17 @@ def test_evaluate_keyword_recall_handles_empty_keyword_list() -> None:
     assert result.hit_terms == []
     assert result.missed_terms == []
     assert result.recall == 0.0
+
+
+def test_line_order_and_table_cell_metrics() -> None:
+    """质量脚本应同时量化版面顺序和表格单元格召回。"""
+    from scripts.pdf_ocr_quality import evaluate_line_order, evaluate_table_cell_recall
+
+    order = evaluate_line_order("标题\n第一行\n第二行", ["标题", "第一行", "第二行"])
+    table = evaluate_table_cell_recall("| 名称 | 数量 |\n| 大米 | 10 |", [["名称", "数量"], ["大米", "10"]])
+
+    assert order.matched_pairs == 3
+    assert order.accuracy == 1.0
+    assert table.total == 4
+    assert table.hit_count == 4
+    assert table.recall == 1.0

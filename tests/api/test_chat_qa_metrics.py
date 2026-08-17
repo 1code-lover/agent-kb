@@ -23,7 +23,7 @@ def test_build_chat_case_report_marks_positive_case_as_passed() -> None:
         "effective_scope_type": "single_kb",
         "effective_kb_ids": ["kb-a"],
         "is_default_deny_applied": False,
-        "isolation_level": "logical_filter_only",
+        "isolation_level": "physical_isolated",
         "answer": "requested_scope_type effective_kb_ids requested_kb_ids isolation_level",
         "sources": [{"file": "scope-contract.md"}],
         "evidence": [{"title": "scope-contract.md", "source": "scope-contract.md"}],
@@ -34,7 +34,7 @@ def test_build_chat_case_report_marks_positive_case_as_passed() -> None:
         case,
         payload,
         expected_kb_ids=["kb-a"],
-        expected_isolation_level="logical_filter_only",
+        expected_isolation_level="physical_isolated",
         preview_payload=preview,
     )
 
@@ -63,7 +63,7 @@ def test_build_chat_case_report_marks_no_evidence_case_as_passed() -> None:
         "effective_scope_type": "single_kb",
         "effective_kb_ids": ["kb-a"],
         "is_default_deny_applied": False,
-        "isolation_level": "logical_filter_only",
+        "isolation_level": "physical_isolated",
         "answer": "No confirmable information is available in the current knowledge base.",
         "sources": [],
         "evidence": [],
@@ -73,7 +73,7 @@ def test_build_chat_case_report_marks_no_evidence_case_as_passed() -> None:
         case,
         payload,
         expected_kb_ids=["kb-a"],
-        expected_isolation_level="logical_filter_only",
+        expected_isolation_level="physical_isolated",
     )
 
     assert report["passed"] is True
@@ -98,7 +98,7 @@ def test_build_chat_case_report_detects_blocked_term_and_preview_failure() -> No
         "effective_scope_type": "single_kb",
         "effective_kb_ids": ["kb-a"],
         "is_default_deny_applied": False,
-        "isolation_level": "logical_filter_only",
+        "isolation_level": "physical_isolated",
         "answer": "must not fabricate, but kb-b is mentioned here",
         "sources": [{"file": "refusal-guideline.md"}],
         "evidence": [{"title": "refusal-guideline.md", "source": "refusal-guideline.md"}],
@@ -109,7 +109,7 @@ def test_build_chat_case_report_detects_blocked_term_and_preview_failure() -> No
         case,
         payload,
         expected_kb_ids=["kb-a"],
-        expected_isolation_level="logical_filter_only",
+        expected_isolation_level="physical_isolated",
         preview_payload=preview,
     )
 

@@ -22,7 +22,7 @@
 ---
 
 ## 3. 风险背景与评测动机
-当前知识库实现仍处于“共享索引 + `metadata["kb_id"]` 过滤”的阶段，因此问答评测必须显式覆盖以下风险：
+当前知识库已采用物理索引隔离，但问答评测仍必须显式覆盖错误路由、默认范围拒绝、历史数据重建遗漏和跨库证据泄漏风险：
 1. 范围过滤失效导致跨知识库越界。
 2. chat 查询在未声明范围时退回全局检索，而不是执行 default-deny。
 3. OCR 文档与普通文本文档在 evidence / preview / answer 契约上行为不一致。
@@ -574,3 +574,10 @@ python -X utf8 -m scripts.run_chat_eval --cases tests/fixtures/rag_quality/eval_
 2. 当前 `74/78` 不是随机失败，而是 4 个 `scope_contract` 弱信号样本的预期失败；diagnostic gate 全通过，说明 runner / schema / import-qa correlation 都在正确反映问题。
 3. 当前真正阻断 `run_passed` 的是 `evidence_hit_rate = 0.934 < 0.95`，根因主要集中在 weak-signal 样本下的 evidence / preview 契约缺口，不是 scope leakage 或 forbidden term 污染。
 4. 下一步要做的不是继续拼数据集，而是先修掉这 4 个失败样本暴露出来的契约问题，例如 `doc_id` / `preview_locator` 缺失、弱信号拒答措辞不完整、声明范围表达不稳定等。
+
+
+## 2026-08-17 评测口径更新
+
+- 当前期望 `isolation_level` 为 `physical_isolated`。
+- 旧 artifacts 中的 `logical_filter_only` 是历史证据，不回写伪造；新 fixture 和新报告必须使用新口径。
+- OCR 质量除关键词召回外，增加行顺序准确率与表格单元格召回。

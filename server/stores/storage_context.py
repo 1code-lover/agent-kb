@@ -31,8 +31,12 @@ def _normalize_persist_dir(persist_dir: str | Path | None = None) -> Path:
     return Path(persist_dir).resolve()
 
 
-def _create_development_storage_context(resolved_dir: Path) -> StorageContext:
-    """在开发模式下按目录创建或恢复 StorageContext。"""
+def _create_isolated_storage_context(resolved_dir: Path) -> StorageContext:
+    """按目录创建或恢复独立 StorageContext。
+
+    显式 persist_dir 代表知识库级物理边界，不受运行环境影响。生产环境的
+    默认知识库仍可使用共享后端，但非默认知识库不会复用全局 store 实例。
+    """
     marker = resolved_dir / _DOCSTORE_FILENAME
     if marker.exists():
         storage_context = StorageContext.from_defaults(persist_dir=str(resolved_dir))
@@ -47,7 +51,7 @@ def _create_development_storage_context(resolved_dir: Path) -> StorageContext:
 def _create_default_storage_context() -> StorageContext:
     """创建默认 storage/ 根目录对应的 StorageContext。"""
     if THINKRAG_ENV == "development":
-        return _create_development_storage_context(_normalize_persist_dir(None))
+        return _create_isolated_storage_context(_normalize_persist_dir(None))
 
     return StorageContext.from_defaults(
         docstore=DOC_STORE,
@@ -88,14 +92,7 @@ def create_storage_context(persist_dir: str | Path | None = None) -> StorageCont
         return get_default_storage_context()
 
     resolved_dir = _normalize_persist_dir(persist_dir)
-    if THINKRAG_ENV == "development":
-        return _create_development_storage_context(resolved_dir)
-
-    return StorageContext.from_defaults(
-        docstore=DOC_STORE,
-        index_store=INDEX_STORE,
-        vector_store=VECTOR_STORE,
-    )
+    return _create_isolated_storage_context(resolved_dir)
 
 
 def create_storage_context_for_kb(kb_id: str) -> StorageContext:

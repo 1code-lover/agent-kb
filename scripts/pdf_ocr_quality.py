@@ -11,6 +11,27 @@ from typing import Iterable
 
 
 @dataclass(frozen=True)
+class LineOrderResult:
+    """期望文本片段的阅读顺序准确率。"""
+
+    total: int
+    matched_pairs: int
+    accuracy: float
+    missing_lines: list[str]
+
+
+@dataclass(frozen=True)
+class TableCellRecallResult:
+    """表格单元格召回统计。"""
+
+    total: int
+    hit_count: int
+    miss_count: int
+    missed_cells: list[str]
+    recall: float
+
+
+@dataclass(frozen=True)
 class KeywordRecallResult:
     """关键词召回统计结果。"""
 
@@ -40,19 +61,61 @@ def evaluate_keyword_recall(text: str, keywords: Iterable[str]) -> KeywordRecall
     )
 
 
-def evaluate_pdf(pdf_path: Path, keywords: Iterable[str]) -> dict:
-    """读取 PDF 并返回 OCR 解析质量报告。"""
+def evaluate_line_order(text: str, expected_lines: Iterable[str]) -> LineOrderResult:
+    """统计期望片段是否按给定顺序出现在 OCR 文本中。"""
+    lines = [line for line in expected_lines if line]
+    cursor = 0
+    matched = 0
+    missing: list[str] = []
+    for line in lines:
+        position = text.find(line, cursor)
+        if position < 0:
+            missing.append(line)
+            continue
+        matched += 1
+        cursor = position + len(line)
+    total = len(lines)
+    return LineOrderResult(total=total, matched_pairs=matched, accuracy=matched / total if total else 0.0, missing_lines=missing)
+
+
+def evaluate_table_cell_recall(text: str, expected_rows: Iterable[Iterable[str]]) -> TableCellRecallResult:
+    """把期望表格展平为单元格，统计 OCR 文本中的召回。"""
+    cells = [str(cell) for row in expected_rows for cell in row if str(cell)]
+    missed = [cell for cell in cells if cell not in text]
+    hit_count = len(cells) - len(missed)
+    total = len(cells)
+    return TableCellRecallResult(
+        total=total,
+        hit_count=hit_count,
+        miss_count=len(missed),
+        missed_cells=missed,
+        recall=hit_count / total if total else 0.0,
+    )
+
+
+def evaluate_pdf(
+    pdf_path: Path,
+    keywords: Iterable[str],
+    *,
+    expected_lines: Iterable[str] = (),
+    expected_table_rows: Iterable[Iterable[str]] = (),
+) -> dict:
+    """读取 PDF 并返回关键词、阅读顺序和表格单元格质量报告。"""
     from server.readers.pdf_ocr import PDFOCRReader
 
     reader = PDFOCRReader()
     docs = reader.load_data(str(pdf_path))
     text = "\n".join(doc.text for doc in docs)
     recall = evaluate_keyword_recall(text, keywords)
+    line_order = evaluate_line_order(text, expected_lines)
+    table_recall = evaluate_table_cell_recall(text, expected_table_rows)
     return {
         "pdf_path": str(pdf_path),
         "document_count": len(docs),
         "text_length": len(text),
         "keyword_recall": asdict(recall),
+        "line_order": asdict(line_order),
+        "table_cell_recall": asdict(table_recall),
         "text_preview": text[:500],
     }
 

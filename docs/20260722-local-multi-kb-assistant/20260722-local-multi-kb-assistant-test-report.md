@@ -1,7 +1,51 @@
-﻿# 20260722-local-multi-kb-assistant-test-report
+# 20260722-local-multi-kb-assistant-test-report
 
-## 1. Scope
-- Report date: 2026-07-31
+## 0. Current verification addendum (2026-08-17)
+
+This section supersedes any older "current state" wording in the retained 2026-07-31 sections below. Those sections and their artifact references remain unchanged as historical evidence.
+
+### 0.1 Delivered scope
+
+1. **Knowledge-base physical index isolation**
+   - `default` remains compatible with the historical `storage/` directory.
+   - Every non-default KB uses an independent `StorageContext` and persists under `storage/kbs/{kb_id}/`.
+   - The API/evaluation contract now reports `isolation_level=physical_isolated`.
+   - The regression proof writes a node only to KB A, persists A and B separately, reloads both stores, and verifies that KB B cannot see KB A's node.
+2. **Embedding cache recovery**
+   - Added `GET /api/embedding/cache` and `POST /api/embedding/cache/prepare`.
+   - The first release accepts only the `modelscope` provider and exposes `idle/downloading/ready/failed` status for frontend polling.
+   - The Knowledge Workspace displays a recovery action when the configured local embedding cache is missing.
+   - Review found and fixed a pre-start concurrency window: the background thread is now started while the service lock is held, so concurrent requests cannot create duplicate download workers.
+3. **OCR layout and table quality**
+   - PaddleOCR geometry is normalized from `rec_boxes` or `dt_polys`, including NumPy array inputs.
+   - Text is clustered into reading-order rows, stable rectangular rows can be rendered as Markdown tables, and PDF OCR preserves `[Page N]` markers.
+   - Quality diagnostics now include line ordering, table-cell recall, layout mode, row/column counts, and mean confidence.
+4. **Documentation**
+   - README and product documents describe the physical storage boundary, ModelScope recovery workflow, OCR layout behavior, and the macOS release limitation.
+
+### 0.2 Current automated verification
+
+| Verification | Command | Result |
+| --- | --- | --- |
+| Python non-slow full suite | `/opt/miniconda3/envs/agent-kb/bin/python -m pytest tests/ -q -m "not slow"` | **803 passed, 1 deselected, 36 warnings** |
+| Web unit tests | `find webapp/src -name '*.test.js' -print0 \| xargs -0 node --test` | **90 passed** |
+| Web production build | `npm run build --prefix webapp` | **passed** |
+| Electron tests | `cd desktop && node --test src/*.test.js scripts/*.test.js` | **86 passed** |
+| Changed-module coverage slice | focused pytest with coverage for embedding cache, storage context, image/PDF OCR, and OCR quality script | **55 passed; TOTAL 85%** |
+| Diff whitespace validation | `git diff --check` | **passed** |
+
+The focused changed-module coverage result is above the repository target of `>= 80%`. The warnings are pre-existing dependency/deprecation warnings and did not produce test failures.
+
+### 0.3 Migration and release boundaries
+
+- Historical non-default data that was written into the old shared index is **not silently split or migrated**. After upgrading, affected knowledge bases must be re-imported or rebuilt into their dedicated directories.
+- Historical artifacts under `docs/20260722-local-multi-kb-assistant/artifacts/` may still contain `logical_filter_only`; those files remain as evidence of the earlier implementation and are not rewritten.
+- Certificate acquisition, Developer ID signing, notarization, and stapling were intentionally skipped in this development round. Local functionality is accepted independently, but a formal distributable macOS release remains blocked until those external release gates are completed.
+- The OCR scope is text/layout/table extraction, not general-purpose image understanding. Table reconstruction remains heuristic and deliberately falls back to geometry-ordered plain lines for irregular layouts.
+
+## 1. Historical scope (2026-07-31)
+- Original report date: 2026-07-31
+- Latest verification addendum: 2026-08-17
 - Requirement folder: `docs/20260722-local-multi-kb-assistant/`
 - Related documents:
   - `docs/20260722-local-multi-kb-assistant/20260722-local-multi-kb-assistant-plan.md`
@@ -12,7 +56,7 @@
   2. **Review evidence from existing formal artifacts**: live roundtrip diagnostic JSON files.
 - This report does not present historically executed commands that were not re-run in this round as if they were current results.
 
-## 2. Executive summary
+## 2. Historical executive summary (2026-07-31)
 1. **The ingestion-to-QA main path is working in the current worktree, and a real empty-markdown import failure was found, fixed, and revalidated in this continuation.**
 2. **The formal `eval_v4` QA evaluation was re-run in the current worktree and passed with `54/54 passed`.**
 3. **The formal `eval_v5` QA evaluation was expanded and re-run in the current worktree, and it now passes with `72/72 passed`, adding stronger evidence-operation, process-boundary, approval-summary, and long-document coverage on top of the earlier long-document, cross-document, and hard-refusal cases.**
@@ -31,7 +75,7 @@
 16. **A fresh regression and live import on `http://127.0.0.1:18089` confirm that extensionless files with generic `application/octet-stream` now fall back to content sniffing: UTF-8 text imports as `text`, supported PNG enters OCR as `image`, and obvious binary bytes are still rejected.**
 17. **A fresh storage-boundary addendum was re-run in the current worktree: `tests/api/test_index_manager_coverage.py` + `tests/utils/test_file_kb_paths.py` now pass with `71 passed`, `server/index.py` reaches `95%`, `server/utils/file.py` reaches `96%`, and the focused import-path hardening evidence is now both functional and measurable.**
 
-## 3. Re-run records in the current worktree
+## 3. Historical re-run records from the 2026-07-31 worktree
 
 ### 3.1 Ingestion-focused regression
 Command 1:
@@ -114,7 +158,7 @@ Formal outputs:
 
 Interpretation:
 - This second formal dataset now extends the QA gate from the original business-path set into harder long-document, cross-document, evidence-operation, approval-summary, and process-boundary scenarios.
-- The current run shows that those added scenarios still pass with the same top-line stability as `eval_v4`, while also pushing the business-path dataset to a larger and more balanced shape: `72` total cases, `24` per modality, `24` per difficulty, and `57` evidence-backed preview-required cases under the same honest product boundary: logical-only KB isolation and OCR-first image support.
+- The current run shows that those added scenarios still pass with the same top-line stability as `eval_v4`, while also pushing the business-path dataset to a larger and more balanced shape: `72` total cases, `24` per modality, `24` per difficulty, and `57` evidence-backed preview-required cases under the product boundary that existed during that historical run: logical-only KB isolation and OCR-first image support.
 
 ### 3.2.2 Formal QA evaluation `eval_v6`
 Command:
@@ -677,7 +721,7 @@ Interpretation:
 - This closes another realistic ingest mismatch between product scope and client behavior: a generic binary MIME no longer forces supported extensionless content into the unsupported bucket.
 - The hardening remains honest and bounded: supported payloads recover into the correct import path, while unsupported binary bytes are still blocked before indexing.
 
-## 4. Review of existing formal live roundtrip artifacts
+## 4. Historical review of existing formal live roundtrip artifacts
 The following evidence is based on formal JSON artifacts that already exist in the repository. They are included because they add chain-level evidence beyond pure unit/integration test output.
 
 ### 4.1 Reviewed files
@@ -694,14 +738,14 @@ The following evidence is based on formal JSON artifacts that already exist in t
 - `20260731-live-18082-pdf-scan.json` shows the scanned-PDF OCR fallback path with `source_text_layer_empty = true` and `saved_text_layer_empty = true`, while answer, evidence, and preview checks remain `true`.
 - `20260731-live-18082-image-ocr.json` shows the image OCR answer `In the OCR diagnostic image, the authorization boundary is the Knowledge Base.`, with `ocr_attempted = true` and `indexed_from_ocr = true`.
 - `20260731-live-18082-mixed-batch.json` shows `core_ingestion_passed`, `core_positive_qa_passed`, `strict_no_evidence_contract_passed`, `no_evidence_answer_refusal_like`, and `run_passed` all equal to `true`.
-- The JSON also echoes `requested_scope_type`, `effective_scope_type`, and `isolation_level`, which is consistent with the current product statement: explicit single-KB scope is provided, and the current isolation level is still `logical_filter_only`.
+- The JSON also echoes `requested_scope_type`, `effective_scope_type`, and `isolation_level`, which is consistent with the historical product state captured by those artifacts: explicit single-KB scope was provided, and the isolation level at that time was `logical_filter_only`. The current implementation is superseded by Section 0 and reports `physical_isolated`.
 
 ### 4.3 What this evidence proves and what it does not prove
 - It proves that there is traceable chain-level evidence for Markdown, PDF text layer, scanned PDF OCR, image OCR, and mixed batch.
 - It proves that the current image path covers **OCR extraction + image asset indexing + evidence/preview resolution**.
 - It does not prove advanced image understanding, flowchart semantic understanding, or general VQA. This report does not claim those capabilities.
 
-## 5. Current quality judgment and remaining boundaries
+## 5. Historical quality judgment and remaining boundaries
 
 ### 5.1 What can be stated with confidence
 - The base ingestion path is working, because the wide ingestion slice (`161 passed in 10.19s`), the narrower backend-only ingestion slice (`92 passed in 11.56s`), and the frontend receipt-summary contract (`10 passed`) together cover the critical ingestion/OCR/directory/receipt/asset surface.
@@ -711,7 +755,7 @@ The following evidence is based on formal JSON artifacts that already exist in t
 - The full repository regression also remains green at `667 passed, 2 warnings`, and the current coverage re-run still stays above threshold at `82%`.
 
 ### 5.2 What must not be overstated
-- Do not state that multi-KB storage isolation is already physical. The current state remains shared storage plus `metadata["kb_id"]` filtering.
+- Historical boundary at the time: multi-KB storage still used a shared index plus `metadata["kb_id"]` filtering. This limitation was removed by the 2026-08-17 implementation described in Section 0.
 - Do not state that image understanding is already complete. The committed scope is OCR extraction plus image ingestion/indexing.
 - Do not state that QA quality has already been comprehensively proven for production reality. The more accurate statement is that the base pipeline is working and the evaluation framework is now credible and reusable.
 - Do not state that full multi-turn dialogue reasoning is already complete. The current state is only minimal history-grounded follow-up support for likely same-session follow-up questions.
@@ -719,7 +763,7 @@ The following evidence is based on formal JSON artifacts that already exist in t
 ### 5.3 Recommended next strengthening steps
 - Continue expanding semi-real and business-like QA datasets and run them as formal regressions.
 - Extend the current dataset beyond the newly landed **minimal** follow-up/session grounding into richer multi-turn context chains, larger mixed-modality batches, and more difficult cross-document competition cases.
-- Keep the security discussion explicit around default-deny and logical-only isolation, and clarify acceptable P0/P1 risk versus the future P2 physical-isolation path.
+- Historical recommendation: keep the security discussion explicit around default-deny and logical-only isolation. The 2026-08-17 implementation completed the physical storage boundary while retaining default-deny scope control.
 
 ## 6. Formal artifacts explicitly referenced by this report
 The following 15 files are the formal outputs explicitly referenced by this report's retained artifact set. The first 9 are aligned with the Stage 3 manifest/submit-scope verifier, the 10th and 11th are the fresh runtime artifacts referenced in Sections 3.8 and 3.9, the next 2 are the re-run `eval_v5` QA artifacts, and the last 2 are the new unified `eval_v6` diagnostic-report artifacts referenced in this update. The fresh `20260731-live-18084-*.json` and `20260731-live-18090-*.json` smoke outputs from Section 3.6, plus the current-run `18088`/`18089` live artifacts from Sections 3.11.1 and 3.11.2, are valid supplementary evidence, but they are not yet part of that minimal retained artifact set:
@@ -739,8 +783,8 @@ The following 15 files are the formal outputs explicitly referenced by this repo
 - `docs/20260722-local-multi-kb-assistant/artifacts/qa-eval/local_multi_kb_eval_v6_business_plus_diagnostic-semireal-report.json`
 - `docs/20260722-local-multi-kb-assistant/artifacts/qa-eval/local_multi_kb_eval_v6_business_plus_diagnostic-semireal-report.md`
 
-## 7. Final conclusion
+## 7. Historical 2026-07-31 conclusion
 > The most accurate current conclusion is: **the base ingestion and QA path is working, and this is supported by the current-round re-run results `161 passed`, `92 passed`, `10 passed`, `54/54 passed`, `72/72 passed`, `78/78 passed`, `81 passed`, `15 passed`, `33 passed`, `47 passed`, `354 passed, 2 warnings`, `667 passed, 2 warnings`, `629 passed, 2 warnings`, `TOTAL 6661 / Miss 1189 / Cover 82%`, `5 passed`, plus the reviewed and freshly generated live roundtrip artifacts.**
 
-> The new `eval_v6` artifact remains especially important because it unifies business QA and weak-signal diagnostics in one formal report, and it now passes end-to-end while still keeping those weak-signal cases explicit in `diagnostic_summary`. That means the next meaningful step is no longer "make the formal eval green," but **continue strengthening real import/live-roundtrip coverage and harder competition cases**, while continuing to keep product claims honest around logical-only isolation, default-deny scope control, and the current image scope of OCR plus asset ingestion.
+> The new `eval_v6` artifact remains especially important because it unifies business QA and weak-signal diagnostics in one formal report, and it now passes end-to-end while still keeping those weak-signal cases explicit in `diagnostic_summary`. That means the next meaningful step is no longer "make the formal eval green," but **continue strengthening real import/live-roundtrip coverage and harder competition cases**, while keeping product claims honest around the then-current logical-only isolation, default-deny scope control, and OCR-plus-asset image scope. See Section 0 for the superseding physical-isolation result.
 

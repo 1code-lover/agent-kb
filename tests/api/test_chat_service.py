@@ -28,7 +28,7 @@ def single_kb_scope() -> ChatQueryScope:
         effective_scope_type="single_kb",
         effective_kb_ids=["kb-a"],
         is_default_deny_applied=False,
-        isolation_level="logical_filter_only",
+        isolation_level="physical_isolated",
     )
 
 

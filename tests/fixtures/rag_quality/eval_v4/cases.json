@@ -2,7 +2,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-001",
     "kb_id": "eval-kb-markdown",
     "question": "在 Payroll cutover 文档里，最终审批人是谁？",
@@ -34,7 +34,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-002",
     "kb_id": "eval-kb-markdown",
     "question": "这个 cutover 文档里的 rollback owner 是谁？",
@@ -66,7 +66,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-003",
     "kb_id": "eval-kb-markdown",
     "question": "最终审批人和 rollback owner 分别是谁？",
@@ -99,7 +99,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-004",
     "kb_id": "eval-kb-markdown",
     "question": "文档里有没有写 CAB ticket 编号？",
@@ -131,7 +131,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-005",
     "kb_id": "eval-kb-markdown",
     "question": "P1 cutover incident 需要在几分钟内升级给谁？",
@@ -164,7 +164,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-006",
     "kb_id": "eval-kb-markdown",
     "question": "总结这个 handover SLA 里最关键的两个时限。",
@@ -197,7 +197,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-007",
     "kb_id": "eval-kb-markdown",
     "question": "workflow boundary note 里写的 evidence preview 至少要带哪两个字段？",
@@ -230,7 +230,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-008",
     "kb_id": "eval-kb-markdown",
     "question": "有没有记录会议密码？",
@@ -262,7 +262,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-001",
     "kb_id": "eval-kb-pdf",
     "question": "在 Payroll release checklist 里，final sign-off owner 是谁？",
@@ -294,7 +294,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-002",
     "kb_id": "eval-kb-pdf",
     "question": "这个 PDF 里的 rollback owner 是谁？",
@@ -326,7 +326,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-003",
     "kb_id": "eval-kb-pdf",
     "question": "在 Payroll release checklist 里，final sign-off owner 和 rollback owner 分别是谁？",
@@ -359,7 +359,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-004",
     "kb_id": "eval-kb-pdf",
     "question": "请给出这份发布清单的变更单编号。",
@@ -391,7 +391,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-005",
     "kb_id": "eval-kb-pdf",
     "question": "sev1 cutover 问题需要在几分钟内升级？",
@@ -424,7 +424,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-006",
     "kb_id": "eval-kb-pdf",
     "question": "总结这份 war-room 交接单里的升级对象和时限。",
@@ -457,7 +457,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-007",
     "kb_id": "eval-kb-pdf",
     "question": "证据 package 至少要包含哪两个字段？",
@@ -490,7 +490,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-008",
     "kb_id": "eval-kb-pdf",
     "question": "请给出这份材料的座机号码。",
@@ -522,7 +522,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-001",
     "kb_id": "eval-kb-image",
     "question": "白板上写的 final approver 是谁？",
@@ -554,7 +554,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-002",
     "kb_id": "eval-kb-image",
     "question": "这块 approval whiteboard 上的 deadline 是几点？",
@@ -586,7 +586,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-003",
     "kb_id": "eval-kb-image",
     "question": "在这块 whiteboard 上，final approver 和 rollback owner 分别是谁？",
@@ -619,7 +619,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-004",
     "kb_id": "eval-kb-image",
     "question": "有没有记录会议密码？",
@@ -651,7 +651,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-005",
     "kb_id": "eval-kb-image",
     "question": "P1 cutover 问题要在几分钟内升级给谁？",
@@ -684,7 +684,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-006",
     "kb_id": "eval-kb-image",
     "question": "总结这块 escalation whiteboard 里与边界相关的两条规则。",
@@ -718,7 +718,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-007",
     "kb_id": "eval-kb-image",
     "question": "用一句话说明 folder 和 knowledge base 的边界关系。",
@@ -751,7 +751,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-008",
     "kb_id": "eval-kb-image",
     "question": "有没有记录座机号码？",
@@ -783,7 +783,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-009",
     "kb_id": "eval-kb-markdown",
     "question": "在 Payroll cutover approval 里，business confirmer 是谁？",
@@ -815,7 +815,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-010",
     "kb_id": "eval-kb-markdown",
     "question": "这份 cutover checklist 要在北京时间几点前签署？",
@@ -847,7 +847,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-011",
     "kb_id": "eval-kb-markdown",
     "question": "总结 Payroll cutover approval 里的三个关键角色。",
@@ -881,7 +881,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-012",
     "kb_id": "eval-kb-markdown",
     "question": "这份审批矩阵里有没有写变更编号和会议桥编号？",
@@ -913,7 +913,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-013",
     "kb_id": "eval-kb-markdown",
     "question": "handover SLA 里的 service desk first-ack 是几分钟？",
@@ -945,7 +945,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-014",
     "kb_id": "eval-kb-markdown",
     "question": "workflow note 里的 cutover/runbook/ 属于什么路径？",
@@ -978,7 +978,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-015",
     "kb_id": "eval-kb-markdown",
     "question": "最终审批人和 business confirmer 分别是谁？",
@@ -1011,7 +1011,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-016",
     "kb_id": "eval-kb-markdown",
     "question": "这份交接规范里有没有写值守座机号码？",
@@ -1043,7 +1043,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-009",
     "kb_id": "eval-kb-pdf",
     "question": "Payroll release checklist 里的 operator checklist 最晚几点前关闭？",
@@ -1075,7 +1075,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-010",
     "kb_id": "eval-kb-pdf",
     "question": "war-room handover 里的 primary incident commander 是谁？",
@@ -1107,7 +1107,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-011",
     "kb_id": "eval-kb-pdf",
     "question": "总结 Payroll release checklist 里的负责人和关单时限。",
@@ -1141,7 +1141,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-012",
     "kb_id": "eval-kb-pdf",
     "question": "请给出这份发布清单的桥接会议编号。",
@@ -1173,7 +1173,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-013",
     "kb_id": "eval-kb-pdf",
     "question": "OCR readiness note 里，文字层提取和 OCR fallback 的顺序是什么？",
@@ -1206,7 +1206,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-014",
     "kb_id": "eval-kb-pdf",
     "question": "scan fallback 这份扫描 PDF 里，OCR fallback 后要把什么写回索引，才能继续变成可检索证据？",
@@ -1239,7 +1239,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-015",
     "kb_id": "eval-kb-pdf",
     "question": "请给出负责人手机号。",
@@ -1271,7 +1271,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-016",
     "kb_id": "eval-kb-pdf",
     "question": "scan fallback note 里，扫描 PDF 的内容最后应该落在哪个知识范围里？",
@@ -1304,7 +1304,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-009",
     "kb_id": "eval-kb-image",
     "question": "approval whiteboard 上写的 rollback owner 是谁？",
@@ -1336,7 +1336,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-010",
     "kb_id": "eval-kb-image",
     "question": "总结这块 approval whiteboard 的三个关键信息。",
@@ -1370,7 +1370,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-011",
     "kb_id": "eval-kb-image",
     "question": "evidence board 上说 OCR 证据结果至少要带哪两个字段？",
@@ -1403,7 +1403,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-012",
     "kb_id": "eval-kb-image",
     "question": "这张审批白板里有没有写桥接会议编号？",
@@ -1435,7 +1435,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-013",
     "kb_id": "eval-kb-image",
     "question": "escalation board 里，folder 和 knowledge base 的边界关系是什么？",
@@ -1468,7 +1468,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-014",
     "kb_id": "eval-kb-image",
     "question": "这块 escalation board 里写的 on-call manager 是谁？",
@@ -1500,7 +1500,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-015",
     "kb_id": "eval-kb-image",
     "question": "这张升级白板里有没有写值守座机号码？",
@@ -1532,7 +1532,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-016",
     "kb_id": "eval-kb-image",
     "question": "请用一句话总结 Liu Chang escalation board 的三条规则：10 minutes、authorization boundary、No confirmable information。",
@@ -1566,7 +1566,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-017",
     "kb_id": "eval-kb-markdown",
     "question": "在 UTF-8 边界说明里，什么对象仍然是授权边界？",
@@ -1601,7 +1601,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-017",
     "kb_id": "eval-kb-pdf",
     "question": "folder-boundary PDF 里，请用完整短句回答哪个对象仍然是 authorization boundary？",
@@ -1638,7 +1638,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-017",
     "kb_id": "eval-kb-image",
     "question": "folder board 里，请用完整短句回答图片 OCR 回答仍然要遵守什么边界？",
@@ -1675,7 +1675,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-md-018",
     "kb_id": "eval-kb-markdown",
     "question": "请用完整短句回答 workflow boundary note 里，access control 保持在哪个层级？",
@@ -1712,7 +1712,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-pdf-018",
     "kb_id": "eval-kb-pdf",
     "question": "在 scan-fallback PDF 里，请用完整短句回答 OCR fallback 对同一页必须合并什么？",
@@ -1750,7 +1750,7 @@
   {
     "dataset": "local_multi_kb_eval_v4_business",
     "expected_scope_type": "single_kb",
-    "expected_isolation_level": "logical_filter_only",
+    "expected_isolation_level": "physical_isolated",
     "case_id": "eval-v4-img-018",
     "kb_id": "eval-kb-image",
     "question": "请用完整短句回答 escalation whiteboard business 里，什么对象仍然是 authorization boundary？",

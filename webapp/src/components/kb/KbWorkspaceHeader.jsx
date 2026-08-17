@@ -21,6 +21,10 @@ export default function KbWorkspaceHeader({
   actionMode,
   onToggleActionMode,
   embeddingWarmupSummary,
+  embeddingCacheStatus,
+  embeddingCacheError,
+  onPrepareEmbeddingCache,
+  isPreparingEmbeddingCache,
   ocrWarmupSummary,
 }) {
   const rootPath = hasSelectedKb ? 'data/' + selectedKbId + '/' : '选择知识库后显示';
@@ -62,6 +66,22 @@ export default function KbWorkspaceHeader({
             <p className='kb-runtime-status-text'>
               {embeddingWarmupSummary?.summary || '导入和问答前会先检查向量模型状态。'}
             </p>
+            {embeddingWarmupSummary?.canPrepareCache ? (
+              <div className='kb-runtime-recovery'>
+                <button
+                  type='button'
+                  className='kb-runtime-recovery-button'
+                  disabled={isPreparingEmbeddingCache}
+                  onClick={onPrepareEmbeddingCache}
+                >
+                  {isPreparingEmbeddingCache ? '正在通过 ModelScope 准备…' : '使用 ModelScope 准备缓存'}
+                </button>
+                {embeddingCacheStatus?.state === 'failed' || embeddingCacheError ? (
+                  <span role='alert'>{embeddingCacheStatus?.last_error || embeddingCacheError}</span>
+                ) : null}
+                {embeddingCacheStatus?.state === 'ready' ? <span>缓存已准备，正在重新加载 Embedding。</span> : null}
+              </div>
+            ) : null}
           </div>
           <div className={ocrRuntimeClassName} role='status' aria-live='polite'>
             <div className='kb-runtime-status-head'>

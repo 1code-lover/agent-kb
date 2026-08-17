@@ -29,7 +29,7 @@
 3. 知识库内部是否应该有文件夹，以及文件夹处在什么层级；
 4. Markdown、PDF、图片、流程图这类内容应该怎样进入统一知识体系；
 5. 导入、重导入、删除、重建索引分别是什么动作，边界如何区分；
-6. 当前共享单索引的现实与未来“知识库是一等对象”的目标之间，差距在哪里；
+6. 2026-07 原始共享单索引基线如何演进到当前物理隔离，以及还剩哪些迁移与权限差距；
 7. 后续如果接入外部 Agent 或其他 Agent 项目，应该留什么契约。
 
 ---
@@ -79,32 +79,31 @@
 
 ## 4. 当前现实与目标态
 
-### 4.1 当前现实
+### 4.1 当前现实（更新于 2026-08-17）
 
 当前代码基础已经具备：
 1. 本地文件导入、URL 导入、索引、检索、问答的主路径；
-2. Markdown / PDF 文本处理能力；
-3. PDF 文字层抽取与 OCR 回退；
-4. Chat 范围 default-deny；
-5. 证据对象与文档预览主链路雏形；
-6. 多知识库“逻辑能力”的最初实现。
+2. Markdown / PDF 文本处理能力，以及 PDF 文字层抽取与 OCR 回退；
+3. Chat 范围 default-deny、证据对象与文档预览主链路；
+4. `default` 知识库兼容历史 `storage/` 路径；
+5. 非 default 知识库使用 `storage/kbs/{kb_id}/` 独立 `StorageContext` 和持久化文件集；
+6. Embedding 缓存缺失时的 ModelScope 白名单恢复，以及 OCR 阅读顺序和规则表格恢复。
 
 ### 4.2 必须诚实承认的架构现实
 
-当前的多知识库并不是存储隔离意义上的一等对象，而是：
-1. 所有知识库共享单一 docstore / vector store / index store；
-2. 依赖 `metadata["kb_id"]` 来做检索时过滤；
-3. 边界本质上仍是**逻辑过滤**，不是**物理隔离**；
-4. 因此任何过滤逻辑失效，都有跨库泄露风险。
+当前多知识库已经具备**目录级物理索引隔离**，但仍需保留以下边界说明：
+1. `kb_id` 查询范围和 default-deny 契约继续保留，作为物理隔离之外的纵深防御；
+2. 历史共享索引中的非 default 数据不会被静默拆分，升级后需要重新导入或重建；
+3. 历史评测 artifacts 可能仍记录 `logical_filter_only`，这些文件只代表当时实现；
+4. 目录级文件隔离不等价于企业级多租户权限、加密隔离或远程服务安全认证。
 
-### 4.3 目标态
+### 4.3 下一目标态
 
-目标态不是“继续把 `kb_id` tag 补补缝缝”，而是：
-1. KnowledgeBase 是一级产品对象；
-2. 知识范围控制是显式契约，不是隐式默认；
-3. Folder / Document / Asset / Chunk / Evidence 都有明确对象语义；
-4. 导入与嵌入是可追踪、可回执、可恢复的流程；
-5. 将来可以从逻辑隔离平滑演进到物理隔离或命名空间隔离。
+在物理索引边界完成后，下一阶段继续强化：
+1. KnowledgeBase 作为一级产品与授权对象；
+2. Folder / Document / Asset / Chunk / Evidence 的稳定对象语义；
+3. 导入、嵌入、缓存恢复的可追踪、可回执、可恢复流程；
+4. 更强的迁移工具、权限模型和标准化 Agent 开放层。
 
 ### 4.4 关键判断
 
@@ -313,10 +312,10 @@ P0 阶段建议：
 - `asset_count`
 - `created_at`
 - `updated_at`
-- `storage_mode`：`logical_filter_only / namespace / physical_isolated`
+- `storage_mode`：当前固定回显 `physical_isolated`；历史值 `logical_filter_only` 只允许出现在旧报告中
 
 #### 8.1.3 说明
-当前实现现实上仍是 `logical_filter_only`，必须在文档与接口回执中诚实体现。
+当前实现使用 `physical_isolated`：`default` 保留 `storage/` 兼容路径，非 default 知识库使用 `storage/kbs/{kb_id}/` 独立文件集。
 
 ---
 
@@ -795,11 +794,11 @@ P0 主要通过以下方式接入：
 ### 15.3 Folder 不是安全边界
 Folder 可用于组织与收窄，但不能替代 `kb_id` 级范围契约。
 
-### 15.4 当前安全风险必须持续可见
-由于当前仍是共享单索引 + 逻辑过滤：
-- `storage_mode` 应诚实表达现状；
-- 对外接口不要暗示已经是物理隔离；
-- 未来 Agent 接入不能建立在“默认相信过滤逻辑永不出错”的前提上。
+### 15.4 当前安全边界必须持续可见
+当前已完成知识库级目录和 `StorageContext` 物理隔离：
+- `storage_mode` / `isolation_level` 必须诚实回显 `physical_isolated`；
+- `kb_id` 范围控制和 default-deny 继续作为纵深防御，不能因为物理隔离而删除；
+- 对外接口不得把目录级隔离夸大为完整的多租户权限或安全认证体系。
 
 ---
 
@@ -890,7 +889,7 @@ P0 最小必要集合建议是：
 - `sources` 保留兼容；
 - `evidence` 是正式契约；
 - `receipt_id` 保留；
-- `logical_filter_only` 需要诚实回显；
+- `physical_isolated` 必须由 API 诚实回显，并由跨目录持久化/重载测试证明；
 - Folder 是组织层，不是边界层。
 
 ---
@@ -950,3 +949,31 @@ P0 最小必要集合建议是：
 4. 资产预览与证据引用。
 
 当前更推荐：**先按方案 A 把“Folder + Markdown 资源解析 + Asset 最小闭环”的实施方案写出来，再继续编码。**
+
+
+## 2026-08-17 实现补充
+
+### 多知识库持久化边界
+
+```text
+default          -> storage/
+non-default KB   -> storage/kbs/{kb_id}/
+```
+
+显式 `persist_dir` 在 development 和 production 均代表物理边界，不得复用其他知识库的 docstore、index store 或 vector store 实例。目录列表、文档列表、摄取和查询必须使用目标 `kb_id` 对应的 `IndexManager`。历史共享索引不会被静默复制；升级后应对非 default 知识库执行重新导入或重建，以避免把旧的逻辑过滤数据误认为已迁移。
+
+### Embedding 缓存恢复状态机
+
+- 接口：`GET /api/embedding/cache`、`POST /api/embedding/cache/prepare`。
+- 状态：`idle / downloading / ready / failed`。
+- 首版 provider 仅允许 `modelscope`，禁止任意命令、任意 URL、密码和密钥输入。
+- 多次点击幂等，同一进程最多一个下载线程。
+- 缓存准备成功后清除旧 embedding 实例并重新触发后台 warmup；前端轮询状态并刷新 `/api/health`。
+
+### OCR 版面与表格
+
+- 将 `rec_texts` 与 `rec_boxes`/`dt_polys`、`rec_scores` 对齐。
+- 按 y 聚类成行，行内按 x 排序；无几何信息时保持原序列回退。
+- 二维规则行列结构恢复为 Markdown table。
+- PDF OCR 文本包含 `[Page N]` 标记。
+- 诊断字段：`layout_mode`、`line_count`、`page_count`、`table_detected`、`table_row_count`、`table_column_count`、`mean_confidence`。

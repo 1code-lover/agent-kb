@@ -1122,6 +1122,33 @@ button {
   line-height: 1.6;
 }
 
+.kb-runtime-recovery {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kb-runtime-recovery-button {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #f59e0b;
+  background: rgba(120, 53, 15, 0.55);
+  color: #fef3c7;
+  cursor: pointer;
+}
+
+.kb-runtime-recovery-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.kb-runtime-recovery span {
+  color: #fecaca;
+  font-size: 12px;
+}
+
 @media (max-width: 860px) {
   .kb-runtime-status-grid {
     grid-template-columns: 1fr;

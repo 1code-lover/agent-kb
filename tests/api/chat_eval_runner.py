@@ -68,7 +68,7 @@ BASE_PDF_IMPORTS = {
         Scope contract for PDF knowledge base queries.
         requested_scope_type must remain single_kb.
         effective_kb_ids must echo the active PDF knowledge base.
-        isolation_level remains logical_filter_only in the current architecture.
+        isolation_level remains physical_isolated in the current architecture.
         """,
     },
     "preview-guide.pdf": {
