@@ -3,6 +3,10 @@ const test = require("node:test");
 
 const { runBuildTarget } = require("./build-target");
 
+function normalizePath(value) {
+  return String(value).replaceAll("\\", "/");
+}
+
 test("runBuildTarget on macOS runs config, Python, release preflight, then electron-builder", () => {
   const calls = [];
   const result = runBuildTarget({
@@ -16,10 +20,10 @@ test("runBuildTarget on macOS runs config, Python, release preflight, then elect
 
   assert.equal(result.status, 0);
   assert.equal(calls.length, 4);
-  assert.match(calls[0], /desktop\/scripts\/verify-release-config\.js$/);
-  assert.match(calls[1], /desktop\/scripts\/verify-python-runtime\.js$/);
-  assert.match(calls[2], /desktop\/scripts\/release-preflight\.js$/);
-  assert.match(calls[3], /desktop\/node_modules\/electron-builder\/cli\.js --mac$/);
+  assert.match(normalizePath(calls[0]), /desktop\/scripts\/verify-release-config\.js$/);
+  assert.match(normalizePath(calls[1]), /desktop\/scripts\/verify-python-runtime\.js$/);
+  assert.match(normalizePath(calls[2]), /desktop\/scripts\/release-preflight\.js$/);
+  assert.match(normalizePath(calls[3]), /desktop\/node_modules\/electron-builder\/cli\.js --mac$/);
   assert.equal(result.stage, "electron-builder");
 });
 
@@ -40,7 +44,7 @@ test("runBuildTarget stops when Python runtime verification fails", () => {
   assert.equal(result.status, 3);
   assert.equal(result.stage, "python-runtime");
   assert.equal(calls.length, 2);
-  assert.match(calls[1], /desktop\/scripts\/verify-python-runtime\.js$/);
+  assert.match(normalizePath(calls[1]), /desktop\/scripts\/verify-python-runtime\.js$/);
 });
 
 test("runBuildTarget stops when macOS build preflight fails", () => {
@@ -60,7 +64,7 @@ test("runBuildTarget stops when macOS build preflight fails", () => {
   assert.equal(result.status, 2);
   assert.equal(result.stage, "build-preflight");
   assert.equal(calls.length, 1);
-  assert.match(calls[0], /desktop\/scripts\/verify-release-config\.js$/);
+  assert.match(normalizePath(calls[0]), /desktop\/scripts\/verify-release-config\.js$/);
 });
 
 test("runBuildTarget on non-mac platforms only invokes electron-builder", () => {
@@ -76,7 +80,7 @@ test("runBuildTarget on non-mac platforms only invokes electron-builder", () => 
 
   assert.equal(result.status, 0);
   assert.equal(calls.length, 1);
-  assert.match(calls[0], /desktop\/node_modules\/electron-builder\/cli\.js --win$/);
+  assert.match(normalizePath(calls[0]), /desktop\/node_modules\/electron-builder\/cli\.js --win$/);
   assert.equal(result.stage, "electron-builder");
   assert.equal(result.target, "--win");
 });

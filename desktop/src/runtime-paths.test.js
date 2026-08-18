@@ -4,6 +4,14 @@ const test = require("node:test");
 
 const { ensureRuntimeRoot, resolveRuntimePaths } = require("./runtime-paths");
 
+function normalizePath(value) {
+  return String(value).replaceAll("\\", "/");
+}
+
+function normalizePaths(record) {
+  return Object.fromEntries(Object.entries(record).map(([key, value]) => [key, normalizePath(value)]));
+}
+
 test("resolveRuntimePaths separates packaged resources from writable runtime data", () => {
   const paths = resolveRuntimePaths({
     devProjectRoot: "/repo",
@@ -12,7 +20,7 @@ test("resolveRuntimePaths separates packaged resources from writable runtime dat
     userDataPath: "/Users/test/Library/Application Support/NorthAgent",
   });
 
-  assert.deepEqual(paths, {
+  assert.deepEqual(normalizePaths(paths), {
     modelRoot: "/Applications/NorthAgent.app/Contents/Resources/localmodels",
     resourceRoot: "/Applications/NorthAgent.app/Contents/Resources",
     runtimeRoot: "/Users/test/Library/Application Support/NorthAgent/runtime",

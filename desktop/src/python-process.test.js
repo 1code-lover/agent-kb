@@ -4,6 +4,10 @@ const test = require("node:test");
 
 const { ensurePythonApi, resolvePythonCommand, stopPythonApi } = require("./python-process");
 
+function normalizePath(value) {
+  return String(value).replaceAll("\\", "/");
+}
+
 const runtimePaths = {
   modelRoot: "/tmp/resources/localmodels",
   resourceRoot: "/tmp/resources",
@@ -84,10 +88,10 @@ test("ensurePythonApi starts Python from resources with writable cwd and explici
 
   assert.equal(ready, true);
   assert.equal(spawnCalls.length, 1);
-  assert.deepEqual(spawnCalls[0].args, ["/tmp/resources/run_api.py"]);
-  assert.equal(spawnCalls[0].options.cwd, "/tmp/user-data/runtime");
-  assert.equal(spawnCalls[0].options.env.NORTHAGENT_DATA_ROOT, "/tmp/user-data/runtime");
-  assert.equal(spawnCalls[0].options.env.NORTHAGENT_MODEL_ROOT, "/tmp/resources/localmodels");
+  assert.deepEqual(spawnCalls[0].args.map(normalizePath), ["/tmp/resources/run_api.py"]);
+  assert.equal(normalizePath(spawnCalls[0].options.cwd), "/tmp/user-data/runtime");
+  assert.equal(normalizePath(spawnCalls[0].options.env.NORTHAGENT_DATA_ROOT), "/tmp/user-data/runtime");
+  assert.equal(normalizePath(spawnCalls[0].options.env.NORTHAGENT_MODEL_ROOT), "/tmp/resources/localmodels");
   assert.equal(spawnCalls[0].options.env.PYTHONDONTWRITEBYTECODE, "1");
   assert.equal(spawnCalls[0].options.env.PYTHONIOENCODING, "utf-8");
   stopPythonApi(runtimePaths);

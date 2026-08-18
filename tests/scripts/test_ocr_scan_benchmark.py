@@ -15,7 +15,7 @@ from scripts.eval_ocr_scan_benchmark import evaluate_manifest, main
 def test_benchmark_manifest_has_six_project_authored_assets(tmp_path: Path) -> None:
     """基准必须覆盖 captured/synthetic_degradation，并校验资产哈希。"""
     manifest_path = build_benchmark(tmp_path / "fixture")
-    manifest = json.loads(manifest_path.read_text())
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     items = manifest["items"]
     assert len(items) >= 6
     assert {item["source_type"] for item in items} == {"captured", "synthetic_degradation"}
@@ -87,8 +87,8 @@ def test_benchmark_assets_are_byte_stable_across_rebuilds(tmp_path: Path) -> Non
     """确定性生成资产重复构建后哈希必须稳定，避免基准自身漂移。"""
     first_path = build_benchmark(tmp_path / "first")
     second_path = build_benchmark(tmp_path / "second")
-    first = json.loads(first_path.read_text())
-    second = json.loads(second_path.read_text())
+    first = json.loads(first_path.read_text(encoding="utf-8"))
+    second = json.loads(second_path.read_text(encoding="utf-8"))
     assert [(item["id"], item["sha256"]) for item in first["items"]] == [
         (item["id"], item["sha256"]) for item in second["items"]
     ]
@@ -97,7 +97,7 @@ def test_benchmark_assets_are_byte_stable_across_rebuilds(tmp_path: Path) -> Non
 def test_cross_page_gold_is_attached_to_a_pdf_asset(tmp_path: Path) -> None:
     """跨页表头和连续合并金标必须落在真实多页资产，而不是单页截图。"""
     manifest_path = build_benchmark(tmp_path / "fixture")
-    manifest = json.loads(manifest_path.read_text())
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     cross_page = next(item for item in manifest["items"] if item["category"] == "cross_page_table")
     assert cross_page["asset"].endswith(".pdf")
     assert cross_page["expected_header_continuation"] is True

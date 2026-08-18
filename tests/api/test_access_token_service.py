@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -35,6 +36,15 @@ def make_service(tmp_path):
     )
 
 
+def assert_private_file(path: Path) -> None:
+    """校验敏感文件已落盘；POSIX 环境额外校验 0600 权限。"""
+
+    assert path.exists()
+    mode = os.stat(path).st_mode & 0o777
+    if os.name != "nt":
+        assert mode == 0o600
+
+
 def test_create_returns_plaintext_once_and_store_contains_only_hash(tmp_path):
     service = make_service(tmp_path)
     created = service.create_token(name="robot", kb_ids=["finance"])
@@ -45,8 +55,8 @@ def test_create_returns_plaintext_once_and_store_contains_only_hash(tmp_path):
     assert payload[0]["secret_hash"]
     assert "token" not in payload[0]
     assert service.list_tokens()[0].get("secret_hash") is None
-    assert os.stat(tmp_path / "access_tokens.json").st_mode & 0o777 == 0o600
-    assert os.stat(tmp_path / "token-pepper").st_mode & 0o777 == 0o600
+    assert_private_file(tmp_path / "access_tokens.json")
+    assert_private_file(tmp_path / "token-pepper")
 
 
 def test_verify_enforces_scope_expiry_and_revocation(tmp_path):
@@ -86,7 +96,7 @@ def test_admin_key_is_stable_and_private(tmp_path):
     second = service.get_admin_key()
     assert first == second
     assert len(first) >= 32
-    assert os.stat(tmp_path / "admin-key").st_mode & 0o777 == 0o600
+    assert_private_file(tmp_path / "admin-key")
 
 
 def test_create_rejects_invalid_expiry_format_with_stable_error(tmp_path):

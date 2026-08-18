@@ -100,7 +100,7 @@ def test_diagnose_prefers_kb_scoped_docstore(tmp_path: Path) -> None:
         eval_report_path=tmp_path / "eval.json",
     )
 
-    assert report["docstore_path"].endswith("storage/kbs/grain-knowledge-base/docstore.json")
+    assert Path(report["docstore_path"]).as_posix().endswith("storage/kbs/grain-knowledge-base/docstore.json")
     assert report["records"][0]["docstore_kb_id_count"] == 1
 
 

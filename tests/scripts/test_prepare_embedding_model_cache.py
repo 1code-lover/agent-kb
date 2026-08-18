@@ -12,6 +12,12 @@ import pytest
 import scripts.prepare_embedding_model_cache as prepare_cache
 
 
+def _localmodels_target() -> str:
+    """返回断言用的规范化本地模型路径。"""
+
+    return (Path("localmodels") / "BAAI" / "bge-small-zh-v1.5").as_posix()
+
+
 def test_prepare_embedding_model_cache_dry_run_reports_missing_cache(monkeypatch, tmp_path: Path) -> None:
     """未传 --download 时只输出诊断，不创建本地缓存目录。"""
 
@@ -87,14 +93,14 @@ def test_prepare_embedding_model_cache_downloads_to_project_localmodels(monkeypa
 
     assert result["downloaded"] is True
     assert result["after"]["local_path_exists"] is True
-    assert calls == [
-        {
-            "repo_id": "BAAI/bge-small-zh-v1.5",
-            "local_dir": "localmodels/BAAI/bge-small-zh-v1.5",
-            "local_dir_use_symlinks": False,
-            "resume_download": True,
-        }
-    ]
+    assert len(calls) == 1
+    assert calls[0] == {
+        "repo_id": "BAAI/bge-small-zh-v1.5",
+        "local_dir": str(Path("localmodels") / "BAAI" / "bge-small-zh-v1.5"),
+        "local_dir_use_symlinks": False,
+        "resume_download": True,
+    }
+    assert Path(str(calls[0]["local_dir"])).as_posix() == _localmodels_target()
 
 
 def test_prepare_embedding_model_cache_downloads_from_modelscope(monkeypatch, tmp_path: Path) -> None:
@@ -122,12 +128,12 @@ def test_prepare_embedding_model_cache_downloads_from_modelscope(monkeypatch, tm
     assert result["downloaded"] is True
     assert result["download_provider"] == "modelscope"
     assert result["after"]["local_path_exists"] is True
-    assert calls == [
-        {
-            "model_id": "AI-ModelScope/bge-small-zh-v1.5",
-            "local_dir": "localmodels/BAAI/bge-small-zh-v1.5",
-        }
-    ]
+    assert len(calls) == 1
+    assert calls[0] == {
+        "model_id": "AI-ModelScope/bge-small-zh-v1.5",
+        "local_dir": str(Path("localmodels") / "BAAI" / "bge-small-zh-v1.5"),
+    }
+    assert Path(str(calls[0]["local_dir"])).as_posix() == _localmodels_target()
 
 
 def test_prepare_embedding_model_cache_imports_from_source_dir(monkeypatch, tmp_path: Path) -> None:

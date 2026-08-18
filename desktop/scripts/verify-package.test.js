@@ -11,6 +11,10 @@ const {
   verifyPackage,
 } = require("./verify-package");
 
+function normalizePath(value) {
+  return String(value).replaceAll("\\", "/");
+}
+
 function createPackagedFixture(options = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "verify-package-"));
   const packageJson = {
@@ -55,7 +59,7 @@ test("verifyPackage accepts expected macOS package contents", () => {
 
   assert.equal(result.ok, true);
   assert.deepEqual(result.failures, []);
-  assert.match(result.resourcesRoot, /mac-arm64\/NorthAgent\.app\/Contents\/Resources$/);
+  assert.match(normalizePath(result.resourcesRoot), /mac-arm64\/NorthAgent\.app\/Contents\/Resources$/);
 });
 
 test("verifyPackage discovers x64 mac app layout and artifacts without arch suffix", () => {
@@ -85,7 +89,7 @@ test("verifyPackage discovers x64 mac app layout and artifacts without arch suff
   });
 
   assert.equal(result.ok, true);
-  assert.match(result.resourcesRoot, /dist\/mac\/NorthAgent\.app\/Contents\/Resources$/);
+  assert.match(normalizePath(result.resourcesRoot), /dist\/mac\/NorthAgent\.app\/Contents\/Resources$/);
   assert.match(result.artifactPaths[0], /NorthAgent-0\.1\.0\.dmg$/);
   assert.match(result.artifactPaths[1], /NorthAgent-0\.1\.0-mac\.zip$/);
 });
@@ -150,7 +154,7 @@ test("verifyPackage discovers mac-universal layout and universal artifacts", () 
   });
 
   assert.equal(result.ok, true);
-  assert.match(result.resourcesRoot, /dist\/mac-universal\/NorthAgent\.app\/Contents\/Resources$/);
+  assert.match(normalizePath(result.resourcesRoot), /dist\/mac-universal\/NorthAgent\.app\/Contents\/Resources$/);
   assert.match(result.artifactPaths[0], /NorthAgent-0\.1\.0-universal\.dmg$/);
   assert.match(result.artifactPaths[1], /NorthAgent-0\.1\.0-universal-mac\.zip$/);
 });
@@ -182,7 +186,7 @@ test("verifyPackage reports missing runtime files", () => {
 
   assert.equal(result.ok, false);
   assert.match(result.failures.join("\n"), /missing runtime file/);
-  assert.match(result.failures.join("\n"), /server\/index\.py/);
+  assert.match(normalizePath(result.failures.join("\n")), /server\/index\.py/);
 });
 
 test("verifyPackage requires a loadable default SentenceTransformer embedding", () => {

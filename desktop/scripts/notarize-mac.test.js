@@ -1,12 +1,24 @@
 const assert = require("node:assert/strict");
+const path = require("node:path");
 const test = require("node:test");
 
 const notarizeMac = require("./notarize-mac");
 
+function normalizePath(value) {
+  return String(value).replaceAll("\\", "/");
+}
+
+function normalizePayload(payload) {
+  return {
+    ...payload,
+    appPath: normalizePath(payload.appPath),
+  };
+}
+
 function buildContext(overrides = {}) {
   return {
     electronPlatformName: "darwin",
-    appOutDir: "/tmp/dist/mac",
+    appOutDir: path.join("/tmp", "dist", "mac"),
     packager: {
       appInfo: {
         appId: "com.northagent.desktop",
@@ -69,7 +81,7 @@ test("notarizeMac submits expected notarization payload", async () => {
     },
   });
 
-  assert.deepEqual(calls, [
+  assert.deepEqual(calls.map(normalizePayload), [
     {
       appBundleId: "com.northagent.desktop",
       appPath: "/tmp/dist/mac/NorthAgent.app",
@@ -78,6 +90,7 @@ test("notarizeMac submits expected notarization payload", async () => {
       teamId: "TEAM123456",
     },
   ]);
+  assert.equal(normalizePath(result.appPath), "/tmp/dist/mac/NorthAgent.app");
   assert.equal(result.skipped, false);
 });
 
@@ -94,7 +107,7 @@ test("notarizeMac submits with a Keychain profile and optional keychain", async 
     notarizeFn: async (payload) => calls.push(payload),
   });
 
-  assert.deepEqual(calls, [
+  assert.deepEqual(calls.map(normalizePayload), [
     {
       appBundleId: "com.northagent.desktop",
       appPath: "/tmp/dist/mac/NorthAgent.app",
@@ -102,6 +115,7 @@ test("notarizeMac submits with a Keychain profile and optional keychain", async 
       keychain: "/Users/release/Library/Keychains/release.keychain-db",
     },
   ]);
+  assert.equal(normalizePath(result.appPath), "/tmp/dist/mac/NorthAgent.app");
   assert.equal(result.strategy, "keychain_profile");
   assert.match(messages.join("\n"), /keychain_profile/);
   assert.doesNotMatch(messages.join("\n"), /northagent-notary/);
@@ -122,7 +136,7 @@ test("notarizeMac submits with App Store Connect API credentials", async () => {
     notarizeFn: async (payload) => calls.push(payload),
   });
 
-  assert.deepEqual(calls, [
+  assert.deepEqual(calls.map(normalizePayload), [
     {
       appBundleId: "com.northagent.desktop",
       appPath: "/tmp/dist/mac/NorthAgent.app",
@@ -131,6 +145,7 @@ test("notarizeMac submits with App Store Connect API credentials", async () => {
       appleApiIssuer: "SECRET-ISSUER",
     },
   ]);
+  assert.equal(normalizePath(result.appPath), "/tmp/dist/mac/NorthAgent.app");
   assert.equal(result.strategy, "api_key");
   assert.match(messages.join("\n"), /api_key/);
   assert.doesNotMatch(messages.join("\n"), /SECRET/);

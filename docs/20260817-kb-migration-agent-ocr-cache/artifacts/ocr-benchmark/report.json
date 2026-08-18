@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "manifest": "/Users/zhaojianyong/python/agent-kb/tests/fixtures/ocr_real_scan/manifest.json",
+  "manifest": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\tests\\fixtures\\ocr_real_scan\\manifest.json",
   "mode": "recorded",
   "item_count": 9,
   "metrics": {

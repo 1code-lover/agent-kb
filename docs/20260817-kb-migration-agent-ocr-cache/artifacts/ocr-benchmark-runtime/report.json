@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "manifest": "/Users/zhaojianyong/python/agent-kb/tests/fixtures/ocr_real_scan/manifest.json",
+  "manifest": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\tests\\fixtures\\ocr_real_scan\\manifest.json",
   "mode": "runtime",
   "item_count": 9,
   "metrics": {
@@ -26,7 +26,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 5213.339,
+        "ocr_total_ms": 39279.76,
         "error": null
       }
     },
@@ -44,7 +44,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 1505.734,
+        "ocr_total_ms": 5555.276,
         "error": null
       }
     },
@@ -62,7 +62,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 1534.106,
+        "ocr_total_ms": 5657.05,
         "error": null
       }
     },
@@ -80,7 +80,7 @@
         "merged_block_count": 1,
         "continued_page_count": 1,
         "removed_repeated_header_count": 1,
-        "ocr_total_ms": 5739.045
+        "ocr_total_ms": 20727.961
       }
     },
     {
@@ -97,7 +97,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 1369.283,
+        "ocr_total_ms": 7104.655,
         "error": null
       }
     },
@@ -115,7 +115,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 1735.152,
+        "ocr_total_ms": 9211.185,
         "error": null
       }
     },
@@ -133,7 +133,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 1311.368,
+        "ocr_total_ms": 8962.919,
         "error": null
       }
     },
@@ -151,7 +151,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 1280.215,
+        "ocr_total_ms": 4747.987,
         "error": null
       }
     },
@@ -169,7 +169,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 1326.03,
+        "ocr_total_ms": 5518.607,
         "error": null
       }
     }

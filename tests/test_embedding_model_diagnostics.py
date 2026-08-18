@@ -27,7 +27,7 @@ def test_embedding_diagnostics_prefers_existing_local_cache(monkeypatch, tmp_pat
     assert diagnostics["load_source"] == "local"
     assert diagnostics["local_path_exists"] is True
     assert diagnostics["allow_remote_download"] is False
-    assert diagnostics["local_path"] == "./localmodels/BAAI/bge-small-zh-v1.5"
+    assert Path(diagnostics["local_path"]).as_posix() == "localmodels/BAAI/bge-small-zh-v1.5"
     assert diagnostics["recommendations"] == []
 
 

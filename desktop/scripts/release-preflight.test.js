@@ -56,6 +56,10 @@ test("ensureExecutable repairs a non-executable file", () => {
   const result = ensureExecutable(target, () => {});
 
   assert.equal(result.ok, true);
+  if (process.platform === "win32") {
+    assert.equal(fs.existsSync(target), true);
+    return;
+  }
   assert.equal(result.repaired, true);
   const mode = fs.statSync(target).mode & 0o777;
   assert.equal(mode & 0o111, 0o111);

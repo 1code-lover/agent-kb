@@ -6,6 +6,10 @@ const test = require("node:test");
 
 const { resolveAppPath, runCheck, verifyMacRelease } = require("./verify-mac-release");
 
+function normalizePath(value) {
+  return String(value).replaceAll("\\", "/");
+}
+
 function createAppFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "verify-mac-release-"));
   const appPath = path.join(root, "dist", "mac-arm64", "NorthAgent.app");
@@ -23,7 +27,7 @@ test("resolveAppPath derives the .app bundle from a resources root", () => {
     resourcesRoot: "/tmp/dist/mac-arm64/NorthAgent.app/Contents/Resources",
   });
 
-  assert.equal(appPath, "/tmp/dist/mac-arm64/NorthAgent.app");
+  assert.match(normalizePath(appPath), /\/tmp\/dist\/mac-arm64\/NorthAgent\.app$/);
 });
 
 test("runCheck captures command status and stderr detail", () => {
