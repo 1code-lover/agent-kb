@@ -93,3 +93,24 @@ node --test src/*.test.js scripts/*.test.js
 ## License
 
 [MIT](./LICENSE)
+
+## 迁移、只读 Agent API 与 OCR/缓存运维
+
+当前本地 API 还提供：
+
+- `GET/POST /api/kb/migration/{status,scan,start,rollback}`：支持无副作用扫描、逐知识库迁移、带校验的备份、仅重试失败项和批次回滚。
+- 只读 Agent API：`GET /api/open/v1/me`、`GET /api/open/v1/knowledge-bases`、`POST /api/open/v1/search`、`POST /api/open/v1/answer`。每次请求都必须携带 Bearer 令牌，令牌只允许访问已授权知识库；令牌管理接口仅允许回环地址。
+- 令牌管理 CLI：
+  ```bash
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/manage_access_tokens.py create --name robot --kb finance
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/manage_access_tokens.py list
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/manage_access_tokens.py revoke TOKEN_ID
+  ```
+  明文令牌只在 `create` 时返回一次，存储文件只保存 HMAC 摘要。不要把本机管理员密钥注入 renderer 或前端 bundle。
+- Embedding 缓存操作：`GET /api/embedding/cache`、`POST /api/embedding/cache/preflight`、`POST /api/embedding/cache/prepare`、`POST /api/embedding/cache/cancel`。磁盘空间预检不足返回 HTTP `507`；下载状态包含阶段、字节数、估算/精确进度和取消状态。
+- OCR 扫描基准工具：
+  ```bash
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/build_ocr_scan_benchmark.py
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/eval_ocr_scan_benchmark.py
+  ```
+  已提交的基准集区分项目自制清晰页面与合成退化样本，是离线确定性基线；真实 PaddleOCR 执行仍属于单独的 slow/runtime 检查。

@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from '../router';
-import { getEmbeddingCacheStatus, getHealthStatus, prepareEmbeddingCache } from '../api/health';
+import { cancelEmbeddingCache, getEmbeddingCacheStatus, getHealthStatus, preflightEmbeddingCache, prepareEmbeddingCache } from '../api/health';
 import { getLatestImportReceipt } from '../api/kb';
 import { readApiData } from '../api/response';
 import { KbProvider, useKb } from '../components/kb/KbContext';
@@ -18,6 +18,7 @@ import KbDetailPanel from '../components/kb/KbDetailPanel';
 import KbObjectExplorer from '../components/kb/KbObjectExplorer';
 import KbWorkspaceFilterBar from '../components/kb/KbWorkspaceFilterBar';
 import KbWorkspaceHeader from '../components/kb/KbWorkspaceHeader';
+import KbMigrationCard from '../components/kb/KbMigrationCard';
 import {
   buildImportNotice,
   buildPersistedImportReceiptSummary,
@@ -119,7 +120,7 @@ function KnowledgeContent() {
   const embeddingCacheQuery = useQuery({
     queryKey: ['embedding-cache-prepare'],
     retry: false,
-    refetchInterval: (query) => query.state.data?.state === 'downloading' ? 2000 : false,
+    refetchInterval: (query) => ['checking_space', 'downloading', 'verifying', 'cancelling'].includes(query.state.data?.state) ? 1000 : false,
     queryFn: async () => {
       const response = await getEmbeddingCacheStatus();
       return readApiData(response) || null;
@@ -140,11 +141,25 @@ function KnowledgeContent() {
     },
   });
 
+  const preflightEmbeddingCacheMutation = useMutation({
+    mutationFn: preflightEmbeddingCache,
+    onSuccess: async () => {
+      await embeddingCacheQuery.refetch();
+    },
+  });
+
   const prepareEmbeddingCacheMutation = useMutation({
     mutationFn: prepareEmbeddingCache,
     onSuccess: async () => {
       await embeddingCacheQuery.refetch();
       await healthQuery.refetch();
+    },
+  });
+
+  const cancelEmbeddingCacheMutation = useMutation({
+    mutationFn: cancelEmbeddingCache,
+    onSuccess: async () => {
+      await embeddingCacheQuery.refetch();
     },
   });
 
@@ -277,13 +292,28 @@ function KnowledgeContent() {
           onToggleActionMode={handleToggleActionMode}
           embeddingWarmupSummary={embeddingWarmupSummary}
           embeddingCacheStatus={embeddingCacheQuery.data}
-          embeddingCacheError={prepareEmbeddingCacheMutation.error?.message || embeddingCacheQuery.error?.message || null}
+          embeddingCacheError={
+            preflightEmbeddingCacheMutation.error?.message
+            || prepareEmbeddingCacheMutation.error?.message
+            || cancelEmbeddingCacheMutation.error?.message
+            || embeddingCacheQuery.error?.message
+            || null
+          }
+          onPreflightEmbeddingCache={() => preflightEmbeddingCacheMutation.mutate()}
           onPrepareEmbeddingCache={() => prepareEmbeddingCacheMutation.mutate()}
-          isPreparingEmbeddingCache={prepareEmbeddingCacheMutation.isPending || embeddingCacheQuery.data?.state === 'downloading'}
+          onCancelEmbeddingCache={() => cancelEmbeddingCacheMutation.mutate()}
+          isPreparingEmbeddingCache={
+            preflightEmbeddingCacheMutation.isPending
+            || prepareEmbeddingCacheMutation.isPending
+            || cancelEmbeddingCacheMutation.isPending
+            || ['checking_space', 'downloading', 'verifying', 'cancelling'].includes(embeddingCacheQuery.data?.state)
+          }
           ocrWarmupSummary={ocrWarmupSummary}
         />
 
         {visibleNotice ? <p className='success kb-page-notice' role='status'>{visibleNotice.message}</p> : null}
+
+        <KbMigrationCard />
 
         <KbWorkspaceFilterBar
           hasSelectedKb={hasSelectedKb}

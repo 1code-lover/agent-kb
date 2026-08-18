@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "thresholds": {
+    "overall_score": 0.8,
+    "character_recall": 0.8,
+    "line_order_accuracy": 0.8,
+    "cell_recall": 0.8,
+    "header_continuation_accuracy": 1.0,
+    "continuous_table_merge_accuracy": 1.0
+  },
+  "items": [
+    {
+      "id": "captured-paragraph",
+      "category": "paragraph",
+      "source_type": "captured",
+      "expected_text": "Project OCR handover note\nOwner: Knowledge Team\nStatus: Ready",
+      "source_note": "项目成员为本基准排版并截取的清晰文档页；不是手机或扫描仪实拍。",
+      "capture_method": "project_rendered_screenshot",
+      "physical_capture_verified": false,
+      "asset": "captured-paragraph.png",
+      "sha256": "18e8ec00d20f2b8366b525d39221b01f5842c18bc8fea8747487e8f00c17988f",
+      "license": "project-authored",
+      "observed_text": "Project OCR handover note\nOwner: Knowledge Team\nStatus: Ready"
+    },
+    {
+      "id": "captured-single-table",
+      "category": "single_page_table",
+      "source_type": "captured",
+      "expected_text": "Item Qty\nRice 10\nWheat 20",
+      "expected_cells": [
+        "Item",
+        "Qty",
+        "Rice",
+        "10",
+        "Wheat",
+        "20"
+      ],
+      "observed_cells": [
+        "Item",
+        "Qty",
+        "Rice",
+        "10",
+        "Wheat",
+        "20"
+      ],
+      "source_note": "项目自制库存表截图；不是打印后扫描或手机实拍。",
+      "capture_method": "project_rendered_screenshot",
+      "physical_capture_verified": false,
+      "asset": "captured-single-table.png",
+      "sha256": "52363c4b0bdcdb4ca06e784766fe7acb26807b25e34559af16a987057388f17c",
+      "license": "project-authored",
+      "observed_text": "Item Qty\nRice 10\nWheat 20"
+    },
+    {
+      "id": "captured-continuous-table",
+      "category": "continuous_table",
+      "source_type": "captured",
+      "expected_text": "Name Count\nAlpha 1\nBeta 2",
+      "expected_cells": [
+        "Name",
+        "Count",
+        "Alpha",
+        "1",
+        "Beta",
+        "2"
+      ],
+      "observed_cells": [
+        "Name",
+        "Count",
+        "Alpha",
+        "1",
+        "Beta",
+        "2"
+      ],
+      "source_note": "项目自制单页连续表格截图；跨页金标由独立 PDF 样本承担。",
+      "capture_method": "project_rendered_screenshot",
+      "physical_capture_verified": false,
+      "asset": "captured-continuous-table.png",
+      "sha256": "1ea4cd2750a23b59dfe1b9f0cefbb363391533ae510c4841ac92926d7cc0bf8d",
+      "license": "project-authored",
+      "observed_text": "Name Count\nAlpha 1\nBeta 2"
+    },
+    {
+      "id": "synthetic-cross-page-table",
+      "category": "cross_page_table",
+      "source_type": "synthetic_degradation",
+      "expected_text": "[Page 1]\nName Count\nAlpha 1\n[Page 2]\nBeta 2",
+      "expected_cells": [
+        "Name",
+        "Count",
+        "Alpha",
+        "1",
+        "Beta",
+        "2"
+      ],
+      "observed_cells": [
+        "Name",
+        "Count",
+        "Alpha",
+        "1",
+        "Beta",
+        "2"
+      ],
+      "expected_header_continuation": true,
+      "observed_header_continuation": true,
+      "expected_continuous_merge": true,
+      "observed_continuous_merge": true,
+      "source_note": "项目自制双页无文本层 PDF，第二页重复表头用于验证跨页延续和去重。",
+      "asset": "synthetic-cross-page-table.pdf",
+      "sha256": "419b6cb8583c774ab9aeef55efd41d62d5f65307b0a863823403cbc4a9224ef4",
+      "license": "project-authored",
+      "observed_text": "[Page 1]\nName Count\nAlpha 1\n[Page 2]\nBeta 2"
+    },
+    {
+      "id": "synthetic-double-column",
+      "category": "double_column",
+      "source_type": "synthetic_degradation",
+      "expected_text": "Left one Right one\nLeft two Right two",
+      "source_note": "项目自制双栏页面，用于验证几何阅读顺序。",
+      "asset": "synthetic-double-column.png",
+      "sha256": "87c99a94cfe7f8e162fce5a1879cc8670540a13e7afa8318f3873b43d3d7c967",
+      "license": "project-authored",
+      "observed_text": "Left one Right one\nLeft two Right two"
+    },
+    {
+      "id": "synthetic-table-with-paragraph",
+      "category": "table_with_paragraph",
+      "source_type": "synthetic_degradation",
+      "expected_text": "Item Qty\nRice 10\nParagraph boundary\nItem Qty\nWheat 20",
+      "expected_cells": [
+        "Item",
+        "Qty",
+        "Rice",
+        "10",
+        "Item",
+        "Qty",
+        "Wheat",
+        "20"
+      ],
+      "observed_cells": [
+        "Item",
+        "Qty",
+        "Rice",
+        "10",
+        "Item",
+        "Qty",
+        "Wheat",
+        "20"
+      ],
+      "source_note": "项目自制表格夹段落页面，用于验证段落硬边界。",
+      "asset": "synthetic-table-with-paragraph.png",
+      "sha256": "b0609ea5e353c30d5c7f5cca1e23dd044f4f375eb5c77f295dab5ac9ef759b77",
+      "license": "project-authored",
+      "observed_text": "Item Qty\nRice 10\nParagraph boundary\nItem Qty\nWheat 20"
+    },
+    {
+      "id": "synthetic-skew",
+      "category": "skew",
+      "source_type": "synthetic_degradation",
+      "expected_text": "Skewed scan sample\nLine order remains stable",
+      "source_note": "由项目自制清晰文档施加 4 度旋转得到。",
+      "asset": "synthetic-skew.png",
+      "sha256": "19730b0f379d772e9365c71528dee97ecc50e4ded28f1b1fa692888663e527fa",
+      "license": "project-authored",
+      "observed_text": "Skewed scan sample\nLine order remains stable"
+    },
+    {
+      "id": "synthetic-low-contrast",
+      "category": "low_contrast",
+      "source_type": "synthetic_degradation",
+      "expected_text": "Low contrast receipt\nTotal amount 128",
+      "source_note": "由项目自制收据页面降低对比度得到。",
+      "asset": "synthetic-low-contrast.png",
+      "sha256": "628a6a51b07491351831d00cff0facd767160c6e37746b56e7a6244f7726e748",
+      "license": "project-authored",
+      "observed_text": "Low contrast receipt\nTotal amount 128"
+    },
+    {
+      "id": "synthetic-noise",
+      "category": "noise",
+      "source_type": "synthetic_degradation",
+      "expected_text": "Noisy scan benchmark\nApproval code KB-2048",
+      "source_note": "由项目自制审批页叠加确定性模糊与噪点得到。",
+      "asset": "synthetic-noise.png",
+      "sha256": "5a6f113186bec6dddce88ac03df284f858935f1b91f1212cd1c8a031d7d0bcc5",
+      "license": "project-authored",
+      "observed_text": "Noisy scan benchmark\nApproval code KB-2048"
+    }
+  ]
+}

@@ -91,3 +91,13 @@ Unsigned/ad-hoc local builds can be used for development verification. A formal 
 ## License
 
 [MIT](./LICENSE)
+
+## Migration, read-only Agent API, and OCR/cache operations
+
+The current local API also provides:
+
+- `GET/POST /api/kb/migration/{status,scan,start,rollback}` for dry-run inspection, verified backups, retrying failed items, and batch rollback.
+- Read-only Agent API: `GET /api/open/v1/me`, `GET /api/open/v1/knowledge-bases`, `POST /api/open/v1/search`, and `POST /api/open/v1/answer`. Bearer tokens are scoped to active KB IDs, and token management is loopback-only.
+- Token CLI: `scripts/manage_access_tokens.py create|list|revoke`. Plaintext is returned only at creation; the store keeps only an HMAC digest. Never inject the local administrator key into the renderer or frontend bundle.
+- Embedding cache operations: `GET /api/embedding/cache`, `POST /api/embedding/cache/preflight`, `POST /api/embedding/cache/prepare`, and `POST /api/embedding/cache/cancel`. Insufficient disk space returns HTTP `507`; status includes phase, byte progress, estimated/exact mode, and cancellation state.
+- OCR benchmark tools: `scripts/build_ocr_scan_benchmark.py` and `scripts/eval_ocr_scan_benchmark.py`. The checked-in assets are an offline deterministic baseline; real PaddleOCR execution is a separate slow/runtime check.

@@ -1,20 +1,21 @@
-本轮代码与测试报告评审建议（2026-08-17）
+本轮测试方案评审建议（2026-08-18）
 
 一、优点
-1. 多知识库物理隔离保留了 default 知识库对历史 storage/ 的兼容，同时让非 default 知识库进入 storage/kbs/{kb_id}/ 独立目录；持久化、重载和跨库不可见测试证据完整。
-2. Embedding 缓存恢复接口采用 ModelScope 白名单和固定 provider，不接受任意 URL、命令、凭证或下载源；前端具备下载中、失败重试、成功后重新预热的闭环。
-3. OCR 改动兼容 rec_boxes、dt_polys 和 NumPy 数组，阅读顺序、规则表格、页标记与质量指标均有单元测试。
-4. Python、Web、Electron 和 Vite build 均已执行完整回归，修改模块覆盖率超过 80% 目标。
-5. 文档明确保留历史 artifacts，不伪造迁移结果，也没有把未完成的证书、签名和公证描述为正式发布完成。
+1. 文档目录和命名符合仓库规范，按迁移、OCR、Open API、Embedding 四个域建立了需求到测试的明确映射，并列出了专项、覆盖率、全量和 slow/runtime 命令。
+2. 对 OCR 资产来源保持诚实：明确 captured 当前是项目排版截图、不是打印扫描/手机实拍，并把该项定义为外部资产待补，避免误报完成。
+3. 测试方案覆盖真实 LlamaIndex 0.11.19 重载、物理索引隔离、结构化 search 与 answer 分离、审计脱敏、ModelScope metadata 超时回退、下载取消和预热门禁等高风险路径。
+4. 验收门禁明确要求单模块 coverage >= 80%、修复后重新跑专项和全量、测试报告评审前不得 commit/push，符合仓库流程。
 
 二、需要改进的地方
-1. EmbeddingCacheService 原实现在线程对象登记后、thread.start() 前释放锁；此时 is_alive() 仍为 false，并发 POST 可能创建第二个下载线程。
-2. 测试报告、Spec、FRD、RTM 和测试方案中仍有部分“当前是共享单索引/逻辑隔离”的历史表述，与本轮 physical_isolated 实现冲突。
-3. 最终测试报告需要使用并发修复后的真实数字，并明确历史共享索引数据需要重建、正式 macOS 发布仍受外部门禁阻塞。
-4. 需要执行最终 whitespace、隔离口径残留和工作区范围检查，避免把历史 artifacts 与当前代码口径混为一谈。
+1. 迁移 RTM 仍缺“成功回滚”和“备份复制/写入权限失败”的直接服务层证据；当前只有篡改与所有权拒绝测试，不能完整证明 FR-MIG-03/08。
+2. 令牌管理路由缺 create/list/revoke 正常链路和撤销后立即拒绝 Open API 的集成证据；CLI 生命周期不能替代管理 API 路由验收。
+3. `llama_index.core.__version__` 在部分 0.11.x 环境未必公开，前置检查命令应改用 `importlib.metadata.version('llama-index-core')`，避免测试方案本身不可执行。
+4. 覆盖率命令未覆盖新增 routers、`open_api_audit.py` 的文件写入分支、`build_ocr_scan_benchmark.py` 和 `manage_access_tokens.py`；若完成定义采用“新增/修改 Python 模块”，应扩展 coverage 范围或在报告中逐一解释非核心 CLI/路由模块的覆盖口径。
+5. OCR runtime 报告虽然已生成，但测试方案应明确把真实运行 artifact 的当前实测值作为证据，并区分“算法/runtime 已通过”与“物理 captured 资产未满足”，避免最终判定含混。
 
 三、具体建议
-1. 将下载线程的判重、状态写入、线程登记和 thread.start() 放在同一服务锁边界内；增加可稳定复现“已登记但尚未启动”窗口的并发回归测试。
-2. 为历史设计文档增加明确的 2026-08-17 supersession 说明；当前验收文档统一使用 physical_isolated，历史 logical_filter_only 只保留在明确标注的旧基线或 artifacts 中。
-3. 在测试报告顶部增加当前验证附录，记录 Python 803 passed、Web 90 passed、Electron 86 passed、Vite build 通过、修改模块覆盖率 85%，并写清迁移与发布边界。
-4. 最后执行 git diff --check、当前代码/测试 fixture 的 logical_filter_only 扫描、git status --short 和 git diff --stat；若无阻断项，再生成本轮开发故事，但不要在测试报告审核前 commit/push。
+1. 增加迁移服务测试：成功迁移后执行 rollback，断言本批次目标被移动到 rollback 隔离目录、历史源和备份仍可用；注入 copy/write 权限异常，断言状态失败且无目标半成品。
+2. 增加 access token route 集成测试：本机+正确 admin key 创建、列表不含明文、撤销；随后用该 token 请求 `/api/open/v1/me` 或 answer，断言立即 401。
+3. 修订前置版本检查为 `importlib.metadata.version`。
+4. 扩展覆盖率命令到新增 routers 和 CLI/基准模块；如某模块因薄路由/CLI 入口不适合 80% 单模块门禁，必须在测试报告中明确分类并给出直接行为测试证据，不能静默遗漏。
+5. 在测试报告模板和 RTM 证据中记录已生成的 recorded/runtime JSON、Markdown 路径及 runtime 五项指标；最终状态应为“代码验收通过但 FR-OCR-01 外部实拍资产待补”，直到真实资产加入。

@@ -6,6 +6,7 @@
 import { Link } from '../../router';
 import { buildKnowledgeAgentLink } from '../../domain/kbNavigation';
 import { KB_WORKSPACE_ACTION_MODES } from '../../domain/knowledgeWorkspace';
+import { buildEmbeddingDownloadView } from '../../domain/embeddingDownload';
 
 function formatDocCount(value) {
   if (typeof value !== 'number') {
@@ -23,7 +24,9 @@ export default function KbWorkspaceHeader({
   embeddingWarmupSummary,
   embeddingCacheStatus,
   embeddingCacheError,
+  onPreflightEmbeddingCache,
   onPrepareEmbeddingCache,
+  onCancelEmbeddingCache,
   isPreparingEmbeddingCache,
   ocrWarmupSummary,
 }) {
@@ -35,6 +38,7 @@ export default function KbWorkspaceHeader({
   const linkClass = 'kb-link-button' + (hasSelectedKb ? '' : ' disabled');
   const embeddingRuntimeClassName = `kb-runtime-status ${embeddingWarmupSummary?.tone || 'muted'}`;
   const ocrRuntimeClassName = `kb-runtime-status ${ocrWarmupSummary?.tone || 'muted'}`;
+  const embeddingDownloadView = buildEmbeddingDownloadView(embeddingCacheStatus, embeddingCacheError);
 
   return (
     <section className='kb-workspace-header'>
@@ -66,20 +70,50 @@ export default function KbWorkspaceHeader({
             <p className='kb-runtime-status-text'>
               {embeddingWarmupSummary?.summary || '导入和问答前会先检查向量模型状态。'}
             </p>
-            {embeddingWarmupSummary?.canPrepareCache ? (
+            {embeddingWarmupSummary?.canPrepareCache || embeddingCacheStatus?.state !== 'idle' ? (
               <div className='kb-runtime-recovery'>
-                <button
-                  type='button'
-                  className='kb-runtime-recovery-button'
-                  disabled={isPreparingEmbeddingCache}
-                  onClick={onPrepareEmbeddingCache}
-                >
-                  {isPreparingEmbeddingCache ? '正在通过 ModelScope 准备…' : '使用 ModelScope 准备缓存'}
-                </button>
-                {embeddingCacheStatus?.state === 'failed' || embeddingCacheError ? (
-                  <span role='alert'>{embeddingCacheStatus?.last_error || embeddingCacheError}</span>
+                <div className='kb-embedding-download-head'>
+                  <strong>{embeddingDownloadView.title}</strong>
+                  <span>{embeddingDownloadView.detail}</span>
+                </div>
+                {embeddingDownloadView.showProgress ? (
+                  <div className='kb-embedding-progress' aria-label={embeddingDownloadView.progressLabel}>
+                    <span style={{ width: `${embeddingDownloadView.progressPercent}%` }} />
+                  </div>
                 ) : null}
-                {embeddingCacheStatus?.state === 'ready' ? <span>缓存已准备，正在重新加载 Embedding。</span> : null}
+                <div className='kb-runtime-recovery-actions'>
+                  {embeddingDownloadView.canPreflight ? (
+                    <button
+                      type='button'
+                      className='kb-runtime-recovery-button secondary'
+                      disabled={isPreparingEmbeddingCache}
+                      onClick={onPreflightEmbeddingCache}
+                    >
+                      {isPreparingEmbeddingCache ? '正在检查…' : '检查下载空间'}
+                    </button>
+                  ) : null}
+                  {embeddingDownloadView.canStart ? (
+                    <button
+                      type='button'
+                      className='kb-runtime-recovery-button'
+                      disabled={isPreparingEmbeddingCache}
+                      onClick={onPrepareEmbeddingCache}
+                    >
+                      {embeddingDownloadView.isRetry ? '重新下载' : '开始 ModelScope 下载'}
+                    </button>
+                  ) : null}
+                  {embeddingDownloadView.canCancel ? (
+                    <button
+                      type='button'
+                      className='kb-runtime-recovery-button danger'
+                      disabled={embeddingCacheStatus?.state === 'cancelling'}
+                      onClick={onCancelEmbeddingCache}
+                    >
+                      {embeddingCacheStatus?.state === 'cancelling' ? '正在取消…' : '取消下载'}
+                    </button>
+                  ) : null}
+                </div>
+                {embeddingDownloadView.error ? <span role='alert'>{embeddingDownloadView.error}</span> : null}
               </div>
             ) : null}
           </div>

@@ -592,3 +592,26 @@ cd webapp && npm run build
 - OCR 利用几何框恢复阅读顺序，扫描 PDF 保留 `[Page N]`，规则表格恢复为 Markdown，并输出布局、表格行列与平均置信度。
 - `scripts/pdf_ocr_quality.py` 增加行顺序和表格单元格召回指标。
 - 历史共享索引中的非 default 数据不会被静默标记为已迁移；升级后需重新导入或重建对应知识库。
+
+## 2026-08-18：迁移、只读开放接口、OCR 基准和 Embedding 缓存
+
+本阶段新增的运维入口：
+
+- **历史迁移**：先调用 `/api/kb/migration/scan` 查看候选知识库、节点摘要、缺失 embedding 和异常，再用 `/start` 执行。迁移会将旧共享索引备份到 `storage/migrations/backups/{batch_id}`，写入 manifest 哈希清单；失败项可用 `retry_failed_only=true` 重试，回滚前会重新校验 manifest，回滚只隔离本批次创建的目标目录。
+- **只读 Agent API**：使用 `scripts/manage_access_tokens.py` 创建、列出和撤销令牌。令牌以 HMAC 摘要保存，明文只返回一次；开放 API 使用 `Authorization: Bearer <token>`，并按 token 的 `kb_ids` 做授权。审计 JSONL 仅记录 token_id、路由、知识库、状态码、耗时和 request_id，不记录完整 token、secret 或问题正文。
+- **Embedding 缓存**：先调用 `/api/embedding/cache/preflight` 检查空间，再 `/prepare` 下载；`/api/embedding/cache` 查看状态，`/cancel` 协作式取消。空间不足映射为 HTTP 507；失败和取消会清理本次 partial 文件，但保留旧完整缓存。
+- **OCR**：`scripts/build_ocr_scan_benchmark.py` 生成基准，`scripts/eval_ocr_scan_benchmark.py` 评估字符召回、行序、单元格召回和连续表格合并。当前 checked-in 资产是项目自制清晰页面与合成退化样本的离线确定性基线，不冒充手机/扫描仪实拍；真实 PaddleOCR 执行另列 slow/runtime 验收。
+
+开放接口示例：
+
+```bash
+TOKEN="nak_ro_..."  # 仅使用 create 命令刚刚返回的一次性明文
+curl -H "Authorization: Bearer ${TOKEN}" \
+  http://127.0.0.1:18080/api/open/v1/knowledge-bases
+curl -X POST -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"kb_id":"finance","question":"本知识库有哪些资料？"}' \
+  http://127.0.0.1:18080/api/open/v1/answer
+```
+
+本地管理员密钥只用于 loopback 管理接口，不应注入 renderer、React bundle 或开放 Agent 请求。

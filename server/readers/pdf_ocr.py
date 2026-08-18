@@ -36,6 +36,10 @@ PDF_INDEX_EXCLUDED_METADATA_KEYS = (
     "table_detected",
     "table_row_count",
     "table_column_count",
+    "table_block_count",
+    "merged_block_count",
+    "continued_page_count",
+    "removed_repeated_header_count",
     "mean_confidence",
 )
 
@@ -187,7 +191,7 @@ class PDFOCRReader(BasePydanticReader):
                 postprocess_started_at = time.perf_counter()
                 layout = extract_ocr_layout(result)
                 page_text = str(layout.pop("text") or "").strip()
-                page_layouts.append(layout)
+                page_layouts.append({"page_number": page_num + 1, **layout})
                 postprocess_elapsed_ms = round(max(time.perf_counter() - postprocess_started_at, 0.0) * 1000, 3)
                 ocr_timing_metrics["ocr_postprocess_ms"] += postprocess_elapsed_ms
                 if page_text:
@@ -201,19 +205,34 @@ class PDFOCRReader(BasePydanticReader):
             doc.close()
 
         ocr_timing_metrics["ocr_total_ms"] = round(max(time.perf_counter() - ocr_started_at, 0.0) * 1000, 3)
+        from server.readers.ocr_layout import merge_continuous_table_pages
+
+        merged_layout = merge_continuous_table_pages(
+            [
+                {"page_number": item["page_number"], "blocks": item.get("blocks") or []}
+                for item in page_layouts
+            ]
+        )
         layout_modes = {item.get("layout_mode") for item in page_layouts if item.get("layout_mode")}
         confidences = [float(item["mean_confidence"]) for item in page_layouts if item.get("mean_confidence") is not None]
+        merge_diagnostics = merged_layout["diagnostics"]
         layout_diagnostics = {
-            "layout_mode": next(iter(layout_modes)) if len(layout_modes) == 1 else ("mixed" if layout_modes else "sequence"),
+            "layout_mode": merge_diagnostics.get("layout_mode")
+            if merge_diagnostics.get("table_detected")
+            else (next(iter(layout_modes)) if len(layout_modes) == 1 else ("mixed" if layout_modes else "sequence")),
             "line_count": sum(int(item.get("line_count") or 0) for item in page_layouts),
             "page_count": page_count,
-            "table_detected": any(bool(item.get("table_detected")) for item in page_layouts),
-            "table_row_count": sum(int(item.get("table_row_count") or 0) for item in page_layouts),
-            "table_column_count": max((int(item.get("table_column_count") or 0) for item in page_layouts), default=0),
+            "table_detected": merge_diagnostics.get("table_detected", False),
+            "table_row_count": merge_diagnostics.get("table_row_count", 0),
+            "table_column_count": merge_diagnostics.get("table_column_count", 0),
+            "table_block_count": merge_diagnostics.get("table_block_count", 0),
+            "merged_block_count": merge_diagnostics.get("merged_block_count", 0),
+            "continued_page_count": merge_diagnostics.get("continued_page_count", 0),
+            "removed_repeated_header_count": merge_diagnostics.get("removed_repeated_header_count", 0),
             "mean_confidence": round(sum(confidences) / len(confidences), 4) if confidences else None,
         }
         self._set_last_diagnostics({**(self._last_diagnostics or {}), **ocr_timing_metrics, **layout_diagnostics})
-        return "\n\n".join(pages_text)
+        return merged_layout["text"] or "\n\n".join(pages_text)
     def load_data(self, file_path, **kwargs):
         resolved_path = os.fspath(file_path)
         filename = os.path.basename(resolved_path)

@@ -91,3 +91,24 @@ Unsigned/ad-hoc local builds can be used for development verification. A formal 
 ## License
 
 [MIT](./LICENSE)
+
+## Migration, read-only Agent API, and OCR/cache operations
+
+The current local API also provides:
+
+- `GET/POST /api/kb/migration/{status,scan,start,rollback}` for dry-run inspection, per-KB migration, verified backups, retrying failed items, and batch rollback.
+- Read-only Agent API: `GET /api/open/v1/me`, `GET /api/open/v1/knowledge-bases`, `POST /api/open/v1/search`, and `POST /api/open/v1/answer`. Every request uses a Bearer token scoped to active KB IDs; management endpoints are loopback-only.
+- Token management CLI:
+  ```bash
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/manage_access_tokens.py create --name robot --kb finance
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/manage_access_tokens.py list
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/manage_access_tokens.py revoke TOKEN_ID
+  ```
+  The plaintext token is returned only by `create`; the store contains only an HMAC digest. Do not put the local administrator key in the renderer or frontend bundle.
+- Embedding cache operations: `GET /api/embedding/cache`, `POST /api/embedding/cache/preflight`, `POST /api/embedding/cache/prepare`, and `POST /api/embedding/cache/cancel`. A failed disk-space preflight returns HTTP `507`; download status reports phase, bytes, estimated/exact progress, and cancellation state.
+- OCR scan benchmark tools:
+  ```bash
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/build_ocr_scan_benchmark.py
+  /opt/miniconda3/envs/agent-kb/bin/python scripts/eval_ocr_scan_benchmark.py
+  ```
+  The checked-in benchmark distinguishes project-authored captured-style assets from synthetic degradation and is an offline deterministic baseline; real PaddleOCR execution remains a separate slow/runtime check.

@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "manifest": "/Users/zhaojianyong/python/agent-kb/tests/fixtures/ocr_real_scan/manifest.json",
+  "mode": "runtime",
+  "item_count": 9,
+  "metrics": {
+    "character_recall": 1.0,
+    "line_order_accuracy": 1.0,
+    "cell_recall": 1.0,
+    "header_continuation_accuracy": 1.0,
+    "continuous_table_merge_accuracy": 1.0
+  },
+  "overall_score": 1.0,
+  "items": [
+    {
+      "id": "captured-paragraph",
+      "asset": "captured-paragraph.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Project OCR handover note\nOwner: Knowledge Team\nStatus: Ready",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "geometry_lines",
+        "table_block_count": 0,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 5213.339,
+        "error": null
+      }
+    },
+    {
+      "id": "captured-single-table",
+      "asset": "captured-single-table.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "| Item | Qty |\n| --- | --- |\n| Rice | 10 |\n| Wheat | 20 |",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "table",
+        "table_block_count": 1,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 1505.734,
+        "error": null
+      }
+    },
+    {
+      "id": "captured-continuous-table",
+      "asset": "captured-continuous-table.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "| Name | Count |\n| --- | --- |\n| Alpha | 1 |\n| Beta | 2 |",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "table",
+        "table_block_count": 1,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 1534.106,
+        "error": null
+      }
+    },
+    {
+      "id": "synthetic-cross-page-table",
+      "asset": "synthetic-cross-page-table.pdf",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "[Page 1]\n| Name | Count |\n| --- | --- |\n| Alpha | 1 |\n\n[Page 2]\n| Beta | 2 |",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "table",
+        "table_block_count": 2,
+        "merged_block_count": 1,
+        "continued_page_count": 1,
+        "removed_repeated_header_count": 1,
+        "ocr_total_ms": 5739.045
+      }
+    },
+    {
+      "id": "synthetic-double-column",
+      "asset": "synthetic-double-column.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "| Left one | Right one |\n| --- | --- |\n| Left two | Right two |",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "table",
+        "table_block_count": 1,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 1369.283,
+        "error": null
+      }
+    },
+    {
+      "id": "synthetic-table-with-paragraph",
+      "asset": "synthetic-table-with-paragraph.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "| Item | Qty |\n| --- | --- |\n| Rice | 10 |\nParagraph boundary\n| Item | Qty |\n| --- | --- |\n| Wheat | 20 |",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "mixed",
+        "table_block_count": 2,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 1735.152,
+        "error": null
+      }
+    },
+    {
+      "id": "synthetic-skew",
+      "asset": "synthetic-skew.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Skewed scan sample\nLine order remains stable",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "geometry_lines",
+        "table_block_count": 0,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 1311.368,
+        "error": null
+      }
+    },
+    {
+      "id": "synthetic-low-contrast",
+      "asset": "synthetic-low-contrast.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Low contrast receipt\nTotal amount 128",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "geometry_lines",
+        "table_block_count": 0,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 1280.215,
+        "error": null
+      }
+    },
+    {
+      "id": "synthetic-noise",
+      "asset": "synthetic-noise.png",
+      "status": "success",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Noisy scan benchmark\nApproval code KB-2048",
+      "diagnostics": {
+        "engine": "paddleocr",
+        "layout_mode": "geometry_lines",
+        "table_block_count": 0,
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
+        "ocr_total_ms": 1326.03,
+        "error": null
+      }
+    }
+  ]
+}

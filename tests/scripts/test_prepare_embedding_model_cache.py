@@ -5,6 +5,9 @@ from __future__ import annotations
 import sys
 import types
 from pathlib import Path
+from threading import Event
+
+import pytest
 
 import scripts.prepare_embedding_model_cache as prepare_cache
 
@@ -71,8 +74,10 @@ def test_prepare_embedding_model_cache_downloads_to_project_localmodels(monkeypa
 
     def fake_snapshot_download(**kwargs):
         calls.append(kwargs)
-        Path(str(kwargs["local_dir"])).mkdir(parents=True, exist_ok=True)
-        return str(kwargs["local_dir"])
+        target = Path(str(kwargs["local_dir"]))
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "config.json").write_text("{}", encoding="utf-8")
+        return str(target)
 
     fake_hf = types.SimpleNamespace(snapshot_download=fake_snapshot_download)
     monkeypatch.setitem(sys.modules, "huggingface_hub", fake_hf)
@@ -99,8 +104,10 @@ def test_prepare_embedding_model_cache_downloads_from_modelscope(monkeypatch, tm
 
     def fake_modelscope_snapshot_download(**kwargs):
         calls.append(kwargs)
-        Path(str(kwargs["local_dir"])).mkdir(parents=True, exist_ok=True)
-        return str(kwargs["local_dir"])
+        target = Path(str(kwargs["local_dir"]))
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "config.json").write_text("{}", encoding="utf-8")
+        return str(target)
 
     fake_snapshot_module = types.SimpleNamespace(snapshot_download=fake_modelscope_snapshot_download)
     monkeypatch.setitem(sys.modules, "modelscope.hub.snapshot_download", fake_snapshot_module)
@@ -172,3 +179,88 @@ def test_prepare_embedding_model_cache_reports_download_failure(monkeypatch, tmp
     assert result["downloaded"] is False
     assert result["after"]["local_path_exists"] is False
     assert result["error"] == "Download failed via huggingface: TimeoutError: mirror timeout"
+
+
+
+def test_prepare_embedding_model_cache_uses_atomic_temp_dir_and_reports_progress(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    """显式临时目录应在校验后原子移动，并报告下载与校验阶段。"""
+
+    phases: list[str] = []
+    partial = tmp_path / ".embedding.partial"
+
+    def fake_snapshot_download(**kwargs):
+        target = Path(str(kwargs["local_dir"]))
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "config.json").write_text("{}", encoding="utf-8")
+        return str(target)
+
+    monkeypatch.setitem(
+        sys.modules,
+        "huggingface_hub",
+        types.SimpleNamespace(snapshot_download=fake_snapshot_download),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    result = prepare_cache.prepare_embedding_model_cache(
+        "bge-small-zh-v1.5",
+        download=True,
+        temp_dir=str(partial),
+        progress_callback=lambda event: phases.append(str(event["phase"])),
+    )
+
+    target = tmp_path / "localmodels" / "BAAI" / "bge-small-zh-v1.5"
+    assert result["downloaded"] is True
+    assert phases == ["downloading", "verifying"]
+    assert (target / "config.json").is_file()
+    assert not partial.exists()
+
+
+def test_prepare_embedding_model_cache_cancellation_cleans_direct_target(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    """下载开始前收到取消时应抛出取消异常并清理本次创建的目标目录。"""
+
+    monkeypatch.setitem(
+        sys.modules,
+        "huggingface_hub",
+        types.SimpleNamespace(snapshot_download=lambda **kwargs: None),
+    )
+    monkeypatch.chdir(tmp_path)
+    cancel_event = Event()
+    cancel_event.set()
+
+    with pytest.raises(prepare_cache.EmbeddingDownloadCancelled):
+        prepare_cache.prepare_embedding_model_cache(
+            "bge-small-zh-v1.5",
+            download=True,
+            cancel_event=cancel_event,
+        )
+
+    assert not (tmp_path / "localmodels" / "BAAI" / "bge-small-zh-v1.5").exists()
+
+
+def test_prepare_embedding_model_cache_rejects_empty_download_and_cleans_target(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    """下载器未写入任何文件时不得把空目录标记为完整缓存。"""
+
+    def fake_snapshot_download(**kwargs):
+        Path(str(kwargs["local_dir"])).mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setitem(
+        sys.modules,
+        "huggingface_hub",
+        types.SimpleNamespace(snapshot_download=fake_snapshot_download),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    result = prepare_cache.prepare_embedding_model_cache("bge-small-zh-v1.5", download=True)
+
+    assert result["downloaded"] is False
+    assert result["error"] == "Download failed via huggingface: RuntimeError: Downloaded embedding cache is empty."
+    assert result["after"]["local_path_exists"] is False

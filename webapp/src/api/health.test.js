@@ -7,7 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import client from './client.js';
-import { getEmbeddingCacheStatus, getHealthStatus, prepareEmbeddingCache } from './health.js';
+import { cancelEmbeddingCache, getEmbeddingCacheStatus, getHealthStatus, preflightEmbeddingCache, prepareEmbeddingCache } from './health.js';
 
 test('getHealthStatus 会调用 /api/health', async () => {
   const originalGet = client.get;
@@ -38,11 +38,15 @@ test('embedding 缓存恢复 API 固定使用 ModelScope 白名单来源', async
 
   try {
     await getEmbeddingCacheStatus();
+    await preflightEmbeddingCache();
     await prepareEmbeddingCache();
+    await cancelEmbeddingCache();
 
     assert.deepEqual(calls, [
       ['get', '/api/embedding/cache'],
+      ['post', '/api/embedding/cache/preflight', { provider: 'modelscope' }],
       ['post', '/api/embedding/cache/prepare', { provider: 'modelscope' }],
+      ['post', '/api/embedding/cache/cancel'],
     ]);
   } finally {
     client.get = originalGet;

@@ -19,3 +19,13 @@ export async function getEmbeddingCacheStatus() {
 export async function prepareEmbeddingCache() {
   return client.post('/api/embedding/cache/prepare', { provider: 'modelscope' });
 }
+
+/** 执行 embedding 缓存磁盘空间预检 */
+export async function preflightEmbeddingCache() {
+  return client.post('/api/embedding/cache/preflight', { provider: 'modelscope' });
+}
+
+/** 协作式取消当前 embedding 缓存下载 */
+export async function cancelEmbeddingCache() {
+  return client.post('/api/embedding/cache/cancel');
+}

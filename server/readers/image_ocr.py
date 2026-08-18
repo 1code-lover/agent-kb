@@ -420,32 +420,38 @@ def _escape_markdown_cell(text: str) -> str:
 
 
 def extract_ocr_layout(result: Any) -> dict[str, Any]:
-    """从 OCR 几何结果恢复阅读顺序，并启发式重建规则表格。"""
+    """从 OCR 几何结果恢复阅读顺序，并输出可跨页合并的结构化块。"""
+    from server.readers.ocr_layout import build_layout_blocks, render_layout_blocks
+
     items = _collect_ocr_items(result)
     rows = _cluster_ocr_rows(items)
-    multi_cell_rows = [row for row in rows if len(row) >= 2]
-    column_counts = {len(row) for row in multi_cell_rows}
-    table_detected = len(multi_cell_rows) >= 2 and len(multi_cell_rows) == len(rows) and len(column_counts) == 1
-    table_column_count = next(iter(column_counts)) if table_detected else 0
-
-    if table_detected:
-        rendered_rows = ["| " + " | ".join(_escape_markdown_cell(cell["text"]) for cell in row) + " |" for row in rows]
-        separator = "| " + " | ".join("---" for _ in range(table_column_count)) + " |"
-        rendered_rows.insert(1, separator)
-        text = "\n".join(rendered_rows)
+    blocks = build_layout_blocks(rows)
+    table_blocks = [block for block in blocks if block.get("type") == "table"]
+    paragraph_blocks = [block for block in blocks if block.get("type") == "paragraph"]
+    table_column_count = max(
+        (len((block.get("rows") or [[]])[0]) for block in table_blocks if block.get("rows")),
+        default=0,
+    )
+    if table_blocks and paragraph_blocks:
+        layout_mode = "mixed"
+    elif table_blocks:
         layout_mode = "table"
     else:
-        text = "\n".join(" ".join(cell["text"] for cell in row) for row in rows).strip()
         layout_mode = "geometry_lines" if items and all(item.get("box") for item in items) else "sequence"
 
     confidences = [float(item["confidence"]) for item in items if item.get("confidence") is not None]
     return {
-        "text": text,
+        "text": render_layout_blocks(blocks),
+        "blocks": blocks,
         "layout_mode": layout_mode,
         "line_count": len(rows),
-        "table_detected": table_detected,
-        "table_row_count": len(rows) if table_detected else 0,
+        "table_detected": bool(table_blocks),
+        "table_row_count": sum(len(block.get("rows") or []) for block in table_blocks),
         "table_column_count": table_column_count,
+        "table_block_count": len(table_blocks),
+        "merged_block_count": 0,
+        "continued_page_count": 0,
+        "removed_repeated_header_count": 0,
         "mean_confidence": round(sum(confidences) / len(confidences), 4) if confidences else None,
     }
 
@@ -547,6 +553,7 @@ def extract_image_ocr_result(file_path: str | Path, *, content_type: str = "") -
     postprocess_started_at = time.perf_counter()
     layout = extract_ocr_layout(result)
     normalized_text = _normalize_ocr_text(layout.pop("text"))
+    layout.pop("blocks", None)
     timing_metrics["ocr_postprocess_ms"] += _elapsed_ms(postprocess_started_at)
     finalized_metrics = _finalize_ocr_timing_metrics(timing_metrics, request_started_at)
     if not _has_meaningful_text(normalized_text):

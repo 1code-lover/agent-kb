@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "manifest": "/Users/zhaojianyong/python/agent-kb/tests/fixtures/ocr_real_scan/manifest.json",
+  "mode": "recorded",
+  "item_count": 9,
+  "metrics": {
+    "character_recall": 1.0,
+    "line_order_accuracy": 1.0,
+    "cell_recall": 1.0,
+    "header_continuation_accuracy": 1.0,
+    "continuous_table_merge_accuracy": 1.0
+  },
+  "overall_score": 1.0,
+  "items": [
+    {
+      "id": "captured-paragraph",
+      "asset": "captured-paragraph.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Project OCR handover note\nOwner: Knowledge Team\nStatus: Ready",
+      "diagnostics": {}
+    },
+    {
+      "id": "captured-single-table",
+      "asset": "captured-single-table.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Item Qty\nRice 10\nWheat 20",
+      "diagnostics": {}
+    },
+    {
+      "id": "captured-continuous-table",
+      "asset": "captured-continuous-table.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Name Count\nAlpha 1\nBeta 2",
+      "diagnostics": {}
+    },
+    {
+      "id": "synthetic-cross-page-table",
+      "asset": "synthetic-cross-page-table.pdf",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "[Page 1]\nName Count\nAlpha 1\n[Page 2]\nBeta 2",
+      "diagnostics": {}
+    },
+    {
+      "id": "synthetic-double-column",
+      "asset": "synthetic-double-column.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Left one Right one\nLeft two Right two",
+      "diagnostics": {}
+    },
+    {
+      "id": "synthetic-table-with-paragraph",
+      "asset": "synthetic-table-with-paragraph.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Item Qty\nRice 10\nParagraph boundary\nItem Qty\nWheat 20",
+      "diagnostics": {}
+    },
+    {
+      "id": "synthetic-skew",
+      "asset": "synthetic-skew.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Skewed scan sample\nLine order remains stable",
+      "diagnostics": {}
+    },
+    {
+      "id": "synthetic-low-contrast",
+      "asset": "synthetic-low-contrast.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Low contrast receipt\nTotal amount 128",
+      "diagnostics": {}
+    },
+    {
+      "id": "synthetic-noise",
+      "asset": "synthetic-noise.png",
+      "status": "recorded",
+      "character_recall": 1.0,
+      "line_order_accuracy": 1.0,
+      "observed_text": "Noisy scan benchmark\nApproval code KB-2048",
+      "diagnostics": {}
+    }
+  ]
+}
