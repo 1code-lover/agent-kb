@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 

@@ -111,9 +111,21 @@ RISKY_ZERO_OVERLAP_SEGMENTS = (
 
 FOCUSED_QUESTION_HINTS = (
     "what time",
+    "checkpoint time",
+    "live checkpoint",
+    "deadline",
+    "interval",
+    "which value",
+    "what value",
+    "which field",
+    "what field",
+    "what remains",
+    "what must",
     "when ",
     "what is",
     "who is",
+    "who owns",
+    "who handles",
     "what does",
     "according to",
     " how many minutes",
@@ -276,7 +288,11 @@ def _build_extract_answer(question: str, text: str) -> str:
     if not terms:
         return str(text).strip()
 
-    scored_segments: list[tuple[int, int, str]] = []
+    lowered_question = str(question).lower()
+    prefers_focused_answer = any(hint in lowered_question for hint in FOCUSED_QUESTION_HINTS)
+    legacy_question = any(flag in lowered_question for flag in ("legacy", "retired", "rehearsal", "dry-run"))
+
+    scored_segments: list[tuple[int, int, int, str]] = []
     safe_fallback_segments: list[str] = []
     for index, segment in enumerate(segments):
         overlap = terms & tokenize(segment)
@@ -285,20 +301,23 @@ def _build_extract_answer(question: str, text: str) -> str:
         if is_risky_zero_overlap:
             continue
         safe_fallback_segments.append(segment)
+
+        legacy_noise = (
+            any(flag in lowered_segment for flag in ("legacy", "retired", "rehearsal", "dry-run"))
+            and not legacy_question
+        )
         if overlap:
-            scored_segments.append((len(overlap), index, segment))
+            scored_segments.append((len(overlap), -int(legacy_noise), index, segment))
 
     if not scored_segments:
         return "\n".join(safe_fallback_segments) if safe_fallback_segments else str(text).strip()
 
-    lowered_question = str(question).lower()
-    prefers_focused_answer = any(hint in lowered_question for hint in FOCUSED_QUESTION_HINTS)
     if len(safe_fallback_segments) <= 8 and not prefers_focused_answer:
         return "\n".join(safe_fallback_segments)
 
-    scored_segments.sort(key=lambda item: (-item[0], item[1]))
-    selected = sorted(scored_segments[:3], key=lambda item: item[1])
-    return "\n".join(segment for _, _, segment in selected)
+    scored_segments.sort(key=lambda item: (-item[0], item[1], item[2]))
+    selected = sorted(scored_segments[:3], key=lambda item: item[2])
+    return "\n".join(segment for _, _, _, segment in selected)
 
 
 MULTI_SOURCE_HINTS = (
@@ -316,8 +335,14 @@ def _question_prefers_multi_source(question: str) -> bool:
     lowered = str(question).lower()
     if any(hint in lowered for hint in MULTI_SOURCE_HINTS):
         return True
-    if "compare" not in lowered or " and " not in lowered:
+
+    compares_multiple_docs = (
+        ("compare" in lowered and (" and " in lowered or " with " in lowered))
+        or ("across" in lowered and " and " in lowered)
+    )
+    if not compares_multiple_docs:
         return False
+
     single_doc_compare_patterns = (
         "requested_scope_type and effective_kb_ids",
         "role of folders and the role of a knowledge base",
@@ -653,3 +678,80 @@ class SemirealQueryEngine:
             return SimpleNamespace(response=_build_multi_source_answer(question, matches), source_nodes=matches)
         best = matches[0]
         return SimpleNamespace(response=_build_extract_answer(question, str(best.node.text)), source_nodes=matches[:1])
+
+
+def clear_chat_history(client: Any, session_id: str) -> None:
+    """清理指定 session 的历史，确保 follow-up 回归从空上下文开始。"""
+    resp = client.delete("/api/chat/history", params={"session_id": session_id})
+    assert resp.status_code == 200
+    payload = resp.json()["data"]
+    assert payload == {"session_id": session_id, "cleared": True}
+
+
+def fetch_chat_history(client: Any, session_id: str) -> list[dict[str, Any]]:
+    """读取指定 session 的历史消息，便于验证预热是否真实落盘。"""
+    resp = client.get("/api/chat/history", params={"session_id": session_id})
+    assert resp.status_code == 200
+    payload = resp.json()["data"]
+    assert payload["session_id"] == session_id
+    return list(payload.get("messages") or [])
+
+
+def query_chat_once(client: Any, *, kb_id: str, question: str, session_id: str) -> dict[str, Any]:
+    """执行单轮 semireal chat query，并返回标准 data payload。"""
+    resp = client.post(
+        "/api/chat/query",
+        json={
+            "question": question,
+            "session_id": session_id,
+            "kb_ids": [kb_id],
+        },
+    )
+    assert resp.status_code == 200
+    return resp.json()["data"]
+
+
+def fetch_first_preview(client: Any, *, kb_id: str, payload: dict[str, Any], expected_source_count: int) -> dict[str, Any] | None:
+    """按首条 evidence 拉取 preview；无证据 case 返回 None。"""
+    if expected_source_count == 0:
+        return None
+
+    evidence = list(payload.get("evidence") or [])
+    assert len(evidence) >= 1
+    preview_resp = client.post(
+        "/api/kb/preview",
+        json={
+            "kb_id": kb_id,
+            "evidence_id": evidence[0]["id"],
+        },
+    )
+    assert preview_resp.status_code == 200
+    return preview_resp.json()["data"]
+
+
+def run_follow_up_case(
+    client: Any,
+    *,
+    kb_id: str,
+    case: dict[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, Any] | None, list[dict[str, Any]]]:
+    """清理 session 后先预热 history_turns，再执行 follow-up 主问题。"""
+    session_id = str(case.get("session_id") or f"{case['case_id']}::follow-up")
+    history_turns = [str(item).strip() for item in case.get("history_turns") or [] if str(item).strip()]
+    assert history_turns, "follow-up case requires at least one history_turn"
+
+    clear_chat_history(client, session_id)
+
+    warmup_payloads = [
+        query_chat_once(client, kb_id=kb_id, question=question, session_id=session_id)
+        for question in history_turns
+    ]
+    final_payload = query_chat_once(client, kb_id=kb_id, question=str(case["question"]), session_id=session_id)
+    preview_payload = fetch_first_preview(
+        client,
+        kb_id=kb_id,
+        payload=final_payload,
+        expected_source_count=int(case.get("expected_source_count", 1)),
+    )
+    history_messages = fetch_chat_history(client, session_id)
+    return warmup_payloads, final_payload, preview_payload, history_messages

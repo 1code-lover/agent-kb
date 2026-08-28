@@ -88,7 +88,7 @@
 - 迁移、下载任务同一时刻各最多一个；状态线程安全。
 - 新增 Python 模块覆盖率不低于 80%。
 - API 保持统一响应格式；错误使用明确 HTTP 状态码。
-- 保持 `llama_index==0.11.19` 与 `llama-index-core==0.11.19`。
+- 保持 `llama-index-core==0.11.19`，并按仓库实际使用的 LlamaIndex integration packages 显式声明依赖；避免在 runtime baseline 中重新引入顶层 `llama_index` metapackage。
 - 不依赖 macOS Developer ID、签名或公证完成开发验收。
 
 ## 6. 验收标准

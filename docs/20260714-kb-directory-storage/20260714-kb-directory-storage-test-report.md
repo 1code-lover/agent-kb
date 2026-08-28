@@ -10,7 +10,7 @@
 
 | 项目 | 值 |
 |---|---|
-| 工作目录 | `C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb` |
+| 工作目录 | `C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb` |
 | 分支 | `codex/desktop-agent-stage3` |
 | 基准 commit | `97d5a65` |
 | Python | `Python 3.12.10` |
@@ -163,3 +163,4 @@ python -m pytest tests/readers/test_pdf_ocr.py -q -m slow -s
 | 文档与格式门禁 | 通过 |
 
 阶段 5 正式测试执行通过，可以提交给审核方评审测试报告。测试报告审核通过后，才能进入阶段 6 的开发故事沉淀、commit 与 push。
+

@@ -1,8 +1,8 @@
-﻿{
-    "last_generated_hash":  "ff22294a3d8c3ecf7fc40b5abfcf1786e67df1d1",
-    "last_capture_time":  "2026-08-18T13:34:26+08:00",
-    "last_story_file":  "2026-08-18-bug-kb-windows-validation-closure.md",
-    "last_prompt_decision":  "generated",
-    "last_generated_push_hash":  null,
-    "last_prompted_hash":  "ff22294a3d8c3ecf7fc40b5abfcf1786e67df1d1"
+{
+  "last_prompt_decision": "generated",
+  "last_prompted_hash": "a5e3d62b9d04521166815eff2a6c9c528e95c6c5",
+  "last_story_file": "2026-08-28-refactor-shared-refusal-contract-markers.md",
+  "last_generated_hash": "a5e3d62b9d04521166815eff2a6c9c528e95c6c5",
+  "last_generated_push_hash": null,
+  "last_capture_time": "2026-08-28T13:03:13.4361905+08:00"
 }

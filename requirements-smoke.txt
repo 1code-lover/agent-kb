@@ -1,0 +1,30 @@
+# Docker-only lighter smoke profile for API import / health checks.
+# Intentionally omit `llama-index-embeddings-huggingface` here to avoid pulling
+# `sentence-transformers -> torch` during Docker smoke builds.
+# Supported scope: app import, docker entrypoint startup, `/api/health`.
+# Unsupported scope: runtime retrieval, embedding initialization, semireal eval.
+
+llama-index-core==0.11.19
+llama-index-readers-file==0.2.0
+llama-index-retrievers-bm25==0.4.0
+llama-index-llms-ollama==0.3.4
+llama-index-llms-langchain==0.4.2
+
+fastapi==0.104.0
+uvicorn==0.24.0
+python-multipart==0.0.6
+requests>=2.31.0
+# Keep smoke/profile parity with the runtime TestClient-compatible httpx baseline.
+httpx==0.27.2
+
+langchain==0.3.4
+langchain_openai==0.2.3
+langchain-core==0.3.63
+langchain-text-splitters==0.3.8
+
+pymupdf==1.28.0
+pypdf>=3.0.0
+Pillow>=10.0.0
+numpy>=1.26.0
+jieba==0.42.1
+docx2txt==0.8

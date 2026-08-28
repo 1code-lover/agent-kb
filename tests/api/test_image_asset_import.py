@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 from llama_index.core import Document
 
 from server.text_splitter import create_text_splitter

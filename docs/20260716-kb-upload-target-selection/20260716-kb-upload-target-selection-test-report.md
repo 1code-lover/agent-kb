@@ -1,7 +1,7 @@
 # 知识库上传目标显式选择测试报告
 
 - 执行日期：2026-07-16
-- 仓库：`C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb`
+- 仓库：`C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb`
 - 前端：React 18 + Vite 5
 - Node.js：v18.19.0
 - Python：3.12
@@ -74,3 +74,4 @@ python -m pytest tests/api/test_kb_routes.py tests/api/test_kb_directory_storage
 ## 5. 验收结论
 
 本轮 P1 已完成代码修复和自动化、构建、后端回归、浏览器 smoke。上传链路不再静默使用 `default`，用户必须明确选择知识库后才能继续；同时前端已移除会导致 multipart boundary 丢失的显式请求头，`.md`/其他文件上传不应再因该问题报 400。真实小文件上传应在专用 smoke KB 中执行，验证落盘、计数和列表刷新后再开始粮仓主资料批量导入。
+

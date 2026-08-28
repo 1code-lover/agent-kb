@@ -1,69 +1,160 @@
-# ThinkRAG ????????
-# - ?????? reload??? uvicorn ????? 18080
-# - ?? PID ??????????/????
-# - ??????????????????
+﻿# ThinkRAG / NorthAgent 开发启动脚本
+# - 默认拉起 FastAPI API（18080）与 React Vite（5173）
+# - 统一从仓库根目录推导路径，不再依赖历史绝对路径
+# - 允许通过参数覆盖端口，并同步写入前端 API base / 后端 CORS 调试来源
 
 param(
     [switch]$Stop,
-    [int]$BackendPort = 18080,
-    [int]$FrontendPort = 5174
+    [Nullable[int]]$BackendPort = $null,
+    [Nullable[int]]$FrontendPort = $null
 )
 
-$ROOT = "C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb"
-$LOG_DIR = Join-Path $ROOT "logs"
-$RUNTIME_DIR = Join-Path $ROOT ".dev-runtime"
-$BACKEND_PID_FILE = Join-Path $RUNTIME_DIR "backend.pid"
-$FRONTEND_PID_FILE = Join-Path $RUNTIME_DIR "frontend.pid"
-$BACKEND_PORT = $BackendPort
-$FRONTEND_PORT = $FrontendPort
-$FRONTEND_API_BASE_URL = "http://127.0.0.1:$BACKEND_PORT"
-$NPM_CMD = (Get-Command npm.cmd -ErrorAction SilentlyContinue).Source
-if (-not $NPM_CMD) { $NPM_CMD = (Get-Command npm -ErrorAction SilentlyContinue).Source }
-$NODE_CMD = (Get-Command node.exe -ErrorAction SilentlyContinue).Source
-$NODE_DIR = if ($NODE_CMD) { Split-Path -Parent $NODE_CMD } else { "" }
+$ROOT = Split-Path -Parent $PSCommandPath
+$LOG_DIR = Join-Path $ROOT 'logs'
+$RUNTIME_DIR = Join-Path $ROOT '.dev-runtime'
+$WEBAPP_DIR = Join-Path $ROOT 'webapp'
+$WEBAPP_NODE_MODULES = Join-Path $WEBAPP_DIR 'node_modules'
+$VITE_CLI = Join-Path $WEBAPP_NODE_MODULES 'vite\bin\vite.js'
+$WEBAPP_DEV_SERVER_ENTRY = Join-Path $WEBAPP_DIR 'scripts\dev-server.mjs'
+
+$DEV_RUNTIME_HELPERS = Join-Path $ROOT 'scripts\dev-runtime-helpers.ps1'
+if (-not (Test-Path $DEV_RUNTIME_HELPERS)) {
+    throw "未找到开发启动共享 helper：$DEV_RUNTIME_HELPERS"
+}
+. $DEV_RUNTIME_HELPERS
+
+$BACKEND_PORT = Resolve-BackendPort $BackendPort
+$FRONTEND_PORT = Resolve-FrontendPort $FrontendPort
+$BACKEND_PID_FILE = Join-Path $RUNTIME_DIR (Get-PortScopedFileName 'backend' $BACKEND_PORT (Get-DefaultBackendPort) '.pid')
+$FRONTEND_PID_FILE = Join-Path $RUNTIME_DIR (Get-PortScopedFileName 'frontend' $FRONTEND_PORT (Get-DefaultFrontendPort) '.pid')
+$BACKEND_OUT_LOG = Join-Path $LOG_DIR (Get-PortScopedFileName 'backend_out' $BACKEND_PORT (Get-DefaultBackendPort) '.log')
+$BACKEND_ERR_LOG = Join-Path $LOG_DIR (Get-PortScopedFileName 'backend_err' $BACKEND_PORT (Get-DefaultBackendPort) '.log')
+$FRONTEND_OUT_LOG = Join-Path $LOG_DIR (Get-PortScopedFileName 'frontend_out' $FRONTEND_PORT (Get-DefaultFrontendPort) '.log')
+$FRONTEND_ERR_LOG = Join-Path $LOG_DIR (Get-PortScopedFileName 'frontend_err' $FRONTEND_PORT (Get-DefaultFrontendPort) '.log')
+
+$FRONTEND_API_BASE_URL = Resolve-ApiBaseUrl '' $BACKEND_PORT
+$FRONTEND_DEV_ORIGINS = Resolve-ExtraDevOrigins '' $FRONTEND_PORT
+
+function Repair-NpmStagedPackage([string]$PackageRelativePath) {
+    $targetDir = Join-Path $WEBAPP_NODE_MODULES $PackageRelativePath
+    $targetPackageJson = Join-Path $targetDir 'package.json'
+    if (Test-Path $targetPackageJson) {
+        return $false
+    }
+
+    $parentDir = Split-Path -Parent $targetDir
+    $leafName = Split-Path -Leaf $PackageRelativePath
+    if (-not (Test-Path $parentDir)) {
+        return $false
+    }
+
+    $stagedCandidates = @(Get-ChildItem -LiteralPath $parentDir -Force -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -eq ('.' + $leafName) -or $_.Name -like ('.' + $leafName + '-*') } |
+        Where-Object { Test-Path (Join-Path $_.FullName 'package.json') })
+
+    if ($stagedCandidates.Count -ne 1) {
+        return $false
+    }
+
+    $stagedDir = $stagedCandidates[0].FullName
+    New-Item -ItemType Directory -Path $targetDir -Force -ErrorAction SilentlyContinue | Out-Null
+    Get-ChildItem -LiteralPath $stagedDir -Force | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $targetDir -Recurse -Force
+    }
+
+    return (Test-Path $targetPackageJson)
+}
+
+function Get-StagedPackageLeafName([string]$StageDirectoryName) {
+    if (-not $StageDirectoryName -or -not $StageDirectoryName.StartsWith('.')) {
+        return $null
+    }
+
+    $trimmed = $StageDirectoryName.Substring(1)
+    if (-not $trimmed) {
+        return $null
+    }
+
+    if ($trimmed -match '^(.*)-[^-]+$') {
+        return $matches[1]
+    }
+
+    return $trimmed
+}
+
+function Repair-StagedPackagesInParentDir([string]$ParentDir, [string]$PackagePrefix = '') {
+    if (-not (Test-Path $ParentDir)) {
+        return @()
+    }
+
+    $recoveredPackages = @()
+    $stagedDirs = @(Get-ChildItem -LiteralPath $ParentDir -Force -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name.StartsWith('.') } |
+        Where-Object { Test-Path (Join-Path $_.FullName 'package.json') })
+
+    foreach ($stagedDir in $stagedDirs) {
+        $leafName = Get-StagedPackageLeafName $stagedDir.Name
+        if (-not $leafName) {
+            continue
+        }
+
+        $packageRelativePath = if ($PackagePrefix) {
+            Join-Path $PackagePrefix $leafName
+        } else {
+            $leafName
+        }
+
+        if (Repair-NpmStagedPackage $packageRelativePath) {
+            $recoveredPackages += $packageRelativePath
+        }
+    }
+
+    return $recoveredPackages
+}
+
+function Repair-WebappDevRuntime() {
+    if (-not (Test-Path $WEBAPP_NODE_MODULES)) {
+        return
+    }
+
+    $recoveredPackages = @()
+    foreach ($packageRelativePath in @(
+        'vite',
+        '@vitejs\plugin-react',
+        'esbuild',
+        'rollup',
+        '@esbuild\win32-x64',
+        '@rollup\rollup-win32-x64-msvc',
+        '@rollup\rollup-win32-x64-gnu'
+    )) {
+        if (Repair-NpmStagedPackage $packageRelativePath) {
+            $recoveredPackages += $packageRelativePath
+        }
+    }
+
+    $recoveredPackages += Repair-StagedPackagesInParentDir $WEBAPP_NODE_MODULES
+    foreach ($scopeDir in @(Get-ChildItem -LiteralPath $WEBAPP_NODE_MODULES -Force -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '@*' })) {
+        $recoveredPackages += Repair-StagedPackagesInParentDir $scopeDir.FullName $scopeDir.Name
+    }
+
+    $recoveredPackages = @($recoveredPackages | Sort-Object -Unique)
+    if ($recoveredPackages.Count -gt 0) {
+        Write-Host ("Recovered staged webapp packages: " + ($recoveredPackages -join ', ')) -ForegroundColor Yellow
+    }
+}
+
+$NPM_CMD = Resolve-CommandPath @('npm.cmd', 'npm') 'npm'
+$NODE_CMD = Resolve-CommandPath @('node.exe', 'node') 'node'
+$PYTHON_CMD = Resolve-PreferredPythonCommand
 
 New-Item -ItemType Directory -Path $LOG_DIR -Force -ErrorAction SilentlyContinue | Out-Null
 New-Item -ItemType Directory -Path $RUNTIME_DIR -Force -ErrorAction SilentlyContinue | Out-Null
-
-function Get-ManagedPid([string]$PidFile) {
-    if (-not (Test-Path $PidFile)) {
-        return $null
-    }
-    $raw = (Get-Content $PidFile -Raw -ErrorAction SilentlyContinue).Trim()
-    if (-not $raw) {
-        return $null
-    }
-    $pidValue = 0
-    if (-not [int]::TryParse($raw, [ref]$pidValue)) {
-        return $null
-    }
-    return $pidValue
-}
-
-function Remove-StalePidFile([string]$PidFile) {
-    if (Test-Path $PidFile) {
-        Remove-Item -LiteralPath $PidFile -Force -ErrorAction SilentlyContinue
-    }
-}
-
-function Stop-ManagedProcess([string]$PidFile, [string]$Label) {
-    $pidValue = Get-ManagedPid $PidFile
-    if ($null -eq $pidValue) {
-        Remove-StalePidFile $PidFile
-        return
-    }
-    $process = Get-Process -Id $pidValue -ErrorAction SilentlyContinue
-    if ($process) {
-        Write-Host "Stopping $Label (PID=$pidValue)..." -ForegroundColor Yellow
-        Stop-Process -Id $pidValue -Force -ErrorAction SilentlyContinue
-    }
-    Remove-StalePidFile $PidFile
-}
 
 function Stop-RepoPortProcess([int]$Port, [string]$Label) {
     $connections = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
         Where-Object { $_.State -in @('Listen', 'Established') } |
         Select-Object -ExpandProperty OwningProcess -Unique
+
     foreach ($pidValue in $connections) {
         if ($pidValue -le 0) {
             continue
@@ -73,12 +164,12 @@ function Stop-RepoPortProcess([int]$Port, [string]$Label) {
             continue
         }
         $commandLine = [string]$process.CommandLine
-        $name = [string]$process.Name
         $belongsToRepo = $commandLine -like "*$ROOT*" -or $commandLine -like "*run_api.py*" -or $commandLine -like "*vite*"
-        if ($belongsToRepo -or $name -in @('python.exe', 'pythonw.exe', 'node.exe', 'cmd.exe', 'powershell.exe')) {
-            Write-Host "Stopping stale $Label listener on port $Port (PID=$pidValue)..." -ForegroundColor Yellow
-            Stop-Process -Id $pidValue -Force -ErrorAction SilentlyContinue
+        if (-not $belongsToRepo) {
+            continue
         }
+        Write-Host "Stopping stale $Label listener on port $Port (PID=$pidValue)..." -ForegroundColor Yellow
+        Stop-Process -Id $pidValue -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -95,62 +186,70 @@ function Wait-HttpReady([string]$Url, [int]$RetryCount = 20, [int]$DelaySeconds 
 }
 
 if ($Stop) {
-    Write-Host "Stopping services..." -ForegroundColor Yellow
-    Stop-ManagedProcess $BACKEND_PID_FILE "backend"
-    Stop-ManagedProcess $FRONTEND_PID_FILE "frontend"
-    Stop-RepoPortProcess $BACKEND_PORT "backend"
-    Stop-RepoPortProcess $FRONTEND_PORT "frontend"
-    Write-Host "Stopped." -ForegroundColor Green
+    Write-Host 'Stopping services...' -ForegroundColor Yellow
+    Stop-ManagedProcess $BACKEND_PID_FILE 'backend'
+    Stop-ManagedProcess $FRONTEND_PID_FILE 'frontend'
+    Stop-RepoPortProcess $BACKEND_PORT 'backend'
+    Stop-RepoPortProcess $FRONTEND_PORT 'frontend'
+    Write-Host 'Stopped.' -ForegroundColor Green
     return
 }
 
-Write-Host "=== ThinkRAG Dev Mode ===" -ForegroundColor Cyan
-Write-Host "Target backend port: $BACKEND_PORT" -ForegroundColor Cyan
-Write-Host "Target frontend port: $FRONTEND_PORT" -ForegroundColor Cyan
-Stop-ManagedProcess $BACKEND_PID_FILE "backend"
-Stop-ManagedProcess $FRONTEND_PID_FILE "frontend"
-Stop-RepoPortProcess $BACKEND_PORT "backend"
-Stop-RepoPortProcess $FRONTEND_PORT "frontend"
+Write-Host '=== ThinkRAG / NorthAgent Dev Mode ===' -ForegroundColor Cyan
+Write-Host "Repository root: $ROOT" -ForegroundColor Cyan
+Write-Host "Backend port: $BACKEND_PORT" -ForegroundColor Cyan
+Write-Host "Frontend port: $FRONTEND_PORT" -ForegroundColor Cyan
+Stop-ManagedProcess $BACKEND_PID_FILE 'backend'
+Stop-ManagedProcess $FRONTEND_PID_FILE 'frontend'
+Stop-RepoPortProcess $BACKEND_PORT 'backend'
+Stop-RepoPortProcess $FRONTEND_PORT 'frontend'
 Start-Sleep -Seconds 1
 
-Write-Host "[1] Starting backend (reload disabled by default)..." -ForegroundColor Cyan
-$env:PYTHONPATH = $ROOT
-$env:KB_API_RELOAD = "0"
-$env:KB_API_PORT = "$BACKEND_PORT"
-$env:Path = "C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\;C:\Users\ethan1.zhao\AppData\Local\Programs\Python\Python312\Scripts\;$NODE_DIR;$env:SystemRoot\system32;$env:SystemRoot;$env:SystemRoot\System32\Wbem"
-$backendProcess = Start-Process -FilePath "python" -ArgumentList "run_api.py" -WorkingDirectory $ROOT -WindowStyle Hidden -PassThru
-Set-Content -LiteralPath $BACKEND_PID_FILE -Value $backendProcess.Id -Encoding utf8
+Write-Host '[1] Starting backend (FastAPI)...' -ForegroundColor Cyan
+Normalize-StartProcessEnvironment
+$backendArgs = @('run_api.py')
+Set-BackendDevEnvironment -RepoRoot $ROOT -BackendPort $BACKEND_PORT -ApiBaseUrl $FRONTEND_API_BASE_URL -ExtraDevOrigins $FRONTEND_DEV_ORIGINS
+try {
+    $backendProcess = Start-Process -FilePath $PYTHON_CMD -ArgumentList $backendArgs -WorkingDirectory $ROOT -RedirectStandardOutput $BACKEND_OUT_LOG -RedirectStandardError $BACKEND_ERR_LOG -WindowStyle Hidden -PassThru
+} finally {
+    Clear-BackendDevEnvironment
+}
+Set-Content -LiteralPath $BACKEND_PID_FILE -Value $backendProcess.Id -Encoding ascii
 Write-Host "    PID: $($backendProcess.Id)" -ForegroundColor Green
-Write-Host "    logs: $LOG_DIR\backend.log / access.log" -ForegroundColor Green
+Write-Host "    logs: $BACKEND_OUT_LOG / $BACKEND_ERR_LOG" -ForegroundColor Green
 
-Write-Host "[2] Starting frontend (Vite)..." -ForegroundColor Cyan
-if (-not $NPM_CMD) { throw "npm.cmd not found before PATH cleanup" }
-$env:VITE_API_BASE_URL = $FRONTEND_API_BASE_URL
-$frontendArgs = @('run', 'dev', '--', '--host', '127.0.0.1', '--port', "$FRONTEND_PORT")
-$frontendProcess = Start-Process -FilePath $NPM_CMD -ArgumentList $frontendArgs -WorkingDirectory (Join-Path $ROOT 'webapp') -RedirectStandardOutput (Join-Path $LOG_DIR 'frontend_out.log') -RedirectStandardError (Join-Path $LOG_DIR 'frontend_err.log') -WindowStyle Hidden -PassThru
-Remove-Item Env:VITE_API_BASE_URL -ErrorAction SilentlyContinue
-Set-Content -LiteralPath $FRONTEND_PID_FILE -Value $frontendProcess.Id -Encoding utf8
+Write-Host '[2] Starting frontend (React + Vite)...' -ForegroundColor Cyan
+Repair-WebappDevRuntime
+Normalize-StartProcessEnvironment
+Set-WebDevEnvironment -ApiBaseUrl $FRONTEND_API_BASE_URL -FrontendPort $FRONTEND_PORT
+try {
+    $frontendProcess = Start-WebProcess -NodeCommand $NODE_CMD -NpmCommand $NPM_CMD -WebappDir $WEBAPP_DIR -DevServerEntry $WEBAPP_DEV_SERVER_ENTRY -ViteCli $VITE_CLI -StdoutLog $FRONTEND_OUT_LOG -StderrLog $FRONTEND_ERR_LOG -FrontendPort $FRONTEND_PORT
+} finally {
+    Clear-WebDevEnvironment
+}
+Set-Content -LiteralPath $FRONTEND_PID_FILE -Value $frontendProcess.Id -Encoding ascii
 Write-Host "    PID: $($frontendProcess.Id)" -ForegroundColor Green
 Write-Host "    API base: $FRONTEND_API_BASE_URL" -ForegroundColor Green
-Write-Host "    log: $LOG_DIR\frontend_out.log" -ForegroundColor Green
+Write-Host "    log: $FRONTEND_OUT_LOG" -ForegroundColor Green
 
-$health = Wait-HttpReady -Url "http://127.0.0.1:$BACKEND_PORT/api/health" -RetryCount 25 -DelaySeconds 1
+$health = Wait-HttpReady -Url "$FRONTEND_API_BASE_URL/api/health" -RetryCount 25 -DelaySeconds 1
 if ($health -and $health.code -eq 0) {
-    Write-Host "Backend OK" -ForegroundColor Green
+    Write-Host 'Backend OK' -ForegroundColor Green
 } else {
-    Write-Host "Backend not ready, check $LOG_DIR\backend.log" -ForegroundColor Red
+    Write-Host "Backend not ready, check $BACKEND_OUT_LOG / $BACKEND_ERR_LOG" -ForegroundColor Red
+    Write-LogTail -Path $BACKEND_OUT_LOG -Label 'backend stdout'
+    Write-LogTail -Path $BACKEND_ERR_LOG -Label 'backend stderr'
 }
 
-Write-Host ""
-Write-Host "================================" -ForegroundColor Cyan
+Write-Host ''
+Write-Host '================================' -ForegroundColor Cyan
 Write-Host "  Frontend: http://127.0.0.1:$FRONTEND_PORT" -ForegroundColor Green
-Write-Host "  Backend:  http://127.0.0.1:$BACKEND_PORT" -ForegroundColor Green
-Write-Host "  API base: $FRONTEND_API_BASE_URL" -ForegroundColor Green
-Write-Host "  API docs: http://127.0.0.1:$BACKEND_PORT/docs" -ForegroundColor Green
-Write-Host "================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Watch live (new terminal):" -ForegroundColor Yellow
-Write-Host "  Get-Content $LOG_DIR\backend.log -Tail 20 -Wait" -ForegroundColor White
-Write-Host "  Get-Content $LOG_DIR\frontend_out.log -Tail 20 -Wait" -ForegroundColor White
-Write-Host ""
+Write-Host "  Backend:  $FRONTEND_API_BASE_URL" -ForegroundColor Green
+Write-Host "  API docs: $FRONTEND_API_BASE_URL/docs" -ForegroundColor Green
+Write-Host '================================' -ForegroundColor Cyan
+Write-Host ''
+Write-Host 'Watch live (new terminal):' -ForegroundColor Yellow
+Write-Host "  Get-Content $BACKEND_OUT_LOG -Tail 20 -Wait" -ForegroundColor White
+Write-Host "  Get-Content $FRONTEND_OUT_LOG -Tail 20 -Wait" -ForegroundColor White
+Write-Host ''
 Write-Host "Stop: powershell -File $PSCommandPath -Stop -BackendPort $BACKEND_PORT -FrontendPort $FRONTEND_PORT" -ForegroundColor Yellow

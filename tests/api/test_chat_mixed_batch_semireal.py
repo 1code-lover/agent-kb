@@ -7,7 +7,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import fitz
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 from PIL import Image, ImageDraw, ImageFont
 import pytest
 
@@ -16,16 +16,13 @@ from api.services import asset_service, kb_service
 import api.services.chat_service as chat_service
 from server.asset_registry import KBAssetRegistry
 from server.kb_registry import KBRegistry
+from server.utils.font_fallbacks import OCR_FONT_CANDIDATES, load_first_available_font
 from server.utils.file import get_kb_data_dir
 from tests.api._semireal_chat_support import FakeUploadFile, SemirealIndexManager, SemirealQueryEngine
 from tests.api.chat_qa_metrics import build_chat_case_report, summarize_chat_case_reports
 
 KB_ID = "realish-batch-kb"
-FONT_CANDIDATES = [
-    Path("C:/Windows/Fonts/arial.ttf"),
-    Path("C:/Windows/Fonts/calibri.ttf"),
-    Path("C:/Windows/Fonts/msyh.ttc"),
-]
+FONT_CANDIDATES = OCR_FONT_CANDIDATES
 MIXED_IMPORT_PATHS = {
     "cutover.md": "playbooks/release/cutover.md",
     "escalation-board.png": "playbooks/release/images/escalation-board.png",
@@ -145,10 +142,8 @@ MIXED_CASES = [
 
 def _pick_font(size: int = 28) -> ImageFont.ImageFont:
     """优先选择支持中文的系统字体，避免 fixture 渲染失真。"""
-    for candidate in FONT_CANDIDATES:
-        if candidate.exists():
-            return ImageFont.truetype(str(candidate), size=size)
-    return ImageFont.load_default()
+    font, _ = load_first_available_font(size=size, candidates=FONT_CANDIDATES)
+    return font
 
 
 
@@ -333,7 +328,11 @@ def _asset_ids_by_role(kb_id: str) -> dict[str, str]:
     return {item["asset_role"]: item["asset_id"] for item in asset_service.list_assets(kb_id)}
 
 
-def _build_query_engine(manager: SemirealIndexManager, kb_ids: list[str] | None = None) -> SemirealQueryEngine:
+def _build_query_engine(
+    manager: SemirealIndexManager,
+    kb_ids: list[str] | None = None,
+    **kwargs: Any,
+) -> SemirealQueryEngine:
     """构造受控的单库 query engine。"""
     normalized = list(kb_ids or [])
     if normalized != [KB_ID]:
@@ -354,7 +353,7 @@ def imported_mixed_kb(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> dict[s
     monkeypatch.setattr(asset_service, "_registry", asset_registry)
 
     manager = SemirealIndexManager(kb_id=KB_ID, kb_dir=get_kb_data_dir(KB_ID, create=True))
-    build_query_engine = MagicMock(side_effect=lambda kb_ids=None: _build_query_engine(manager, kb_ids))
+    build_query_engine = MagicMock(side_effect=lambda kb_ids=None, **kwargs: _build_query_engine(manager, kb_ids, **kwargs))
 
     monkeypatch.setattr(kb_service.runtime_state, "ensure_models_ready", MagicMock(return_value=True))
     monkeypatch.setattr(kb_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))

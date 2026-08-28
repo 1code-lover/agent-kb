@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from server.kb_registry import KBRegistry
@@ -59,7 +59,14 @@ def test_single_kb_scope_succeeds(monkeypatch, isolated_registry):
     assert data["effective_scope_type"] == "single_kb"
     assert data["effective_kb_ids"] == ["kb-a"]
     assert data["is_default_deny_applied"] is False
-    mock_build.assert_called_once_with(kb_ids=["kb-a"])
+    mock_build.assert_called_once_with(
+        kb_ids=["kb-a"],
+        top_k=None,
+        response_mode=None,
+        use_reranker=None,
+        top_n=None,
+        reranker_model=None,
+    )
 
 
 def test_response_echoes_effective_scope(monkeypatch, isolated_registry):
@@ -78,6 +85,36 @@ def test_response_echoes_effective_scope(monkeypatch, isolated_registry):
     assert data["effective_scope_type"] == "single_kb"
     assert data["effective_kb_ids"] == ["kb-a"]
     assert data["isolation_level"] == "physical_isolated"
+
+def test_request_level_rag_params_flow_from_http_payload_to_query_engine(monkeypatch, isolated_registry):
+    """HTTP payload 中的 QueryRequest 检索参数应原样进入 build_query_engine。"""
+    isolated_registry.create_kb("kb-a", "KB A")
+    mock_build = _stub_chat_runtime(monkeypatch)
+
+    resp = client.post(
+        "/api/chat/query",
+        json={
+            "question": "custom params",
+            "session_id": "scope-custom-rag",
+            "kb_ids": ["kb-a"],
+            "top_k": 9,
+            "response_mode": "tree_summarize",
+            "use_reranker": False,
+            "top_n": 2,
+            "reranker_model": "bge-reranker-v2-m3",
+        },
+    )
+
+    assert resp.status_code == 200
+    assert resp.json()["code"] == 0
+    mock_build.assert_called_once_with(
+        kb_ids=["kb-a"],
+        top_k=9,
+        response_mode="tree_summarize",
+        use_reranker=False,
+        top_n=2,
+        reranker_model="bge-reranker-v2-m3",
+    )
 
 
 def test_unspecified_scope_is_rejected(monkeypatch, isolated_registry):

@@ -12,6 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from server.utils.font_fallbacks import load_first_available_font
+
 _SUPPORTED_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 _SUPPORTED_IMAGE_MIME_TYPES = {
     "image/png",
@@ -167,25 +169,12 @@ def _set_ocr_warmup_status(**kwargs: Any) -> None:
 def _run_ocr_dummy_inference() -> None:
     """执行一次轻量 OCR 预热推理，提前加载检测与识别模型。"""
     import numpy as np
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw
 
     ocr = get_shared_ocr()
     canvas = Image.new("RGB", (1280, 720), color="white")
     draw = ImageDraw.Draw(canvas)
-    font = None
-    for candidate in (
-        Path("C:/Windows/Fonts/msyh.ttc"),
-        Path("C:/Windows/Fonts/simhei.ttf"),
-        Path("C:/Windows/Fonts/arial.ttf"),
-    ):
-        try:
-            if candidate.exists():
-                font = ImageFont.truetype(str(candidate), size=36)
-                break
-        except Exception:
-            continue
-    if font is None:
-        font = ImageFont.load_default()
+    font, _ = load_first_available_font(size=36)
 
     warmup_lines = [
         "ThinkRAG OCR warmup sample",

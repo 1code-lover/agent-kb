@@ -2,11 +2,65 @@
 
 from __future__ import annotations
 
+import os
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
+from urllib.parse import urlparse
 
 import requests
+
+
+DEFAULT_LOCAL_API_PORT = 18080
+API_PORT_ENV_KEYS = ("KB_API_PORT", "NORTHAGENT_API_PORT", "THINKRAG_API_PORT", "FOXGLOVE_API_PORT")
+API_BASE_URL_ENV_KEYS = ("KB_API_BASE_URL", "NORTHAGENT_API_BASE_URL", "THINKRAG_API_BASE_URL", "FOXGLOVE_API_BASE_URL")
+
+
+def _read_first_non_empty_env(env_names: tuple[str, ...], *, env: Mapping[str, str] | None = None) -> str:
+    """按优先级读取第一个非空环境变量值。"""
+    source = os.environ if env is None else env
+    for env_name in env_names:
+        value = source.get(env_name, "")
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def normalize_api_base_url(value: str | None) -> str:
+    """去除 API base URL 两端空白与尾部斜杠。"""
+    raw = str(value or "").strip()
+    return raw.rstrip("/") if raw else ""
+
+
+def resolve_api_port(env: Mapping[str, str] | None = None, *, default_port: int = DEFAULT_LOCAL_API_PORT) -> int:
+    """按桌面/runtime 合同解析 API 端口。"""
+    explicit_base_url = normalize_api_base_url(_read_first_non_empty_env(API_BASE_URL_ENV_KEYS, env=env))
+    if explicit_base_url:
+        try:
+            parsed = urlparse(explicit_base_url)
+            if parsed.scheme in {"http", "https"} and parsed.netloc:
+                if parsed.port is not None:
+                    return parsed.port
+                return 443 if parsed.scheme == "https" else 80
+        except ValueError:
+            pass
+
+    raw_port = _read_first_non_empty_env(API_PORT_ENV_KEYS, env=env)
+    try:
+        parsed_port = int(raw_port)
+    except (TypeError, ValueError):
+        return default_port
+    return parsed_port if parsed_port > 0 else default_port
+
+
+def resolve_api_base_url(env: Mapping[str, str] | None = None, *, default_port: int = DEFAULT_LOCAL_API_PORT) -> str:
+    """按桌面/runtime 合同解析 API base URL。"""
+    explicit_base_url = normalize_api_base_url(_read_first_non_empty_env(API_BASE_URL_ENV_KEYS, env=env))
+    if explicit_base_url:
+        parsed = urlparse(explicit_base_url)
+        if parsed.scheme in {"http", "https"} and parsed.netloc:
+            return explicit_base_url
+    return f"http://127.0.0.1:{resolve_api_port(env, default_port=default_port)}"
 
 
 def _get_import_payload(import_resp: dict[str, Any] | None) -> dict[str, Any]:

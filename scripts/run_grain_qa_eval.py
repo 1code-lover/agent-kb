@@ -1,7 +1,7 @@
 """粮仓知识库真实问答评测脚本。
 
 读取 data/grain-knowledge-base/qa/verified.jsonl（30 条人工标注用例），
-对已运行的 API（默认 http://127.0.0.1:18080）逐条发起 /api/chat/query，
+对已运行的 API（默认按 KB_API_BASE_URL / KB_API_PORT 合同解析，未配置时 fallback 到 http://127.0.0.1:18080）逐条发起 /api/chat/query，
 统计检索与问答指标：
 
 - Recall@5：relevant_documents 是否出现在 top5 引用来源里。
@@ -17,6 +17,8 @@
         --api-base http://127.0.0.1:18080 \\
         --kb-id grain-knowledge-base \\
         --output data/grain-knowledge-base/qa/qa-eval-report.json
+
+也可以先设置 `KB_API_BASE_URL` 或 `KB_API_PORT`，再省略 `--api-base`。
 
 评测不依赖 LLM 主观打分，只校验检索命中与引用正确性，因此可在无 LLM
 裁判的情况下复跑。LLM 仅用于生成 answer（决定 refusal 文案），不影响
@@ -37,6 +39,11 @@ from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
+
+try:
+    from scripts.diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url
+except ModuleNotFoundError:
+    from diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url
 
 
 # 导入落盘时会给文件名追加 `_<8 位十六进制>` 后缀（如 AAA粮油安全储存守则_a68a17f8.docx）。
@@ -547,8 +554,8 @@ def run_evaluation(
     return report, 0
 
 
-def main() -> None:
-    """脚本入口：解析参数、逐条评测、输出报告。"""
+def _build_arg_parser() -> argparse.ArgumentParser:
+    """构建命令行参数解析器。"""
     parser = argparse.ArgumentParser(description="粮仓知识库真实问答评测")
     parser.add_argument(
         "--cases",
@@ -557,8 +564,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--api-base",
-        default="http://127.0.0.1:18080",
-        help="API 根地址",
+        default=resolve_api_base_url(default_port=DEFAULT_LOCAL_API_PORT),
+        help="API 根地址；优先读取 KB_API_BASE_URL，未设置时回退到 KB_API_PORT（默认 18080）",
     )
     parser.add_argument(
         "--kb-id",
@@ -578,6 +585,12 @@ def main() -> None:
     )
     parser.add_argument("--resume", action="store_true", help="复用已有报告中无 API error 的 case 结果")
     parser.add_argument("--stop-on-api-error", action="store_true", help="遇到 API error 时写出部分报告并退出")
+    return parser
+
+
+def main() -> None:
+    """命令行入口。"""
+    parser = _build_arg_parser()
     args = parser.parse_args()
 
     report, exit_code = run_evaluation(

@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -104,3 +105,70 @@ def test_create_rejects_invalid_expiry_format_with_stable_error(tmp_path):
     service = make_service(tmp_path)
     with pytest.raises(ValueError, match="Invalid expires_at"):
         service.create_token(name="robot", kb_ids=["finance"], expires_at="not-a-date")
+
+
+def test_get_admin_key_retries_permission_error_and_cleans_tmp_file(tmp_path, monkeypatch):
+    """敏感 secret 初次落盘遇到临时锁时，应重试并清理遗留 tmp 文件。"""
+    service = make_service(tmp_path)
+    real_replace = os.replace
+    attempts = {"count": 0}
+
+    def flaky_replace(src, dst):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise PermissionError("locked")
+        return real_replace(src, dst)
+
+    sleep = MagicMock()
+    monkeypatch.setattr("api.services.access_token_service.os.replace", flaky_replace)
+    monkeypatch.setattr("api.services.access_token_service.time.sleep", sleep)
+
+    value = service.get_admin_key()
+
+    assert len(value) >= 32
+    assert attempts["count"] == 3
+    assert sleep.call_count == 2
+    assert_private_file(tmp_path / "admin-key")
+    assert list(tmp_path.glob("admin-key.tmp-*")) == []
+
+
+def test_create_token_retries_permission_error_when_writing_store(tmp_path, monkeypatch):
+    """令牌清单落盘遇到临时锁时，应重试成功且不留下 tmp 文件。"""
+    service = make_service(tmp_path)
+    real_replace = os.replace
+    attempts = {"store": 0, "all": 0}
+
+    def flaky_replace(src, dst):
+        attempts["all"] += 1
+        if Path(dst) == tmp_path / "access_tokens.json":
+            attempts["store"] += 1
+            if attempts["store"] < 3:
+                raise PermissionError("locked")
+        return real_replace(src, dst)
+
+    sleep = MagicMock()
+    monkeypatch.setattr("api.services.access_token_service.os.replace", flaky_replace)
+    monkeypatch.setattr("api.services.access_token_service.time.sleep", sleep)
+
+    created = service.create_token(name="robot", kb_ids=["finance"])
+
+    assert created["token"].startswith("nak_ro_")
+    assert attempts["store"] == 3
+    assert attempts["all"] >= attempts["store"]
+    assert sleep.call_count == 2
+    assert json.loads((tmp_path / "access_tokens.json").read_text(encoding="utf-8"))[0]["token_id"] == created["token_id"]
+    assert list(tmp_path.glob("access_tokens.json.tmp-*")) == []
+
+
+def test_create_token_raises_after_retry_exhaustion_and_cleans_tmp_file(tmp_path, monkeypatch):
+    """如果写 token store 的 replace 一直失败，应抛错且清理 tmp 文件。"""
+    service = make_service(tmp_path)
+
+    monkeypatch.setattr("api.services.access_token_service.os.replace", MagicMock(side_effect=PermissionError("still locked")))
+    monkeypatch.setattr("api.services.access_token_service.time.sleep", MagicMock())
+
+    with pytest.raises(PermissionError, match="still locked"):
+        service.create_token(name="robot", kb_ids=["finance"])
+
+    assert not (tmp_path / "access_tokens.json").exists()
+    assert list(tmp_path.glob("access_tokens.json.tmp-*")) == []

@@ -1,4 +1,4 @@
-"""桌面 packaged runtime 数据与模型路径隔离测试。"""
+"""Packaged runtime data/model root isolation tests."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _inspect_isolated_runtime(data_root: Path, model_root: Path) -> dict[str, str]:
+def _inspect_isolated_runtime(env_overrides: dict[str, str], cwd: Path) -> dict[str, str]:
     script = r'''
 import json
 import config
@@ -39,16 +39,11 @@ print(json.dumps({
 }))
 '''
     env = os.environ.copy()
-    env.update(
-        {
-            "NORTHAGENT_DATA_ROOT": str(data_root),
-            "NORTHAGENT_MODEL_ROOT": str(model_root),
-            "PYTHONPATH": str(PROJECT_ROOT),
-        }
-    )
+    env.update(env_overrides)
+    env["PYTHONPATH"] = str(PROJECT_ROOT)
     completed = subprocess.run(
         [sys.executable, "-c", script],
-        cwd=data_root.parent,
+        cwd=cwd,
         env=env,
         check=True,
         capture_output=True,
@@ -57,16 +52,9 @@ print(json.dumps({
     return json.loads(completed.stdout.strip())
 
 
-def test_packaged_runtime_uses_absolute_data_and_model_roots(tmp_path: Path) -> None:
-    data_root = tmp_path / "user-data" / "runtime"
-    model_root = tmp_path / "resources" / "localmodels"
+def _expected_runtime_snapshot(data_root: Path, model_root: Path) -> dict[str, str]:
     default_model = model_root / "BAAI" / "bge-small-zh-v1.5"
-    default_model.mkdir(parents=True)
-    data_root.parent.mkdir(parents=True)
-
-    result = _inspect_isolated_runtime(data_root, model_root)
-
-    assert result == {
+    return {
         "storage_dir": str(data_root / "storage"),
         "data_dir": str(data_root / "data"),
         "model_dir": str(model_root),
@@ -76,3 +64,37 @@ def test_packaged_runtime_uses_absolute_data_and_model_roots(tmp_path: Path) -> 
         "embedding_path": str(default_model),
         "resolved_model": str(default_model),
     }
+
+
+def test_packaged_runtime_uses_absolute_data_and_model_roots(tmp_path: Path) -> None:
+    data_root = tmp_path / "user-data" / "runtime"
+    model_root = tmp_path / "resources" / "localmodels"
+    (model_root / "BAAI" / "bge-small-zh-v1.5").mkdir(parents=True)
+    data_root.parent.mkdir(parents=True)
+
+    result = _inspect_isolated_runtime(
+        {
+            "KB_DATA_ROOT": str(data_root),
+            "KB_MODEL_ROOT": str(model_root),
+        },
+        data_root.parent,
+    )
+
+    assert result == _expected_runtime_snapshot(data_root, model_root)
+
+
+def test_packaged_runtime_keeps_thinkrag_and_foxglove_root_aliases_compatible(tmp_path: Path) -> None:
+    data_root = tmp_path / "user-data" / "runtime-alias"
+    model_root = tmp_path / "resources" / "localmodels-alias"
+    (model_root / "BAAI" / "bge-small-zh-v1.5").mkdir(parents=True)
+    data_root.parent.mkdir(parents=True)
+
+    result = _inspect_isolated_runtime(
+        {
+            "THINKRAG_DATA_ROOT": str(data_root),
+            "FOXGLOVE_MODEL_ROOT": str(model_root),
+        },
+        data_root.parent,
+    )
+
+    assert result == _expected_runtime_snapshot(data_root, model_root)

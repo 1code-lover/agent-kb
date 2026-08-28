@@ -6,6 +6,7 @@ const test = require("node:test");
 
 const {
   checkNotaryTool,
+  describePreflightMode,
   ensureExecutable,
   findDeveloperIdApplicationIdentities,
   getMissingReleaseEnv,
@@ -188,6 +189,8 @@ test("runPreflight reports all missing release gates in non-strict mode", () => 
   assert.equal(summary.developerIdReady, false);
   assert.equal(summary.notaryToolReady, false);
   assert.equal(summary.appBuilderExecutable.ok, false);
+  assert.match(messages.join("\n"), /non-strict build preflight/);
+  assert.match(messages.join("\n"), /does not prove the final app is already signed\/notarized/);
   assert.match(messages.join("\n"), /app-builder binary missing/);
   assert.match(messages.join("\n"), /Developer ID Application signing identity missing/);
   assert.match(messages.join("\n"), /xcrun notarytool not available/);
@@ -249,6 +252,8 @@ test("runPreflight passes strict mode when mac release gates are ready", () => {
   assert.deepEqual(summary.missingReleaseEnv, []);
   assert.equal(summary.notarizationStrategy, "apple_id");
   assert.equal(xattrCalls.length, 2);
+  assert.match(messages.join("\n"), /strict release preflight/);
+  assert.match(messages.join("\n"), /does not prove the final app is already signed\/notarized/);
   assert.match(messages.join("\n"), /mac signing\/notarization env looks ready/);
   assert.match(messages.join("\n"), /Electron bundle present/);
 });
@@ -470,4 +475,10 @@ test("preflight and notarize hook resolve the same credential strategy", async (
 
   assert.equal(preflight.notarizationStrategy, "api_key");
   assert.equal(hook.strategy, preflight.notarizationStrategy);
+});
+
+
+test("describePreflightMode exposes strict vs non-strict lane names", () => {
+  assert.equal(describePreflightMode(false), "non-strict build preflight");
+  assert.equal(describePreflightMode(true), "strict release preflight");
 });

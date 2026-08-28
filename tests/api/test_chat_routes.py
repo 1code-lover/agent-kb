@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from fastapi import HTTPException
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.routers import chat as chat_router
@@ -48,13 +48,22 @@ def test_raise_http_from_kb_error_maps_status_code(exc: KBServiceError, expected
 
 
 def test_query_route_returns_service_payload() -> None:
-    """/api/chat/query 应透传 QueryRequest 并包装服务层结果。"""
+    """/api/chat/query 应透传完整 QueryRequest 并包装服务层结果。"""
 
     payload = {"answer": "命中答案", "sources": [{"id": "e1"}], "scope": {"kb_id": "kb-a"}}
     with patch("api.routers.chat.chat_service.query", return_value=payload) as mock_query:
         resp = client.post(
             "/api/chat/query",
-            json={"question": "测试问题", "session_id": "s-1", "kb_ids": ["kb-a"]},
+            json={
+                "question": "测试问题",
+                "session_id": "s-1",
+                "kb_ids": ["kb-a"],
+                "top_k": 8,
+                "response_mode": "compact",
+                "use_reranker": False,
+                "top_n": 2,
+                "reranker_model": "bge-reranker-v2-m3",
+            },
         )
 
     assert resp.status_code == 200
@@ -63,6 +72,72 @@ def test_query_route_returns_service_payload() -> None:
     assert request.question == "测试问题"
     assert request.session_id == "s-1"
     assert request.kb_ids == ["kb-a"]
+    assert request.top_k == 8
+    assert request.response_mode == "compact"
+    assert request.use_reranker is False
+    assert request.top_n == 2
+    assert request.reranker_model == "bge-reranker-v2-m3"
+
+
+def test_query_route_rejects_unknown_response_mode() -> None:
+    """/api/chat/query 应拒绝未声明的 response_mode，避免脏参数进入主链路。"""
+
+    with patch("api.routers.chat.chat_service.query") as mock_query:
+        resp = client.post(
+            "/api/chat/query",
+            json={
+                "question": "测试问题",
+                "session_id": "s-invalid-mode",
+                "kb_ids": ["kb-a"],
+                "response_mode": "unsupported-mode",
+            },
+        )
+
+    assert resp.status_code == 422
+    mock_query.assert_not_called()
+
+
+def test_query_route_rejects_unknown_extra_fields() -> None:
+    """/api/chat/query 应拒绝未声明字段，避免前端脏参数被静默吞掉。"""
+
+    with patch("api.routers.chat.chat_service.query") as mock_query:
+        resp = client.post(
+            "/api/chat/query",
+            json={
+                "question": "测试问题",
+                "session_id": "s-extra-fields",
+                "kb_ids": ["kb-a"],
+                "debug_mode": True,
+            },
+        )
+
+    assert resp.status_code == 422
+    mock_query.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("top_k", 51),
+        ("top_n", 51),
+        ("reranker_model", "x" * 129),
+    ],
+)
+def test_query_route_rejects_out_of_range_request_level_rag_fields(field: str, value) -> None:
+    """/api/chat/query 应拒绝超出契约范围的请求级 RAG 字段。"""
+
+    payload = {
+        "question": "测试问题",
+        "session_id": "s-invalid-rag-bounds",
+        "kb_ids": ["kb-a"],
+        field: value,
+    }
+
+    with patch("api.routers.chat.chat_service.query") as mock_query:
+        resp = client.post("/api/chat/query", json=payload)
+
+    assert resp.status_code == 422
+    mock_query.assert_not_called()
 
 
 def test_query_route_maps_runtime_error_to_503() -> None:

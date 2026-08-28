@@ -95,8 +95,8 @@ def create_embedding_model(model_name=DEFAULT_EMBEDDING_MODEL):
         if not diagnostics["local_path_exists"] and not diagnostics["allow_remote_download"]:
             raise RuntimeError(
                 "Local embedding model cache is missing at "
-                f"{diagnostics['local_path']}; run `/opt/miniconda3/envs/agent-kb/bin/python "
-                "-m scripts.prepare_embedding_model_cache --download` or set "
+                f"{diagnostics['local_path']}; run `python -m scripts.prepare_embedding_model_cache --download` "
+                "with the project runtime (desktop/build scripts can pin it via KB_PYTHON), or set "
                 "EMBEDDING_ALLOW_REMOTE_DOWNLOAD=1 to allow runtime remote download."
             )
         model_path = diagnostics["local_path"] if diagnostics["local_path_exists"] else diagnostics["hf_model_path"]

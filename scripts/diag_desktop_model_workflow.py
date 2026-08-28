@@ -12,20 +12,24 @@ from typing import Any
 import requests
 
 try:
-    from scripts.diag_roundtrip_support import wait_for_runtime_ready
+    from scripts.diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url, wait_for_runtime_ready
 except ModuleNotFoundError:
-    from diag_roundtrip_support import wait_for_runtime_ready
+    from diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url, wait_for_runtime_ready
 
-DEFAULT_BASE_URL = "http://127.0.0.1:18080"
+DEFAULT_BASE_URL = f"http://127.0.0.1:{DEFAULT_LOCAL_API_PORT}"
 DEFAULT_TIMEOUT = 240.0
 DEFAULT_ISOLATION_KB_ID = "default"
 DEFAULT_RELATIVE_PATH = "desktop-e2e/desktop-model-workflow.md"
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """读取命令行参数。"""
     parser = argparse.ArgumentParser(description="诊断桌面端模型配置、文件导入、问答、preview 与跨 KB 隔离")
-    parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="本地 API 地址")
+    parser.add_argument(
+        "--base-url",
+        default=resolve_api_base_url(),
+        help="本地 API 地址；优先读取 KB_API_BASE_URL，未设置时回退到 KB_API_PORT（默认 18080）",
+    )
     parser.add_argument("--kb-id", default=None, help="目标知识库 ID，默认创建临时诊断知识库")
     parser.add_argument("--kb-name", default="Desktop Model Workflow Diagnostic", help="目标知识库名称")
     parser.add_argument("--isolation-kb-id", default=DEFAULT_ISOLATION_KB_ID, help="跨 KB 隔离对照知识库")
@@ -36,7 +40,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--api-base", default="", help="可选；指定模型 Base URL")
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT, help="HTTP 超时时间（秒）")
     parser.add_argument("--output-path", default=None, help="将 JSON 报告写入指定路径")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def _sha256_bytes(payload: bytes) -> str:

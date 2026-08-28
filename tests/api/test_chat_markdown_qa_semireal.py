@@ -10,13 +10,14 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.services import asset_service, kb_service
 from server.asset_registry import KBAssetRegistry
 from server.kb_registry import KBRegistry
 from server.utils.file import get_kb_data_dir
+from tests.api._semireal_chat_support import run_follow_up_case
 from tests.api.chat_qa_metrics import build_chat_case_report, summarize_chat_case_reports
 
 client = TestClient(app)
@@ -24,6 +25,8 @@ FIXTURE_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "rag_quality" /
 CASE_FIXTURE = FIXTURE_DIR / "cases.json"
 EVAL_V4_CASE_FIXTURE = FIXTURE_DIR.parent / "eval_v4" / "cases.json"
 EVAL_V5_CASE_FIXTURE = FIXTURE_DIR.parent / "eval_v5" / "cases.json"
+EVAL_V8_MAIN_CASE_FIXTURE = FIXTURE_DIR.parent / "eval_v8_main" / "cases.json"
+EVAL_V8_HARD_CASE_FIXTURE = FIXTURE_DIR.parent / "eval_v8_hard" / "cases.json"
 KB_ID = "kb-a"
 FIXTURE_IMPORT_PATHS = {
     "scope-contract.md": "qa/contracts/scope-contract.md",
@@ -261,10 +264,9 @@ def semireal_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "ensure_index_loaded",
         MagicMock(side_effect=lambda kb_id=None: manager.check_index_exists()),
     )
-    build_query_engine = MagicMock(side_effect=lambda kb_ids=None: FakeSemirealQueryEngine(manager))
+    build_query_engine = MagicMock(side_effect=lambda kb_ids=None, **kwargs: FakeSemirealQueryEngine(manager))
     monkeypatch.setattr(chat_service.runtime_state, "build_query_engine", build_query_engine)
     monkeypatch.setattr(chat_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))
-    monkeypatch.setattr(chat_service, "append_chat_message", lambda *args, **kwargs: None)
 
     return {
         "registry": registry,
@@ -311,6 +313,14 @@ def _load_eval_v5_cases() -> list[dict[str, object]]:
     return json.loads(EVAL_V5_CASE_FIXTURE.read_text(encoding="utf-8"))
 
 
+def _load_eval_v8_main_cases() -> list[dict[str, object]]:
+    return json.loads(EVAL_V8_MAIN_CASE_FIXTURE.read_text(encoding="utf-8"))
+
+
+def _load_eval_v8_hard_cases() -> list[dict[str, object]]:
+    return json.loads(EVAL_V8_HARD_CASE_FIXTURE.read_text(encoding="utf-8"))
+
+
 def _collect_markdown_fixture_docs() -> set[str]:
     docs = set(FIXTURE_IMPORT_PATHS)
 
@@ -319,7 +329,12 @@ def _collect_markdown_fixture_docs() -> set[str]:
         if expected_doc:
             docs.add(expected_doc)
 
-    for eval_cases in (_load_eval_v4_cases(), _load_eval_v5_cases()):
+    for eval_cases in (
+        _load_eval_v4_cases(),
+        _load_eval_v5_cases(),
+        _load_eval_v8_main_cases(),
+        _load_eval_v8_hard_cases(),
+    ):
         for case in eval_cases:
             if str(case.get("kb_id") or "").strip() != "eval-kb-markdown":
                 continue
@@ -353,7 +368,30 @@ def _tokenize(text: str) -> set[str]:
 
 
 SEMIREAL_CASES = _load_cases()
-
+MARKDOWN_FOLLOW_UP_CASES = [
+    {
+        "case_id": "markdown-follow-up-gate-metrics",
+        "category": "metrics-follow-up",
+        "history_turns": ["先看一下 QA Gate Metrics 文档。"],
+        "question": "那里面 source count match rate 和 forbidden-term clean rate 也要跟踪吗？",
+        "expected_doc": "suite-metrics-gate.md",
+        "expected_keypoints": ["source count match rate", "forbidden-term clean rate"],
+        "must_not_contain": ["passing exit code alone is enough"],
+        "preview_terms": ["source count match rate", "forbidden-term clean rate"],
+        "expected_source_count": 1,
+    },
+    {
+        "case_id": "markdown-follow-up-cab-refusal",
+        "category": "refusal-follow-up",
+        "history_turns": ["先看一下 Single KB Scope Contract 文档。"],
+        "question": "那里面有写 CAB ticket 编号吗？",
+        "expected_doc": None,
+        "expected_keypoints": ["No confirmable information is available", "knowledge base"],
+        "must_not_contain": ["CAB-"],
+        "preview_terms": [],
+        "expected_source_count": 0,
+    },
+]
 
 
 def _query_case(case: dict[str, object]) -> tuple[dict[str, object], dict[str, object] | None]:
@@ -391,6 +429,8 @@ def test_semireal_markdown_fixture_exists() -> None:
     assert CASE_FIXTURE.exists(), f"missing case fixture: {CASE_FIXTURE}"
     assert EVAL_V4_CASE_FIXTURE.exists(), f"missing eval v4 fixture: {EVAL_V4_CASE_FIXTURE}"
     assert EVAL_V5_CASE_FIXTURE.exists(), f"missing eval v5 fixture: {EVAL_V5_CASE_FIXTURE}"
+    assert EVAL_V8_MAIN_CASE_FIXTURE.exists(), f"missing eval v8 main fixture: {EVAL_V8_MAIN_CASE_FIXTURE}"
+    assert EVAL_V8_HARD_CASE_FIXTURE.exists(), f"missing eval v8 hard fixture: {EVAL_V8_HARD_CASE_FIXTURE}"
 
     markdown_files = {path.name for path in FIXTURE_DIR.glob("*.md")}
     missing_base_files = set(FIXTURE_IMPORT_PATHS) - markdown_files
@@ -505,7 +545,73 @@ def test_chat_markdown_qa_semireal_contract(case: dict[str, object], imported_ma
         assert report["preview_resolvable"] is True
         assert report["preview_term_coverage"] == 1.0
 
-    build_query_engine.assert_called_once_with(kb_ids=[KB_ID])
+    build_query_engine.assert_called_once_with(
+        kb_ids=[KB_ID],
+        top_k=None,
+        response_mode=None,
+        use_reranker=None,
+        top_n=None,
+        reranker_model=None,
+    )
+
+
+@pytest.mark.parametrize("case", MARKDOWN_FOLLOW_UP_CASES, ids=[case["case_id"] for case in MARKDOWN_FOLLOW_UP_CASES])
+def test_chat_markdown_qa_semireal_follow_up_contract(case: dict[str, object], imported_markdown_kb: dict[str, object]) -> None:
+    """验证 Markdown semireal 真实复用同一 session 的 follow-up 契约。"""
+    build_query_engine: MagicMock = imported_markdown_kb["build_query_engine"]
+
+    warmups, payload, preview, history_messages = run_follow_up_case(client, kb_id=KB_ID, case=case)
+
+    assert len(warmups) == len(case["history_turns"])
+    assert payload["session_id"].endswith("::follow-up")
+    assert payload["requested_scope_type"] == "single_kb"
+    assert payload["requested_kb_ids"] == [KB_ID]
+    assert payload["effective_scope_type"] == "single_kb"
+    assert payload["effective_kb_ids"] == [KB_ID]
+    assert payload["is_default_deny_applied"] is False
+    assert payload["isolation_level"] == "physical_isolated"
+
+    answer = payload["answer"]
+    for keypoint in case["expected_keypoints"]:
+        assert keypoint in answer
+    for blocked in case["must_not_contain"]:
+        assert blocked not in answer
+
+    expected_source_count = int(case.get("expected_source_count", 1))
+    assert len(payload["sources"]) == expected_source_count
+    assert len(payload["evidence"]) == expected_source_count
+
+    if expected_source_count == 0:
+        assert preview is None
+        assert payload["sources"] == []
+        assert payload["evidence"] == []
+    else:
+        evidence = payload["evidence"][0]
+        assert payload["sources"][0]["file"] == case["expected_doc"]
+        assert evidence["title"] == case["expected_doc"]
+        assert evidence["source"] == case["expected_doc"]
+        assert preview is not None
+        assert preview["doc_id"] == evidence["doc_id"]
+        for term in case["preview_terms"]:
+            assert term in preview["excerpt"]
+
+    assert len(history_messages) == 2 * (len(case["history_turns"]) + 1)
+    assert history_messages[0]["role"] == "user"
+    assert history_messages[0]["content"] == case["history_turns"][0]
+    assert history_messages[-2]["role"] == "user"
+    assert history_messages[-2]["content"] == case["question"]
+
+    report = build_chat_case_report(
+        case,
+        payload,
+        expected_kb_ids=[KB_ID],
+        expected_isolation_level="physical_isolated",
+        preview_payload=preview,
+    )
+    assert report["passed"] is True
+    assert report["scope_passed"] is True
+
+    assert build_query_engine.call_count == len(case["history_turns"]) + 1
 
 
 

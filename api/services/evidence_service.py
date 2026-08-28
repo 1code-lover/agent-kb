@@ -151,6 +151,7 @@ def build_evidence_id(
     doc_id: str | None,
     preview_locator: dict[str, Any] | None,
     fallback_index: int,
+    excerpt: Any | None = None,
 ) -> str:
     """构造可反解的 evidence_id；无 doc_id 时退回顺序号。"""
     if not doc_id:
@@ -161,6 +162,9 @@ def build_evidence_id(
         "doc_id": doc_id,
         "preview_locator": preview_locator or None,
     }
+    trimmed_excerpt = _trim_excerpt(excerpt)
+    if trimmed_excerpt:
+        payload["excerpt"] = trimmed_excerpt
     encoded = base64.urlsafe_b64encode(
         json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).decode("ascii")
@@ -227,20 +231,32 @@ def normalize_evidence(sources: Sequence[dict[str, Any]] | None, receipt_id: str
         locator = source.get("preview_locator") if isinstance(source.get("preview_locator"), dict) else None
         doc_id = source.get("doc_id") if isinstance(source.get("doc_id"), str) else None
         asset_id = source.get("asset_id") if isinstance(source.get("asset_id"), str) else None
+        excerpt = _trim_excerpt(source.get("text") or source.get("excerpt"))
+        evidence_id = source.get("id")
+        if doc_id:
+            evidence_id = build_evidence_id(
+                kb_id=source.get("kb_id", "default"),
+                doc_id=doc_id,
+                preview_locator=locator,
+                fallback_index=index,
+                excerpt=excerpt,
+            )
+        elif not evidence_id:
+            evidence_id = build_evidence_id(
+                kb_id=source.get("kb_id", "default"),
+                doc_id=doc_id,
+                preview_locator=locator,
+                fallback_index=index,
+                excerpt=excerpt,
+            )
         evidence.append(
             {
-                "id": source.get("id")
-                or build_evidence_id(
-                    kb_id=source.get("kb_id", "default"),
-                    doc_id=doc_id,
-                    preview_locator=locator,
-                    fallback_index=index,
-                ),
+                "id": evidence_id,
                 "title": title,
                 "source": source.get("source") or title,
                 "page": source.get("page"),
                 "score": source.get("score"),
-                "excerpt": _trim_excerpt(source.get("text") or source.get("excerpt")),
+                "excerpt": excerpt,
                 "receipt_id": receipt_id if receipt_id is not None else source.get("receipt_id"),
                 "kb_id": source.get("kb_id", "default"),
                 "doc_id": doc_id,

@@ -13,26 +13,18 @@ import fitz
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
-try:
-    from scripts.diag_roundtrip_support import wait_for_runtime_ready
-except ModuleNotFoundError:
-    from diag_roundtrip_support import wait_for_runtime_ready
+from server.utils.font_fallbacks import OCR_FONT_CANDIDATES, load_first_available_font
 
-DEFAULT_BASE_URL = "http://127.0.0.1:18080"
+try:
+    from scripts.diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url, wait_for_runtime_ready
+except ModuleNotFoundError:
+    from diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url, wait_for_runtime_ready
+
+DEFAULT_BASE_URL = f"http://127.0.0.1:{DEFAULT_LOCAL_API_PORT}"
 DEFAULT_TIMEOUT = 240.0
 DEFAULT_CHUNK_SIZE = 256
 DEFAULT_CHUNK_OVERLAP = 16
-FONT_CANDIDATES = [
-    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
-    Path("/System/Library/Fonts/Supplemental/Verdana.ttf"),
-    Path("/System/Library/Fonts/Helvetica.ttc"),
-    Path("/Library/Fonts/Arial.ttf"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
-    Path("C:/Windows/Fonts/arial.ttf"),
-    Path("C:/Windows/Fonts/calibri.ttf"),
-    Path("C:/Windows/Fonts/msyh.ttc"),
-]
+FONT_CANDIDATES = OCR_FONT_CANDIDATES
 IMPORT_ORDER = [
     "cutover.md",
     "escalation-board.png",
@@ -107,18 +99,20 @@ def _sha256_bytes(payload: bytes) -> str:
 
 
 def _pick_font(size: int = 30) -> ImageFont.ImageFont:
-    """?????? TrueType ????????????? OCR?"""
-    for candidate in FONT_CANDIDATES:
-        if candidate.exists():
-            return ImageFont.truetype(str(candidate), size=size)
-    return ImageFont.load_default()
+    """优先选择跨平台系统字体，保证 mixed batch OCR 诊断样本稳定可读。"""
+    font, _ = load_first_available_font(size=size, candidates=FONT_CANDIDATES)
+    return font
 
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """????????"""
     parser = argparse.ArgumentParser(description="???????????????? roundtrip?")
-    parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="?? API ??")
+    parser.add_argument(
+        "--base-url",
+        default=resolve_api_base_url(),
+        help="目标 API 地址；优先读取 KB_API_BASE_URL，未设置时回退到 KB_API_PORT（默认 18080）",
+    )
     parser.add_argument("--kb-id", default=None, help="?????????? ID")
     parser.add_argument(
         "--workspace-dir",
@@ -129,7 +123,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--chunk-size", type=int, default=DEFAULT_CHUNK_SIZE, help="?? chunk_size")
     parser.add_argument("--chunk-overlap", type=int, default=DEFAULT_CHUNK_OVERLAP, help="?? chunk_overlap")
     parser.add_argument("--output-path", default=None, help="???? JSON ??? UTF-8 ??")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 

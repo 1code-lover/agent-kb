@@ -1,15 +1,19 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
+const { bootDesktopApp, resolveDevProjectRoot } = require("./desktop-bootstrap");
 const { ensurePythonApi, stopPythonApi } = require("./python-process");
+const { buildApiStartupFailureMessage, buildRendererStartupFailureMessage, resolveApiStartupFailure } = require("./bootstrap-messages");
+const { resolveDesktopHeadless } = require("./desktop-launch-config");
 const { getLogFile, logRuntime } = require("./runtime-log");
 const { buildContentSecurityPolicy, resolveUrlOrigin } = require("./csp");
+const { resolveRendererEntry } = require("./renderer-entry");
 const { ensureRuntimeRoot, resolveRuntimePaths } = require("./runtime-paths");
+const { registerPickFilesHandlers } = require("./desktop-bridge-contract");
 
-const devProjectRoot = path.resolve(__dirname, "..", "..");
+const devProjectRoot = resolveDevProjectRoot();
 const resourceRoot = app.isPackaged ? process.resourcesPath : devProjectRoot;
 let activeRuntimePaths = null;
-const distIndexPath = path.join(resourceRoot, "webapp", "dist", "index.html");
 const desktopIconCandidates = [
   path.join(resourceRoot, "desktop", "resources", "icon.png"),
   path.join(__dirname, "..", "resources", "icon.png"),
@@ -26,35 +30,33 @@ function applySecurityHeaders(win, rendererEntry) {
   });
 }
 
-function resolveRendererEntry() {
-  if (process.env.NORTHAGENT_WEB_URL || process.env.FOXGLOVE_WEB_URL || process.env.THINKRAG_WEB_URL) {
-    return {
-      type: "url",
-      value: process.env.NORTHAGENT_WEB_URL || process.env.FOXGLOVE_WEB_URL || process.env.THINKRAG_WEB_URL,
-      source: process.env.NORTHAGENT_WEB_URL ? "northagent-env" : process.env.FOXGLOVE_WEB_URL ? "foxglove-env" : "legacy-env"
-    };
-  }
+function attachWindowLifecycleLogging(win, runtimePaths, { headless, rendererEntry }) {
+  win.webContents.on("did-finish-load", () => {
+    logRuntime(runtimePaths.runtimeRoot, "renderer_loaded", {
+      headless,
+      source: rendererEntry.source,
+      url: win.webContents.getURL(),
+    });
+  });
 
-  if (fs.existsSync(distIndexPath)) {
-    return {
-      type: "file",
-      value: distIndexPath,
-      source: "dist"
-    };
-  }
-
-  return {
-    type: "url",
-    value: "http://127.0.0.1:5173",
-    source: "dev-server"
-  };
+  win.webContents.on("did-fail-load", (_, errorCode, errorDescription, validatedURL) => {
+    logRuntime(runtimePaths.runtimeRoot, "renderer_load_failed", {
+      headless,
+      source: rendererEntry.source,
+      error_code: errorCode,
+      error_description: errorDescription,
+      url: validatedURL,
+    });
+  });
 }
 
-function createWindow(runtimePaths) {
+function createWindow(runtimePaths, options = {}) {
+  const headless = options.headless ?? resolveDesktopHeadless(options.env || process.env);
   const desktopIconPath = desktopIconCandidates.find((candidate) => fs.existsSync(candidate));
   const win = new BrowserWindow({
     width: 1366,
     height: 900,
+    show: !headless,
     icon: desktopIconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -63,19 +65,24 @@ function createWindow(runtimePaths) {
     }
   });
 
-  const rendererEntry = resolveRendererEntry();
-  logRuntime(runtimePaths.runtimeRoot, "renderer_resolved", rendererEntry);
+  const rendererEntry = resolveRendererEntry({ resourceRoot, env: options.env || process.env, isPackaged: app.isPackaged });
+  logRuntime(runtimePaths.runtimeRoot, "renderer_resolved", {
+    ...rendererEntry,
+    headless,
+  });
+  attachWindowLifecycleLogging(win, runtimePaths, { headless, rendererEntry });
   applySecurityHeaders(win, rendererEntry);
 
   if (rendererEntry.type === "file") {
     win.loadFile(rendererEntry.value);
-    return;
+    return win;
   }
 
   win.loadURL(rendererEntry.value);
+  return win;
 }
 
-ipcMain.handle("northagent:pick-files", async (_, options = {}) => {
+async function handlePickFiles(_, options = {}) {
   const result = await dialog.showOpenDialog({
     title: options.title || "选择文件",
     properties: ["openFile", ...(options.multiSelections ? ["multiSelections"] : [])],
@@ -86,39 +93,30 @@ ipcMain.handle("northagent:pick-files", async (_, options = {}) => {
     canceled: result.canceled,
     filePaths: result.filePaths || []
   };
-});
+}
+
+registerPickFilesHandlers(ipcMain, handlePickFiles);
 
 app.whenReady().then(async () => {
-  const runtimePaths = resolveRuntimePaths({
+  await bootDesktopApp({
+    app,
+    dialog,
+    env: process.env,
+    processResourcesPath: process.resourcesPath,
     devProjectRoot,
-    isPackaged: app.isPackaged,
-    resourcesPath: process.resourcesPath,
-    userDataPath: app.getPath("userData"),
+    onRuntimePaths: (runtimePaths) => {
+      activeRuntimePaths = runtimePaths;
+    },
+    resolveRuntimePaths,
+    ensureRuntimeRoot,
+    getLogFile,
+    logRuntime,
+    ensurePythonApi,
+    resolveApiStartupFailure,
+    buildApiStartupFailureMessage,
+    buildRendererStartupFailureMessage,
+    createWindow,
   });
-  activeRuntimePaths = runtimePaths;
-  const logFile = getLogFile(runtimePaths.runtimeRoot);
-  try {
-    ensureRuntimeRoot(runtimePaths.runtimeRoot);
-  } catch (error) {
-    console.error("[desktop-runtime] runtime root unavailable", error);
-    dialog.showErrorBox("NorthAgent", `运行目录不可写，无法启动：${runtimePaths.runtimeRoot}\n${error.message}`);
-    app.quit();
-    return;
-  }
-  logRuntime(runtimePaths.runtimeRoot, "desktop_app_ready", { log_file: logFile });
-
-  const ready = await ensurePythonApi(runtimePaths);
-  if (!ready) {
-    logRuntime(runtimePaths.runtimeRoot, "desktop_app_boot_failed", {
-      reason: "python_api_not_ready",
-      log_file: logFile
-    });
-    dialog.showErrorBox("NorthAgent", `Python API 启动失败，请检查日志：${logFile}`);
-    app.quit();
-    return;
-  }
-
-  createWindow(runtimePaths);
 });
 
 app.on("window-all-closed", () => {
@@ -140,8 +138,11 @@ app.on("before-quit", () => {
 
 module.exports = {
   applySecurityHeaders,
+  attachWindowLifecycleLogging,
+  bootDesktopApp,
   buildContentSecurityPolicy,
   createWindow,
+  resolveDevProjectRoot,
   resolveRendererEntry,
   resolveUrlOrigin,
 };

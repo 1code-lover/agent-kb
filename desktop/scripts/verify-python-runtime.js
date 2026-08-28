@@ -1,15 +1,22 @@
 /* eslint-disable no-console */
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
+const {
+  PYTHON_OVERRIDE_KEYS,
+  defaultPythonCandidates: sharedDefaultPythonCandidates,
+  resolveExplicitPythonCommand,
+} = require("../src/python-runtime-resolution");
 
 const projectRoot = path.resolve(__dirname, "..", "..");
 const MAX_DIAGNOSTIC_LENGTH = 500;
-const PYTHON_OVERRIDE_KEYS = ["NORTHAGENT_PYTHON", "THINKRAG_PYTHON", "FOXGLOVE_PYTHON"];
 const SECRET_ENV_KEY_PATTERN = /(?:TOKEN|SECRET|PASSWORD|API_KEY|APP_SPECIFIC|CREDENTIAL|PRIVATE_KEY)/i;
 const REQUIRED_MODULES = ["fastapi", "uvicorn", "llama_index", "sentence_transformers", "httpx"];
+// Keep the release verifier aligned with requirements-runtime.txt: lock the core package
+// and import probes, but do not require the top-level llama-index metapackage that the
+// default runtime baseline intentionally avoids.
 const LOCKED_PACKAGES = {
-  "llama-index": "0.11.19",
   "llama-index-core": "0.11.19",
+  "httpx": "0.27.2",
 };
 
 const PROBE_SOURCE = [
@@ -68,35 +75,22 @@ function summarizeDiagnostic(value, limit = MAX_DIAGNOSTIC_LENGTH, env = {}) {
   return collapsed.slice(0, limit);
 }
 
-function defaultPythonCandidates(platform = process.platform, root = projectRoot) {
-  if (platform === "win32") {
-    return [
-      path.join(root, ".venv", "Scripts", "python.exe"),
-      path.join(root, "venv", "Scripts", "python.exe"),
-      "python",
-    ];
-  }
-  return [
-    "/opt/miniconda3/envs/agent-kb/bin/python",
-    path.join(root, ".venv", "bin", "python"),
-    path.join(root, "venv", "bin", "python"),
-    "python3",
-  ];
+function defaultPythonCandidates(platform = process.platform, root = projectRoot, env = process.env) {
+  return sharedDefaultPythonCandidates(root, { platform, env });
 }
 
 function resolvePythonCandidates(options = {}) {
   const env = options.env || process.env;
-  for (const key of PYTHON_OVERRIDE_KEYS) {
-    if (env[key]) {
-      return {
-        candidates: [env[key]],
-        explicit: true,
-        overrideKey: key,
-      };
-    }
+  const explicitPython = resolveExplicitPythonCommand(env);
+  if (explicitPython.command) {
+    return {
+      candidates: [explicitPython.command],
+      explicit: true,
+      overrideKey: explicitPython.overrideKey,
+    };
   }
   return {
-    candidates: options.candidates || defaultPythonCandidates(options.platform, options.projectRoot),
+    candidates: options.candidates || defaultPythonCandidates(options.platform, options.projectRoot, env),
     explicit: false,
     overrideKey: null,
   };

@@ -5,7 +5,7 @@
 - 严格 TDD：每个 Task 先提交失败测试，再写最小实现，再重构。
 - 测试报告审核前不执行 git commit；审核通过后再按迁移、OCR、Open API、Embedding、文档验收边界组织 conventional commits。
 - Python 固定使用 `/opt/miniconda3/envs/agent-kb/bin/python`。
-- 保持 `llama_index==0.11.19` 和 `llama-index-core==0.11.19`。
+- 保持 `llama-index-core==0.11.19`，并按仓库实际使用的 LlamaIndex integration packages 显式声明依赖；避免在 runtime baseline 中重新引入顶层 `llama_index` metapackage。
 - 新增后台任务采用依赖注入和同步核心、线程包装，避免只能通过 sleep 测试。
 
 ## 2. Task 清单

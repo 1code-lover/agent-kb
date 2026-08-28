@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from fastapi import HTTPException
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.routers import kb as kb_router

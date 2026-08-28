@@ -12,13 +12,27 @@ from api.services.evidence_service import normalize_evidence, normalize_source_n
 from server.retriever import SimpleFusionRetriever
 
 
-def run_readonly_query(*, token_id: str, kb_id: str, question: str, top_k: int | None = None) -> dict:
+def run_readonly_query(
+    *,
+    token_id: str,
+    kb_id: str,
+    question: str,
+    top_k: int | None = None,
+    response_mode: str | None = None,
+    use_reranker: bool | None = None,
+    top_n: int | None = None,
+    reranker_model: str | None = None,
+) -> dict:
     """固定单知识库范围执行只读问答，不记录会话历史。"""
     request = QueryRequest(
         question=question,
         session_id=f"open-readonly:{token_id}",
         kb_ids=[kb_id],
         top_k=top_k,
+        response_mode=response_mode,
+        use_reranker=use_reranker,
+        top_n=top_n,
+        reranker_model=reranker_model,
     )
     return chat_service.query(request, record_history=False)
 
@@ -38,7 +52,7 @@ def run_readonly_search(
     manager = runtime_state.get_index_manager(kb_id)
     if getattr(manager, "index", None) is None:
         if not manager.check_index_exists():
-            raise RuntimeError("Knowledge base is empty.")
+            raise ValueError("Knowledge base is empty. Please import documents first.")
         manager.load_index()
 
     effective_top_k = top_k or config.TOP_K

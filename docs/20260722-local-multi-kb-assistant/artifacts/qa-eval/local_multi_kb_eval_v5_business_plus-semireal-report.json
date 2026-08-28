@@ -1,22 +1,22 @@
 {
   "dataset_name": "local_multi_kb_eval_v5_business_plus",
   "evaluation_mode": "healthy",
-  "run_at": "2026-07-31T13:43:00.946376+00:00",
+  "run_at": "2026-08-21T12:06:46.526096+00:00",
   "suite_summary": {
     "total_cases": 72,
-    "passed_cases": 72,
-    "failed_cases": 0,
-    "pass_rate": 1.0,
+    "passed_cases": 71,
+    "failed_cases": 1,
+    "pass_rate": 0.9861111111111112,
     "pass_rate_ci95": {
-      "low": 0.9493470601886036,
-      "high": 1.0
+      "low": 0.9254321971571302,
+      "high": 0.9975441113595678
     },
     "scope_pass_rate": 1.0,
-    "average_keypoint_coverage": 1.0,
+    "average_keypoint_coverage": 0.9907407407407407,
     "total_keypoints": 132,
-    "matched_keypoints": 132,
-    "missing_keypoints": 0,
-    "keypoint_hit_rate": 1.0,
+    "matched_keypoints": 130,
+    "missing_keypoints": 2,
+    "keypoint_hit_rate": 0.9848484848484849,
     "evidence_expected_cases": 57,
     "evidence_hit_cases": 57,
     "evidence_hit_rate": 1.0,
@@ -86,11 +86,11 @@
       },
       "process_boundary": {
         "count": 12,
-        "passed": 12,
-        "pass_rate": 1.0,
+        "passed": 11,
+        "pass_rate": 0.9166666666666666,
         "pass_rate_ci95": {
-          "low": 0.7574992425007574,
-          "high": 1.0
+          "low": 0.6461140782014047,
+          "high": 0.9851352905492264
         }
       },
       "role_lookup": {
@@ -122,7 +122,7 @@
     },
     "average_keypoint_coverage_min": {
       "metric": "average_keypoint_coverage",
-      "actual": 1.0,
+      "actual": 0.9907407407407407,
       "minimum": 0.85,
       "passed": true
     },
@@ -151,23 +151,23 @@
       "passed": true
     }
   },
-  "run_passed": true,
+  "run_passed": false,
   "breakdowns": {
     "modality": {
       "image_ocr": {
         "count": 24,
-        "passed": 24,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 23,
+        "failed": 1,
+        "pass_rate": 0.9583333333333334,
         "pass_rate_ci95": {
-          "low": 0.8620194241710247,
-          "high": 1.0
+          "low": 0.7975777375115778,
+          "high": 0.992606734645195
         },
         "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "average_keypoint_coverage": 0.9722222222222222,
         "total_keypoints": 45,
-        "matched_keypoints": 45,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 43,
+        "keypoint_hit_rate": 0.9555555555555556,
         "evidence_expected_cases": 19,
         "evidence_hit_cases": 19,
         "evidence_hit_rate": 1.0,
@@ -236,18 +236,18 @@
     "difficulty": {
       "complex": {
         "count": 24,
-        "passed": 24,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 23,
+        "failed": 1,
+        "pass_rate": 0.9583333333333334,
         "pass_rate_ci95": {
-          "low": 0.8620194241710247,
-          "high": 1.0
+          "low": 0.7975777375115778,
+          "high": 0.992606734645195
         },
         "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "average_keypoint_coverage": 0.9722222222222222,
         "total_keypoints": 53,
-        "matched_keypoints": 53,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 51,
+        "keypoint_hit_rate": 0.9622641509433962,
         "evidence_expected_cases": 22,
         "evidence_hit_cases": 22,
         "evidence_hit_rate": 1.0,
@@ -420,18 +420,18 @@
       },
       "summary": {
         "count": 17,
-        "passed": 17,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 16,
+        "failed": 1,
+        "pass_rate": 0.9411764705882353,
         "pass_rate_ci95": {
-          "low": 0.8156763396284354,
-          "high": 1.0
+          "low": 0.730174547964372,
+          "high": 0.9895398693548358
         },
         "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "average_keypoint_coverage": 0.9607843137254901,
         "total_keypoints": 40,
-        "matched_keypoints": 40,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 38,
+        "keypoint_hit_rate": 0.95,
         "evidence_expected_cases": 17,
         "evidence_hit_cases": 17,
         "evidence_hit_rate": 1.0,
@@ -604,18 +604,18 @@
       },
       "process_boundary": {
         "count": 12,
-        "passed": 12,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 1,
+        "pass_rate": 0.9166666666666666,
         "pass_rate_ci95": {
-          "low": 0.7574992425007574,
-          "high": 1.0
+          "low": 0.6461140782014047,
+          "high": 0.9851352905492264
         },
         "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "average_keypoint_coverage": 0.9444444444444445,
         "total_keypoints": 26,
-        "matched_keypoints": 26,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 24,
+        "keypoint_hit_rate": 0.9230769230769231,
         "evidence_expected_cases": 12,
         "evidence_hit_cases": 12,
         "evidence_hit_rate": 1.0,
@@ -684,18 +684,18 @@
     "kb_id": {
       "eval-kb-image": {
         "count": 24,
-        "passed": 24,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 23,
+        "failed": 1,
+        "pass_rate": 0.9583333333333334,
         "pass_rate_ci95": {
-          "low": 0.8620194241710247,
-          "high": 1.0
+          "low": 0.7975777375115778,
+          "high": 0.992606734645195
         },
         "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "average_keypoint_coverage": 0.9722222222222222,
         "total_keypoints": 45,
-        "matched_keypoints": 45,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 43,
+        "keypoint_hit_rate": 0.9555555555555556,
         "evidence_expected_cases": 19,
         "evidence_hit_cases": 19,
         "evidence_hit_rate": 1.0,
@@ -767,11 +767,15 @@
     "required_cases": 57,
     "skipped_cases": 0
   },
-  "failure_stage_breakdown": {},
+  "failure_stage_breakdown": {
+    "quality_gate": 1
+  },
   "case_results": [
     {
       "case_id": "eval-v4-md-001",
       "category": "role_lookup",
+      "answer": "- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
+      "preview_excerpt": "# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -825,6 +829,8 @@
     {
       "case_id": "eval-v4-md-002",
       "category": "role_lookup",
+      "answer": "- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
+      "preview_excerpt": "# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -878,6 +884,8 @@
     {
       "case_id": "eval-v4-md-003",
       "category": "approval_summary",
+      "answer": "- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
+      "preview_excerpt": "# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -932,6 +940,8 @@
     {
       "case_id": "eval-v4-md-004",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Please answer from the active knowledge base only.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -980,6 +990,8 @@
     {
       "case_id": "eval-v4-md-005",
       "category": "timeline_sla",
+      "answer": "- P1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.\n- Service desk first-ack SLA is 5 minutes.\n- If the current knowledge base has no confirmable evidence, the assistant must refuse instead of fabricating.",
+      "preview_excerpt": "# War-room Handover SLA\n\n- P1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.\n- Service desk first-ack SLA is 5 minutes.\n- If the current knowledge base has no confirmable evidence, the assistant must refuse instead of fabricating.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1034,6 +1046,8 @@
     {
       "case_id": "eval-v4-md-006",
       "category": "approval_summary",
+      "answer": "- P1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.\n- Service desk first-ack SLA is 5 minutes.\n- If the current knowledge base has no confirmable evidence, the assistant must refuse instead of fabricating.",
+      "preview_excerpt": "# War-room Handover SLA\n\n- P1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.\n- Service desk first-ack SLA is 5 minutes.\n- If the current knowledge base has no confirmable evidence, the assistant must refuse instead of fabricating.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1088,6 +1102,8 @@
     {
       "case_id": "eval-v4-md-007",
       "category": "evidence_operation",
+      "answer": "- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
+      "preview_excerpt": "# Workflow Boundary Note\n\n- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1142,6 +1158,8 @@
     {
       "case_id": "eval-v4-md-008",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1190,6 +1208,8 @@
     {
       "case_id": "eval-v4-pdf-001",
       "category": "role_lookup",
+      "answer": "Payroll release checklist.\nFinal sign-off owner: Operations Director Chen Yu.\nRollback owner: Database Lead Xu Nan.\nThe operator checklist must close before 23:00 Beijing time.\nEvidence package must include doc_id and preview_locator.",
+      "preview_excerpt": "Payroll release checklist.\n        Final sign-off owner: Operations Director Chen Yu.\n        Rollback owner: Database Lead Xu Nan.\n        The operator checklist must close before 23:00 Beijing time.\n        Evidence package must include doc_id and preview_locator.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1243,6 +1263,8 @@
     {
       "case_id": "eval-v4-pdf-002",
       "category": "role_lookup",
+      "answer": "Payroll release checklist.\nFinal sign-off owner: Operations Director Chen Yu.\nRollback owner: Database Lead Xu Nan.\nThe operator checklist must close before 23:00 Beijing time.\nEvidence package must include doc_id and preview_locator.",
+      "preview_excerpt": "Payroll release checklist.\n        Final sign-off owner: Operations Director Chen Yu.\n        Rollback owner: Database Lead Xu Nan.\n        The operator checklist must close before 23:00 Beijing time.\n        Evidence package must include doc_id and preview_locator.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1296,6 +1318,8 @@
     {
       "case_id": "eval-v4-pdf-003",
       "category": "approval_summary",
+      "answer": "Payroll release checklist.\nFinal sign-off owner: Operations Director Chen Yu.\nRollback owner: Database Lead Xu Nan.\nThe operator checklist must close before 23:00 Beijing time.\nEvidence package must include doc_id and preview_locator.",
+      "preview_excerpt": "Payroll release checklist.\n        Final sign-off owner: Operations Director Chen Yu.\n        Rollback owner: Database Lead Xu Nan.\n        The operator checklist must close before 23:00 Beijing time.\n        Evidence package must include doc_id and preview_locator.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1350,6 +1374,8 @@
     {
       "case_id": "eval-v4-pdf-004",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1398,6 +1424,8 @@
     {
       "case_id": "eval-v4-pdf-005",
       "category": "timeline_sla",
+      "answer": "War-room handover sheet.\nPrimary incident commander: SRE Manager Zhao Lin.\nSev1 cutover issues must be escalated to the commander within 10 minutes.\nIf the active knowledge base has no confirmable evidence, the answer must say No confirmable\ninformation is available in the current knowledge base.",
+      "preview_excerpt": "War-room handover sheet.\n        Primary incident commander: SRE Manager Zhao Lin.\n        Sev1 cutover issues must be escalated to the commander within 10 minutes.\n        If the active knowledge base has no confirmable evidence, the answer must say No confirmable\ninformation is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1452,6 +1480,8 @@
     {
       "case_id": "eval-v4-pdf-006",
       "category": "approval_summary",
+      "answer": "War-room handover sheet.\nPrimary incident commander: SRE Manager Zhao Lin.\nSev1 cutover issues must be escalated to the commander within 10 minutes.\nIf the active knowledge base has no confirmable evidence, the answer must say No confirmable\ninformation is available in the current knowledge base.",
+      "preview_excerpt": "War-room handover sheet.\n        Primary incident commander: SRE Manager Zhao Lin.\n        Sev1 cutover issues must be escalated to the commander within 10 minutes.\n        If the active knowledge base has no confirmable evidence, the answer must say No confirmable\ninformation is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1506,6 +1536,8 @@
     {
       "case_id": "eval-v4-pdf-007",
       "category": "evidence_operation",
+      "answer": "Payroll release checklist.\nFinal sign-off owner: Operations Director Chen Yu.\nRollback owner: Database Lead Xu Nan.\nThe operator checklist must close before 23:00 Beijing time.\nEvidence package must include doc_id and preview_locator.",
+      "preview_excerpt": "Payroll release checklist.\n        Final sign-off owner: Operations Director Chen Yu.\n        Rollback owner: Database Lead Xu Nan.\n        The operator checklist must close before 23:00 Beijing time.\n        Evidence package must include doc_id and preview_locator.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1560,6 +1592,8 @@
     {
       "case_id": "eval-v4-pdf-008",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1608,6 +1642,8 @@
     {
       "case_id": "eval-v4-img-001",
       "category": "role_lookup",
+      "answer": "Final approver Zhao Lin.\nRollback owner Sun Kai.\nDeadline 22:45 Beijing time.",
+      "preview_excerpt": "Final approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -1661,6 +1697,8 @@
     {
       "case_id": "eval-v4-img-002",
       "category": "timeline_sla",
+      "answer": "Final approver Zhao Lin.\nRollback owner Sun Kai.\nDeadline 22:45 Beijing time.",
+      "preview_excerpt": "Final approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -1714,6 +1752,8 @@
     {
       "case_id": "eval-v4-img-003",
       "category": "approval_summary",
+      "answer": "Final approver Zhao Lin.\nRollback owner Sun Kai.\nDeadline 22:45 Beijing time.",
+      "preview_excerpt": "Final approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -1768,6 +1808,8 @@
     {
       "case_id": "eval-v4-img-004",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -1816,6 +1858,8 @@
     {
       "case_id": "eval-v4-img-005",
       "category": "timeline_sla",
+      "answer": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes.\nfolder is not an authorization boundary.\nKnowledge base remains the authorization boundary for this escalation board.\nIf evidence is missing, reply No confirmable information is available in the current knowledge base.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -1870,6 +1914,8 @@
     {
       "case_id": "eval-v4-img-006",
       "category": "process_boundary",
+      "answer": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes.\nfolder is not an authorization boundary.\nKnowledge base remains the authorization boundary for this escalation board.\nIf evidence is missing, reply No confirmable information is available in the current knowledge base.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -1925,6 +1971,8 @@
     {
       "case_id": "eval-v4-img-007",
       "category": "process_boundary",
+      "answer": "Folders are organizational objects inside one knowledge base.\nFolder is an organization object, 中文补充：文件夹只是知识库内部的组织对象.\nKnowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -1979,6 +2027,8 @@
     {
       "case_id": "eval-v4-img-008",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2027,6 +2077,8 @@
     {
       "case_id": "eval-v4-md-009",
       "category": "role_lookup",
+      "answer": "- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
+      "preview_excerpt": "# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2080,6 +2132,8 @@
     {
       "case_id": "eval-v4-md-010",
       "category": "timeline_sla",
+      "answer": "- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
+      "preview_excerpt": "# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2133,6 +2187,8 @@
     {
       "case_id": "eval-v4-md-011",
       "category": "approval_summary",
+      "answer": "- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
+      "preview_excerpt": "# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2188,6 +2244,8 @@
     {
       "case_id": "eval-v4-md-012",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2236,6 +2294,8 @@
     {
       "case_id": "eval-v4-md-013",
       "category": "timeline_sla",
+      "answer": "- P1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.\n- Service desk first-ack SLA is 5 minutes.\n- If the current knowledge base has no confirmable evidence, the assistant must refuse instead of fabricating.",
+      "preview_excerpt": "# War-room Handover SLA\n\n- P1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.\n- Service desk first-ack SLA is 5 minutes.\n- If the current knowledge base has no confirmable evidence, the assistant must refuse instead of fabricating.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2289,6 +2349,8 @@
     {
       "case_id": "eval-v4-md-014",
       "category": "process_boundary",
+      "answer": "- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
+      "preview_excerpt": "# Workflow Boundary Note\n\n- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2343,6 +2405,8 @@
     {
       "case_id": "eval-v4-md-015",
       "category": "approval_summary",
+      "answer": "- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
+      "preview_excerpt": "# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2397,6 +2461,8 @@
     {
       "case_id": "eval-v4-md-016",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -2445,6 +2511,8 @@
     {
       "case_id": "eval-v4-pdf-009",
       "category": "timeline_sla",
+      "answer": "Payroll release checklist.\nFinal sign-off owner: Operations Director Chen Yu.\nRollback owner: Database Lead Xu Nan.\nThe operator checklist must close before 23:00 Beijing time.\nEvidence package must include doc_id and preview_locator.",
+      "preview_excerpt": "Payroll release checklist.\n        Final sign-off owner: Operations Director Chen Yu.\n        Rollback owner: Database Lead Xu Nan.\n        The operator checklist must close before 23:00 Beijing time.\n        Evidence package must include doc_id and preview_locator.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2498,6 +2566,8 @@
     {
       "case_id": "eval-v4-pdf-010",
       "category": "role_lookup",
+      "answer": "War-room handover sheet.\nPrimary incident commander: SRE Manager Zhao Lin.\nSev1 cutover issues must be escalated to the commander within 10 minutes.\nIf the active knowledge base has no confirmable evidence, the answer must say No confirmable\ninformation is available in the current knowledge base.",
+      "preview_excerpt": "War-room handover sheet.\n        Primary incident commander: SRE Manager Zhao Lin.\n        Sev1 cutover issues must be escalated to the commander within 10 minutes.\n        If the active knowledge base has no confirmable evidence, the answer must say No confirmable\ninformation is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2551,6 +2621,8 @@
     {
       "case_id": "eval-v4-pdf-011",
       "category": "approval_summary",
+      "answer": "Payroll release checklist.\nFinal sign-off owner: Operations Director Chen Yu.\nRollback owner: Database Lead Xu Nan.\nThe operator checklist must close before 23:00 Beijing time.\nEvidence package must include doc_id and preview_locator.",
+      "preview_excerpt": "Payroll release checklist.\n        Final sign-off owner: Operations Director Chen Yu.\n        Rollback owner: Database Lead Xu Nan.\n        The operator checklist must close before 23:00 Beijing time.\n        Evidence package must include doc_id and preview_locator.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2606,6 +2678,8 @@
     {
       "case_id": "eval-v4-pdf-012",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2654,6 +2728,8 @@
     {
       "case_id": "eval-v4-pdf-013",
       "category": "evidence_operation",
+      "answer": "OCR readiness note for PDF ingestion checks.\nfitz text-layer extraction should run before OCR fallback.\nTests should surface paddleocr dependency readiness.\nTests must not hide readiness behind generic failures.",
+      "preview_excerpt": "OCR readiness note for PDF ingestion checks.\n        fitz text-layer extraction should run before OCR fallback.\n        Tests should surface paddleocr dependency readiness.\n        Tests must not hide readiness behind generic failures.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2708,6 +2784,8 @@
     {
       "case_id": "eval-v4-pdf-014",
       "category": "evidence_operation",
+      "answer": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.\n中文流程说明也要写回当前知识库，避免导入后只剩图片像素。\nScanned PDF content should still become searchable evidence in the active knowledge base.",
+      "preview_excerpt": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.\n        中文流程说明也要写回当前知识库，避免导入后只剩图片像素。\n        Scanned PDF content should still become searchable evidence in the active knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2762,6 +2840,8 @@
     {
       "case_id": "eval-v4-pdf-015",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2810,6 +2890,8 @@
     {
       "case_id": "eval-v4-pdf-016",
       "category": "process_boundary",
+      "answer": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.\n中文流程说明也要写回当前知识库，避免导入后只剩图片像素。\nScanned PDF content should still become searchable evidence in the active knowledge base.",
+      "preview_excerpt": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.\n        中文流程说明也要写回当前知识库，避免导入后只剩图片像素。\n        Scanned PDF content should still become searchable evidence in the active knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2864,6 +2946,8 @@
     {
       "case_id": "eval-v4-img-009",
       "category": "role_lookup",
+      "answer": "Final approver Zhao Lin.\nRollback owner Sun Kai.\nDeadline 22:45 Beijing time.",
+      "preview_excerpt": "Final approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2917,6 +3001,8 @@
     {
       "case_id": "eval-v4-img-010",
       "category": "approval_summary",
+      "answer": "Final approver Zhao Lin.\nRollback owner Sun Kai.\nDeadline 22:45 Beijing time.",
+      "preview_excerpt": "Final approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2972,6 +3058,8 @@
     {
       "case_id": "eval-v4-img-011",
       "category": "evidence_operation",
+      "answer": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets.\n中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
+      "preview_excerpt": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets. 中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3026,6 +3114,8 @@
     {
       "case_id": "eval-v4-img-012",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3074,6 +3164,8 @@
     {
       "case_id": "eval-v4-img-013",
       "category": "process_boundary",
+      "answer": "folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3128,6 +3220,8 @@
     {
       "case_id": "eval-v4-img-014",
       "category": "timeline_sla",
+      "answer": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes.\nfolder is not an authorization boundary.\nKnowledge base remains the authorization boundary for this escalation board.\nIf evidence is missing, reply No confirmable information is available in the current knowledge base.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3181,6 +3275,8 @@
     {
       "case_id": "eval-v4-img-015",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3229,18 +3325,21 @@
     {
       "case_id": "eval-v4-img-016",
       "category": "process_boundary",
+      "answer": "folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
       ],
       "keypoint_total": 3,
       "keypoint_hits": [
+        "authorization boundary"
+      ],
+      "keypoint_missed": [
         "10",
-        "authorization boundary",
         "No confirmable information"
       ],
-      "keypoint_missed": [],
-      "keypoint_coverage": 1.0,
+      "keypoint_coverage": 0.3333333333333333,
       "blocked_term_total": 1,
       "blocked_term_hits": [],
       "blocked_term_clean": true,
@@ -3262,7 +3361,7 @@
       "preview_term_total": 0,
       "preview_term_hits": [],
       "preview_term_coverage": 1.0,
-      "passed": true,
+      "passed": false,
       "modality": "image_ocr",
       "difficulty": "complex",
       "answer_style": "summary",
@@ -3284,6 +3383,8 @@
     {
       "case_id": "eval-v4-md-017",
       "category": "process_boundary",
+      "answer": "- 这是一份专门用于问答完整性回归的 UTF-8 边界说明。\n- 本说明明确指出：知识库仍然是授权边界。\n- 文件夹只承担组织作用，不承担权限隔离。\n- 证据预览仍应返回 doc_id 和 preview_locator。",
+      "preview_excerpt": "# UTF-8 Boundary Note\n\n- 这是一份专门用于问答完整性回归的 UTF-8 边界说明。\n- 本说明明确指出：知识库仍然是授权边界。\n- 文件夹只承担组织作用，不承担权限隔离。\n- 证据预览仍应返回 doc_id 和 preview_locator。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -3339,6 +3440,8 @@
     {
       "case_id": "eval-v4-pdf-017",
       "category": "process_boundary",
+      "answer": "Folder boundary note for the PDF suite.\nFolder is an organization object and not an authorization boundary.\nKnowledge Base remains the range and authorization boundary.",
+      "preview_excerpt": "Folder boundary note for the PDF suite.\n        Folder is an organization object and not an authorization boundary.\n        Knowledge Base remains the range and authorization boundary.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -3396,6 +3499,8 @@
     {
       "case_id": "eval-v4-img-017",
       "category": "process_boundary",
+      "answer": "Folders are organizational objects inside one knowledge base.\nFolder is an organization object, 中文补充：文件夹只是知识库内部的组织对象.\nKnowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3453,6 +3558,8 @@
     {
       "case_id": "eval-v4-md-018",
       "category": "process_boundary",
+      "answer": "- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
+      "preview_excerpt": "# Workflow Boundary Note\n\n- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -3510,6 +3617,8 @@
     {
       "case_id": "eval-v4-pdf-018",
       "category": "evidence_operation",
+      "answer": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.\n中文流程说明也要写回当前知识库，避免导入后只剩图片像素。\nScanned PDF content should still become searchable evidence in the active knowledge base.",
+      "preview_excerpt": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.\n        中文流程说明也要写回当前知识库，避免导入后只剩图片像素。\n        Scanned PDF content should still become searchable evidence in the active knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -3568,6 +3677,8 @@
     {
       "case_id": "eval-v4-img-018",
       "category": "process_boundary",
+      "answer": "folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3625,6 +3736,8 @@
     {
       "case_id": "eval-v5-md-001",
       "category": "long_document",
+      "answer": "Payroll release handbook.\nFinal approval checkpoint closes at 21:40 Beijing time.",
+      "preview_excerpt": "# Payroll Long-form Cutover Handbook\n\nPayroll release handbook.\nWarm-up note: archive stale dashboards after each rehearsal.\nFolder labels stay inside a single knowledge base.\nFinal approval checkpoint closes at 21:40 Beijing time.\nEvidence packets must keep preview_locator aligned with the cited paragraph.\nLegacy dry-run note: the retired rehearsal closed at 18:00 and should not be used for the live answer.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -3678,6 +3791,8 @@
     {
       "case_id": "eval-v5-md-002",
       "category": "cross_document",
+      "answer": "Final approver: Release Manager Li Qing.\nP1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.",
+      "preview_excerpt": "# War-room Handover SLA\n\n- P1 cutover incident must be escalated to on-call manager Zhao Lin within 15 minutes.\n- Service desk first-ack SLA is 5 minutes.\n- If the current knowledge base has no confirmable evidence, the assistant must refuse instead of fabricating.\n# Payroll Cutover Approval Matrix\n\n- Final approver: Release Manager Li Qing.\n- Rollback owner: Platform SRE Wang Lei.\n- Business confirmer: Finance Ops Zhou Yu.\n- Checklist must be signed before 22:30 Beijing time.\n- Evidence preview should resolve back to the original document segment.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -3734,6 +3849,8 @@
     {
       "case_id": "eval-v5-md-003",
       "category": "cross_document",
+      "answer": "workflow-boundary.md: - Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.\nfolder-boundary.md: Folders are organizational objects inside one knowledge base.\nThey help import tree display and browsing, but they do not create a separate authorization boundary.\nQuery scope and access control still stay at the knowledge-base level.\n中文补充：文件夹只是知识库内部的组织对象，不应被当成新的授权边界。\n中文补充：查询范围和访问控制仍然以知识库为边界。",
+      "preview_excerpt": "# Workflow Boundary Note\n\n- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.\n# Folder Boundary Model\n\nFolders are organizational objects inside one knowledge base.\nThey help import tree display and browsing, but they do not create a separate authorization boundary.\nQuery scope and access control still stay at the knowledge-base level.\n中文补充：文件夹只是知识库内部的组织对象，不应被当成新的授权边界。\n中文补充：查询范围和访问控制仍然以知识库为边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -3790,6 +3907,8 @@
     {
       "case_id": "eval-v5-md-004",
       "category": "hard_refusal",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -3838,6 +3957,8 @@
     {
       "case_id": "eval-v5-pdf-001",
       "category": "long_document",
+      "answer": "Payroll long-form handbook.\nFinal approval checkpoint closes at 21:55 Beijing time.",
+      "preview_excerpt": "Payroll long-form handbook.\n        Warm-up note: archive stale dashboards after each rehearsal.\n        Folder labels stay inside a single knowledge base.\n        Final approval checkpoint closes at 21:55 Beijing time.\n        Evidence packets must keep preview_locator aligned with the cited paragraph.\n        Legacy dry-run note: the retired rehearsal closed at 18:30 and should not be used for the live\nanswer.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -3891,6 +4012,8 @@
     {
       "case_id": "eval-v5-pdf-002",
       "category": "cross_document",
+      "answer": "Final sign-off owner: Operations Director Chen Yu.\nPrimary incident commander: SRE Manager Zhao Lin.",
+      "preview_excerpt": "Payroll release checklist.\n        Final sign-off owner: Operations Director Chen Yu.\n        Rollback owner: Database Lead Xu Nan.\n        The operator checklist must close before 23:00 Beijing time.\n        Evidence package must include doc_id and preview_locator.\nWar-room handover sheet.\n        Primary incident commander: SRE Manager Zhao Lin.\n        Sev1 cutover issues must be escalated to the commander within 10 minutes.\n        If the active knowledge base has no confirmable evidence, the answer must say No confirmable\ninformation is available in the current knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -3947,6 +4070,8 @@
     {
       "case_id": "eval-v5-pdf-003",
       "category": "cross_document",
+      "answer": "folder-boundary.pdf: Folder boundary note for the PDF suite.\nFolder is an organization object and not an authorization boundary.\nKnowledge Base remains the range and authorization boundary.\nscope-manual.pdf: Scope contract for PDF knowledge base queries.\nrequested_scope_type must remain single_kb.\neffective_kb_ids must echo the active PDF knowledge base.\nisolation_level remains physical_isolated in the current architecture.",
+      "preview_excerpt": "Folder boundary note for the PDF suite.\n        Folder is an organization object and not an authorization boundary.\n        Knowledge Base remains the range and authorization boundary.\nScope contract for PDF knowledge base queries.\n        requested_scope_type must remain single_kb.\n        effective_kb_ids must echo the active PDF knowledge base.\n        isolation_level remains physical_isolated in the current architecture.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -4003,6 +4128,8 @@
     {
       "case_id": "eval-v5-pdf-004",
       "category": "hard_refusal",
+      "answer": "No confirmable information is available in the current knowledge base. Please answer from the active PDF knowledge base only.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -4051,6 +4178,8 @@
     {
       "case_id": "eval-v5-img-001",
       "category": "long_document",
+      "answer": "Payroll long OCR handbook.\nFinal approval checkpoint closes at 21:50 Beijing time.",
+      "preview_excerpt": "Payroll long OCR handbook. Final approval checkpoint closes at 21:50 Beijing time. Folder names stay inside one knowledge base. preview_locator must stay aligned with the cited evidence. Legacy rehearsal 18:20 is retired and must not be used for the live answer.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -4104,6 +4233,8 @@
     {
       "case_id": "eval-v5-img-002",
       "category": "cross_document",
+      "answer": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing.\nFinal approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.\nFinal approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -4160,6 +4291,8 @@
     {
       "case_id": "eval-v5-img-003",
       "category": "cross_document",
+      "answer": "folder-board.png: Folders are organizational objects inside one knowledge base.\nFolder is an organization object, 中文补充：文件夹只是知识库内部的组织对象.\nKnowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。\nscope-board.png: requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base.\nKnowledge Base remains the authorization boundary for this scope board.",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。\nrequested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base. Knowledge Base remains the authorization boundary for this scope board.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -4216,6 +4349,8 @@
     {
       "case_id": "eval-v5-img-004",
       "category": "hard_refusal",
+      "answer": "No confirmable information is available in the current knowledge base. Please answer from the active knowledge base only.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -4264,6 +4399,8 @@
     {
       "case_id": "eval-v5-md-005",
       "category": "evidence_operation",
+      "answer": "- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
+      "preview_excerpt": "# Workflow Boundary Note\n\n- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -4318,6 +4455,8 @@
     {
       "case_id": "eval-v5-md-006",
       "category": "process_boundary",
+      "answer": "- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
+      "preview_excerpt": "# Workflow Boundary Note\n\n- Folder path `cutover/runbook/` is an internal organization path, not an authorization boundary.\n- Query scope and access control remain at the knowledge base level.\n- Evidence preview must include `doc_id` and `preview_locator`.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -4373,6 +4512,8 @@
     {
       "case_id": "eval-v5-pdf-005",
       "category": "evidence_operation",
+      "answer": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.",
+      "preview_excerpt": "handover window 扫描页没有文字层时，OCR fallback must merge every predict batch for the same page.\n        中文流程说明也要写回当前知识库，避免导入后只剩图片像素。\n        Scanned PDF content should still become searchable evidence in the active knowledge base.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -4427,6 +4568,8 @@
     {
       "case_id": "eval-v5-pdf-006",
       "category": "long_document",
+      "answer": "Payroll long-form handbook.\nWarm-up note: archive stale dashboards after each rehearsal.\nLegacy dry-run note: the retired rehearsal closed at 18:30 and should not be used for the live",
+      "preview_excerpt": "Payroll long-form handbook.\n        Warm-up note: archive stale dashboards after each rehearsal.\n        Folder labels stay inside a single knowledge base.\n        Final approval checkpoint closes at 21:55 Beijing time.\n        Evidence packets must keep preview_locator aligned with the cited paragraph.\n        Legacy dry-run note: the retired rehearsal closed at 18:30 and should not be used for the live\nanswer.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -4480,6 +4623,8 @@
     {
       "case_id": "eval-v5-img-005",
       "category": "evidence_operation",
+      "answer": "Payroll long OCR handbook.\npreview_locator must stay aligned with the cited evidence.",
+      "preview_excerpt": "Payroll long OCR handbook. Final approval checkpoint closes at 21:50 Beijing time. Folder names stay inside one knowledge base. preview_locator must stay aligned with the cited evidence. Legacy rehearsal 18:20 is retired and must not be used for the live answer.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -4533,6 +4678,8 @@
     {
       "case_id": "eval-v5-img-006",
       "category": "approval_summary",
+      "answer": "Final approver Zhao Lin.\nDeadline 22:45 Beijing time.",
+      "preview_excerpt": "Final approver Zhao Lin. Rollback owner Sun Kai. Deadline 22:45 Beijing time.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -4585,7 +4732,33 @@
       "failure_message": ""
     }
   ],
-  "failures": [],
+  "failures": [
+    {
+      "case_id": "eval-v4-img-016",
+      "kb_id": "eval-kb-image",
+      "modality": "image_ocr",
+      "difficulty": "complex",
+      "category": "process_boundary",
+      "failure_stage": "quality_gate",
+      "failure_message": "contract or metric mismatch",
+      "keypoint_missed": [
+        "10",
+        "No confirmable information"
+      ],
+      "blocked_term_hits": [],
+      "returned_titles": [
+        "escalation-whiteboard-business.png"
+      ],
+      "answer": "folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board.",
+      "preview_excerpt": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
+      "source_count_match": true,
+      "evidence_hit": true,
+      "preview_resolvable": true,
+      "preview_requested": true,
+      "response_status_code": 200,
+      "preview_status_code": 200
+    }
+  ],
   "import_summary": {
     "total_kbs": 3,
     "total_files": 27,
@@ -4605,8 +4778,8 @@
     "total_nodes_with_embedding_count": 27,
     "nodes_without_embedding_count": 0,
     "total_nodes_without_embedding_count": 0,
-    "input_text_chars": 6990,
-    "total_input_text_chars": 6990,
+    "input_text_chars": 6988,
+    "total_input_text_chars": 6988,
     "ocr_success_count": 6,
     "total_ocr_success_count": 6,
     "ocr_no_text_count": 0,
@@ -4633,13 +4806,13 @@
     "total_dependency_missing_count": 0,
     "asset_registered_count": 6,
     "total_asset_registered_count": 6,
-    "import_total_ms": 264.08700000000005,
-    "total_import_ms": 264.08700000000005,
+    "import_total_ms": 551.852,
+    "total_import_ms": 551.852,
     "asset_registered_without_index_count": 0,
     "success_rate": 1.0,
     "failed_rate": 0.0,
     "empty_rate": 0.0,
-    "avg_input_text_chars_per_doc": 258.8888888888889,
+    "avg_input_text_chars_per_doc": 258.81481481481484,
     "avg_indexed_chunks_per_doc": 1.0,
     "nodes_without_embedding_rate": 0.0,
     "quality_signal_tags": [],
@@ -4647,7 +4820,7 @@
       "eval-kb-image": {
         "kb_id": "eval-kb-image",
         "modality": "image_ocr",
-        "receipt_id": "kb-file-import-bb19a3fcbb1b4c7aaeaf33f254edf08e",
+        "receipt_id": "kb-file-import-3b76fe32eb7044d7b71e71f255e9758a",
         "import_mode": "preserve_tree",
         "headline": "成功导入 6 个文件",
         "total_files": 6,
@@ -4673,7 +4846,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 6,
-        "import_total_ms": 77.903,
+        "import_total_ms": 182.348,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
@@ -4688,7 +4861,7 @@
       "eval-kb-markdown": {
         "kb_id": "eval-kb-markdown",
         "modality": "markdown",
-        "receipt_id": "kb-file-import-335a8b0bb73f4cff812e23ed9f169111",
+        "receipt_id": "kb-file-import-e65a7d7bcc9349a2940d25ddff3594c0",
         "import_mode": "preserve_tree",
         "headline": "成功导入 12 个文件",
         "total_files": 12,
@@ -4714,7 +4887,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 87.43,
+        "import_total_ms": 206.249,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
@@ -4729,7 +4902,7 @@
       "eval-kb-pdf": {
         "kb_id": "eval-kb-pdf",
         "modality": "pdf",
-        "receipt_id": "kb-file-import-77da069696974665bede7d5ed362ea75",
+        "receipt_id": "kb-file-import-04167810987a44e696ca44f5aea90113",
         "import_mode": "preserve_tree",
         "headline": "成功导入 9 个文件",
         "total_files": 9,
@@ -4741,7 +4914,7 @@
         "node_count": 9,
         "nodes_with_embedding_count": 9,
         "nodes_without_embedding_count": 0,
-        "input_text_chars": 2347,
+        "input_text_chars": 2345,
         "ocr_success_count": 0,
         "ocr_no_text_count": 0,
         "ocr_failed_count": 0,
@@ -4755,14 +4928,14 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 98.754,
+        "import_total_ms": 163.255,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
         "success_rate": 1.0,
         "failed_rate": 0.0,
         "empty_rate": 0.0,
-        "avg_input_text_chars_per_doc": 260.77777777777777,
+        "avg_input_text_chars_per_doc": 260.55555555555554,
         "avg_indexed_chunks_per_doc": 1.0,
         "nodes_without_embedding_rate": 0.0,
         "quality_signal_tags": []
@@ -4795,7 +4968,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 6,
-        "import_total_ms": 77.903,
+        "import_total_ms": 182.348,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
@@ -4833,7 +5006,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 87.43,
+        "import_total_ms": 206.249,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
@@ -4857,7 +5030,7 @@
         "node_count": 9,
         "nodes_with_embedding_count": 9,
         "nodes_without_embedding_count": 0,
-        "input_text_chars": 2347,
+        "input_text_chars": 2345,
         "ocr_success_count": 0,
         "ocr_no_text_count": 0,
         "ocr_failed_count": 0,
@@ -4871,14 +5044,14 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 98.754,
+        "import_total_ms": 163.255,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
         "success_rate": 1.0,
         "failed_rate": 0.0,
         "empty_rate": 0.0,
-        "avg_input_text_chars_per_doc": 260.77777777777777,
+        "avg_input_text_chars_per_doc": 260.55555555555554,
         "avg_indexed_chunks_per_doc": 1.0,
         "nodes_without_embedding_rate": 0.0,
         "quality_signal_tags": []
@@ -4898,9 +5071,9 @@
         "quality_signal_tags": [],
         "signal_count": 0,
         "qa_total_cases": 24,
-        "qa_passed_cases": 24,
-        "qa_failed_cases": 0,
-        "qa_pass_rate": 1.0,
+        "qa_passed_cases": 23,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.9583333333333334,
         "qa_scope_pass_rate": 1.0,
         "qa_evidence_hit_rate": 1.0,
         "qa_preview_resolvable_rate": 1.0,
@@ -4970,8 +5143,8 @@
         "import_failed_count": 0,
         "import_empty_count": 0,
         "import_document_count": 9,
-        "import_input_text_chars": 2347,
-        "import_avg_input_text_chars_per_doc": 260.77777777777777,
+        "import_input_text_chars": 2345,
+        "import_avg_input_text_chars_per_doc": 260.55555555555554,
         "import_nodes_without_embedding_count": 0,
         "import_nodes_without_embedding_rate": 0.0,
         "import_total_ocr_failed_count": 0,
@@ -4986,9 +5159,9 @@
         "quality_signal_tags": [],
         "signal_count": 0,
         "qa_total_cases": 24,
-        "qa_passed_cases": 24,
-        "qa_failed_cases": 0,
-        "qa_pass_rate": 1.0,
+        "qa_passed_cases": 23,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.9583333333333334,
         "qa_scope_pass_rate": 1.0,
         "qa_evidence_hit_rate": 1.0,
         "qa_preview_resolvable_rate": 1.0,
@@ -5056,8 +5229,8 @@
         "import_failed_count": 0,
         "import_empty_count": 0,
         "import_document_count": 9,
-        "import_input_text_chars": 2347,
-        "import_avg_input_text_chars_per_doc": 260.77777777777777,
+        "import_input_text_chars": 2345,
+        "import_avg_input_text_chars_per_doc": 260.55555555555554,
         "import_nodes_without_embedding_count": 0,
         "import_nodes_without_embedding_rate": 0.0,
         "import_total_ocr_failed_count": 0,
@@ -5068,7 +5241,7 @@
     }
   },
   "artifacts": {
-    "json": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v5_business_plus-semireal-report.json",
-    "markdown": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v5_business_plus-semireal-report.md"
+    "json": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v5_business_plus-semireal-report.json",
+    "markdown": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v5_business_plus-semireal-report.md"
   }
 }

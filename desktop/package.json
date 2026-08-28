@@ -10,6 +10,7 @@
     "start": "electron .",
     "build": "npm run build:web && node scripts/build-target.js",
     "build:web": "cd ../webapp && npm run build",
+    "test": "node --test scripts/build-target.test.js scripts/notarization-credentials.test.js scripts/notarize-mac.test.js scripts/release-preflight.test.js scripts/verify-mac-release.test.js scripts/verify-package.test.js scripts/verify-python-runtime.test.js scripts/verify-release-config.test.js src/csp.test.js src/desktop-bridge-contract.test.js src/desktop-launch-config.test.js src/python-process.test.js src/renderer-entry.test.js src/runtime-config.test.js src/runtime-paths.test.js src/bootstrap-messages.test.js src/desktop-bootstrap.test.js",
     "verify:python-runtime": "node scripts/verify-python-runtime.js",
     "build:preflight": "node scripts/verify-release-config.js && npm run verify:python-runtime && node scripts/release-preflight.js",
     "release:preflight": "npm run verify:python-runtime && node scripts/release-preflight.js --strict",
@@ -69,8 +70,8 @@
         "to": "run_api.py"
       },
       {
-        "from": "../requirements.txt",
-        "to": "requirements.txt"
+        "from": "../requirements-runtime.txt",
+        "to": "requirements-runtime.txt"
       },
       {
         "from": "../localmodels",

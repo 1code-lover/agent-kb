@@ -8,6 +8,7 @@ import json
 import os
 import secrets
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,36 @@ def _chmod_private(path: Path) -> None:
         pass
 
 
+def _atomic_write_text(path: Path, value: str, *, chmod_private: bool = False) -> None:
+    """原子写入文本文件，并在 Windows 上对临时锁做有限重试。"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f"{path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
+    try:
+        with tmp.open("w", encoding="utf-8") as handle:
+            handle.write(value)
+            handle.flush()
+            os.fsync(handle.fileno())
+        if chmod_private:
+            _chmod_private(tmp)
+
+        last_exc: PermissionError | None = None
+        for attempt in range(5):
+            try:
+                os.replace(tmp, path)
+                last_exc = None
+                break
+            except PermissionError as exc:
+                last_exc = exc
+                time.sleep(0.02 * (attempt + 1))
+
+        if last_exc is not None:
+            raise last_exc
+        if chmod_private:
+            _chmod_private(path)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
 class AccessTokenService:
     """创建、验证、列出和撤销只读令牌。"""
 
@@ -66,16 +97,8 @@ class AccessTokenService:
             if path.exists():
                 _chmod_private(path)
                 return path.read_text(encoding="utf-8").strip()
-            path.parent.mkdir(parents=True, exist_ok=True)
             value = secrets.token_urlsafe(48)
-            tmp = path.with_name(f"{path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
-            try:
-                tmp.write_text(value, encoding="utf-8")
-                _chmod_private(tmp)
-                os.replace(tmp, path)
-                _chmod_private(path)
-            finally:
-                tmp.unlink(missing_ok=True)
+            _atomic_write_text(path, value, chmod_private=True)
             return value
 
     def _pepper(self) -> bytes:
@@ -97,18 +120,8 @@ class AccessTokenService:
         return value
 
     def _write_unlocked(self, records: list[dict[str, Any]]) -> None:
-        self.store_path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = self.store_path.with_name(f"{self.store_path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
-        try:
-            with tmp.open("w", encoding="utf-8") as handle:
-                json.dump(records, handle, ensure_ascii=False, indent=2, sort_keys=True)
-                handle.flush()
-                os.fsync(handle.fileno())
-            _chmod_private(tmp)
-            os.replace(tmp, self.store_path)
-            _chmod_private(self.store_path)
-        finally:
-            tmp.unlink(missing_ok=True)
+        payload = json.dumps(records, ensure_ascii=False, indent=2, sort_keys=True)
+        _atomic_write_text(self.store_path, payload, chmod_private=True)
 
     def _hash_token(self, token: str) -> str:
         return hmac.new(self._pepper(), token.encode("utf-8"), hashlib.sha256).hexdigest()

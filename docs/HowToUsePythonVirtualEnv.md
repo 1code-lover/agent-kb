@@ -1,35 +1,35 @@
-# Create an environment with venv and installing Streamlit and other packages with pip.
-# Refer to: https://docs.streamlit.io/get-started/installation/command-line
-### 1. Open a terminal and navigate to your project folder
-```zsh
-cd ThinkRAG
-```
-### 2. In your terminal, type:
-```zsh
-python -m venv .venv
-```
-A folder named ".venv" will appear in your project. This directory is where your virtual environment and its dependencies are installed.
-### 3. Activate your environment with one of the following commands
-```zsh
-# Windows command prompt
-.venv\Scripts\activate.bat
+# HowToUsePythonVirtualEnv（compatibility redirect）
 
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
+## Current status
 
-# macOS and Linux
-source .venv/bin/activate
-```
-Once activated, you will see your environment name in parentheses before your prompt. "(.venv)"
-### 4. In the terminal with your environment activated, install all required packages:
-```zsh
-pip3 install -r requirements.txt
-```
-### 5. Run your Streamlit app
-```zsh
-python3 -m streamlit run app.py
-```
-### 6. When you're done using this environment, return to your normal shell by typing:
-```zsh
-deactivate
-```
+This file is kept only as a **root-level compatibility redirect** so that historical links do not keep serving an outdated Streamlit-first setup guide.
+
+- **Current source of truth**: `docs/guide/HowToUsePythonVirtualEnv.md`
+- **Current primary local entry**: FastAPI + React (Vite)
+- **Recommended Python profile**: `requirements-runtime.txt`
+- **Legacy Streamlit path**: allowed only when `KB_ALLOW_LEGACY_STREAMLIT=1` is explicitly set
+
+## What to use now
+
+If you want the current project setup flow, open:
+
+- `docs/guide/HowToUsePythonVirtualEnv.md`
+
+That guide contains the maintained instructions for:
+
+1. creating and activating a virtual environment;
+2. installing `requirements-runtime.txt` first, then `requirements.txt` only when full local extras are needed;
+3. starting the current local stack through `start_all.ps1` / `start_dev.ps1` or `python run_api.py`;
+4. opting into the historical Streamlit UI only with `KB_ALLOW_LEGACY_STREAMLIT=1`.
+
+## Why this file still exists
+
+1. historical docs and external links may still point to `docs/HowToUsePythonVirtualEnv.md`;
+2. deleting it outright would create broken links and more ambiguity;
+3. keeping it as a redirect prevents the old “install everything then run Streamlit” workflow from drifting back into the default narrative.
+
+## Explicit boundary
+
+- Do **not** treat this file as the maintained environment guide;
+- do **not** restore `python -m streamlit run app.py` as the default startup path here;
+- if the environment/setup contract changes, update `docs/guide/HowToUsePythonVirtualEnv.md` instead of copying full instructions back into this file.

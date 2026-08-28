@@ -1,0 +1,3242 @@
+[
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-001",
+    "kb_id": "eval-kb-markdown",
+    "question": "刚才看的 Payroll cutover approval matrix 里面，最终审批人是谁？",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Li Qing"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Chen Yu"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": [],
+    "history_turns": [
+      "先看一下 Payroll cutover approval matrix。"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-002",
+    "kb_id": "eval-kb-markdown",
+    "question": "这个 cutover 文档里的 rollback owner 是谁？",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Wang Lei"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Sun Kai"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-003",
+    "kb_id": "eval-kb-markdown",
+    "question": "最终审批人和 rollback owner 分别是谁？",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Li Qing",
+      "Wang Lei"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "same owner Zhao Lin"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-004",
+    "kb_id": "eval-kb-markdown",
+    "question": "文档里有没有写 CAB ticket 编号？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "CAB-2048"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "cutover-approval.md"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-005",
+    "kb_id": "eval-kb-markdown",
+    "question": "P1 cutover incident 需要在几分钟内升级给谁？",
+    "source_doc": "handover-sla.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['handover-sla.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "15",
+      "Zhao Lin"
+    ],
+    "required_evidence_docs": [
+      "handover-sla.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "10 minutes"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-006",
+    "kb_id": "eval-kb-markdown",
+    "question": "总结这个 handover SLA 里最关键的两个时限。",
+    "source_doc": "handover-sla.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['handover-sla.md']",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "15",
+      "5"
+    ],
+    "required_evidence_docs": [
+      "handover-sla.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "23:00"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-007",
+    "kb_id": "eval-kb-markdown",
+    "question": "workflow boundary note 里写的 evidence preview 至少要带哪两个字段？",
+    "source_doc": "workflow-boundary.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['workflow-boundary.md']",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "workflow-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "room number"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-008",
+    "kb_id": "eval-kb-markdown",
+    "question": "有没有记录会议密码？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "folder admin"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "workflow-boundary.md"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-001",
+    "kb_id": "eval-kb-pdf",
+    "question": "那里面 final sign-off owner 是谁？",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Chen Yu"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Li Qing"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": [],
+    "history_turns": [
+      "先看一下 Payroll release checklist。"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-002",
+    "kb_id": "eval-kb-pdf",
+    "question": "这个 PDF 里的 rollback owner 是谁？",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Xu Nan"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Wang Lei"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-003",
+    "kb_id": "eval-kb-pdf",
+    "question": "在 Payroll release checklist 里，final sign-off owner 和 rollback owner 分别是谁？",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Chen Yu",
+      "Xu Nan"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "same owner Wang Lei"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-004",
+    "kb_id": "eval-kb-pdf",
+    "question": "请给出这份发布清单的变更单编号。",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "CHG-7788"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-005",
+    "kb_id": "eval-kb-pdf",
+    "question": "sev1 cutover 问题需要在几分钟内升级？",
+    "source_doc": "war-room-handover-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['war-room-handover-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "10",
+      "Zhao Lin"
+    ],
+    "required_evidence_docs": [
+      "war-room-handover-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "15 minutes"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-006",
+    "kb_id": "eval-kb-pdf",
+    "question": "总结这份 war-room 交接单里的升级对象和时限。",
+    "source_doc": "war-room-handover-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['war-room-handover-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin",
+      "10"
+    ],
+    "required_evidence_docs": [
+      "war-room-handover-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "23:00"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-007",
+    "kb_id": "eval-kb-pdf",
+    "question": "证据 package 至少要包含哪两个字段？",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "simple",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "bridge-payroll-01"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-008",
+    "kb_id": "eval-kb-pdf",
+    "question": "请给出这份材料的座机号码。",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "2026-08-01"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "war-room-handover-business.pdf"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-001",
+    "kb_id": "eval-kb-image",
+    "question": "那上面写的 final approver 是谁？",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Li Qing"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": [],
+    "history_turns": [
+      "先看一下 approval whiteboard。"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-002",
+    "kb_id": "eval-kb-image",
+    "question": "这块 approval whiteboard 上的 deadline 是几点？",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "complex",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "22:45"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "23:00"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-003",
+    "kb_id": "eval-kb-image",
+    "question": "在这块 whiteboard 上，final approver 和 rollback owner 分别是谁？",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin",
+      "Sun Kai"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "same owner Chen Yu"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-004",
+    "kb_id": "eval-kb-image",
+    "question": "有没有记录会议密码？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "PASS-8899"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-005",
+    "kb_id": "eval-kb-image",
+    "question": "P1 cutover 问题要在几分钟内升级给谁？",
+    "source_doc": "escalation-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['escalation-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "10",
+      "Liu Chang"
+    ],
+    "required_evidence_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Zhao Lin"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-006",
+    "kb_id": "eval-kb-image",
+    "question": "总结这块 escalation whiteboard 里与边界相关的两条规则。",
+    "source_doc": "escalation-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['escalation-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "10",
+      "Liu Chang",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder admin"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-007",
+    "kb_id": "eval-kb-image",
+    "question": "用一句话说明 folder 和 knowledge base 的边界关系。",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_IMAGE_IMPORTS['folder-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "simple",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "authorization boundary",
+      "knowledge base"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "new authorization domain"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-008",
+    "kb_id": "eval-kb-image",
+    "question": "有没有记录座机号码？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "138-0000-0000"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-009",
+    "kb_id": "eval-kb-markdown",
+    "question": "在 Payroll cutover approval 里，business confirmer 是谁？",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhou Yu"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Zhao Lin"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-010",
+    "kb_id": "eval-kb-markdown",
+    "question": "这份 cutover checklist 要在北京时间几点前签署？",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "22:30"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "22:45"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-011",
+    "kb_id": "eval-kb-markdown",
+    "question": "总结 Payroll cutover approval 里的三个关键角色。",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Li Qing",
+      "Wang Lei",
+      "Zhou Yu"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Chen Yu"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-012",
+    "kb_id": "eval-kb-markdown",
+    "question": "这份审批矩阵里有没有写变更编号和会议桥编号？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "bridge-payroll-01"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "cutover-approval.md"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-013",
+    "kb_id": "eval-kb-markdown",
+    "question": "handover SLA 里的 service desk first-ack 是几分钟？",
+    "source_doc": "handover-sla.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['handover-sla.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "5"
+    ],
+    "required_evidence_docs": [
+      "handover-sla.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "23:00"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-014",
+    "kb_id": "eval-kb-markdown",
+    "question": "workflow note 里的 cutover/runbook/ 属于什么路径？",
+    "source_doc": "workflow-boundary.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['workflow-boundary.md']",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "complex",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "not an authorization boundary",
+      "knowledge base"
+    ],
+    "required_evidence_docs": [
+      "workflow-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "new authorization domain"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-015",
+    "kb_id": "eval-kb-markdown",
+    "question": "最终审批人和 business confirmer 分别是谁？",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Li Qing",
+      "Zhou Yu"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Zhao Lin"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-016",
+    "kb_id": "eval-kb-markdown",
+    "question": "这份交接规范里有没有写值守座机号码？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "400-800-1234"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "handover-sla.md"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-009",
+    "kb_id": "eval-kb-pdf",
+    "question": "Payroll release checklist 里的 operator checklist 最晚几点前关闭？",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "23:00"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "22:45"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-010",
+    "kb_id": "eval-kb-pdf",
+    "question": "war-room handover 里的 primary incident commander 是谁？",
+    "source_doc": "war-room-handover-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['war-room-handover-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin"
+    ],
+    "required_evidence_docs": [
+      "war-room-handover-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Liu Chang"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-011",
+    "kb_id": "eval-kb-pdf",
+    "question": "总结 Payroll release checklist 里的负责人和关单时限。",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Chen Yu",
+      "Xu Nan",
+      "23:00"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Li Qing"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-012",
+    "kb_id": "eval-kb-pdf",
+    "question": "请给出这份发布清单的桥接会议编号。",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "bridge-payroll-01"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "release-checklist-business.pdf"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-013",
+    "kb_id": "eval-kb-pdf",
+    "question": "OCR readiness note 里，文字层提取和 OCR fallback 的顺序是什么？",
+    "source_doc": "ocr-readiness.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['ocr-readiness.pdf']",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "complex",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "fitz",
+      "OCR fallback"
+    ],
+    "required_evidence_docs": [
+      "ocr-readiness.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "OCR first"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-014",
+    "kb_id": "eval-kb-pdf",
+    "question": "scan fallback 这份扫描 PDF 里，OCR fallback 后要把什么写回索引，才能继续变成可检索证据？",
+    "source_doc": "scan-fallback.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['scan-fallback.pdf']",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "merge every predict batch",
+      "searchable evidence"
+    ],
+    "required_evidence_docs": [
+      "scan-fallback.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "skip indexing"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-015",
+    "kb_id": "eval-kb-pdf",
+    "question": "请给出负责人手机号。",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "138-8888-0000"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "war-room-handover-business.pdf"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-016",
+    "kb_id": "eval-kb-pdf",
+    "question": "scan fallback note 里，扫描 PDF 的内容最后应该落在哪个知识范围里？",
+    "source_doc": "scan-fallback.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['scan-fallback.pdf']",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "active knowledge base",
+      "searchable evidence"
+    ],
+    "required_evidence_docs": [
+      "scan-fallback.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "global memory"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-009",
+    "kb_id": "eval-kb-image",
+    "question": "approval whiteboard 上写的 rollback owner 是谁？",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "role_lookup",
+    "answerable": true,
+    "expected_keypoints": [
+      "Sun Kai"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Wang Lei"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-010",
+    "kb_id": "eval-kb-image",
+    "question": "总结这块 approval whiteboard 的三个关键信息。",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin",
+      "Sun Kai",
+      "22:45"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "23:00"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-011",
+    "kb_id": "eval-kb-image",
+    "question": "evidence board 上说 OCR 证据结果至少要带哪两个字段？",
+    "source_doc": "evidence-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_IMAGE_IMPORTS['evidence-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "evidence-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "room number"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-012",
+    "kb_id": "eval-kb-image",
+    "question": "这张审批白板里有没有写桥接会议编号？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "bridge-ocr-01"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-013",
+    "kb_id": "eval-kb-image",
+    "question": "escalation board 里，folder 和 knowledge base 的边界关系是什么？",
+    "source_doc": "escalation-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['escalation-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "folder is not an authorization boundary",
+      "knowledge base"
+    ],
+    "required_evidence_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder becomes boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-014",
+    "kb_id": "eval-kb-image",
+    "question": "这块 escalation board 里写的 on-call manager 是谁？",
+    "source_doc": "escalation-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['escalation-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "timeline_sla",
+    "answerable": true,
+    "expected_keypoints": [
+      "Liu Chang"
+    ],
+    "required_evidence_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Zhao Lin"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-015",
+    "kb_id": "eval-kb-image",
+    "question": "这张升级白板里有没有写值守座机号码？",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "021-5566-7788"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-016",
+    "kb_id": "eval-kb-image",
+    "question": "请用一句话总结 Liu Chang escalation board 的三条规则：10 minutes、authorization boundary、No confirmable information。",
+    "source_doc": "escalation-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['escalation-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "10",
+      "authorization boundary",
+      "No confirmable information"
+    ],
+    "required_evidence_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder admin"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-017",
+    "kb_id": "eval-kb-markdown",
+    "question": "在 UTF-8 边界说明里，什么对象仍然是授权边界？",
+    "source_doc": "utf8-boundary.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['utf8-boundary.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "知识库仍然是授权边界"
+    ],
+    "required_evidence_docs": [
+      "utf8-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "知识库仍然是授权边界"
+    ],
+    "forbidden_terms": [
+      "文件夹仍然是授权边界"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-017",
+    "kb_id": "eval-kb-pdf",
+    "question": "folder-boundary PDF 里，请用完整短句回答哪个对象仍然是 authorization boundary？",
+    "source_doc": "folder-boundary.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_PDF_IMPORTS['folder-boundary.pdf']",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "Knowledge Base",
+      "authorization boundary"
+    ],
+    "forbidden_terms": [
+      "Folder is the authorization boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-017",
+    "kb_id": "eval-kb-image",
+    "question": "folder board 里，请用完整短句回答图片 OCR 回答仍然要遵守什么边界？",
+    "source_doc": "folder-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_IMAGE_IMPORTS['folder-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Knowledge Base",
+      "知识库边界"
+    ],
+    "required_evidence_docs": [
+      "folder-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "Knowledge Base",
+      "知识库边界"
+    ],
+    "forbidden_terms": [
+      "folder 是授权边界"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-md-018",
+    "kb_id": "eval-kb-markdown",
+    "question": "请用完整短句回答 workflow boundary note 里，access control 保持在哪个层级？",
+    "source_doc": "workflow-boundary.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['workflow-boundary.md']",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "access control",
+      "knowledge base level"
+    ],
+    "required_evidence_docs": [
+      "workflow-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "access control",
+      "knowledge base level"
+    ],
+    "forbidden_terms": [
+      "folder path is the authorization boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-pdf-018",
+    "kb_id": "eval-kb-pdf",
+    "question": "在 scan-fallback PDF 里，请用完整短句回答 OCR fallback 对同一页必须合并什么？",
+    "source_doc": "scan-fallback.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['scan-fallback.pdf']",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "OCR fallback",
+      "merge every predict batch",
+      "same page"
+    ],
+    "required_evidence_docs": [
+      "scan-fallback.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "OCR fallback",
+      "merge every predict batch"
+    ],
+    "forbidden_terms": [
+      "Folder is the authorization boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v4-img-018",
+    "kb_id": "eval-kb-image",
+    "question": "请用完整短句回答 escalation whiteboard business 里，什么对象仍然是 authorization boundary？",
+    "source_doc": "escalation-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['escalation-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Knowledge base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "knowledge base",
+      "authorization boundary"
+    ],
+    "forbidden_terms": [
+      "folder is the authorization boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-md-001",
+    "kb_id": "eval-kb-markdown",
+    "question": "In the long handbook, what time does the final approval checkpoint close?",
+    "source_doc": "long-cutover-handbook.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['long-cutover-handbook.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "long_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "21:40 Beijing time"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "18:00"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-md-002",
+    "kb_id": "eval-kb-markdown",
+    "question": "那最终审批人和 on-call manager 分别是谁？",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "Li Qing",
+      "Zhao Lin"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md",
+      "handover-sla.md"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Chen Yu"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": [],
+    "history_turns": [
+      "先比较一下 payroll cutover approval matrix 和 war-room handover SLA。"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-md-003",
+    "kb_id": "eval-kb-markdown",
+    "question": "Across the workflow boundary note and the folder boundary model, what remains the authorization boundary?",
+    "source_doc": "workflow-boundary.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['workflow-boundary.md']",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "knowledge base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "workflow-boundary.md",
+      "folder-boundary.md"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "forbidden_terms": [
+      "physical isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-md-004",
+    "kb_id": "eval-kb-markdown",
+    "question": "Does the current knowledge base mention any plasma escrow ledger or shard witness?",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "complex",
+    "category": "hard_refusal",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "plasma escrow"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "long-cutover-handbook.md",
+      "cutover-approval.md"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-pdf-001",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the long PDF handbook, what time does the final approval checkpoint close?",
+    "source_doc": "long-cutover-handbook.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['long-cutover-handbook.pdf']",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "long_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "21:55 Beijing time"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "18:30"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-pdf-002",
+    "kb_id": "eval-kb-pdf",
+    "question": "那 final sign-off owner 和 incident commander 分别是谁？",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "Chen Yu",
+      "Zhao Lin"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf",
+      "war-room-handover-business.pdf"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Liu Chang"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": [],
+    "history_turns": [
+      "先比较一下 payroll release checklist 和 war-room handover sheet。"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-pdf-003",
+    "kb_id": "eval-kb-pdf",
+    "question": "Across the scope manual and the folder boundary note, what remains the authorization boundary rule?",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_PDF_IMPORTS['scope-manual.pdf']",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "single_kb",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf",
+      "folder-boundary.pdf"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "forbidden_terms": [
+      "physical isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-pdf-004",
+    "kb_id": "eval-kb-pdf",
+    "question": "Does the current PDF knowledge base mention any zephyr lattice mirror or blue token?",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "hard_refusal",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "blue token"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "release-checklist-business.pdf",
+      "long-cutover-handbook.pdf"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-img-001",
+    "kb_id": "eval-kb-image",
+    "question": "On the long OCR board, what time does the final approval checkpoint close?",
+    "source_doc": "long-cutover-handbook-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['long-cutover-handbook-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "long_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "21:50 Beijing time"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "18:20"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-img-002",
+    "kb_id": "eval-kb-image",
+    "question": "那 final approver 和 on-call manager 分别是谁？",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "medium",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin",
+      "Liu Chang"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png",
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Chen Yu"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": [],
+    "history_turns": [
+      "先比较一下 approval whiteboard 和 escalation whiteboard。"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-img-003",
+    "kb_id": "eval-kb-image",
+    "question": "Across the scope board and the folder board, what rule says folders are organizational objects while single_kb remains the authorization boundary?",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_IMAGE_IMPORTS['scope-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "single_kb",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png",
+      "folder-board.png"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "forbidden_terms": [
+      "physical isolation"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-img-004",
+    "kb_id": "eval-kb-image",
+    "question": "Does the current image knowledge base mention any zephyr lattice mirror or blue token?",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "hard_refusal",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "blue token"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "approval-whiteboard-business.png",
+      "long-cutover-handbook-board.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-md-005",
+    "kb_id": "eval-kb-markdown",
+    "question": "workflow boundary note ?????evidence preview ?????????",
+    "source_doc": "workflow-boundary.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['workflow-boundary.md']",
+    "modality": "markdown",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "doc_id",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "workflow-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder grants access"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-md-006",
+    "kb_id": "eval-kb-markdown",
+    "question": "workflow boundary note ??folder path?query scope ? evidence preview ???????????",
+    "source_doc": "workflow-boundary.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['workflow-boundary.md']",
+    "modality": "markdown",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "not an authorization boundary",
+      "knowledge base level",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "workflow-boundary.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder grants access"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-pdf-005",
+    "kb_id": "eval-kb-pdf",
+    "question": "?? PDF fallback ????OCR fallback ?????? merge ???",
+    "source_doc": "scan-fallback.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['scan-fallback.pdf']",
+    "modality": "pdf",
+    "answer_style": "fact",
+    "difficulty": "medium",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "merge every predict batch",
+      "same page"
+    ],
+    "required_evidence_docs": [
+      "scan-fallback.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "skip OCR entirely"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-pdf-006",
+    "kb_id": "eval-kb-pdf",
+    "question": "long PDF handbook ???? retired rehearsal ?????? live answer?",
+    "source_doc": "long-cutover-handbook.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['long-cutover-handbook.pdf']",
+    "modality": "pdf",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "long_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "18:30"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "21:15 Beijing time"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-img-005",
+    "kb_id": "eval-kb-image",
+    "question": "long OCR handbook board ?????????? cited evidence ???",
+    "source_doc": "long-cutover-handbook-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['long-cutover-handbook-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "fact",
+    "difficulty": "simple",
+    "category": "evidence_operation",
+    "answerable": true,
+    "expected_keypoints": [
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "folder path grants access"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v5-img-006",
+    "kb_id": "eval-kb-image",
+    "question": "approval whiteboard ??final approver ? deadline ??????",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "medium",
+    "category": "approval_summary",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin",
+      "22:45 Beijing time"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "Liu Chang"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ],
+    "preview_terms": []
+  },
+  {
+    "case_id": "eval-v3-img-001",
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "kb_id": "eval-kb-image",
+    "question": "The weak no text board produced no confirmable OCR text. What should the assistant say?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "outside memory"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "weak_signal_tags": [
+      "ocr_no_text",
+      "asset_registered_without_index"
+    ],
+    "expected_case_passed": true,
+    "expected_failure_stage": null,
+    "seed_docs": [
+      "weak-no-text-board.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "case_id": "eval-v3-img-002",
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "kb_id": "eval-kb-image",
+    "question": "If the weak failed board has no confirmable OCR evidence, what boundary should the assistant stay inside?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": false,
+    "expected_keypoints": [
+      "active knowledge base",
+      "must not fabricate an answer"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "outside memory"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "weak_signal_tags": [
+      "ocr_failed",
+      "asset_registered_without_index"
+    ],
+    "expected_case_passed": true,
+    "expected_failure_stage": null,
+    "seed_docs": [
+      "weak-failed-board.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "case_id": "eval-v3-img-003",
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "kb_id": "eval-kb-image",
+    "question": "If OCR cannot confirm the weak dependency board, what should the assistant do instead of inventing content?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "must not fabricate an answer"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "outside memory"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "weak_signal_tags": [
+      "dependency_missing",
+      "ocr_failed",
+      "asset_registered_without_index"
+    ],
+    "expected_case_passed": true,
+    "expected_failure_stage": null,
+    "seed_docs": [
+      "weak-dependency-board.png"
+    ],
+    "preview_terms": []
+  },
+  {
+    "case_id": "eval-v3-pdf-001",
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "kb_id": "eval-kb-pdf",
+    "question": "What authorization rule is defined in the embedding gap pdf?",
+    "source_doc": "embedding-gap.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['embedding-gap.pdf']",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "knowledge base",
+      "declared knowledge scope"
+    ],
+    "required_evidence_docs": [
+      "embedding-gap.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "forbidden_terms": [
+      "outside memory"
+    ],
+    "judge_focus": [
+      "groundedness"
+    ],
+    "weak_signal_tags": [
+      "nodes_without_embedding"
+    ],
+    "expected_case_passed": true,
+    "expected_failure_stage": null,
+    "preview_terms": []
+  },
+  {
+    "case_id": "eval-v3-pdf-002",
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "kb_id": "eval-kb-pdf-zero",
+    "question": "What approval phrase appears in the zero text diagnostic pdf?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "approval phrase"
+    ],
+    "judge_focus": [
+      "refusal_correctness"
+    ],
+    "weak_signal_tags": [
+      "zero_text_content"
+    ],
+    "expected_case_passed": true,
+    "expected_failure_stage": null,
+    "seed_docs": [
+      "zero-text-diagnostic.pdf"
+    ],
+    "preview_terms": []
+  },
+  {
+    "case_id": "eval-v3-pdf-003",
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "kb_id": "eval-kb-pdf",
+    "question": "What does aurora ledger annex zx-73 say?",
+    "source_doc": null,
+    "source_locator": null,
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "simple",
+    "category": "no_evidence",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "forbidden_terms": [
+      "aurora ledger annex zx-73"
+    ],
+    "judge_focus": [
+      "refusal_correctness"
+    ],
+    "weak_signal_tags": [],
+    "expected_case_passed": true,
+    "expected_failure_stage": null,
+    "preview_terms": []
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-md-001",
+    "kb_id": "eval-kb-markdown",
+    "question": "In the long-form cutover handbook, what live final approval checkpoint should be used, and which retired rehearsal time must be ignored?",
+    "source_doc": "long-cutover-handbook.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['long-cutover-handbook.md']",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "long_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "21:40 Beijing time",
+      "18:00"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "21:40 Beijing time",
+      "18:00"
+    ],
+    "forbidden_terms": [
+      "21:55 Beijing time"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-md-002",
+    "kb_id": "eval-kb-markdown",
+    "question": "Compare the payroll cutover approval matrix with the long-form handbook: what is the checklist sign deadline, and which field must stay aligned with the cited paragraph?",
+    "source_doc": "cutover-approval.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['cutover-approval.md']",
+    "modality": "markdown",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "22:30 Beijing time",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "cutover-approval.md",
+      "long-cutover-handbook.md"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "preview_terms": [
+      "22:30 Beijing time",
+      "preview_locator"
+    ],
+    "forbidden_terms": [
+      "5 minutes"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-md-003",
+    "kb_id": "eval-kb-markdown",
+    "question": "Does the current knowledge base mention any plasma escrow ledger or shard witness?",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "markdown",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "hard_refusal",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "preview_terms": [],
+    "forbidden_terms": [
+      "plasma escrow"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "long-cutover-handbook.md",
+      "cutover-approval.md"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-md-004",
+    "kb_id": "eval-kb-markdown",
+    "question": "Under the single KB scope contract, can the effective scope expand beyond the requested KB, and which two id fields should stay aligned with the request?",
+    "source_doc": "scope-contract.md",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_MARKDOWN_IMPORTS['scope-contract.md']",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "requested_kb_ids",
+      "effective_kb_ids",
+      "explicitly requested knowledge base"
+    ],
+    "required_evidence_docs": [
+      "scope-contract.md"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "requested_kb_ids",
+      "effective_kb_ids"
+    ],
+    "forbidden_terms": [
+      "multi_kb"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-pdf-001",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the PDF long-form handbook, what live checkpoint time should be used and which retired rehearsal time should not be used?",
+    "source_doc": "long-cutover-handbook.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['long-cutover-handbook.pdf']",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "long_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "21:55 Beijing time",
+      "18:30"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "21:55 Beijing time",
+      "18:30"
+    ],
+    "forbidden_terms": [
+      "23:00 Beijing time"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-pdf-002",
+    "kb_id": "eval-kb-pdf",
+    "question": "Compare the PDF release checklist with the PDF long-form handbook: who owns final sign-off, and which field must stay aligned with the cited paragraph?",
+    "source_doc": "release-checklist-business.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['release-checklist-business.pdf']",
+    "modality": "pdf",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "Chen Yu",
+      "preview_locator"
+    ],
+    "required_evidence_docs": [
+      "release-checklist-business.pdf",
+      "long-cutover-handbook.pdf"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "preview_terms": [
+      "Chen Yu",
+      "preview_locator"
+    ],
+    "forbidden_terms": [
+      "10 minutes"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-pdf-003",
+    "kb_id": "eval-kb-pdf",
+    "question": "Does the current PDF knowledge base mention any zephyr lattice mirror or blue token?",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "pdf",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "hard_refusal",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "preview_terms": [],
+    "forbidden_terms": [
+      "zephyr lattice mirror",
+      "blue token"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "release-checklist-business.pdf",
+      "long-cutover-handbook.pdf"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-pdf-004",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the PDF scope contract, which response field should echo the active PDF knowledge base, and what scope type must remain in force?",
+    "source_doc": "scope-manual.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_PDF_IMPORTS['scope-manual.pdf']",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective_kb_ids",
+      "single_kb"
+    ],
+    "required_evidence_docs": [
+      "scope-manual.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "effective_kb_ids",
+      "single_kb"
+    ],
+    "forbidden_terms": [
+      "multi_kb"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-img-001",
+    "kb_id": "eval-kb-image",
+    "question": "On the long OCR handbook board, what live checkpoint should be used and which retired rehearsal should be ignored?",
+    "source_doc": "long-cutover-handbook-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['long-cutover-handbook-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "long_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "21:50 Beijing time",
+      "18:20"
+    ],
+    "required_evidence_docs": [
+      "long-cutover-handbook-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "21:50 Beijing time",
+      "18:20"
+    ],
+    "forbidden_terms": [
+      "22:45 Beijing time"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-img-002",
+    "kb_id": "eval-kb-image",
+    "question": "Compare the approval whiteboard and the escalation whiteboard: who is the final approver, and to whom within how many minutes do P1 issues escalate?",
+    "source_doc": "approval-whiteboard-business.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['approval-whiteboard-business.png']",
+    "modality": "image_ocr",
+    "answer_style": "comparison",
+    "difficulty": "complex",
+    "category": "cross_document",
+    "answerable": true,
+    "expected_keypoints": [
+      "Zhao Lin",
+      "Liu Chang",
+      "10 minutes"
+    ],
+    "required_evidence_docs": [
+      "approval-whiteboard-business.png",
+      "escalation-whiteboard-business.png"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "preview_terms": [
+      "Zhao Lin",
+      "Liu Chang",
+      "10 minutes"
+    ],
+    "forbidden_terms": [
+      "Sun Kai"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-img-003",
+    "kb_id": "eval-kb-image",
+    "question": "Does the current image knowledge base mention any zephyr lattice mirror or blue token?",
+    "source_doc": null,
+    "source_locator": null,
+    "modality": "image_ocr",
+    "answer_style": "refusal",
+    "difficulty": "medium",
+    "category": "hard_refusal",
+    "answerable": false,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "required_evidence_docs": [],
+    "expected_source_count": 0,
+    "preview_required": false,
+    "preview_terms": [],
+    "forbidden_terms": [
+      "zephyr lattice mirror",
+      "blue token"
+    ],
+    "judge_focus": [
+      "refusal_correctness",
+      "groundedness"
+    ],
+    "seed_docs": [
+      "approval-whiteboard-business.png",
+      "long-cutover-handbook-board.png"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-img-004",
+    "kb_id": "eval-kb-image",
+    "question": "On the scope board, which field should echo the declared image knowledge base, and what remains the authorization boundary for image answers?",
+    "source_doc": "scope-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::BASE_IMAGE_IMPORTS['scope-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "effective_kb_ids",
+      "Knowledge Base"
+    ],
+    "required_evidence_docs": [
+      "scope-board.png"
+    ],
+    "expected_source_count": 2,
+    "preview_required": true,
+    "preview_terms": [
+      "effective_kb_ids",
+      "Knowledge Base"
+    ],
+    "forbidden_terms": [
+      "folder is the authorization boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-md-019",
+    "kb_id": "eval-kb-markdown",
+    "question": "According to the refusal wording note, if the current knowledge base has no confirmable evidence, what should the assistant say and what must it avoid doing?",
+    "source_doc": "refusal-wording-note.md",
+    "source_locator": "tests/api/chat_eval_runner.py::MARKDOWN_EXTRA_IMPORTS['refusal-wording-note.md']",
+    "modality": "markdown",
+    "answer_style": "policy",
+    "difficulty": "simple",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "No confirmable information",
+      "current knowledge base",
+      "must not fabricate from outside memory"
+    ],
+    "required_evidence_docs": [
+      "refusal-wording-note.md"
+    ],
+    "expected_source_count": 3,
+    "preview_required": true,
+    "preview_terms": [
+      "No confirmable information",
+      "current knowledge base"
+    ],
+    "forbidden_terms": [
+      "guess from outside memory"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-pdf-019",
+    "kb_id": "eval-kb-pdf",
+    "question": "In the PDF titled 'Scope refusal bridge', repeat the exact phrase for what the assistant must not do when the current PDF knowledge base has no confirmable evidence.",
+    "source_doc": "scope-refusal-bridge.pdf",
+    "source_locator": "tests/api/chat_eval_runner.py::PDF_EXTRA_IMPORTS['scope-refusal-bridge.pdf']",
+    "modality": "pdf",
+    "answer_style": "policy",
+    "difficulty": "medium",
+    "category": "scope_contract",
+    "answerable": true,
+    "expected_keypoints": [
+      "must not fabricate from outside memory"
+    ],
+    "required_evidence_docs": [
+      "scope-refusal-bridge.pdf"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "outside memory"
+    ],
+    "forbidden_terms": [
+      "fabricate from memory"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  },
+  {
+    "dataset": "local_multi_kb_eval_v8_layered_main",
+    "expected_scope_type": "single_kb",
+    "expected_isolation_level": "physical_isolated",
+    "case_id": "eval-v8-main-img-019",
+    "kb_id": "eval-kb-image",
+    "question": "Summarize the OCR boundary knowledge board in one sentence: what is not the authorization boundary, and what remains it for image answers?",
+    "source_doc": "boundary-knowledge-board.png",
+    "source_locator": "tests/api/chat_eval_runner.py::IMAGE_EXTRA_IMPORTS['boundary-knowledge-board.png']",
+    "modality": "image_ocr",
+    "answer_style": "summary",
+    "difficulty": "complex",
+    "category": "process_boundary",
+    "answerable": true,
+    "expected_keypoints": [
+      "not an authorization boundary",
+      "knowledge base",
+      "authorization boundary"
+    ],
+    "required_evidence_docs": [
+      "boundary-knowledge-board.png"
+    ],
+    "expected_source_count": 1,
+    "preview_required": true,
+    "preview_terms": [
+      "knowledge base",
+      "authorization boundary"
+    ],
+    "forbidden_terms": [
+      "folder path is the authorization boundary"
+    ],
+    "judge_focus": [
+      "factual_accuracy",
+      "completeness",
+      "citation_accuracy",
+      "groundedness"
+    ]
+  }
+]

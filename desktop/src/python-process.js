@@ -3,9 +3,16 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { logRuntime } = require("./runtime-log");
 const { ensureRuntimeRoot } = require("./runtime-paths");
+const {
+  resolveApiBaseUrl,
+  resolveApiHealthUrl,
+  resolveApiPort,
+  resolveExplicitApiBaseUrlState,
+  shouldAutoStartLocalApi,
+} = require("./runtime-config");
+const { PYTHON_OVERRIDE_KEYS, defaultPythonCandidates, resolveExplicitPythonCommand } = require("./python-runtime-resolution");
 
 let pythonProcess = null;
-const API_HEALTH_URL = "http://127.0.0.1:18080/api/health";
 
 function normalizeRuntimePaths(runtimePaths) {
   if (typeof runtimePaths === "string") {
@@ -21,33 +28,24 @@ function normalizeRuntimePaths(runtimePaths) {
   return runtimePaths;
 }
 
-function resolvePythonCommand(resourceRoot) {
-  const explicitPython = process.env.NORTHAGENT_PYTHON || process.env.THINKRAG_PYTHON || process.env.FOXGLOVE_PYTHON;
+function buildDefaultPythonCandidates(resourceRoot, env = process.env, platform = process.platform) {
+  return defaultPythonCandidates(resourceRoot, { env, platform });
+}
+
+function resolvePythonCommand(resourceRoot, env = process.env, platform = process.platform) {
+  const { command: explicitPython } = resolveExplicitPythonCommand(env);
   if (explicitPython) {
     return explicitPython;
   }
 
-  const candidates =
-    process.platform === "win32"
-      ? [
-          path.join(resourceRoot, ".venv", "Scripts", "python.exe"),
-          path.join(resourceRoot, "venv", "Scripts", "python.exe"),
-          "python"
-        ]
-      : [
-          "/opt/miniconda3/envs/agent-kb/bin/python",
-          path.join(resourceRoot, ".venv", "bin", "python"),
-          path.join(resourceRoot, "venv", "bin", "python"),
-          "python3"
-        ];
-
+  const candidates = buildDefaultPythonCandidates(resourceRoot, env, platform);
   for (const candidate of candidates) {
     if (!candidate.includes(path.sep) || fs.existsSync(candidate)) {
       return candidate;
     }
   }
 
-  return process.platform === "win32" ? "python" : "python3";
+  return platform === "win32" ? "python" : "python3";
 }
 
 function startPythonApi(runtimePaths, options = {}) {
@@ -59,12 +57,15 @@ function startPythonApi(runtimePaths, options = {}) {
     return pythonProcess;
   }
 
-  const cmd = resolvePythonCommand(paths.resourceRoot);
+  const childEnv = options.env || process.env;
+  const cmd = resolvePythonCommand(paths.resourceRoot, childEnv);
   const script = path.join(paths.resourceRoot, "run_api.py");
+  const apiBaseUrl = options.apiBaseUrl || resolveApiBaseUrl(childEnv);
   logRuntime(paths.runtimeRoot, "python_api_starting", {
     command: cmd,
     script,
-    cwd: paths.runtimeRoot
+    cwd: paths.runtimeRoot,
+    api_base_url: apiBaseUrl
   });
 
   const spawnImpl = options.spawnImpl || spawn;
@@ -74,8 +75,16 @@ function startPythonApi(runtimePaths, options = {}) {
     windowsHide: true,
     env: {
       ...process.env,
+      ...options.env,
+      KB_API_PORT: String(resolveApiPort(childEnv)),
+      KB_DATA_ROOT: paths.runtimeRoot,
+      KB_MODEL_ROOT: paths.modelRoot,
       NORTHAGENT_DATA_ROOT: paths.runtimeRoot,
       NORTHAGENT_MODEL_ROOT: paths.modelRoot,
+      THINKRAG_DATA_ROOT: paths.runtimeRoot,
+      THINKRAG_MODEL_ROOT: paths.modelRoot,
+      FOXGLOVE_DATA_ROOT: paths.runtimeRoot,
+      FOXGLOVE_MODEL_ROOT: paths.modelRoot,
       PYTHONDONTWRITEBYTECODE: "1",
       PYTHONIOENCODING: "utf-8",
     }
@@ -134,14 +143,16 @@ async function waitForApiReady(runtimePaths, retries = 20, intervalMs = 500, opt
   const paths = normalizeRuntimePaths(runtimePaths);
   const fetchImpl = options.fetchImpl || fetch;
   const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+  const apiHealthUrl = options.apiHealthUrl || resolveApiHealthUrl(options.env || process.env);
   for (let i = 0; i < retries; i += 1) {
     try {
-      const response = await fetchImpl(API_HEALTH_URL);
+      const response = await fetchImpl(apiHealthUrl);
       if (response.ok) {
         logRuntime(paths.runtimeRoot, "python_api_ready", {
           attempt: i + 1,
           retries,
-          status: response.status
+          status: response.status,
+          url: apiHealthUrl
         });
         return true;
       }
@@ -150,7 +161,8 @@ async function waitForApiReady(runtimePaths, retries = 20, intervalMs = 500, opt
         logRuntime(paths.runtimeRoot, "python_api_health_failed", {
           attempt: i + 1,
           retries,
-          message: error.message
+          message: error.message,
+          url: apiHealthUrl
         });
       }
     }
@@ -158,29 +170,52 @@ async function waitForApiReady(runtimePaths, retries = 20, intervalMs = 500, opt
   }
   logRuntime(paths.runtimeRoot, "python_api_not_ready", {
     retries,
-    interval_ms: intervalMs
+    interval_ms: intervalMs,
+    url: apiHealthUrl
   });
   return false;
 }
 
 async function ensurePythonApi(runtimePaths, options = {}) {
   const paths = normalizeRuntimePaths(runtimePaths);
+  const childEnv = options.env || process.env;
+  const explicitApiBaseUrl = resolveExplicitApiBaseUrlState(childEnv);
+  const autoStartLocalApi = options.autoStartLocalApi ?? shouldAutoStartLocalApi(options.apiBaseUrl || childEnv);
   ensureRuntimeRoot(paths.runtimeRoot, options);
-  const alreadyReady = await waitForApiReady(paths, 1, 0, options);
+
+  if (explicitApiBaseUrl.invalid) {
+    logRuntime(paths.runtimeRoot, "python_api_autostart_skipped", {
+      reason: "explicit_invalid_api_base",
+      url: explicitApiBaseUrl.raw,
+    });
+    return false;
+  }
+
+  const apiHealthUrl = options.apiHealthUrl || resolveApiHealthUrl(childEnv);
+  const alreadyReady = await waitForApiReady(paths, 1, 0, { ...options, apiHealthUrl });
   if (alreadyReady) {
     logRuntime(paths.runtimeRoot, "python_api_reusing_existing", {
-      url: API_HEALTH_URL
+      url: apiHealthUrl
     });
     return true;
   }
+  if (!autoStartLocalApi) {
+    logRuntime(paths.runtimeRoot, "python_api_autostart_skipped", {
+      reason: "explicit_non_local_api_base",
+      url: apiHealthUrl,
+    });
+    return false;
+  }
   startPythonApi(paths, options);
-  return waitForApiReady(paths, options.retries || 20, options.intervalMs || 500, options);
+  return waitForApiReady(paths, options.retries || 20, options.intervalMs || 500, { ...options, apiHealthUrl });
 }
 
 module.exports = {
+  PYTHON_OVERRIDE_KEYS,
   ensurePythonApi,
   startPythonApi,
   stopPythonApi,
   waitForApiReady,
-  resolvePythonCommand
+  resolvePythonCommand,
+  buildDefaultPythonCandidates
 };

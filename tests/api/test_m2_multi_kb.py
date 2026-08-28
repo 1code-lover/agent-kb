@@ -424,11 +424,26 @@ class TestM2ChatServiceKbIds:
                 with patch("api.services.chat_service.runtime_state.build_query_engine", return_value=mock_engine) as mock_build:
                     from api.schemas import QueryRequest
 
-                    req = QueryRequest(question="test", kb_ids=["kb1"])
+                    req = QueryRequest(
+                        question="test",
+                        kb_ids=["kb1"],
+                        top_k=7,
+                        response_mode="tree_summarize",
+                        use_reranker=False,
+                        top_n=2,
+                        reranker_model="bge-reranker-v2-m3",
+                    )
                     query(req, record_history=False)
 
                     mock_resolve.assert_called_once_with(["kb1"])
-                    mock_build.assert_called_once_with(kb_ids=["kb1"])
+                    mock_build.assert_called_once_with(
+                        kb_ids=["kb1"],
+                        top_k=7,
+                        response_mode="tree_summarize",
+                        use_reranker=False,
+                        top_n=2,
+                        reranker_model="bge-reranker-v2-m3",
+                    )
 
     def test_query_without_kb_ids(self):
         """??? kb_ids ??????????"""

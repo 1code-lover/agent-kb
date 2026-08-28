@@ -12,14 +12,11 @@ from llama_index.core import Document
 
 from server.readers import image_ocr
 from server.readers.pdf_ocr import PDFOCRReader
+from server.utils.font_fallbacks import OCR_FONT_CANDIDATES, load_first_available_font
 from server.text_splitter import create_text_splitter
 
 
-FONT_CANDIDATES = [
-    Path("C:/Windows/Fonts/msyh.ttc"),
-    Path("C:/Windows/Fonts/simhei.ttf"),
-    Path("C:/Windows/Fonts/arial.ttf"),
-]
+FONT_CANDIDATES = OCR_FONT_CANDIDATES
 
 
 def _create_text_pdf(path: Path, text: str) -> None:
@@ -48,12 +45,8 @@ def _create_blank_pdf(path: Path) -> None:
 
 def _pick_font(size: int = 28):
     """优先选择支持中文的系统字体，避免扫描件 fixture 出现方块字。"""
-    from PIL import ImageFont
-
-    for candidate in FONT_CANDIDATES:
-        if candidate.exists():
-            return ImageFont.truetype(str(candidate), size=size)
-    return ImageFont.load_default()
+    font, _ = load_first_available_font(size=size, candidates=FONT_CANDIDATES)
+    return font
 
 
 def _create_scanned_pdf(path: Path, lines: list[str]) -> None:

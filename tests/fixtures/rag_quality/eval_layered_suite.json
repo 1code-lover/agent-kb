@@ -1,0 +1,45 @@
+{
+  "suite_name": "local_multi_kb_eval_v8_layered_suite",
+  "strategy": "A-most-practical-layered-expansion",
+  "layers": [
+    {
+      "name": "smoke",
+      "purpose": "environment_rebuild_ci_smoke",
+      "dataset_name": "local_multi_kb_eval_v7_holdout_regression",
+      "target_case_count": 24,
+      "cases_path": "tests/fixtures/rag_quality/eval_v7/cases.json",
+      "schema_path": "tests/fixtures/rag_quality/eval_v7/schema.json"
+    },
+    {
+      "name": "main",
+      "purpose": "pre_release_primary_gate",
+      "dataset_name": "local_multi_kb_eval_v8_layered_main",
+      "target_case_count": 93,
+      "focus": [
+        "qa_accuracy",
+        "multi_source_merge",
+        "refusal",
+        "scope_isolation",
+        "preview_grounding"
+      ],
+      "cases_path": "tests/fixtures/rag_quality/eval_v8_main/cases.json",
+      "schema_path": "tests/fixtures/rag_quality/eval_v8_main/schema.json"
+    },
+    {
+      "name": "hard",
+      "purpose": "boundary_bug_hunting",
+      "dataset_name": "local_multi_kb_eval_v8_layered_hard",
+      "target_case_count": 39,
+      "focus": [
+        "similar_document_confusion",
+        "stale_version_conflict",
+        "chunk_boundary",
+        "paraphrase_rewrite",
+        "evidence_insufficient",
+        "scope_isolation_trap"
+      ],
+      "cases_path": "tests/fixtures/rag_quality/eval_v8_hard/cases.json",
+      "schema_path": "tests/fixtures/rag_quality/eval_v8_hard/schema.json"
+    }
+  ]
+}

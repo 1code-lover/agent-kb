@@ -22,40 +22,25 @@ import {
   updateAgentSession,
   uploadFilesToKnowledge,
 } from "../api/agent";
-import { getHistory, queryChat } from "../api/chat";
-import { previewItem } from "../api/evidence";
 import { getModelOptions, selectModel } from "../api/models";
-import { readApiData } from "../api/response";
 import { KbProvider, useKb } from "../components/kb/KbContext";
-import { canUseKbTarget } from "../domain/kbSelection";
 import {
-  buildKnowledgeAgentLink,
+  DEFAULT_KNOWLEDGE_SCOPE,
+  canUseKbTarget,
+  resolveKnowledgeScope,
+} from "../domain/kbSelection";
+import {
+  buildAgentWorkbenchLink,
   buildKnowledgeWorkspaceLink,
-  parseKnowledgeAgentEntry,
+  parseAgentWorkbenchEntry,
 } from "../domain/kbNavigation";
-import KbEvidencePreview from "../components/kb/KbEvidencePreview";
-import {
-  AGENT_EXPERIENCES,
-  buildChatPayload,
-  buildChatSessionId,
-  buildExperienceSummary,
-} from "../domain/agentExperience";
+import { AGENT_EXPERIENCES } from "../domain/agentExperience";
 import { buildModelHealthSummary } from "../domain/modelHealth";
+import { getDesktopBridge } from "../domain/desktopBridge.js";
+import QaWorkbench from "./agent-page/QaWorkbench.jsx";
+import { useAgentChatWorkspace } from "./useAgentChatWorkspace.js";
 import useAppStore from "../store/appStore";
 import "./agent-page.css";
-
-const DEFAULT_KNOWLEDGE_SCOPE = {
-  kb_id: "default",
-  kb_name: "默认知识库",
-};
-
-function safeBuildChatSessionId({ experience, sessionId, selectedKbId }) {
-  try {
-    return buildChatSessionId({ experience, sessionId, selectedKbId });
-  } catch {
-    return "";
-  }
-}
 
 function createAttachmentFromPath(path, index = 0) {
   const normalizedPath = path || "";
@@ -94,26 +79,6 @@ function mergeAttachments(existingFiles, nextFiles) {
   return merged;
 }
 
-function formatMessageTime(value) {
-  if (!value) {
-    return "";
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-  return date.toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function formatScore(score) {
-  return typeof score === "number" ? score.toFixed(3) : "-";
-}
-
 function ExperienceTabs({ experience, onChange }) {
   return (
     <div className="qa-experience-switcher" role="tablist" aria-label="问答体验切换">
@@ -138,363 +103,9 @@ function ExperienceTabs({ experience, onChange }) {
   );
 }
 
-function QaConversation({ messages, pendingQuestion, historyLoading, chatBusy }) {
-  const hasMessages = (messages || []).length > 0;
-
-  return (
-    <section className="qa-surface-card qa-conversation-card">
-      <div className="qa-section-head">
-        <div>
-          <p className="qa-section-eyebrow">会话记录</p>
-          <h2>问答线程</h2>
-        </div>
-        {historyLoading ? <span className="toolbar-pill subtle">正在同步历史…</span> : null}
-      </div>
-
-      <div className="qa-conversation-thread">
-        {!hasMessages && !pendingQuestion ? (
-          <div className="empty-block">还没有对话记录，先输入一个问题试试。</div>
-        ) : null}
-
-        {(messages || []).map((item, index) => {
-          const role = item.role === "user" ? "user" : "assistant";
-          return (
-            <article
-              key={item.id || role + "-" + index}
-              className={
-                role === "user"
-                  ? "qa-message-row qa-message-row-user"
-                  : "qa-message-row qa-message-row-assistant"
-              }
-            >
-              <div className={role === "user" ? "qa-message qa-message-user" : "qa-message qa-message-assistant"}>
-                <div className="qa-message-meta">
-                  <span>{role === "user" ? "你" : "助手"}</span>
-                  <span>{formatMessageTime(item.created_at)}</span>
-                </div>
-                <div className="qa-message-body">{item.content}</div>
-              </div>
-            </article>
-          );
-        })}
-
-        {pendingQuestion ? (
-          <>
-            <article className="qa-message-row qa-message-row-user">
-              <div className="qa-message qa-message-user pending">
-                <div className="qa-message-meta">
-                  <span>你</span>
-                  <span>刚刚</span>
-                </div>
-                <div className="qa-message-body">{pendingQuestion}</div>
-              </div>
-            </article>
-            <article className="qa-message-row qa-message-row-assistant">
-              <div className="qa-message qa-message-assistant pending">
-                <div className="qa-message-meta">
-                  <span>助手</span>
-                  <span>{chatBusy ? "生成中" : "排队中"}</span>
-                </div>
-                <div className="qa-message-body">正在检索并组织回答，请稍候…</div>
-              </div>
-            </article>
-          </>
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
-function SourceList({
-  sources,
-  evidence,
-  onPreview,
-  preview,
-  previewLoading,
-  previewError,
-}) {
-  const items =
-    evidence.length > 0
-      ? evidence
-      : sources.map((item, index) => ({
-          id: item.id || (item.file || "source") + "-" + index,
-          title: item.file || "未命名来源",
-          source: item.file || "未命名来源",
-          page: item.page,
-          score: item.score,
-          excerpt: item.excerpt || item.text || "",
-          kb_id: item.kb_id || "default",
-          doc_id: item.doc_id || null,
-          preview_locator: item.preview_locator || null,
-          asset_id: item.asset_id || null,
-        }));
-
-  return (
-    <section className="qa-surface-card qa-source-card">
-      <div className="qa-section-head">
-        <div>
-          <p className="qa-section-eyebrow">证据</p>
-          <h2>命中来源</h2>
-        </div>
-        <span className="toolbar-pill subtle">{items.length} 条</span>
-      </div>
-
-      {items.length === 0 ? (
-        <div className="empty-block">
-          当前还没有可展示的证据；发送问题后，命中的文档片段会出现在这里。
-        </div>
-      ) : (
-        <div className="qa-source-list">
-          {items.map((item, index) => (
-            <article key={(item.id || item.title || "source") + "-" + index} className="qa-source-item">
-              <div className="qa-source-title-row">
-                <strong>{item.title || item.source || "未命名来源"}</strong>
-                <span>{"score " + formatScore(item.score)}</span>
-              </div>
-              <p className="stack-subtle">
-                {"kb_id=" + (item.kb_id || "default")}
-                {item.page && item.page !== "N/A" ? " / 页码 " + item.page : ""}
-              </p>
-              {item.asset_id ? <p className="stack-subtle">{"关联资产：" + item.asset_id}</p> : null}
-              <p className="qa-source-excerpt">{item.excerpt || "未返回摘录"}</p>
-              {item.asset_id || item.doc_id || item.id ? (
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={() => onPreview(item)}
-                  disabled={previewLoading}
-                >
-                  {previewLoading ? "加载中" : "预览"}
-                </button>
-              ) : null}
-            </article>
-          ))}
-        </div>
-      )}
-
-      <KbEvidencePreview
-        preview={preview}
-        loading={previewLoading}
-        error={previewError}
-      />
-    </section>
-  );
-}
-
-
-function KnowledgeScopeSelector({ selectedKbId, selectedKb, kbList, kbLoading, onSelectKb }) {
-  return (
-    <section className="qa-surface-card qa-kb-target-card">
-      <div className="qa-section-head">
-        <div>
-          <p className="qa-section-eyebrow">知识库范围</p>
-          <h2>选择问答目标</h2>
-        </div>
-      </div>
-
-      <div className="qa-kb-bar">
-        <label className="qa-field-label" htmlFor="knowledge-kb-select">
-          Active 知识库
-        </label>
-        <select
-          id="knowledge-kb-select"
-          className="qa-select"
-          value={selectedKbId || ""}
-          disabled={kbLoading}
-          onChange={(event) => onSelectKb(event.target.value)}
-        >
-          <option value="">请选择知识库</option>
-          {kbList.map((kb) => (
-            <option key={kb.kb_id} value={kb.kb_id}>
-              {(kb.kb_name || kb.kb_id) + "（" + kb.kb_id + "）"}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="qa-inline-tip">
-        {selectedKb
-          ? "当前问答将严格限定在“" + (selectedKb.kb_name || selectedKb.kb_id) + "”（kb_id=" + selectedKb.kb_id + "）范围内。"
-          : "知识库问答必须先显式选择一个 active 知识库，避免误用默认库。"}
-      </div>
-    </section>
-  );
-}
-
-function QaWorkbench(props) {
-  const {
-    experience,
-    selectedKb,
-    selectedKbId,
-    kbList,
-    kbLoading,
-    onSelectKb,
-    currentModelLabel,
-    modelHealthSummary,
-    modelReady,
-    question,
-    onQuestionChange,
-    onSubmit,
-    messages,
-    sources,
-    evidence,
-    pendingQuestion,
-    error,
-    historyLoading,
-    chatBusy,
-    preview,
-    previewLoading,
-    previewError,
-    onPreviewEvidence,
-  } = props;
-
-  const summary = buildExperienceSummary({ experience, selectedKb });
-  const submitDisabled =
-    chatBusy ||
-    !question.trim() ||
-    !modelReady ||
-    (experience === "knowledge" && !selectedKbId);
-
-  return (
-    <div className="qa-page-shell">
-      <header className="qa-hero-card">
-        <div className="qa-hero-content">
-          <div className="qa-hero-copy">
-            <span className="qa-eyebrow">问答工作台</span>
-            <h1>先问答，再决定是否进入 Agent 高级模式</h1>
-            <p>{summary}</p>
-          </div>
-          <div className="qa-hero-meta">
-            <span className="qa-badge">{"当前模型：" + currentModelLabel}</span>
-            <span className="qa-badge">{modelHealthSummary?.chipLabel || "状态未知"}</span>
-            <span className="qa-badge">
-              {"当前范围：" + (experience === "knowledge" ? (selectedKb?.kb_name || "未选择知识库") : "全部知识范围")}
-            </span>
-            <span className="qa-badge">{"可用知识库：" + kbList.length + " 个"}</span>
-          </div>
-          <p className="qa-inline-tip">{modelHealthSummary?.actionHint || "问答会沿用当前模型配置。"}</p>
-        </div>
-        <div className="qa-hero-actions">
-          <Link className="secondary-button link-button" to={buildKnowledgeWorkspaceLink(selectedKbId)}>
-            管理知识库
-          </Link>
-          <Link className="secondary-button link-button" to="/models">
-            模型配置
-          </Link>
-        </div>
-      </header>
-
-      <div className="qa-layout">
-        <div className="qa-main-column">
-          {experience === "knowledge" ? (
-            <KnowledgeScopeSelector
-              selectedKbId={selectedKbId}
-              selectedKb={selectedKb}
-              kbList={kbList}
-              kbLoading={kbLoading}
-              onSelectKb={onSelectKb}
-            />
-          ) : null}
-
-          <section className="qa-surface-card qa-compose-card">
-            <div className="qa-section-head">
-              <div>
-                <p className="qa-section-eyebrow">立即提问</p>
-                <h2>{experience === "knowledge" ? "知识库定向问答" : "基础问答"}</h2>
-              </div>
-              <span className="toolbar-pill subtle">{modelReady ? currentModelLabel : "尚未配置模型"}</span>
-            </div>
-
-            <form className="qa-compose-form" onSubmit={onSubmit}>
-              <textarea
-                className="qa-compose-input"
-                rows={5}
-                value={question}
-                onChange={(event) => onQuestionChange(event.target.value)}
-                placeholder={
-                  experience === "knowledge"
-                    ? "例如：这份知识库里对实习要求是怎么描述的？"
-                    : "例如：帮我总结一下当前知识库里有哪些主题。"
-                }
-              />
-              <div className="qa-compose-actions">
-                <div className="qa-inline-tip">
-                  {experience === "knowledge" && !selectedKbId
-                    ? "请先在上方选择知识库后再发送问题。"
-                    : "问答会保留独立会话历史，方便你连续追问。"}
-                </div>
-                <button type="submit" className="primary-button" disabled={submitDisabled}>
-                  {chatBusy ? "回答生成中…" : "发送问题"}
-                </button>
-              </div>
-            </form>
-
-            {error ? <div className="banner-info banner-danger">{error}</div> : null}
-            {!modelReady ? (
-              <div className="banner-info">
-                还没有可用模型，请先前往模型配置页完成提供商与模型选择。
-              </div>
-            ) : null}
-          </section>
-
-          <QaConversation
-            messages={messages}
-            pendingQuestion={pendingQuestion}
-            historyLoading={historyLoading}
-            chatBusy={chatBusy}
-          />
-        </div>
-
-        <aside className="qa-side-column">
-          <section className="qa-surface-card qa-summary-card">
-            <div className="qa-section-head">
-              <div>
-                <p className="qa-section-eyebrow">当前状态</p>
-                <h2>工作台概览</h2>
-              </div>
-            </div>
-            <div className="qa-summary-list">
-              <div className="qa-summary-item">
-                <span>体验模式</span>
-                <strong>{AGENT_EXPERIENCES.find((item) => item.value === experience)?.label}</strong>
-              </div>
-              <div className="qa-summary-item">
-                <span>模型状态</span>
-                <strong>{modelHealthSummary?.title || (modelReady ? "已就绪" : "待配置")}</strong>
-              </div>
-              <div className="qa-summary-item">
-                <span>健康详情</span>
-                <strong>{modelHealthSummary?.detail || (modelReady ? "最近未发现异常" : "请先配置模型")}</strong>
-              </div>
-              <div className="qa-summary-item">
-                <span>切换提示</span>
-                <strong>{modelHealthSummary?.transitionLabel || modelHealthSummary?.actionHint || "暂无自动切换"}</strong>
-              </div>
-              <div className="qa-summary-item">
-                <span>知识库范围</span>
-                <strong>{experience === "knowledge" ? (selectedKb?.kb_name || "未选择") : "全局检索"}</strong>
-              </div>
-            </div>
-          </section>
-
-          <SourceList
-            sources={sources}
-            evidence={evidence}
-            onPreview={onPreviewEvidence}
-            preview={preview}
-            previewLoading={previewLoading}
-            previewError={previewError}
-          />
-        </aside>
-      </div>
-    </div>
-  );
-}
-
-function AgentRuntimePanel({ selectedKbId, selectedKb }) {
+function AgentRuntimePanel({ selectedKbId, selectedKb, resolvedKnowledgeScope }) {
   const sessionId = useAppStore((state) => state.sessionId);
   const currentMode = useAppStore((state) => state.currentMode);
-  const knowledgeScope = useAppStore((state) => state.knowledgeScope);
   const draftQuestion = useAppStore((state) => state.draftQuestion);
   const timeline = useAppStore((state) => state.timeline);
   const evidence = useAppStore((state) => state.evidence);
@@ -719,7 +330,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
         session_id: sessionId,
         workspace: {
           current_mode: currentMode,
-          knowledge_scope: knowledgeScope,
+          knowledge_scope: resolvedKnowledgeScope,
           task_goal: taskGoal,
           draft_question: draftQuestion,
           run_state: runState,
@@ -744,7 +355,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
     sessionLoaded,
     sessionId,
     currentMode,
-    knowledgeScope,
+    resolvedKnowledgeScope,
     taskGoal,
     draftQuestion,
     runState,
@@ -800,7 +411,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
       }
       formData.append("chunk_size", "2048");
       formData.append("chunk_overlap", "512");
-      formData.append("kb_id", selectedKbId || knowledgeScope?.kb_id || DEFAULT_KNOWLEDGE_SCOPE.kb_id);
+      formData.append("kb_id", resolvedKnowledgeScope.kb_id);
       return uploadFilesToKnowledge(formData);
     },
     onSuccess: (result) => {
@@ -814,7 +425,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
           "已导入 " +
           (result.files?.length || 0) +
           " 个文件到知识库 " +
-          (result.kb_id || selectedKbId || knowledgeScope?.kb_id || DEFAULT_KNOWLEDGE_SCOPE.kb_id) +
+          (result.kb_id || resolvedKnowledgeScope.kb_id) +
           "。",
       });
     },
@@ -828,9 +439,11 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
 
   const isBusy = runMutation.isPending || approvalMutation.isPending || quickSwitchMutation.isPending;
   const canRunAgent = currentMode !== "agent" || Boolean(currentModel?.service_provider && currentModel?.model);
-  const uploadTargetText = selectedKb
-    ? (selectedKb.kb_name || selectedKb.kb_id) + "（kb_id=" + selectedKb.kb_id + "）"
-    : (knowledgeScope?.kb_name || DEFAULT_KNOWLEDGE_SCOPE.kb_name) + "（kb_id=" + (knowledgeScope?.kb_id || DEFAULT_KNOWLEDGE_SCOPE.kb_id) + "）";
+  const uploadTargetText =
+    (resolvedKnowledgeScope.kb_name || DEFAULT_KNOWLEDGE_SCOPE.kb_name) +
+    "（kb_id=" +
+    resolvedKnowledgeScope.kb_id +
+    "）";
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -851,7 +464,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
       question,
       session_id: sessionId,
       mode: currentMode,
-      knowledge_scope: knowledgeScope,
+      knowledge_scope: resolvedKnowledgeScope,
     });
   }
 
@@ -884,7 +497,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
   }
 
   async function handlePickLocalFiles() {
-    const desktopBridge = window.northAgentDesktop || window.foxgloveDesktop || window.thinkragDesktop;
+    const desktopBridge = getDesktopBridge(window);
     if (!desktopBridge?.pickFiles) {
       appendTimeline({
         type: "error",
@@ -953,7 +566,7 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
       <div className="agent-runtime-note banner-info">
         {selectedKb
           ? "当前已选知识库：" + (selectedKb.kb_name || selectedKb.kb_id) + "（kb_id=" + selectedKb.kb_id + "）。Agent 在 kb_search 模式下会优先使用该范围。"
-          : "当前使用知识范围：" + (knowledgeScope?.kb_name || DEFAULT_KNOWLEDGE_SCOPE.kb_name) + "。如果要定向到某个知识库，可先切换到“知识库问答”选择目标。"}
+          : "当前使用知识范围：" + resolvedKnowledgeScope.kb_name + "。如果要定向到某个知识库，可先切换到“知识库问答”选择目标。"}
       </div>
 
       <section className="agent-chat-page">
@@ -1051,34 +664,20 @@ function AgentRuntimePanel({ selectedKbId, selectedKb }) {
 
 function AgentPageContent() {
   const sessionId = useAppStore((state) => state.sessionId);
-  const knowledgeScope = useAppStore((state) => state.knowledgeScope);
   const setKnowledgeScope = useAppStore((state) => state.setKnowledgeScope);
 
   const location = useLocation();
   const navigate = useNavigate();
   const { kbList, selectedKbId, selectedKb, loading: kbLoading, selectKb } = useKb();
   const routeIntentAppliedRef = useRef("");
-  const routeIntent = useMemo(() => parseKnowledgeAgentEntry(location.search), [location.search]);
+  const routeIntent = useMemo(() => parseAgentWorkbenchEntry(location.search), [location.search]);
   const isRouteIntentPending = Boolean(location.search) && routeIntentAppliedRef.current !== location.search;
 
   const [experience, setExperience] = useState(routeIntent.requestedExperience || "basic");
-  const [chatQuestion, setChatQuestion] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatSources, setChatSources] = useState([]);
-  const [chatEvidence, setChatEvidence] = useState([]);
-  const [chatPreview, setChatPreview] = useState(null);
-  const [chatPreviewError, setChatPreviewError] = useState("");
-  const [chatError, setChatError] = useState("");
-  const [pendingQuestion, setPendingQuestion] = useState("");
-
-  const modelOptionsQuery = useQuery({
-    queryKey: ["agent-model-options"],
-    queryFn: getModelOptions,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    staleTime: 60000,
-  });
-
+  const resolvedKnowledgeScope = useMemo(
+    () => resolveKnowledgeScope({ selectedKb, selectedKbId, fallbackScope: knowledgeScope }),
+    [knowledgeScope, selectedKb, selectedKbId],
+  );
   const activeKbList = useMemo(
     () => (kbList || []).filter((kb) => kb.status === "active"),
     [kbList],
@@ -1109,166 +708,39 @@ function AgentPageContent() {
       return;
     }
 
-    const target = experience === "knowledge"
-      ? buildKnowledgeAgentLink(selectedKbId)
-      : "/agent";
+    const target = experience === "agent"
+      ? "/agent"
+      : buildAgentWorkbenchLink({ experience, kbId: selectedKbId });
     const current = location.pathname + location.search;
     if (target !== current) {
       navigate(target, { replace: true });
     }
   }, [experience, isRouteIntentPending, location.pathname, location.search, navigate, selectedKbId]);
 
-  const currentModel = modelOptionsQuery.data?.current_llm_info || null;
-  const modelHealthSummary = useMemo(
-    () => buildModelHealthSummary(modelOptionsQuery.data?.model_health || null),
-    [modelOptionsQuery.data?.model_health],
-  );
-  const currentModelLabel =
-    currentModel?.service_provider && currentModel?.model
-      ? currentModel.service_provider + " / " + currentModel.model
-      : "未启用模型";
-  const modelReady = Boolean(currentModel?.service_provider && currentModel?.model);
-
   useEffect(() => {
-    const nextKnowledgeScope = selectedKb?.kb_id
-      ? { kb_id: selectedKb.kb_id, kb_name: selectedKb.kb_name || selectedKb.kb_id }
-      : DEFAULT_KNOWLEDGE_SCOPE;
-
     if (
-      knowledgeScope?.kb_id !== nextKnowledgeScope.kb_id ||
-      knowledgeScope?.kb_name !== nextKnowledgeScope.kb_name
+      knowledgeScope?.kb_id !== resolvedKnowledgeScope.kb_id ||
+      knowledgeScope?.kb_name !== resolvedKnowledgeScope.kb_name
     ) {
-      setKnowledgeScope(nextKnowledgeScope);
+      setKnowledgeScope(resolvedKnowledgeScope);
     }
-  }, [knowledgeScope, selectedKb, setKnowledgeScope]);
+  }, [knowledgeScope, resolvedKnowledgeScope, setKnowledgeScope]);
 
-  const chatSessionId = useMemo(
-    () => safeBuildChatSessionId({ experience, sessionId, selectedKbId }),
-    [experience, selectedKbId, sessionId],
-  );
-
-  const historyQuery = useQuery({
-    queryKey: ["agent-chat-history", chatSessionId],
-    enabled: experience !== "agent" && Boolean(chatSessionId),
-    queryFn: async () => {
-      const response = await getHistory(chatSessionId);
-      return readApiData(response) || { session_id: chatSessionId, messages: [] };
-    },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    staleTime: 0,
+  const chatWorkspace = useAgentChatWorkspace({
+    experience,
+    sessionId,
+    selectedKbId,
   });
-
-  useEffect(() => {
-    setChatMessages(historyQuery.data?.messages || []);
-  }, [historyQuery.data]);
-
-  useEffect(() => {
-    setChatError("");
-    setPendingQuestion("");
-    setChatSources([]);
-    setChatEvidence([]);
-    setChatPreview(null);
-    setChatPreviewError("");
-  }, [chatSessionId, experience]);
-
-  const chatMutation = useMutation({
-    mutationFn: async (payload) => {
-      const queryResponse = await queryChat(payload);
-      const queryData = readApiData(queryResponse) || {};
-      const historyResponse = await getHistory(queryData.session_id || payload.session_id);
-      const historyData = readApiData(historyResponse) || { messages: [] };
-      return {
-        ...queryData,
-        messages: historyData.messages || [],
-      };
-    },
-    onMutate: (payload) => {
-      setChatError("");
-      setPendingQuestion(payload.question);
-      setChatPreview(null);
-      setChatPreviewError("");
-    },
-    onSuccess: async (result) => {
-      setPendingQuestion("");
-      setChatQuestion("");
-      setChatSources(result.sources || []);
-      setChatEvidence(result.evidence || []);
-      setChatMessages(result.messages || []);
-      historyQuery.refetch();
-      // 问答可能在服务端触发模型 fallback；主动刷新而不是等待 60 秒缓存过期，
-      // 让当前模型名称和“已自动切换”提示立即与服务端状态一致。
-      await modelOptionsQuery.refetch();
-    },
-    onError: (error) => {
-      setPendingQuestion("");
-      setChatError(error.message || "问答请求失败，请稍后重试。");
-    },
-  });
-
-  const previewMutation = useMutation({
-    mutationFn: async (item) => {
-      const targetKbId = item?.kb_id || selectedKbId;
-      if (!targetKbId) {
-        throw new Error("当前证据缺少知识库范围，无法预览。");
-      }
-
-      const response = await previewItem(item, selectedKbId);
-      return readApiData(response) || null;
-    },
-    onMutate: () => {
-      setChatPreviewError("");
-    },
-    onSuccess: (preview) => {
-      setChatPreview(preview);
-    },
-    onError: (error) => {
-      setChatPreview(null);
-      setChatPreviewError(error.message || "证据预览失败，请稍后重试。");
-    },
-  });
-
-  const handlePreviewEvidence = useCallback(
-    (item) => {
-      previewMutation.mutate(item);
-    },
-    [previewMutation],
-  );
 
   const handleExperienceChange = useCallback((nextExperience) => {
     setExperience(nextExperience);
-    setChatError("");
-    setPendingQuestion("");
   }, []);
-
-  const handleChatSubmit = useCallback(
-    (event) => {
-      event.preventDefault();
-      if (!modelReady) {
-        setChatError("请先到模型配置页启用一个模型，再开始问答。");
-        return;
-      }
-
-      try {
-        const payload = buildChatPayload({
-          experience,
-          question: chatQuestion,
-          sessionId,
-          selectedKbId,
-        });
-        chatMutation.mutate(payload);
-      } catch (error) {
-        setChatError(error.message || "提问参数无效。");
-      }
-    },
-    [chatMutation, chatQuestion, experience, modelReady, selectedKbId, sessionId],
-  );
 
   if (experience === "agent") {
     return (
       <div className="qa-page-frame">
         <ExperienceTabs experience={experience} onChange={handleExperienceChange} />
-        <AgentRuntimePanel selectedKbId={selectedKbId} selectedKb={selectedKb} />
+        <AgentRuntimePanel selectedKbId={selectedKbId} selectedKb={selectedKb} resolvedKnowledgeScope={resolvedKnowledgeScope} />
       </div>
     );
   }
@@ -1283,23 +755,28 @@ function AgentPageContent() {
         kbList={activeKbList}
         kbLoading={kbLoading}
         onSelectKb={selectKb}
-        currentModelLabel={currentModelLabel}
-        modelHealthSummary={modelHealthSummary}
-        modelReady={modelReady}
-        question={chatQuestion}
-        onQuestionChange={setChatQuestion}
-        onSubmit={handleChatSubmit}
-        messages={chatMessages}
-        sources={chatSources}
-        evidence={chatEvidence}
-        pendingQuestion={pendingQuestion}
-        error={chatError}
-        historyLoading={historyQuery.isLoading || historyQuery.isFetching}
-        chatBusy={chatMutation.isPending}
-        preview={chatPreview}
-        previewLoading={previewMutation.isPending}
-        previewError={chatPreviewError}
-        onPreviewEvidence={handlePreviewEvidence}
+        currentModelLabel={chatWorkspace.currentModelLabel}
+        modelHealthSummary={chatWorkspace.modelHealthSummary}
+        modelReady={chatWorkspace.modelReady}
+        question={chatWorkspace.question}
+        onQuestionChange={chatWorkspace.setQuestion}
+        requestOptions={chatWorkspace.requestOptions}
+        requestOptionsLoading={chatWorkspace.requestOptionsLoading}
+        onRequestOptionsChange={chatWorkspace.setRequestOptions}
+        onRequestOptionsReset={chatWorkspace.resetRequestOptions}
+        onSubmit={chatWorkspace.submitChat}
+        messages={chatWorkspace.messages}
+        sources={chatWorkspace.sources}
+        evidence={chatWorkspace.evidence}
+        pendingQuestion={chatWorkspace.pendingQuestion}
+        error={chatWorkspace.error}
+        chatNotice={chatWorkspace.chatNotice}
+        historyLoading={chatWorkspace.historyLoading}
+        chatBusy={chatWorkspace.chatBusy}
+        preview={chatWorkspace.preview}
+        previewLoading={chatWorkspace.previewLoading}
+        previewError={chatWorkspace.previewError}
+        onPreviewEvidence={chatWorkspace.previewEvidence}
       />
     </div>
   );
@@ -1312,3 +789,4 @@ export default function AgentPage() {
     </KbProvider>
   );
 }
+

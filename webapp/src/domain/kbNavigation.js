@@ -9,16 +9,34 @@ function normalizeKbId(kbId) {
   return typeof kbId === 'string' ? kbId.trim() : '';
 }
 
-export function buildKnowledgeAgentLink(kbId) {
-  const params = new URLSearchParams();
-  params.set('experience', 'knowledge');
+function normalizeAgentExperience(experience) {
+  if (experience === 'basic' || experience === 'knowledge') {
+    return experience;
+  }
+  return '';
+}
 
+export function buildAgentWorkbenchLink({ experience, kbId } = {}) {
+  const normalizedExperience = normalizeAgentExperience(experience);
   const normalizedKbId = normalizeKbId(kbId);
+  const params = new URLSearchParams();
+
+  if (normalizedExperience === 'knowledge') {
+    params.set('experience', 'knowledge');
+  } else if (normalizedExperience === 'basic' && normalizedKbId) {
+    params.set('experience', 'basic');
+  }
+
   if (normalizedKbId) {
     params.set('kb_id', normalizedKbId);
   }
 
-  return '/agent?' + params.toString();
+  const query = params.toString();
+  return query ? '/agent?' + query : '/agent';
+}
+
+export function buildKnowledgeAgentLink(kbId) {
+  return buildAgentWorkbenchLink({ experience: 'knowledge', kbId });
 }
 
 export function buildKnowledgeWorkspaceLink(kbId) {
@@ -32,18 +50,19 @@ export function buildKnowledgeWorkspaceLink(kbId) {
   return '/knowledge?' + params.toString();
 }
 
-export function parseKnowledgeAgentEntry(search) {
+export function parseAgentWorkbenchEntry(search) {
   const params = new URLSearchParams(typeof search === 'string' ? search : '');
   const requestedKbId = normalizeKbId(params.get('kb_id'));
-  const requestedExperience =
-    params.get('experience') === 'knowledge' || requestedKbId
-      ? 'knowledge'
-      : '';
+  const requestedExperience = normalizeAgentExperience(params.get('experience')) || (requestedKbId ? 'knowledge' : '');
 
   return {
     requestedKbId: requestedKbId || EMPTY_KB_SELECTION,
     requestedExperience,
   };
+}
+
+export function parseKnowledgeAgentEntry(search) {
+  return parseAgentWorkbenchEntry(search);
 }
 
 export function parseKnowledgeWorkspaceEntry(search) {

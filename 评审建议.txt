@@ -1,21 +1,52 @@
-本轮测试方案评审建议（2026-08-18）
+第130轮评审建议
 
-一、优点
-1. 文档目录和命名符合仓库规范，按迁移、OCR、Open API、Embedding 四个域建立了需求到测试的明确映射，并列出了专项、覆盖率、全量和 slow/runtime 命令。
-2. 对 OCR 资产来源保持诚实：明确 captured 当前是项目排版截图、不是打印扫描/手机实拍，并把该项定义为外部资产待补，避免误报完成。
-3. 测试方案覆盖真实 LlamaIndex 0.11.19 重载、物理索引隔离、结构化 search 与 answer 分离、审计脱敏、ModelScope metadata 超时回退、下载取消和预热门禁等高风险路径。
-4. 验收门禁明确要求单模块 coverage >= 80%、修复后重新跑专项和全量、测试报告评审前不得 commit/push，符合仓库流程。
+本轮优点：
+1. 这轮没有继续停留在“153 / 153 还是 156 / 156 的数字争论”，而是继续往真实执行链路里钻，最终抓到一个比文档漂移更严重的问题：当前 semireal eval harness 里的 follow-up 预热并没有真正写入会话历史。
+2. 已把 layered eval 当前真实数据口径再次核实清楚：
+   - `tests/fixtures/rag_quality/eval_v7/cases.json` = 24
+   - `tests/fixtures/rag_quality/eval_v8_main/cases.json` = 93
+   - `tests/fixtures/rag_quality/eval_v8_hard/cases.json` = 39
+   - `tests/fixtures/rag_quality/eval_layered_suite.json` = 24 / 93 / 39，总计 156
+   这说明当前工作树的 fixture/manifest 口径已经是 156，不再是历史材料里大量复写的 153。
+3. 这轮找到了一条能直接解释 hard follow-up 失败的证据链，而不是只看报告猜原因：
+   - `tests/api/chat_eval_runner.py` 的 `EvalV1SemirealHarness.__enter__()` 里把 `chat_service.append_chat_message` 直接改成了 `lambda *args, **kwargs: None`
+   - 在这个 harness 里实际调用 `/api/chat/query` 预热 `history_turns` 之后，再读 `/api/chat/history`，返回 `messages: []`
+   - 继续用同一 session 跑 `eval-v8-hard-pdf-013`，最终答案只返回 `war-room-handover-business.pdf`，没有把 `release-checklist-business.pdf` 带进来，`history_len = 0`
+   这说明当前 follow-up eval 很大一部分并没有真的利用“同 session 历史”，而是被当作独立问句在跑。
+4. 失败 case 与这条证据链能对上：
+   - `eval-v8-hard-md-013`：只答出了 `Zhao Lin / 15 minutes`，缺 `Li Qing`，`actual_source_count = 1`
+   - `eval-v8-hard-pdf-013`：只答出了 `10 minutes`，缺 `Chen Yu`，`actual_source_count = 1`
+   这两个 case 都是“先打开前文，再问组合事实”的 history-grounded multi-source 问题；而现在预热历史没有落盘，失败就不是偶然了。
+5. 还顺手抓到了一个中文 classifier 盲区：
+   - 对 `刚才看的那两份文档里，最终审批人是谁，P1 cutover incident 又要在几分钟内升级给谁？`
+   - `chat_service._question_looks_follow_up(...) = True`
+   - 但 `chat_service._question_requests_targeted_fact_answer(...) = False`
+   当前 targeted-fact 中文规则主要覆盖“X 和 Y 分别是谁”这种模式，没有覆盖“刚才看的两份文档里，A 是谁，B 又是什么”这种真实追问，因此即便后面把历史落盘修好，中文 follow-up 组合题仍可能少走一条 source-backed 组装链路。
 
-二、需要改进的地方
-1. 迁移 RTM 仍缺“成功回滚”和“备份复制/写入权限失败”的直接服务层证据；当前只有篡改与所有权拒绝测试，不能完整证明 FR-MIG-03/08。
-2. 令牌管理路由缺 create/list/revoke 正常链路和撤销后立即拒绝 Open API 的集成证据；CLI 生命周期不能替代管理 API 路由验收。
-3. `llama_index.core.__version__` 在部分 0.11.x 环境未必公开，前置检查命令应改用 `importlib.metadata.version('llama-index-core')`，避免测试方案本身不可执行。
-4. 覆盖率命令未覆盖新增 routers、`open_api_audit.py` 的文件写入分支、`build_ocr_scan_benchmark.py` 和 `manage_access_tokens.py`；若完成定义采用“新增/修改 Python 模块”，应扩展 coverage 范围或在报告中逐一解释非核心 CLI/路由模块的覆盖口径。
-5. OCR runtime 报告虽然已生成，但测试方案应明确把真实运行 artifact 的当前实测值作为证据，并区分“算法/runtime 已通过”与“物理 captured 资产未满足”，避免最终判定含混。
+需要改进的地方：
+1. 当前 layered suite 的主口径已经出现“两层漂移”：
+   - fixture/manifest/数据集测试：156
+   - audit / interview / snapshot tool / docs contract：大量仍写 153 / 36 hard
+   如果不先明确哪套才是正式 baseline，后续任何“全绿”“主路径闭环”表述都会继续失真。
+2. `tests/api/chat_eval_runner.py` 的 follow-up 测试目前只验证“是否先发了预热请求”，没有验证“预热后历史是否真的落盘 / 最终 query 是否真的读到了历史”。这让 harness 把 `append_chat_message` 置空这种问题可以长期潜伏。
+3. source reconcile 目前使用的是原始 `request.question`，不是 `grounded_question`；对依赖 history 的 targeted / multi-source follow-up 来说，这会进一步削弱补检索能力。即使主 query 用了带上下文的问题，后面的 reconcile 还是按“无历史版本的问题”做 source 扩展。
+4. main 层两个失败也不只是“答案 wording 差一点”：
+   - `eval-v5-pdf-003` 本该组合 `scope-manual.pdf + folder-boundary.pdf`，却漂到 `scope-refusal-bridge.pdf`
+   - `eval-v8-main-pdf-019` 题目明确要求复述 `must not fabricate from outside memory`，但回答被压成了 authorization-boundary 句子
+   这说明当前 exact phrase / boundary / targeted answer 这几条后处理链，面对“同主题多 PDF 漂移”时仍缺 semireal 级回归保护。
 
-三、具体建议
-1. 增加迁移服务测试：成功迁移后执行 rollback，断言本批次目标被移动到 rollback 隔离目录、历史源和备份仍可用；注入 copy/write 权限异常，断言状态失败且无目标半成品。
-2. 增加 access token route 集成测试：本机+正确 admin key 创建、列表不含明文、撤销；随后用该 token 请求 `/api/open/v1/me` 或 answer，断言立即 401。
-3. 修订前置版本检查为 `importlib.metadata.version`。
-4. 扩展覆盖率命令到新增 routers 和 CLI/基准模块；如某模块因薄路由/CLI 入口不适合 80% 单模块门禁，必须在测试报告中明确分类并给出直接行为测试证据，不能静默遗漏。
-5. 在测试报告模板和 RTM 证据中记录已生成的 recorded/runtime JSON、Markdown 路径及 runtime 五项指标；最终状态应为“代码验收通过但 FR-OCR-01 外部实拍资产待补”，直到真实资产加入。
+具体建议：
+1. 下一步优先修 eval harness 的历史落盘问题：
+   - 不要在 `EvalV1SemirealHarness.__enter__()` 里把 `chat_service.append_chat_message` 置空；
+   - 或者至少改成可写入可清理的 fake session store，而不是完全 no-op；
+   - 新增测试必须显式断言：prewarm 之后 `/api/chat/history` 非空，且最终 follow-up query 的 grounded question 真的包含历史上下文。
+2. 修完历史落盘后，重新复跑 `eval-v8-hard-md-013` / `eval-v8-hard-pdf-013`，确认这两个 case 是不是自然回绿；如果仍不绿，再单独拆 targeted-fact / source reconcile 问题。
+3. 给 `question_requests_targeted_fact_answer()` 增补中文 follow-up 复合问句规则，至少覆盖：
+   - “刚才/前面/上面看的那两份文档里”
+   - “A是谁，B又是什么/几分钟/哪个字段”
+   - 不依赖“分别”才能命中 targeted-fact
+4. 给 source reconcile 增加 history-grounded 契约测试：当主 query 已经被 `build_history_grounded_question()` 改写后，reconcile 阶段也要能利用 grounded question 或等价历史摘要，而不是退回原始省略问句。
+5. 在修真实链路之前，不要继续把 `153 / 153` 当成当前对外口径。当前更诚实的说法应该是：
+   - 数据集 manifest 现状：156
+   - 2026-08-28 真实 suite 复跑：152 / 156，且 hard follow-up 评测链路存在历史预热不生效问题
+6. 后续如果进入提交阶段，仍然必须只摘本问题簇文件；当前工作树极脏，绝不能全仓提交。

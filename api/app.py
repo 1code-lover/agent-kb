@@ -23,28 +23,69 @@ from api.runtime import bootstrap_runtime, runtime_state
 from server.readers.image_ocr import start_ocr_warmup_in_background
 from utils.api_response import error_response
 
-DEFAULT_FRONTEND_DEV_ORIGINS = [
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-]
+DEFAULT_FRONTEND_DEV_PORT = "5173"
 LOCAL_DEV_ORIGIN_REGEX = r"^https?://(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$"
+_FRONTEND_DEV_PORT_ENV_KEYS = (
+    "KB_WEBAPP_PORT",
+    "KB_WEB_PORT",
+    "NORTHAGENT_WEB_PORT",
+    "THINKRAG_WEB_PORT",
+    "FOXGLOVE_WEB_PORT",
+)
+_EXTRA_DEV_ORIGIN_ENV_KEYS = (
+    "KB_EXTRA_DEV_ORIGINS",
+    "NORTHAGENT_EXTRA_DEV_ORIGINS",
+    "THINKRAG_EXTRA_DEV_ORIGINS",
+    "FOXGLOVE_EXTRA_DEV_ORIGINS",
+)
+_EMBED_PREWARM_ENV_KEYS = (
+    "KB_EMBED_PREWARM",
+    "NORTHAGENT_EMBED_PREWARM",
+    "THINKRAG_EMBED_PREWARM",
+    "FOXGLOVE_EMBED_PREWARM",
+)
+_OCR_PREWARM_ENV_KEYS = (
+    "KB_OCR_PREWARM",
+    "NORTHAGENT_OCR_PREWARM",
+    "THINKRAG_OCR_PREWARM",
+    "FOXGLOVE_OCR_PREWARM",
+)
+
+
+def _read_first_non_empty_env(env_names: tuple[str, ...], default: str = "") -> str:
+    """按优先级读取第一个非空环境变量。"""
+    for env_name in env_names:
+        value = os.getenv(env_name, "").strip()
+        if value:
+            return value
+    return default
+
+
+def _default_frontend_dev_origins() -> list[str]:
+    """构造默认显式放行的前端调试来源；任意 loopback 端口仍由 regex 统一放行。"""
+    raw_port = _read_first_non_empty_env(_FRONTEND_DEV_PORT_ENV_KEYS, default=DEFAULT_FRONTEND_DEV_PORT)
+    port = raw_port if raw_port.isdigit() else DEFAULT_FRONTEND_DEV_PORT
+    return [
+        f"http://127.0.0.1:{port}",
+        f"http://localhost:{port}",
+    ]
 
 
 def _parse_extra_dev_origins() -> list[str]:
     """解析附加的本地前端调试来源。"""
-    raw_value = os.getenv("THINKRAG_EXTRA_DEV_ORIGINS", "")
+    raw_value = _read_first_non_empty_env(_EXTRA_DEV_ORIGIN_ENV_KEYS)
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
 def _should_enable_embedding_prewarm() -> bool:
     """判断是否在启动后后台预热 embedding 模型。"""
-    raw_value = os.getenv("THINKRAG_EMBED_PREWARM", "0").strip().lower()
+    raw_value = _read_first_non_empty_env(_EMBED_PREWARM_ENV_KEYS, default="0").lower()
     return raw_value in {"1", "true", "yes", "on"}
 
 
 def _should_enable_ocr_prewarm() -> bool:
     """判断是否在启动后后台预热 OCR 引擎。"""
-    raw_value = os.getenv("THINKRAG_OCR_PREWARM", "0").strip().lower()
+    raw_value = _read_first_non_empty_env(_OCR_PREWARM_ENV_KEYS, default="0").lower()
     return raw_value in {"1", "true", "yes", "on"}
 
 
@@ -67,7 +108,7 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="ThinkRAG Local API", version="0.1.0", lifespan=_lifespan)
 
 FRONTEND_DEV_ORIGINS = [
-    *DEFAULT_FRONTEND_DEV_ORIGINS,
+    *_default_frontend_dev_origins(),
     *_parse_extra_dev_origins(),
 ]
 

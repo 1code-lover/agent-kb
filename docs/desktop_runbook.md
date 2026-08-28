@@ -1,96 +1,55 @@
-# ThinkRAG Desktop Runbook
+# ThinkRAG Desktop Runbook（兼容跳转说明）
 
-## 1. Local Development
+## 当前状态
 
-### Prerequisites
+该文件仅保留为**根目录兼容跳转页**，避免历史链接、旧索引或旧 audit 材料继续把它当作当前桌面运行手册正文。
 
-- Python 3.10+
-- Node.js 18+
-- npm
+- **当前唯一运行手册**：`docs/guide/desktop_runbook.md`
+- **当前主线**：FastAPI + React（Vite）+ Electron
+- **默认本地入口**：`start_all.ps1` / `scripts/dev-all.ps1`
+- **legacy Streamlit 状态**：`app.py` + `frontend/` 仍保留为 legacy 兼容 shim，必须显式设置 `KB_ALLOW_LEGACY_STREAMLIT=1`
 
-### Install dependencies
+## 快速契约摘要
 
-```powershell
-python -m pip install -r requirements.txt
-cd webapp; npm install; cd ..
-cd desktop; npm install; cd ..
-```
+如果你只是想快速确认“当前桌面主线怎么跑”，至少记住下面几条：
 
-### Start desktop dev mode
+1. **联调优先入口**
+   - API + Web：`powershell -File .\start_all.ps1`
+   - API + Web + Desktop：`powershell -File .\scripts\dev-all.ps1`
+   - 仅 Web + Desktop 兼容 helper：`powershell -File .\scripts\desktop-dev.ps1`
+   - 停止兼容 helper：`powershell -File .\scripts\desktop-dev.ps1 -Stop`
+2. **端口与 API Base 契约**
+   - FastAPI fallback：`18080`
+   - Vite fallback：`5173`
+   - 优先遵循 `KB_API_BASE_URL` / `KB_API_PORT` / `VITE_API_BASE_URL`
+   - 如果显式把 `KB_API_BASE_URL` 配成远端非 loopback 地址，Electron 只探活该远端 API，不会自动回退到本地 `run_api.py`
+   - `-BackendPort` / `-FrontendPort` 会沿统一契约透传
+   - 如果传入 `-BackendPort 18095 -FrontendPort 5176`，就应按覆盖后的地址理解联调结果
+3. **依赖基线**
+   - 默认 runtime profile：`requirements-runtime.txt`
+   - 当前显式锁定：`httpx==0.27.2`
+   - 如果 pytest / TestClient 报 `Client.__init__() got an unexpected keyword argument 'app'`，先回到该 runtime profile
+4. **Docker smoke 建议**
+   - 优先：`python scripts/docker_smoke.py --install-profile smoke --app-runtime-mode api`
+   - helper 默认让 Docker 自动分配 loopback host port，再用 `docker port` 回查映射
+   - `docker run -p 18080:18080` 只是固定端口手工复现实例，不是唯一有效口径
 
-```powershell
-.\scripts\desktop-dev.ps1
-```
+## 应该查看哪里
 
-或使用一键联调（显式启动 API + Web + Desktop）：
+如果你要看当前完整运行说明、端口覆盖、安装 profile、桌面 helper、Docker smoke 或 legacy 边界，请直接查看：
 
-```powershell
-.\scripts\dev-all.ps1
-```
+- `docs/guide/desktop_runbook.md`
 
-This starts:
+该文档才是当前 source of truth。
 
-- React dev server at `http://127.0.0.1:5173`
-- Electron desktop shell
-- Python API is auto-started by Electron (`run_api.py`)
+## 为什么还保留这个文件
 
-## 2. API Smoke Check
+1. 历史文档、旧索引和部分审计材料仍可能引用 `docs/desktop_runbook.md`
+2. 直接删除会让这些引用失效，并继续制造“是不是缺一份运行手册正文”的噪音
+3. 因此这里故意收口成兼容跳转页，而不是继续保留一份会再次漂移的正文副本
 
-Run:
+## 明确边界
 
-```powershell
-python run_api.py
-```
-
-Then check:
-
-```powershell
-python -c "import requests;print(requests.get('http://127.0.0.1:18080/api/health',timeout=5).json())"
-```
-
-Expected:
-
-- `code` is `0`
-- `data.status` is `ok`
-
-## 3. Build Desktop Packages
-
-### Windows
-
-```powershell
-.\scripts\build-desktop.ps1 -InstallDeps
-```
-
-### macOS/Linux
-
-```bash
-chmod +x scripts/build-desktop.sh
-./scripts/build-desktop.sh --install-deps
-```
-
-`desktop/package.json` 中的 `npm run build` 会按当前平台自动选择目标：
-
-- Windows 主机打包 `--win`
-- macOS 主机打包 `--mac`
-
-Build artifacts are generated under `desktop/dist`.
-
-## 4. Package Python Runtime (Optional)
-
-If you need to bundle API as a standalone executable:
-
-```powershell
-.\scripts\package-python-runtime.ps1
-```
-
-Output path defaults to:
-
-- `desktop/resources/python/thinkrag-api(.exe)`
-
-## 5. Known Notes
-
-- Current query/index pipeline relies on `llama_index` runtime dependencies.
-- If local environment has a `pydantic` mismatch, align by reinstalling from `requirements.txt`.
-- Keep `streamlit run app.py` as migration fallback until feature parity acceptance.
-- Electron 首次打包需要从 GitHub 下载 Electron 二进制；若网络受限，请先配置代理或镜像，再执行 `npm run build`。
-- 功能回归清单见 `docs/desktop_regression_checklist.md`，建议每次发布前执行。
+- 不要再把本文件视为当前 runbook 正文
+- 不要在这里维护完整启动步骤或长篇联调说明
+- 如运行契约发生变化，只更新 `docs/guide/desktop_runbook.md`

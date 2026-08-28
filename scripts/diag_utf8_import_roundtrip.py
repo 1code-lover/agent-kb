@@ -12,11 +12,16 @@ from typing import Any
 import requests
 
 try:
-    from scripts.diag_roundtrip_support import find_file_result, resolve_saved_file_path
+    from scripts.diag_roundtrip_support import (
+        DEFAULT_LOCAL_API_PORT,
+        find_file_result,
+        resolve_api_base_url,
+        resolve_saved_file_path,
+    )
 except ModuleNotFoundError:
-    from diag_roundtrip_support import find_file_result, resolve_saved_file_path
+    from diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, find_file_result, resolve_api_base_url, resolve_saved_file_path
 
-DEFAULT_BASE_URL = "http://127.0.0.1:18081"
+DEFAULT_BASE_URL = f"http://127.0.0.1:{DEFAULT_LOCAL_API_PORT}"
 DEFAULT_RELATIVE_PATH = "diag/diag-import-utf8.md"
 UTF8_TEXT = (
     "# UTF-8 \u8bca\u65ad\u77e5\u8bc6\u5e93\n\n"
@@ -60,10 +65,14 @@ def _sha256_bytes(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """\u89e3\u6790\u547d\u4ee4\u884c\u53c2\u6570\u3002"""
     parser = argparse.ArgumentParser(description="\u8bca\u65ad UTF-8 Markdown \u5bfc\u5165\u3001\u843d\u76d8\u4e0e\u95ee\u7b54\u94fe\u8def")
-    parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="\u76ee\u6807 API \u57fa\u5730\u5740")
+    parser.add_argument(
+        "--base-url",
+        default=resolve_api_base_url(),
+        help="目标 API 基地址；优先读取 KB_API_BASE_URL，未设置时回退到 KB_API_PORT（默认 18080）",
+    )
     parser.add_argument("--kb-id", default=None, help="\u53ef\u9009\u7684\u8bca\u65ad\u77e5\u8bc6\u5e93 ID")
     parser.add_argument(
         "--source-path",
@@ -73,7 +82,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--relative-path", default=DEFAULT_RELATIVE_PATH, help="\u5bfc\u5165\u5230\u77e5\u8bc6\u5e93\u5185\u7684\u76f8\u5bf9\u8def\u5f84")
     parser.add_argument("--timeout", type=float, default=180.0, help="HTTP \u8bf7\u6c42\u8d85\u65f6\u65f6\u95f4\uff08\u79d2\uff09")
     parser.add_argument("--output-path", default=None, help="\u53ef\u9009\u7684 JSON \u62a5\u544a\u8f93\u51fa\u8def\u5f84")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def _request_json(method: str, url: str, *, timeout: float, **kwargs: Any) -> dict[str, Any]:

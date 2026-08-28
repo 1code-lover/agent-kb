@@ -6,9 +6,10 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
+from api.services.evidence_service import build_evidence_id
 from server.kb_registry import KBRegistry
 
 client = TestClient(app)
@@ -109,6 +110,27 @@ def test_preview_by_evidence_id_returns_text_excerpt(monkeypatch, isolated_regis
     assert data["doc_id"] == "doc-1"
     assert data["locator"]["page"] == "7"
     assert data["preview_type"] == "text_excerpt"
+
+
+def test_preview_by_evidence_id_prefers_encoded_excerpt(monkeypatch, isolated_registry):
+    isolated_registry.create_kb("kb-a", "KB A")
+    _install_preview_runtime(monkeypatch)
+
+    evidence_id = build_evidence_id(
+        kb_id="kb-a",
+        doc_id="doc-1",
+        preview_locator={"page": "7", "node_id": "node-1"},
+        fallback_index=1,
+        excerpt="Sign deadline is 22:30 Beijing time.",
+    )
+
+    resp = client.post("/api/kb/preview", json={"kb_id": "kb-a", "evidence_id": evidence_id})
+
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["excerpt"] == "Sign deadline is 22:30 Beijing time."
+    assert data["doc_id"] == "doc-1"
+    assert data["locator"]["page"] == "7"
 
 
 def test_preview_requires_doc_id_or_evidence_id(monkeypatch, isolated_registry):

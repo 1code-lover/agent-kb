@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.routers import embedding_cache as embedding_cache_router

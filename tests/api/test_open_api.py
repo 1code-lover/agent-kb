@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.routers import open_api
@@ -77,6 +77,53 @@ def test_open_request_models_reject_execution_fields(monkeypatch):
     assert response.status_code == 422
 
 
+def test_open_answer_route_forwards_readonly_query_params(monkeypatch):
+    calls: list[dict] = []
+    monkeypatch.setattr(open_api, "access_token_service", FakeTokens())
+    monkeypatch.setattr(open_api, "open_api_audit", Audit())
+    monkeypatch.setattr(
+        open_api,
+        "run_readonly_query",
+        lambda **kwargs: calls.append(kwargs) or {"answer": "ok", "evidence": []},
+    )
+
+    response = TestClient(app).post(
+        "/api/open/v1/answer",
+        headers={"Authorization": "Bearer good-token"},
+        json={
+            "kb_id": "finance",
+            "question": "x",
+            "top_k": 6,
+            "response_mode": "tree_summarize",
+            "use_reranker": False,
+            "top_n": 2,
+            "reranker_model": "bge-reranker-v2-m3",
+        },
+    )
+
+    assert response.status_code == 200
+    assert calls == [{
+        "token_id": "tok-1",
+        "kb_id": "finance",
+        "question": "x",
+        "top_k": 6,
+        "response_mode": "tree_summarize",
+        "use_reranker": False,
+        "top_n": 2,
+        "reranker_model": "bge-reranker-v2-m3",
+    }]
+
+
+def test_open_answer_rejects_unknown_response_mode(monkeypatch):
+    monkeypatch.setattr(open_api, "access_token_service", FakeTokens())
+    response = TestClient(app).post(
+        "/api/open/v1/answer",
+        headers={"Authorization": "Bearer good-token"},
+        json={"kb_id": "finance", "question": "x", "response_mode": "unsupported-mode"},
+    )
+    assert response.status_code == 422
+
+
 def test_open_api_schema_contains_only_readonly_paths_and_methods():
     schema = app.openapi()
     open_paths = {path: set(methods) for path, methods in schema["paths"].items() if path.startswith("/api/open/v1")}
@@ -124,6 +171,17 @@ def test_audit_file_omits_token_secret_and_question_body(tmp_path):
     assert full_question not in raw
 
 
+def test_search_rejects_answer_only_query_fields(monkeypatch):
+    monkeypatch.setattr(open_api, "access_token_service", FakeTokens())
+    response = TestClient(app).post(
+        "/api/open/v1/search",
+        headers={"Authorization": "Bearer good-token"},
+        json={"kb_id": "finance", "question": "revenue", "response_mode": "compact"},
+    )
+    assert response.status_code == 422
+
+
+
 def test_search_uses_structured_retrieval_executor(monkeypatch):
     """search 路由必须返回结构化命中，不能复用生成式 answer 执行器。"""
     tokens = FakeTokens()
@@ -158,3 +216,43 @@ def test_search_uses_structured_retrieval_executor(monkeypatch):
     assert response.json()["data"]["hits"][0]["text"] == "match"
     assert search_calls == [{"token_id": "tok-1", "kb_id": "finance", "question": "revenue", "top_k": 3}]
     assert answer_calls == []
+
+def test_open_answer_empty_kb_returns_400_instead_of_500(monkeypatch):
+    monkeypatch.setattr(open_api, "access_token_service", FakeTokens())
+    monkeypatch.setattr(open_api, "open_api_audit", Audit())
+    monkeypatch.setattr(
+        open_api,
+        "run_readonly_query",
+        lambda **kwargs: (_ for _ in ()).throw(ValueError("Knowledge base is empty. Please import documents first.")),
+    )
+
+    response = TestClient(app).post(
+        "/api/open/v1/answer",
+        headers={"Authorization": "Bearer good-token"},
+        json={"kb_id": "finance", "question": "x"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["code"] == 400
+    assert "Please import documents first" in response.json()["message"]
+
+def test_open_search_empty_kb_returns_400_instead_of_500(monkeypatch):
+    monkeypatch.setattr(open_api, "access_token_service", FakeTokens())
+    monkeypatch.setattr(open_api, "open_api_audit", Audit())
+    monkeypatch.setattr(
+        open_api,
+        "run_readonly_search",
+        lambda **kwargs: (_ for _ in ()).throw(ValueError("Knowledge base is empty. Please import documents first.")),
+    )
+
+    response = TestClient(app).post(
+        "/api/open/v1/search",
+        headers={"Authorization": "Bearer good-token"},
+        json={"kb_id": "finance", "question": "x"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["code"] == 400
+    assert "Please import documents first" in response.json()["message"]
+
+

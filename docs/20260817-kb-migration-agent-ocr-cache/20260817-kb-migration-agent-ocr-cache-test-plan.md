@@ -6,7 +6,7 @@
 - 测试方案日期：2026-08-18
 - 目标分支：`codex/desktop-agent-stage3`
 - macOS Python：`/opt/miniconda3/envs/agent-kb/bin/python`（Python 3.12.13）
-- 关键依赖：`llama_index==0.11.19`、`llama-index-core==0.11.19`
+- 关键依赖：`llama-index-core==0.11.19`，以及仓库实际使用到的 LlamaIndex integration packages；runtime baseline 避免重新引入顶层 `llama_index` metapackage
 - 覆盖范围：历史知识库迁移、OCR 连续表格和基准、只读 Open API 与授权令牌、Embedding 下载增强、Web/Electron 回归
 
 ## 2. 测试目标

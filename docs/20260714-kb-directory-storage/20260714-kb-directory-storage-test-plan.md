@@ -51,7 +51,7 @@
 |---|---|
 | OS | Windows，本仓库当前开发机 |
 | Python | 系统 Python 3.12 |
-| 工作目录 | `C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb` |
+| 工作目录 | `C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb` |
 | 后端框架 | FastAPI |
 | RAG 核心 | LlamaIndex |
 | 默认快测策略 | `pytest -m "not slow"` 排除真实 PaddleOCR 慢测 |
@@ -244,7 +244,7 @@ python -m pytest tests/readers/test_pdf_ocr.py -q -m slow -s
 
 以下结果是编码阶段用于确认实现可运行的预跑证据，不替代阶段 5 的正式测试报告。2026-07-14 在修复 `server/kb_registry.py` 缩进/中文注释恢复问题后，已重新执行以下命令。
 
-执行上下文：工作目录 `C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb`；Python 为系统 Python 3.12；测试使用 `tmp_path`、monkeypatch 或测试 fixture 隔离文件系统状态，不写入用户真实 `data/` 与 `storage/`；当前记录为编码阶段预跑，正式报告还需在阶段 5 重新记录分支、commit、pytest/coverage 版本与覆盖率。
+执行上下文：工作目录 `C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb`；Python 为系统 Python 3.12；测试使用 `tmp_path`、monkeypatch 或测试 fixture 隔离文件系统状态，不写入用户真实 `data/` 与 `storage/`；当前记录为编码阶段预跑，正式报告还需在阶段 5 重新记录分支、commit、pytest/coverage 版本与覆盖率。
 
 | 时间 | 命令 | 结果 |
 |---|---|---|
@@ -269,3 +269,4 @@ python -m pytest tests/readers/test_pdf_ocr.py -q -m slow -s
 5. 测试过程中不得污染用户真实 `data/` 文件和真实 `storage/` 索引。
 6. 如果真实 OCR 慢测未执行，测试报告必须明确说明原因、耗时预期和非阻断依据。
 7. 若发现失败，必须先修复阻断问题并重新执行相关命令，再生成最终测试报告。
+

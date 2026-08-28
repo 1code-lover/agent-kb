@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test src/api/chat.test.js src/api/client.test.js src/api/health.test.js src/api/kb.test.js src/api/migration.test.js src/api/response.test.js src/domain/agentExperience.test.js src/domain/chatWorkflow.test.js src/domain/desktopBridge.test.js src/domain/embeddingDownload.test.js src/domain/folderNavigation.test.js src/domain/folderTree.test.js src/domain/importSummary.test.js src/domain/kbMigration.test.js src/domain/kbNavigation.test.js src/domain/kbSelection.test.js src/domain/knowledgeWorkspace.test.js src/domain/modelHealth.test.js src/domain/ocrWarmup.test.js src/domain/uploadImport.test.js src/store/agentState.test.js"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.51.1",

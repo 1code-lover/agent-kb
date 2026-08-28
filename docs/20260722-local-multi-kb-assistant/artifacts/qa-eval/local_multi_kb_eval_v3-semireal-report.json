@@ -1,42 +1,42 @@
 {
   "dataset_name": "local_multi_kb_eval_v3",
   "evaluation_mode": "diagnostic",
-  "run_at": "2026-07-31T12:52:51.394816+00:00",
+  "run_at": "2026-08-21T11:50:22.406986+00:00",
   "suite_summary": {
     "total_cases": 6,
-    "passed_cases": 2,
-    "failed_cases": 4,
-    "pass_rate": 0.3333333333333333,
+    "passed_cases": 0,
+    "failed_cases": 6,
+    "pass_rate": 0.0,
     "pass_rate_ci95": {
-      "low": 0.09676933255921683,
-      "high": 0.7000116786584712
+      "low": 0.0,
+      "high": 0.3903430336530645
     },
-    "scope_pass_rate": 1.0,
-    "average_keypoint_coverage": 0.5833333333333334,
+    "scope_pass_rate": 0.0,
+    "average_keypoint_coverage": 0.0,
     "total_keypoints": 10,
-    "matched_keypoints": 5,
-    "missing_keypoints": 5,
-    "keypoint_hit_rate": 0.5,
+    "matched_keypoints": 0,
+    "missing_keypoints": 10,
+    "keypoint_hit_rate": 0.0,
     "evidence_expected_cases": 4,
     "evidence_hit_cases": 0,
     "evidence_hit_rate": 0.0,
     "preview_required_cases": 4,
-    "preview_resolved_cases": 3,
-    "preview_resolvable_rate": 0.75,
+    "preview_resolved_cases": 0,
+    "preview_resolvable_rate": 0.0,
     "preview_term_total": 0,
     "preview_term_hits": 0,
     "preview_term_hit_rate": 1.0,
-    "source_count_match_rate": 0.8333333333333334,
+    "source_count_match_rate": 0.3333333333333333,
     "blocked_term_hit_cases": 0,
     "forbidden_term_clean_rate": 1.0,
     "category_breakdown": {
       "no_evidence": {
         "count": 2,
-        "passed": 2,
-        "pass_rate": 1.0,
+        "passed": 0,
+        "pass_rate": 0.0,
         "pass_rate_ci95": {
-          "low": 0.34237195288961925,
-          "high": 1.0
+          "low": 0.0,
+          "high": 0.6576280471103807
         }
       },
       "scope_contract": {
@@ -53,13 +53,13 @@
   "run_gates": {
     "scope_pass_rate_min": {
       "metric": "scope_pass_rate",
-      "actual": 1.0,
+      "actual": 0.0,
       "minimum": 1.0,
-      "passed": true
+      "passed": false
     },
     "average_keypoint_coverage_min": {
       "metric": "average_keypoint_coverage",
-      "actual": 0.5833333333333334,
+      "actual": 0.0,
       "minimum": 0.0,
       "passed": true
     },
@@ -71,13 +71,13 @@
     },
     "preview_resolvable_rate_min": {
       "metric": "preview_resolvable_rate",
-      "actual": 0.75,
+      "actual": 0.0,
       "minimum": 0.0,
       "passed": true
     },
     "source_count_match_rate_min": {
       "metric": "source_count_match_rate",
-      "actual": 0.8333333333333334,
+      "actual": 0.3333333333333333,
       "minimum": 0.0,
       "passed": true
     },
@@ -88,7 +88,7 @@
       "passed": true
     }
   },
-  "run_passed": true,
+  "run_passed": false,
   "breakdowns": {
     "modality": {
       "image_ocr": {
@@ -100,75 +100,75 @@
           "low": 0.0,
           "high": 0.5615060804490177
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 0.3333333333333333,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 6,
-        "matched_keypoints": 2,
-        "keypoint_hit_rate": 0.3333333333333333,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 3,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 0.0,
         "preview_required_cases": 3,
-        "preview_resolved_cases": 2,
-        "preview_resolvable_rate": 0.6666666666666666,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 0.0,
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 0.6666666666666666,
+        "source_count_match_rate": 0.0,
         "forbidden_term_clean_rate": 1.0
       },
       "pdf": {
         "count": 3,
-        "passed": 2,
-        "failed": 1,
-        "pass_rate": 0.6666666666666666,
+        "passed": 0,
+        "failed": 3,
+        "pass_rate": 0.0,
         "pass_rate_ci95": {
-          "low": 0.20765495512648796,
-          "high": 0.9385096847238394
+          "low": 0.0,
+          "high": 0.5615060804490177
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 0.8333333333333334,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 4,
-        "matched_keypoints": 3,
-        "keypoint_hit_rate": 0.75,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 1,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 0.0,
         "preview_required_cases": 1,
-        "preview_resolved_cases": 1,
-        "preview_resolvable_rate": 1.0,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 0.0,
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.6666666666666666,
         "forbidden_term_clean_rate": 1.0
       }
     },
     "difficulty": {
       "simple": {
         "count": 6,
-        "passed": 2,
-        "failed": 4,
-        "pass_rate": 0.3333333333333333,
+        "passed": 0,
+        "failed": 6,
+        "pass_rate": 0.0,
         "pass_rate_ci95": {
-          "low": 0.09676933255921683,
-          "high": 0.7000116786584712
+          "low": 0.0,
+          "high": 0.3903430336530645
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 0.5833333333333334,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 10,
-        "matched_keypoints": 5,
-        "keypoint_hit_rate": 0.5,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 4,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 0.0,
         "preview_required_cases": 4,
-        "preview_resolved_cases": 3,
-        "preview_resolvable_rate": 0.75,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 0.0,
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 0.8333333333333334,
+        "source_count_match_rate": 0.3333333333333333,
         "forbidden_term_clean_rate": 1.0
       }
     },
@@ -182,37 +182,37 @@
           "low": 0.0,
           "high": 0.48990002040399916
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 0.375,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 8,
-        "matched_keypoints": 3,
-        "keypoint_hit_rate": 0.375,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 4,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 0.0,
         "preview_required_cases": 4,
-        "preview_resolved_cases": 3,
-        "preview_resolvable_rate": 0.75,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 0.0,
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 0.75,
+        "source_count_match_rate": 0.0,
         "forbidden_term_clean_rate": 1.0
       },
       "refusal": {
         "count": 2,
-        "passed": 2,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 0,
+        "failed": 2,
+        "pass_rate": 0.0,
         "pass_rate_ci95": {
-          "low": 0.34237195288961925,
-          "high": 1.0
+          "low": 0.0,
+          "high": 0.6576280471103807
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 2,
-        "matched_keypoints": 2,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 0,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 1.0,
@@ -229,18 +229,18 @@
     "category": {
       "no_evidence": {
         "count": 2,
-        "passed": 2,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 0,
+        "failed": 2,
+        "pass_rate": 0.0,
         "pass_rate_ci95": {
-          "low": 0.34237195288961925,
-          "high": 1.0
+          "low": 0.0,
+          "high": 0.6576280471103807
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 2,
-        "matched_keypoints": 2,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 0,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 1.0,
@@ -262,21 +262,21 @@
           "low": 0.0,
           "high": 0.48990002040399916
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 0.375,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 8,
-        "matched_keypoints": 3,
-        "keypoint_hit_rate": 0.375,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 4,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 0.0,
         "preview_required_cases": 4,
-        "preview_resolved_cases": 3,
-        "preview_resolvable_rate": 0.75,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 0.0,
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 0.75,
+        "source_count_match_rate": 0.0,
         "forbidden_term_clean_rate": 1.0
       }
     },
@@ -290,63 +290,63 @@
           "low": 0.0,
           "high": 0.5615060804490177
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 0.3333333333333333,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 6,
-        "matched_keypoints": 2,
-        "keypoint_hit_rate": 0.3333333333333333,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 3,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 0.0,
         "preview_required_cases": 3,
-        "preview_resolved_cases": 2,
-        "preview_resolvable_rate": 0.6666666666666666,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 0.0,
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 0.6666666666666666,
+        "source_count_match_rate": 0.0,
         "forbidden_term_clean_rate": 1.0
       },
       "eval-kb-pdf": {
         "count": 2,
-        "passed": 1,
-        "failed": 1,
-        "pass_rate": 0.5,
+        "passed": 0,
+        "failed": 2,
+        "pass_rate": 0.0,
         "pass_rate_ci95": {
-          "low": 0.09452865480086614,
-          "high": 0.9054713451991339
+          "low": 0.0,
+          "high": 0.6576280471103807
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 0.75,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 3,
-        "matched_keypoints": 2,
-        "keypoint_hit_rate": 0.6666666666666666,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 1,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 0.0,
         "preview_required_cases": 1,
-        "preview_resolved_cases": 1,
-        "preview_resolvable_rate": 1.0,
+        "preview_resolved_cases": 0,
+        "preview_resolvable_rate": 0.0,
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.5,
         "forbidden_term_clean_rate": 1.0
       },
       "eval-kb-pdf-zero": {
         "count": 1,
-        "passed": 1,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 0,
+        "failed": 1,
+        "pass_rate": 0.0,
         "pass_rate_ci95": {
-          "low": 0.2065432914738929,
-          "high": 1.0
+          "low": 0.0,
+          "high": 0.7934567085261071
         },
-        "scope_pass_rate": 1.0,
-        "average_keypoint_coverage": 1.0,
+        "scope_pass_rate": 0.0,
+        "average_keypoint_coverage": 0.0,
         "total_keypoints": 1,
-        "matched_keypoints": 1,
-        "keypoint_hit_rate": 1.0,
+        "matched_keypoints": 0,
+        "keypoint_hit_rate": 0.0,
         "evidence_expected_cases": 0,
         "evidence_hit_cases": 0,
         "evidence_hit_rate": 1.0,
@@ -362,50 +362,17 @@
     }
   },
   "preview_stats": {
-    "requested_cases": 3,
+    "requested_cases": 0,
     "required_cases": 4,
-    "skipped_cases": 1
+    "skipped_cases": 4
   },
   "failure_stage_breakdown": {
-    "quality_gate": 4
+    "chat_query": 6
   },
   "case_results": [
     {
       "case_id": "eval-v3-img-001",
       "category": "scope_contract",
-      "scope_passed": true,
-      "expected_kb_ids": [
-        "eval-kb-image"
-      ],
-      "keypoint_total": 2,
-      "keypoint_hits": [
-        "doc_id",
-        "preview_locator"
-      ],
-      "keypoint_missed": [],
-      "keypoint_coverage": 1.0,
-      "blocked_term_total": 1,
-      "blocked_term_hits": [],
-      "blocked_term_clean": true,
-      "forbidden_term_clean_rate": 1.0,
-      "expected_source_count": 1,
-      "actual_source_count": 1,
-      "actual_evidence_count": 1,
-      "source_count_match": true,
-      "expected_doc": "weak-no-text-board.png",
-      "required_evidence_docs": [
-        "weak-no-text-board.png"
-      ],
-      "returned_titles": [
-        "evidence-board.png"
-      ],
-      "evidence_hit": false,
-      "preview_required": true,
-      "preview_resolvable": true,
-      "preview_term_total": 0,
-      "preview_term_hits": [],
-      "preview_term_coverage": 1.0,
-      "passed": false,
       "modality": "image_ocr",
       "difficulty": "simple",
       "answer_style": "policy",
@@ -415,16 +382,56 @@
       "judge_focus": [
         "groundedness"
       ],
-      "response_status_code": 200,
-      "preview_status_code": 200,
-      "preview_requested": true,
-      "failure_stage": null,
-      "failure_message": ""
+      "scope_passed": false,
+      "expected_kb_ids": [
+        "eval-kb-image"
+      ],
+      "keypoint_total": 2,
+      "keypoint_hits": [],
+      "keypoint_missed": [
+        "doc_id",
+        "preview_locator"
+      ],
+      "keypoint_coverage": 0.0,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 1,
+      "actual_source_count": 0,
+      "actual_evidence_count": 0,
+      "source_count_match": false,
+      "expected_doc": "weak-no-text-board.png",
+      "required_evidence_docs": [
+        "weak-no-text-board.png"
+      ],
+      "returned_titles": [],
+      "evidence_hit": false,
+      "preview_required": true,
+      "preview_resolvable": false,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 0.0,
+      "passed": false,
+      "response_status_code": 400,
+      "preview_status_code": null,
+      "preview_requested": false,
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined"
     },
     {
       "case_id": "eval-v3-img-002",
       "category": "scope_contract",
-      "scope_passed": true,
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "answer_style": "policy",
+      "kb_id": "eval-kb-image",
+      "question": "What authorization rule is shown on the weak failed board?",
+      "answerable": true,
+      "judge_focus": [
+        "groundedness"
+      ],
+      "scope_passed": false,
       "expected_kb_ids": [
         "eval-kb-image"
       ],
@@ -440,42 +447,40 @@
       "blocked_term_clean": true,
       "forbidden_term_clean_rate": 1.0,
       "expected_source_count": 1,
-      "actual_source_count": 1,
-      "actual_evidence_count": 1,
-      "source_count_match": true,
+      "actual_source_count": 0,
+      "actual_evidence_count": 0,
+      "source_count_match": false,
       "expected_doc": "weak-failed-board.png",
       "required_evidence_docs": [
         "weak-failed-board.png"
       ],
-      "returned_titles": [
-        "folder-board.png"
-      ],
+      "returned_titles": [],
       "evidence_hit": false,
       "preview_required": true,
-      "preview_resolvable": true,
+      "preview_resolvable": false,
       "preview_term_total": 0,
       "preview_term_hits": [],
-      "preview_term_coverage": 1.0,
+      "preview_term_coverage": 0.0,
       "passed": false,
-      "modality": "image_ocr",
-      "difficulty": "simple",
-      "answer_style": "policy",
-      "kb_id": "eval-kb-image",
-      "question": "What authorization rule is shown on the weak failed board?",
-      "answerable": true,
-      "judge_focus": [
-        "groundedness"
-      ],
-      "response_status_code": 200,
-      "preview_status_code": 200,
-      "preview_requested": true,
-      "failure_stage": null,
-      "failure_message": ""
+      "response_status_code": 400,
+      "preview_status_code": null,
+      "preview_requested": false,
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined"
     },
     {
       "case_id": "eval-v3-img-003",
       "category": "scope_contract",
-      "scope_passed": true,
+      "modality": "image_ocr",
+      "difficulty": "simple",
+      "answer_style": "policy",
+      "kb_id": "eval-kb-image",
+      "question": "Which dependency must be ready before OCR import on the weak dependency board?",
+      "answerable": true,
+      "judge_focus": [
+        "groundedness"
+      ],
+      "scope_passed": false,
       "expected_kb_ids": [
         "eval-kb-image"
       ],
@@ -506,58 +511,15 @@
       "preview_term_hits": [],
       "preview_term_coverage": 0.0,
       "passed": false,
-      "modality": "image_ocr",
-      "difficulty": "simple",
-      "answer_style": "policy",
-      "kb_id": "eval-kb-image",
-      "question": "Which dependency must be ready before OCR import on the weak dependency board?",
-      "answerable": true,
-      "judge_focus": [
-        "groundedness"
-      ],
-      "response_status_code": 200,
+      "response_status_code": 400,
       "preview_status_code": null,
       "preview_requested": false,
-      "failure_stage": null,
-      "failure_message": ""
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined"
     },
     {
       "case_id": "eval-v3-pdf-001",
       "category": "scope_contract",
-      "scope_passed": true,
-      "expected_kb_ids": [
-        "eval-kb-pdf"
-      ],
-      "keypoint_total": 2,
-      "keypoint_hits": [
-        "knowledge base"
-      ],
-      "keypoint_missed": [
-        "declared knowledge scope"
-      ],
-      "keypoint_coverage": 0.5,
-      "blocked_term_total": 1,
-      "blocked_term_hits": [],
-      "blocked_term_clean": true,
-      "forbidden_term_clean_rate": 1.0,
-      "expected_source_count": 1,
-      "actual_source_count": 1,
-      "actual_evidence_count": 1,
-      "source_count_match": true,
-      "expected_doc": "embedding-gap.pdf",
-      "required_evidence_docs": [
-        "embedding-gap.pdf"
-      ],
-      "returned_titles": [
-        "folder-boundary.pdf"
-      ],
-      "evidence_hit": false,
-      "preview_required": true,
-      "preview_resolvable": true,
-      "preview_term_total": 0,
-      "preview_term_hits": [],
-      "preview_term_coverage": 1.0,
-      "passed": false,
       "modality": "pdf",
       "difficulty": "simple",
       "answer_style": "policy",
@@ -567,43 +529,46 @@
       "judge_focus": [
         "groundedness"
       ],
-      "response_status_code": 200,
-      "preview_status_code": 200,
-      "preview_requested": true,
-      "failure_stage": null,
-      "failure_message": ""
-    },
-    {
-      "case_id": "eval-v3-pdf-002",
-      "category": "no_evidence",
-      "scope_passed": true,
+      "scope_passed": false,
       "expected_kb_ids": [
-        "eval-kb-pdf-zero"
+        "eval-kb-pdf"
       ],
-      "keypoint_total": 1,
-      "keypoint_hits": [
-        "No confirmable information"
+      "keypoint_total": 2,
+      "keypoint_hits": [],
+      "keypoint_missed": [
+        "knowledge base",
+        "declared knowledge scope"
       ],
-      "keypoint_missed": [],
-      "keypoint_coverage": 1.0,
+      "keypoint_coverage": 0.0,
       "blocked_term_total": 1,
       "blocked_term_hits": [],
       "blocked_term_clean": true,
       "forbidden_term_clean_rate": 1.0,
-      "expected_source_count": 0,
+      "expected_source_count": 1,
       "actual_source_count": 0,
       "actual_evidence_count": 0,
-      "source_count_match": true,
-      "expected_doc": null,
-      "required_evidence_docs": [],
+      "source_count_match": false,
+      "expected_doc": "embedding-gap.pdf",
+      "required_evidence_docs": [
+        "embedding-gap.pdf"
+      ],
       "returned_titles": [],
-      "evidence_hit": true,
-      "preview_required": false,
-      "preview_resolvable": true,
+      "evidence_hit": false,
+      "preview_required": true,
+      "preview_resolvable": false,
       "preview_term_total": 0,
       "preview_term_hits": [],
-      "preview_term_coverage": 1.0,
-      "passed": true,
+      "preview_term_coverage": 0.0,
+      "passed": false,
+      "response_status_code": 400,
+      "preview_status_code": null,
+      "preview_requested": false,
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined"
+    },
+    {
+      "case_id": "eval-v3-pdf-002",
+      "category": "no_evidence",
       "modality": "pdf",
       "difficulty": "simple",
       "answer_style": "refusal",
@@ -613,25 +578,16 @@
       "judge_focus": [
         "refusal_correctness"
       ],
-      "response_status_code": 200,
-      "preview_status_code": null,
-      "preview_requested": false,
-      "failure_stage": null,
-      "failure_message": ""
-    },
-    {
-      "case_id": "eval-v3-pdf-003",
-      "category": "no_evidence",
-      "scope_passed": true,
+      "scope_passed": false,
       "expected_kb_ids": [
-        "eval-kb-pdf"
+        "eval-kb-pdf-zero"
       ],
       "keypoint_total": 1,
-      "keypoint_hits": [
+      "keypoint_hits": [],
+      "keypoint_missed": [
         "No confirmable information"
       ],
-      "keypoint_missed": [],
-      "keypoint_coverage": 1.0,
+      "keypoint_coverage": 0.0,
       "blocked_term_total": 1,
       "blocked_term_hits": [],
       "blocked_term_clean": true,
@@ -649,7 +605,16 @@
       "preview_term_total": 0,
       "preview_term_hits": [],
       "preview_term_coverage": 1.0,
-      "passed": true,
+      "passed": false,
+      "response_status_code": 400,
+      "preview_status_code": null,
+      "preview_requested": false,
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined"
+    },
+    {
+      "case_id": "eval-v3-pdf-003",
+      "category": "no_evidence",
       "modality": "pdf",
       "difficulty": "simple",
       "answer_style": "refusal",
@@ -659,11 +624,39 @@
       "judge_focus": [
         "refusal_correctness"
       ],
-      "response_status_code": 200,
+      "scope_passed": false,
+      "expected_kb_ids": [
+        "eval-kb-pdf"
+      ],
+      "keypoint_total": 1,
+      "keypoint_hits": [],
+      "keypoint_missed": [
+        "No confirmable information"
+      ],
+      "keypoint_coverage": 0.0,
+      "blocked_term_total": 1,
+      "blocked_term_hits": [],
+      "blocked_term_clean": true,
+      "forbidden_term_clean_rate": 1.0,
+      "expected_source_count": 0,
+      "actual_source_count": 0,
+      "actual_evidence_count": 0,
+      "source_count_match": true,
+      "expected_doc": null,
+      "required_evidence_docs": [],
+      "returned_titles": [],
+      "evidence_hit": true,
+      "preview_required": false,
+      "preview_resolvable": true,
+      "preview_term_total": 0,
+      "preview_term_hits": [],
+      "preview_term_coverage": 1.0,
+      "passed": false,
+      "response_status_code": 400,
       "preview_status_code": null,
       "preview_requested": false,
-      "failure_stage": null,
-      "failure_message": ""
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined"
     }
   ],
   "failures": [
@@ -673,16 +666,22 @@
       "modality": "image_ocr",
       "difficulty": "simple",
       "category": "scope_contract",
-      "failure_stage": "quality_gate",
-      "failure_message": "contract or metric mismatch",
-      "keypoint_missed": [],
-      "blocked_term_hits": [],
-      "returned_titles": [
-        "evidence-board.png"
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined",
+      "keypoint_missed": [
+        "doc_id",
+        "preview_locator"
       ],
-      "preview_requested": true,
-      "response_status_code": 200,
-      "preview_status_code": 200
+      "blocked_term_hits": [],
+      "returned_titles": [],
+      "answer": "",
+      "preview_excerpt": "",
+      "source_count_match": false,
+      "evidence_hit": false,
+      "preview_resolvable": false,
+      "preview_requested": false,
+      "response_status_code": 400,
+      "preview_status_code": null
     },
     {
       "case_id": "eval-v3-img-002",
@@ -690,19 +689,22 @@
       "modality": "image_ocr",
       "difficulty": "simple",
       "category": "scope_contract",
-      "failure_stage": "quality_gate",
-      "failure_message": "contract or metric mismatch",
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined",
       "keypoint_missed": [
         "active knowledge base only",
         "no fabricated memory"
       ],
       "blocked_term_hits": [],
-      "returned_titles": [
-        "folder-board.png"
-      ],
-      "preview_requested": true,
-      "response_status_code": 200,
-      "preview_status_code": 200
+      "returned_titles": [],
+      "answer": "",
+      "preview_excerpt": "",
+      "source_count_match": false,
+      "evidence_hit": false,
+      "preview_resolvable": false,
+      "preview_requested": false,
+      "response_status_code": 400,
+      "preview_status_code": null
     },
     {
       "case_id": "eval-v3-img-003",
@@ -710,16 +712,21 @@
       "modality": "image_ocr",
       "difficulty": "simple",
       "category": "scope_contract",
-      "failure_stage": "quality_gate",
-      "failure_message": "contract or metric mismatch",
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined",
       "keypoint_missed": [
         "paddleocr",
         "dependency"
       ],
       "blocked_term_hits": [],
       "returned_titles": [],
+      "answer": "",
+      "preview_excerpt": "",
+      "source_count_match": false,
+      "evidence_hit": false,
+      "preview_resolvable": false,
       "preview_requested": false,
-      "response_status_code": 200,
+      "response_status_code": 400,
       "preview_status_code": null
     },
     {
@@ -728,18 +735,66 @@
       "modality": "pdf",
       "difficulty": "simple",
       "category": "scope_contract",
-      "failure_stage": "quality_gate",
-      "failure_message": "contract or metric mismatch",
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined",
       "keypoint_missed": [
+        "knowledge base",
         "declared knowledge scope"
       ],
       "blocked_term_hits": [],
-      "returned_titles": [
-        "folder-boundary.pdf"
+      "returned_titles": [],
+      "answer": "",
+      "preview_excerpt": "",
+      "source_count_match": false,
+      "evidence_hit": false,
+      "preview_resolvable": false,
+      "preview_requested": false,
+      "response_status_code": 400,
+      "preview_status_code": null
+    },
+    {
+      "case_id": "eval-v3-pdf-002",
+      "kb_id": "eval-kb-pdf-zero",
+      "modality": "pdf",
+      "difficulty": "simple",
+      "category": "no_evidence",
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined",
+      "keypoint_missed": [
+        "No confirmable information"
       ],
-      "preview_requested": true,
-      "response_status_code": 200,
-      "preview_status_code": 200
+      "blocked_term_hits": [],
+      "returned_titles": [],
+      "answer": "",
+      "preview_excerpt": "",
+      "source_count_match": true,
+      "evidence_hit": true,
+      "preview_resolvable": true,
+      "preview_requested": false,
+      "response_status_code": 400,
+      "preview_status_code": null
+    },
+    {
+      "case_id": "eval-v3-pdf-003",
+      "kb_id": "eval-kb-pdf",
+      "modality": "pdf",
+      "difficulty": "simple",
+      "category": "no_evidence",
+      "failure_stage": "chat_query",
+      "failure_message": "name '_tokenize_text' is not defined",
+      "keypoint_missed": [
+        "No confirmable information"
+      ],
+      "blocked_term_hits": [],
+      "returned_titles": [],
+      "answer": "",
+      "preview_excerpt": "",
+      "source_count_match": true,
+      "evidence_hit": true,
+      "preview_resolvable": true,
+      "preview_requested": false,
+      "response_status_code": 400,
+      "preview_status_code": null
     }
   ],
   "import_summary": {
@@ -761,8 +816,8 @@
     "total_nodes_with_embedding_count": 15,
     "nodes_without_embedding_count": 1,
     "total_nodes_without_embedding_count": 1,
-    "input_text_chars": 3727,
-    "total_input_text_chars": 3727,
+    "input_text_chars": 3725,
+    "total_input_text_chars": 3725,
     "ocr_success_count": 3,
     "total_ocr_success_count": 3,
     "ocr_no_text_count": 1,
@@ -789,13 +844,13 @@
     "total_dependency_missing_count": 1,
     "asset_registered_count": 6,
     "total_asset_registered_count": 6,
-    "import_total_ms": 331.703,
-    "total_import_ms": 331.703,
+    "import_total_ms": 292.06800000000004,
+    "total_import_ms": 292.06800000000004,
     "asset_registered_without_index_count": 3,
     "success_rate": 0.8421052631578947,
     "failed_rate": 0.0,
     "empty_rate": 0.15789473684210525,
-    "avg_input_text_chars_per_doc": 232.9375,
+    "avg_input_text_chars_per_doc": 232.8125,
     "avg_indexed_chunks_per_doc": 1.0,
     "nodes_without_embedding_rate": 0.0625,
     "quality_signal_tags": [
@@ -810,7 +865,7 @@
       "eval-kb-image": {
         "kb_id": "eval-kb-image",
         "modality": "image_ocr",
-        "receipt_id": "kb-file-import-69dfdafd9fc741adaa7a06ef34dc92cc",
+        "receipt_id": "kb-file-import-23ecc3222582444cb43110e97f21ddbd",
         "import_mode": "preserve_tree",
         "headline": "1 个文件因依赖缺失未完成导入",
         "total_files": 6,
@@ -836,7 +891,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 1,
         "asset_registered_count": 6,
-        "import_total_ms": 81.975,
+        "import_total_ms": 71.897,
         "asset_registered_without_index_count": 3,
         "total_ocr_failed_count": 2,
         "total_ocr_no_text_count": 1,
@@ -857,7 +912,7 @@
       "eval-kb-markdown": {
         "kb_id": "eval-kb-markdown",
         "modality": "markdown",
-        "receipt_id": "kb-file-import-a856b68eb8394ad5abfac39e593cd3d0",
+        "receipt_id": "kb-file-import-27dcec5aea44432dba55f28b85d983c0",
         "import_mode": "preserve_tree",
         "headline": "成功导入 7 个文件",
         "total_files": 7,
@@ -883,7 +938,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 100.738,
+        "import_total_ms": 107.816,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
@@ -898,7 +953,7 @@
       "eval-kb-pdf": {
         "kb_id": "eval-kb-pdf",
         "modality": "pdf",
-        "receipt_id": "kb-file-import-63ad0f7181414a71ab1f7ef497620525",
+        "receipt_id": "kb-file-import-fb6ba8c6a809437d8ff08854fca94723",
         "import_mode": "preserve_tree",
         "headline": "成功导入 5 个文件",
         "total_files": 5,
@@ -910,7 +965,7 @@
         "node_count": 5,
         "nodes_with_embedding_count": 4,
         "nodes_without_embedding_count": 1,
-        "input_text_chars": 1080,
+        "input_text_chars": 1078,
         "ocr_success_count": 0,
         "ocr_no_text_count": 0,
         "ocr_failed_count": 0,
@@ -924,14 +979,14 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 112.596,
+        "import_total_ms": 85.242,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
         "success_rate": 1.0,
         "failed_rate": 0.0,
         "empty_rate": 0.0,
-        "avg_input_text_chars_per_doc": 216.0,
+        "avg_input_text_chars_per_doc": 215.6,
         "avg_indexed_chunks_per_doc": 1.0,
         "nodes_without_embedding_rate": 0.2,
         "quality_signal_tags": [
@@ -941,7 +996,7 @@
       "eval-kb-pdf-zero": {
         "kb_id": "eval-kb-pdf-zero",
         "modality": "pdf",
-        "receipt_id": "kb-file-import-ee643309e574415ebaae08ce751ea47b",
+        "receipt_id": "kb-file-import-b5ddfa8c26594d05997f3ddb4f251d29",
         "import_mode": "preserve_tree",
         "headline": "成功导入 1 个文件",
         "total_files": 1,
@@ -967,7 +1022,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 36.394,
+        "import_total_ms": 27.113,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
@@ -1009,7 +1064,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 1,
         "asset_registered_count": 6,
-        "import_total_ms": 81.975,
+        "import_total_ms": 71.897,
         "asset_registered_without_index_count": 3,
         "total_ocr_failed_count": 2,
         "total_ocr_no_text_count": 1,
@@ -1053,7 +1108,7 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 100.738,
+        "import_total_ms": 107.816,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
@@ -1077,7 +1132,7 @@
         "node_count": 6,
         "nodes_with_embedding_count": 5,
         "nodes_without_embedding_count": 1,
-        "input_text_chars": 1080,
+        "input_text_chars": 1078,
         "ocr_success_count": 0,
         "ocr_no_text_count": 0,
         "ocr_failed_count": 0,
@@ -1091,14 +1146,14 @@
         "embedded_indexed_from_ocr_count": 0,
         "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 148.99,
+        "import_total_ms": 112.355,
         "asset_registered_without_index_count": 0,
         "total_ocr_failed_count": 0,
         "total_ocr_no_text_count": 0,
         "success_rate": 1.0,
         "failed_rate": 0.0,
         "empty_rate": 0.0,
-        "avg_input_text_chars_per_doc": 180.0,
+        "avg_input_text_chars_per_doc": 179.66666666666666,
         "avg_indexed_chunks_per_doc": 1.0,
         "nodes_without_embedding_rate": 0.16666666666666666,
         "quality_signal_tags": [
@@ -1129,8 +1184,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "dependency_missing": {
@@ -1142,8 +1197,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "empty_imports": {
@@ -1155,8 +1210,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "nodes_without_embedding": {
@@ -1165,12 +1220,12 @@
           "eval-kb-pdf"
         ],
         "qa_case_count": 2,
-        "qa_passed_cases": 1,
-        "qa_failed_cases": 1,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 2,
         "evidence_miss_cases": 1,
-        "preview_failure_cases": 0,
-        "source_count_mismatch_cases": 0,
-        "qa_pass_rate": 0.5
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
       },
       "ocr_failed": {
         "kb_count": 1,
@@ -1181,8 +1236,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "ocr_no_text": {
@@ -1194,8 +1249,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "zero_text_content": {
@@ -1204,12 +1259,12 @@
           "eval-kb-pdf-zero"
         ],
         "qa_case_count": 1,
-        "qa_passed_cases": 1,
-        "qa_failed_cases": 0,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 1,
         "evidence_miss_cases": 0,
         "preview_failure_cases": 0,
         "source_count_mismatch_cases": 0,
-        "qa_pass_rate": 1.0
+        "qa_pass_rate": 0.0
       }
     },
     "kb_alignment": {
@@ -1228,12 +1283,12 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "qa_pass_rate": 0.0,
-        "qa_scope_pass_rate": 1.0,
+        "qa_scope_pass_rate": 0.0,
         "qa_evidence_hit_rate": 0.0,
-        "qa_preview_resolvable_rate": 0.6666666666666666,
+        "qa_preview_resolvable_rate": 0.0,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "import_total_files": 6,
         "import_success_count": 3,
         "import_failed_count": 0,
@@ -1285,22 +1340,22 @@
         ],
         "signal_count": 1,
         "qa_total_cases": 2,
-        "qa_passed_cases": 1,
-        "qa_failed_cases": 1,
-        "qa_pass_rate": 0.5,
-        "qa_scope_pass_rate": 1.0,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 2,
+        "qa_pass_rate": 0.0,
+        "qa_scope_pass_rate": 0.0,
         "qa_evidence_hit_rate": 0.0,
-        "qa_preview_resolvable_rate": 1.0,
+        "qa_preview_resolvable_rate": 0.0,
         "evidence_miss_cases": 1,
-        "preview_failure_cases": 0,
-        "source_count_mismatch_cases": 0,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
         "import_total_files": 5,
         "import_success_count": 5,
         "import_failed_count": 0,
         "import_empty_count": 0,
         "import_document_count": 5,
-        "import_input_text_chars": 1080,
-        "import_avg_input_text_chars_per_doc": 216.0,
+        "import_input_text_chars": 1078,
+        "import_avg_input_text_chars_per_doc": 215.6,
         "import_nodes_without_embedding_count": 1,
         "import_nodes_without_embedding_rate": 0.2,
         "import_total_ocr_failed_count": 0,
@@ -1316,10 +1371,10 @@
         ],
         "signal_count": 1,
         "qa_total_cases": 1,
-        "qa_passed_cases": 1,
-        "qa_failed_cases": 0,
-        "qa_pass_rate": 1.0,
-        "qa_scope_pass_rate": 1.0,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.0,
+        "qa_scope_pass_rate": 0.0,
         "qa_evidence_hit_rate": 1.0,
         "qa_preview_resolvable_rate": 1.0,
         "evidence_miss_cases": 0,
@@ -1355,12 +1410,12 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "qa_pass_rate": 0.0,
-        "qa_scope_pass_rate": 1.0,
+        "qa_scope_pass_rate": 0.0,
         "qa_evidence_hit_rate": 0.0,
-        "qa_preview_resolvable_rate": 0.6666666666666666,
+        "qa_preview_resolvable_rate": 0.0,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "import_total_files": 6,
         "import_success_count": 3,
         "import_failed_count": 0,
@@ -1410,22 +1465,22 @@
         ],
         "signal_count": 1,
         "qa_total_cases": 3,
-        "qa_passed_cases": 2,
-        "qa_failed_cases": 1,
-        "qa_pass_rate": 0.6666666666666666,
-        "qa_scope_pass_rate": 1.0,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 3,
+        "qa_pass_rate": 0.0,
+        "qa_scope_pass_rate": 0.0,
         "qa_evidence_hit_rate": 0.0,
-        "qa_preview_resolvable_rate": 1.0,
+        "qa_preview_resolvable_rate": 0.0,
         "evidence_miss_cases": 1,
-        "preview_failure_cases": 0,
-        "source_count_mismatch_cases": 0,
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
         "import_total_files": 6,
         "import_success_count": 6,
         "import_failed_count": 0,
         "import_empty_count": 0,
         "import_document_count": 6,
-        "import_input_text_chars": 1080,
-        "import_avg_input_text_chars_per_doc": 180.0,
+        "import_input_text_chars": 1078,
+        "import_avg_input_text_chars_per_doc": 179.66666666666666,
         "import_nodes_without_embedding_count": 1,
         "import_nodes_without_embedding_rate": 0.16666666666666666,
         "import_total_ocr_failed_count": 0,
@@ -1437,13 +1492,13 @@
   },
   "diagnostic_summary": {
     "total_cases": 6,
-    "expected_passed_cases": 2,
-    "expected_failed_cases": 4,
-    "actual_passed_cases": 2,
-    "actual_failed_cases": 4,
-    "expectation_matched_cases": 6,
-    "expectation_mismatched_cases": 0,
-    "case_expectation_match_rate": 1.0,
+    "expected_passed_cases": 3,
+    "expected_failed_cases": 3,
+    "actual_passed_cases": 0,
+    "actual_failed_cases": 6,
+    "expectation_matched_cases": 0,
+    "expectation_mismatched_cases": 6,
+    "case_expectation_match_rate": 0.0,
     "weak_signal_case_count": 5,
     "weak_signal_case_ids": [
       "eval-v3-img-001",
@@ -1481,8 +1536,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "dependency_missing": {
@@ -1494,8 +1549,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "empty_imports": {
@@ -1507,8 +1562,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "nodes_without_embedding": {
@@ -1517,12 +1572,12 @@
           "eval-kb-pdf"
         ],
         "qa_case_count": 2,
-        "qa_passed_cases": 1,
-        "qa_failed_cases": 1,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 2,
         "evidence_miss_cases": 1,
-        "preview_failure_cases": 0,
-        "source_count_mismatch_cases": 0,
-        "qa_pass_rate": 0.5
+        "preview_failure_cases": 1,
+        "source_count_mismatch_cases": 1,
+        "qa_pass_rate": 0.0
       },
       "ocr_failed": {
         "kb_count": 1,
@@ -1533,8 +1588,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "ocr_no_text": {
@@ -1546,8 +1601,8 @@
         "qa_passed_cases": 0,
         "qa_failed_cases": 3,
         "evidence_miss_cases": 3,
-        "preview_failure_cases": 1,
-        "source_count_mismatch_cases": 1,
+        "preview_failure_cases": 3,
+        "source_count_mismatch_cases": 3,
         "qa_pass_rate": 0.0
       },
       "zero_text_content": {
@@ -1556,12 +1611,12 @@
           "eval-kb-pdf-zero"
         ],
         "qa_case_count": 1,
-        "qa_passed_cases": 1,
-        "qa_failed_cases": 0,
+        "qa_passed_cases": 0,
+        "qa_failed_cases": 1,
         "evidence_miss_cases": 0,
         "preview_failure_cases": 0,
         "source_count_mismatch_cases": 0,
-        "qa_pass_rate": 1.0
+        "qa_pass_rate": 0.0
       }
     },
     "comparisons": [
@@ -1576,9 +1631,9 @@
         "expected_case_passed": false,
         "actual_case_passed": false,
         "expected_failure_stage": "quality_gate",
-        "actual_failure_stage": "quality_gate",
-        "expectation_matches": true,
-        "failure_message": ""
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
       },
       {
         "case_id": "eval-v3-img-002",
@@ -1591,9 +1646,9 @@
         "expected_case_passed": false,
         "actual_case_passed": false,
         "expected_failure_stage": "quality_gate",
-        "actual_failure_stage": "quality_gate",
-        "expectation_matches": true,
-        "failure_message": ""
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
       },
       {
         "case_id": "eval-v3-img-003",
@@ -1607,9 +1662,9 @@
         "expected_case_passed": false,
         "actual_case_passed": false,
         "expected_failure_stage": "quality_gate",
-        "actual_failure_stage": "quality_gate",
-        "expectation_matches": true,
-        "failure_message": ""
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
       },
       {
         "case_id": "eval-v3-pdf-001",
@@ -1618,12 +1673,12 @@
         "weak_signal_tags": [
           "nodes_without_embedding"
         ],
-        "expected_case_passed": false,
+        "expected_case_passed": true,
         "actual_case_passed": false,
-        "expected_failure_stage": "quality_gate",
-        "actual_failure_stage": "quality_gate",
-        "expectation_matches": true,
-        "failure_message": ""
+        "expected_failure_stage": null,
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
       },
       {
         "case_id": "eval-v3-pdf-002",
@@ -1633,11 +1688,11 @@
           "zero_text_content"
         ],
         "expected_case_passed": true,
-        "actual_case_passed": true,
+        "actual_case_passed": false,
         "expected_failure_stage": null,
-        "actual_failure_stage": null,
-        "expectation_matches": true,
-        "failure_message": ""
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
       },
       {
         "case_id": "eval-v3-pdf-003",
@@ -1645,21 +1700,108 @@
         "modality": "pdf",
         "weak_signal_tags": [],
         "expected_case_passed": true,
-        "actual_case_passed": true,
+        "actual_case_passed": false,
         "expected_failure_stage": null,
-        "actual_failure_stage": null,
-        "expectation_matches": true,
-        "failure_message": ""
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
       }
     ],
-    "mismatch_cases": []
+    "mismatch_cases": [
+      {
+        "case_id": "eval-v3-img-001",
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "weak_signal_tags": [
+          "ocr_no_text",
+          "asset_registered_without_index"
+        ],
+        "expected_case_passed": false,
+        "actual_case_passed": false,
+        "expected_failure_stage": "quality_gate",
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
+      },
+      {
+        "case_id": "eval-v3-img-002",
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "weak_signal_tags": [
+          "ocr_failed",
+          "asset_registered_without_index"
+        ],
+        "expected_case_passed": false,
+        "actual_case_passed": false,
+        "expected_failure_stage": "quality_gate",
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
+      },
+      {
+        "case_id": "eval-v3-img-003",
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "weak_signal_tags": [
+          "dependency_missing",
+          "ocr_failed",
+          "asset_registered_without_index"
+        ],
+        "expected_case_passed": false,
+        "actual_case_passed": false,
+        "expected_failure_stage": "quality_gate",
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
+      },
+      {
+        "case_id": "eval-v3-pdf-001",
+        "kb_id": "eval-kb-pdf",
+        "modality": "pdf",
+        "weak_signal_tags": [
+          "nodes_without_embedding"
+        ],
+        "expected_case_passed": true,
+        "actual_case_passed": false,
+        "expected_failure_stage": null,
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
+      },
+      {
+        "case_id": "eval-v3-pdf-002",
+        "kb_id": "eval-kb-pdf-zero",
+        "modality": "pdf",
+        "weak_signal_tags": [
+          "zero_text_content"
+        ],
+        "expected_case_passed": true,
+        "actual_case_passed": false,
+        "expected_failure_stage": null,
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
+      },
+      {
+        "case_id": "eval-v3-pdf-003",
+        "kb_id": "eval-kb-pdf",
+        "modality": "pdf",
+        "weak_signal_tags": [],
+        "expected_case_passed": true,
+        "actual_case_passed": false,
+        "expected_failure_stage": null,
+        "actual_failure_stage": "chat_query",
+        "expectation_matches": false,
+        "failure_message": "name '_tokenize_text' is not defined"
+      }
+    ]
   },
   "diagnostic_gates": {
     "case_expectation_match_rate_min": {
       "metric": "case_expectation_match_rate",
-      "actual": 1.0,
+      "actual": 0.0,
       "minimum": 1.0,
-      "passed": true
+      "passed": false
     },
     "minimum_weak_signal_kb_count": {
       "metric": "weak_signal_kb_count",
@@ -1696,7 +1838,7 @@
     }
   },
   "artifacts": {
-    "json": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v3-semireal-report.json",
-    "markdown": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v3-semireal-report.md"
+    "json": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v3-semireal-report.json",
+    "markdown": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v3-semireal-report.md"
   }
 }

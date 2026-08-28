@@ -1,0 +1,203 @@
+{
+  "generated_at": "2026-08-28T09:33:52.360757+00:00",
+  "repo_root": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb",
+  "bundles": {
+    "chat_regression": {
+      "label": "chat 关键回归",
+      "pytest_args": "tests/api/test_chat_qa_metrics.py tests/api/test_chat_service.py tests/api/test_chat_evidence_contract.py tests/api/test_kb_preview_route.py",
+      "command": "python -m pytest tests/api/test_chat_qa_metrics.py tests/api/test_chat_service.py tests/api/test_chat_evidence_contract.py tests/api/test_kb_preview_route.py -q",
+      "selected_count": 114,
+      "deselected_count": 0,
+      "pass_label": "114 passed",
+      "result_label": "114 passed"
+    },
+    "docs_contract": {
+      "label": "启动 / 文档入口 / requirements / cleanup / repo hygiene 契约",
+      "pytest_args": "tests/scripts/test_dev_startup_contracts.py tests/scripts/test_docs_entry_contracts.py tests/test_requirements_profiles.py tests/scripts/test_cleanup_local_artifacts.py tests/scripts/test_repo_hygiene_contracts.py",
+      "command": "python -m pytest tests/scripts/test_dev_startup_contracts.py tests/scripts/test_docs_entry_contracts.py tests/test_requirements_profiles.py tests/scripts/test_cleanup_local_artifacts.py tests/scripts/test_repo_hygiene_contracts.py -q",
+      "selected_count": 83,
+      "deselected_count": 0,
+      "pass_label": "83 passed",
+      "result_label": "83 passed"
+    },
+    "startup_desktop_smoke": {
+      "label": "startup + desktop 双 smoke",
+      "pytest_args": "tests/scripts/test_dev_startup_contracts.py tests/scripts/test_start_dev_smoke.py tests/scripts/test_dev_all_smoke.py",
+      "command": "python -m pytest tests/scripts/test_dev_startup_contracts.py tests/scripts/test_start_dev_smoke.py tests/scripts/test_dev_all_smoke.py -q",
+      "selected_count": 20,
+      "deselected_count": 0,
+      "pass_label": "20 passed",
+      "result_label": "20 passed"
+    },
+    "docker_helper": {
+      "label": "Docker smoke helper 契约",
+      "pytest_args": "tests/scripts/test_docker_smoke.py",
+      "command": "python -m pytest tests/scripts/test_docker_smoke.py -q",
+      "selected_count": 20,
+      "deselected_count": 0,
+      "pass_label": "20 passed",
+      "result_label": "20 passed"
+    },
+    "docker_bundle": {
+      "label": "startup / docker helper / repo hygiene 回归 bundle",
+      "pytest_args": "tests/scripts/test_docker_smoke.py tests/scripts/test_repo_hygiene_contracts.py tests/scripts/test_dev_startup_contracts.py tests/scripts/test_webapp_contracts.py tests/scripts/test_start_dev_smoke.py tests/scripts/test_dev_all_smoke.py tests/scripts/test_docs_entry_contracts.py tests/test_legacy_streamlit_entry.py tests/test_run_api.py tests/test_requirements_profiles.py",
+      "command": "python -m pytest tests/scripts/test_docker_smoke.py tests/scripts/test_repo_hygiene_contracts.py tests/scripts/test_dev_startup_contracts.py tests/scripts/test_webapp_contracts.py tests/scripts/test_start_dev_smoke.py tests/scripts/test_dev_all_smoke.py tests/scripts/test_docs_entry_contracts.py tests/test_legacy_streamlit_entry.py tests/test_run_api.py tests/test_requirements_profiles.py -q",
+      "selected_count": 108,
+      "deselected_count": 0,
+      "pass_label": "108 passed",
+      "result_label": "108 passed"
+    },
+    "prompt_bundle_1": {
+      "label": "Prompt bundle 1",
+      "pytest_args": "tests/api/test_chat_composite_answers.py tests/api/test_chat_postprocessors.py tests/api/test_chat_service.py",
+      "command": "python -m pytest tests/api/test_chat_composite_answers.py tests/api/test_chat_postprocessors.py tests/api/test_chat_service.py -q",
+      "selected_count": 98,
+      "deselected_count": 0,
+      "pass_label": "98 passed",
+      "result_label": "98 passed"
+    },
+    "prompt_bundle_2": {
+      "label": "Prompt bundle 2",
+      "pytest_args": "tests/api/test_chat_question_intents.py tests/api/test_chat_targeted_fact.py tests/api/test_chat_source_answers.py tests/api/test_chat_answer_repair.py",
+      "command": "python -m pytest tests/api/test_chat_question_intents.py tests/api/test_chat_targeted_fact.py tests/api/test_chat_source_answers.py tests/api/test_chat_answer_repair.py -q",
+      "selected_count": 49,
+      "deselected_count": 0,
+      "pass_label": "49 passed",
+      "result_label": "49 passed"
+    },
+    "prompt_bundle_3": {
+      "label": "Prompt bundle 3",
+      "pytest_args": "tests/api/test_chat_eval_runner.py tests/test_rag_quality_eval_dataset_v8.py",
+      "command": "python -m pytest tests/api/test_chat_eval_runner.py tests/test_rag_quality_eval_dataset_v8.py -q",
+      "selected_count": 41,
+      "deselected_count": 0,
+      "pass_label": "41 passed",
+      "result_label": "41 passed"
+    },
+    "full_non_slow": {
+      "label": "全量非慢测回归",
+      "pytest_args": "tests/ -m \"not slow\"",
+      "command": "python -m pytest tests/ -m \"not slow\" -q",
+      "selected_count": 1299,
+      "deselected_count": 4,
+      "pass_label": "1299 passed",
+      "result_label": "1299 passed, 4 deselected"
+    },
+    "closure_docs_sync": {
+      "label": "P0/P2 收口：文档入口 / legacy / audit sync",
+      "pytest_args": "tests/scripts/test_dev_startup_contracts.py tests/scripts/test_docs_entry_contracts.py tests/test_legacy_streamlit_entry.py tests/scripts/test_build_audit_metrics_snapshot.py",
+      "command": "python -m pytest tests/scripts/test_dev_startup_contracts.py tests/scripts/test_docs_entry_contracts.py tests/test_legacy_streamlit_entry.py tests/scripts/test_build_audit_metrics_snapshot.py -q",
+      "selected_count": 75,
+      "deselected_count": 0,
+      "pass_label": "75 passed",
+      "result_label": "75 passed"
+    },
+    "closure_docker_startup": {
+      "label": "P0/P2 收口：Docker / requirements / startup contracts",
+      "pytest_args": "tests/scripts/test_docker_smoke.py tests/test_requirements_profiles.py tests/scripts/test_dev_startup_contracts.py",
+      "command": "python -m pytest tests/scripts/test_docker_smoke.py tests/test_requirements_profiles.py tests/scripts/test_dev_startup_contracts.py -q",
+      "selected_count": 49,
+      "deselected_count": 0,
+      "pass_label": "49 passed",
+      "result_label": "49 passed"
+    },
+    "closure_repo_hygiene": {
+      "label": "P0/P2 收口：cleanup / repo hygiene",
+      "pytest_args": "tests/scripts/test_cleanup_local_artifacts.py tests/scripts/test_repo_hygiene_contracts.py",
+      "command": "python -m pytest tests/scripts/test_cleanup_local_artifacts.py tests/scripts/test_repo_hygiene_contracts.py -q",
+      "selected_count": 27,
+      "deselected_count": 0,
+      "pass_label": "27 passed",
+      "result_label": "27 passed"
+    },
+    "closure_query_request": {
+      "label": "P0/P2 收口：QueryRequest runtime override",
+      "pytest_args": "tests/api/test_runtime_model_loading.py -k \"request or overrides_config_store_defaults\"",
+      "command": "python -m pytest tests/api/test_runtime_model_loading.py -k \"request or overrides_config_store_defaults\" -q",
+      "selected_count": 2,
+      "deselected_count": 32,
+      "pass_label": "2 passed",
+      "result_label": "2 passed, 32 deselected"
+    },
+    "closure_eval_contract": {
+      "label": "P0/P2 收口：eval contract / dataset v8",
+      "pytest_args": "tests/api/test_chat_eval_runner.py tests/api/test_chat_eval_contracts.py tests/test_rag_quality_eval_dataset_v8.py",
+      "command": "python -m pytest tests/api/test_chat_eval_runner.py tests/api/test_chat_eval_contracts.py tests/test_rag_quality_eval_dataset_v8.py -q",
+      "selected_count": 54,
+      "deselected_count": 0,
+      "pass_label": "54 passed",
+      "result_label": "54 passed"
+    },
+    "closure_chat_mainline": {
+      "label": "P0/P2 收口：scope / open api / chat 主链路",
+      "pytest_args": "tests/api/test_chat_scope_contract.py tests/api/test_open_api_service.py tests/api/test_open_api_integration.py tests/api/test_chat_service.py tests/api/test_chat_routes.py",
+      "command": "python -m pytest tests/api/test_chat_scope_contract.py tests/api/test_open_api_service.py tests/api/test_open_api_integration.py tests/api/test_chat_service.py tests/api/test_chat_routes.py -q",
+      "selected_count": 118,
+      "deselected_count": 0,
+      "pass_label": "118 passed",
+      "result_label": "118 passed"
+    }
+  },
+  "cleanup": {
+    "file_mode": {
+      "key": "file_mode",
+      "label": "根目录 file-mode dry-run",
+      "command": "python scripts/cleanup_local_artifacts.py --dry-run",
+      "include_directories": false,
+      "managed_count": 0,
+      "result_label": "managed_count = 0",
+      "summary": {
+        "top_n": 5,
+        "total_size_bytes": 0,
+        "by_category": {},
+        "by_recommended_action": {},
+        "by_kind": {},
+        "size_bytes_by_category": {},
+        "count_by_prefix": {},
+        "size_bytes_by_prefix": {},
+        "largest_records": [],
+        "largest_records_by_category": {},
+        "top_prefixes": []
+      }
+    },
+    "directory_mode": {
+      "key": "directory_mode",
+      "label": "根目录 directory-mode dry-run",
+      "command": "python scripts/cleanup_local_artifacts.py --dry-run --include-directories",
+      "include_directories": true,
+      "managed_count": 0,
+      "result_label": "managed_count = 0",
+      "summary": {
+        "top_n": 5,
+        "total_size_bytes": 0,
+        "by_category": {},
+        "by_recommended_action": {},
+        "by_kind": {},
+        "size_bytes_by_category": {},
+        "count_by_prefix": {},
+        "size_bytes_by_prefix": {},
+        "largest_records": [],
+        "largest_records_by_category": {},
+        "top_prefixes": []
+      }
+    }
+  },
+  "node_commands": {
+    "desktop_full_node": {
+      "key": "desktop_full_node",
+      "label": "Desktop 全量 Node 单测",
+      "command": "npm --prefix desktop test",
+      "pass_count": 136,
+      "pass_label": "136 passed",
+      "result_label": "136 passed"
+    },
+    "webapp_full_node": {
+      "key": "webapp_full_node",
+      "label": "Web 全量 Node 单测",
+      "command": "npm --prefix webapp test",
+      "pass_count": 139,
+      "pass_label": "139 passed",
+      "result_label": "139 passed"
+    }
+  }
+}

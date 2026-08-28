@@ -985,6 +985,66 @@ def test_build_query_engine_loads_missing_index_and_forwards_settings(monkeypatc
     }
 
 
+def test_build_query_engine_request_params_override_saved_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    """请求级 QueryRequest 参数应优先覆盖已保存的 RAG 默认配置。"""
+
+    import server.engine as engine_module
+
+    captured: dict[str, Any] = {}
+
+    class FakeManager:
+        def __init__(self) -> None:
+            self.index = "ready-index"
+
+        def check_index_exists(self) -> bool:
+            return True
+
+        def load_index(self) -> None:
+            raise AssertionError("ready index should not reload")
+
+    def fake_create_query_engine(**kwargs: Any) -> Any:
+        captured.update(kwargs)
+        return "query-engine"
+
+    def fake_config_get(key: str) -> Any:
+        if key == "current_llm_settings":
+            return {
+                "use_reranker": True,
+                "response_mode": "tree_summarize",
+                "top_k": 6,
+                "top_n": 3,
+                "reranker_model": "bge-reranker-v2-m3",
+            }
+        return None
+
+    manager = FakeManager()
+    state = RuntimeState()
+    monkeypatch.setattr(state, "ensure_models_ready", lambda require_llm=False: True)
+    monkeypatch.setattr(state, "get_index_manager", lambda kb_id=None: manager)
+    monkeypatch.setattr(engine_module, "create_query_engine", fake_create_query_engine)
+    monkeypatch.setattr(config_store_module.CONFIG_STORE, "get", fake_config_get)
+
+    result = state.build_query_engine(
+        ["kb-a"],
+        top_k=9,
+        response_mode="compact",
+        use_reranker=False,
+        top_n=1,
+        reranker_model="custom-reranker",
+    )
+
+    assert result == "query-engine"
+    assert captured == {
+        "index": "ready-index",
+        "use_reranker": False,
+        "response_mode": "compact",
+        "top_k": 9,
+        "top_n": 1,
+        "reranker": "custom-reranker",
+        "kb_ids": ["kb-a"],
+    }
+
+
 def test_bootstrap_runtime_returns_quietly_when_config_store_import_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
