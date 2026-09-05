@@ -1,0 +1,10 @@
+*
+!Dockerfile
+!.dockerignore
+!requirements*.txt
+!config.py
+!api/**
+!server/**
+!scripts/**
+!tests/**
+!utils/**

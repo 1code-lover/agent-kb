@@ -1,0 +1,498 @@
+{
+  "generated_at": "2026-08-20T00:00:00+08:00",
+  "topic": "rag-interview-eval",
+  "evidence_sources": {
+    "grain_retrieval": "docs/20260810-grain-retrieval-quality-tuning/artifacts/grain-retrieval-full-experiments-final-clean.json",
+    "grain_qa": "docs/20260810-grain-retrieval-quality-tuning/artifacts/grain-qa-eval-report-qwen-plus.json",
+    "semireal_v6": "docs/20260722-local-multi-kb-assistant/artifacts/qa-eval/local_multi_kb_eval_v6_business_plus_diagnostic-semireal-report.json",
+    "cross_domain_trend": [
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite.json",
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-scope-merge.json",
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-current-branch-check.json",
+      "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json"
+    ]
+  },
+  "datasets": {
+    "grain_verified": {
+      "path": "data/grain-knowledge-base/qa/verified.jsonl",
+      "total": 80,
+      "answerable": 77,
+      "unanswerable": 3,
+      "difficulty_breakdown": {
+        "easy": 15,
+        "medium": 51,
+        "hard": 14
+      },
+      "top_tags": [
+        [
+          "grain-knowledge-base",
+          80
+        ],
+        [
+          "operations",
+          23
+        ],
+        [
+          "pdf",
+          19
+        ],
+        [
+          "monitoring",
+          17
+        ],
+        [
+          "platform",
+          10
+        ],
+        [
+          "safety",
+          7
+        ],
+        [
+          "regulation",
+          7
+        ],
+        [
+          "controlled-atmosphere",
+          6
+        ],
+        [
+          "scope",
+          5
+        ],
+        [
+          "one-card",
+          5
+        ]
+      ]
+    },
+    "semireal_v6": {
+      "path": "tests/fixtures/rag_quality/eval_v6/cases.json",
+      "total": 78,
+      "modality_breakdown": {
+        "markdown": 24,
+        "pdf": 27,
+        "image_ocr": 27
+      },
+      "difficulty_breakdown": {
+        "simple": 30,
+        "medium": 24,
+        "complex": 24
+      },
+      "answer_style_breakdown": {
+        "fact": 24,
+        "comparison": 7,
+        "refusal": 20,
+        "summary": 17,
+        "policy": 10
+      },
+      "category_breakdown": {
+        "role_lookup": 8,
+        "approval_summary": 10,
+        "no_evidence": 14,
+        "timeline_sla": 8,
+        "evidence_operation": 9,
+        "process_boundary": 12,
+        "long_document": 4,
+        "cross_document": 6,
+        "hard_refusal": 3,
+        "scope_contract": 4
+      },
+      "preview_required_cases": 58,
+      "answerable_cases": 58,
+      "no_evidence_cases": 20,
+      "weak_signal_case_count": 5
+    }
+  },
+  "current_metrics": {
+    "grain_retrieval_recommended": {
+      "recommended_config": {
+        "top_k": 5,
+        "mode": "dist_based_score",
+        "use_reranker": false,
+        "top_n": 5,
+        "name": "top5-dist_based_score-no-rerank"
+      },
+      "summary": {
+        "total": 80,
+        "answerable_total": 77,
+        "recall_at_5": 1.0,
+        "mrr_at_5": 1.0,
+        "retrieval_miss_count": 0,
+        "rank_miss_count": 0,
+        "source_noise_count": 0,
+        "retrieval_miss_ids": [],
+        "rank_miss_ids": [],
+        "source_noise_ids": []
+      },
+      "leaderboard": [
+        {
+          "name": "top5-dist_based_score-no-rerank",
+          "top_k": 5,
+          "mode": "dist_based_score",
+          "use_reranker": false,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "retrieval_miss_count": 0,
+          "rank_miss_count": 0,
+          "source_noise_count": 0
+        },
+        {
+          "name": "top8-dist_based_score-no-rerank",
+          "top_k": 8,
+          "mode": "dist_based_score",
+          "use_reranker": false,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "retrieval_miss_count": 0,
+          "rank_miss_count": 0,
+          "source_noise_count": 0
+        },
+        {
+          "name": "top10-dist_based_score-no-rerank",
+          "top_k": 10,
+          "mode": "dist_based_score",
+          "use_reranker": false,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "retrieval_miss_count": 0,
+          "rank_miss_count": 0,
+          "source_noise_count": 0
+        },
+        {
+          "name": "top5-relative_score-no-rerank",
+          "top_k": 5,
+          "mode": "relative_score",
+          "use_reranker": false,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 0.9773,
+          "retrieval_miss_count": 0,
+          "rank_miss_count": 3,
+          "source_noise_count": 1
+        },
+        {
+          "name": "top8-relative_score-no-rerank",
+          "top_k": 8,
+          "mode": "relative_score",
+          "use_reranker": false,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 0.9773,
+          "retrieval_miss_count": 0,
+          "rank_miss_count": 3,
+          "source_noise_count": 1
+        },
+        {
+          "name": "top10-relative_score-no-rerank",
+          "top_k": 10,
+          "mode": "relative_score",
+          "use_reranker": false,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 0.9773,
+          "retrieval_miss_count": 0,
+          "rank_miss_count": 3,
+          "source_noise_count": 1
+        },
+        {
+          "name": "top5-reciprocal_rerank-no-rerank",
+          "top_k": 5,
+          "mode": "reciprocal_rerank",
+          "use_reranker": false,
+          "recall_at_5": 0.987,
+          "mrr_at_5": 0.974,
+          "retrieval_miss_count": 1,
+          "rank_miss_count": 2,
+          "source_noise_count": 2
+        },
+        {
+          "name": "top8-reciprocal_rerank-no-rerank",
+          "top_k": 8,
+          "mode": "reciprocal_rerank",
+          "use_reranker": false,
+          "recall_at_5": 0.987,
+          "mrr_at_5": 0.974,
+          "retrieval_miss_count": 1,
+          "rank_miss_count": 2,
+          "source_noise_count": 2
+        },
+        {
+          "name": "top10-reciprocal_rerank-no-rerank",
+          "top_k": 10,
+          "mode": "reciprocal_rerank",
+          "use_reranker": false,
+          "recall_at_5": 0.987,
+          "mrr_at_5": 0.974,
+          "retrieval_miss_count": 1,
+          "rank_miss_count": 2,
+          "source_noise_count": 2
+        }
+      ]
+    },
+    "grain_real_qa": {
+      "summary": {
+        "total": 80,
+        "answerable_total": 77,
+        "unanswerable_total": 3,
+        "error_count": 0,
+        "recall_at_5": 1.0,
+        "mrr_at_5": 1.0,
+        "citation_hit_rate": 1.0,
+        "refusal_accuracy": 1.0,
+        "kb_isolation_rate": 1.0
+      },
+      "failure_group_counts": {
+        "api_error": 0,
+        "retrieval_miss": 0,
+        "rank_miss": 0,
+        "source_noise": 0,
+        "ocr_text_quality": 0,
+        "duplicate_or_conflict": 0,
+        "kb_isolation_failure": 0,
+        "refusal_miss": 0
+      }
+    },
+    "multi_kb_semireal_v6": {
+      "suite_summary": {
+        "total_cases": 78,
+        "passed_cases": 78,
+        "failed_cases": 0,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": {
+          "low": 0.9530605462258804,
+          "high": 1.0
+        },
+        "scope_pass_rate": 1.0,
+        "average_keypoint_coverage": 1.0,
+        "total_keypoints": 142,
+        "matched_keypoints": 142,
+        "missing_keypoints": 0,
+        "keypoint_hit_rate": 1.0,
+        "evidence_expected_cases": 58,
+        "evidence_hit_cases": 58,
+        "evidence_hit_rate": 1.0,
+        "preview_required_cases": 58,
+        "preview_resolved_cases": 58,
+        "preview_resolvable_rate": 1.0,
+        "preview_term_total": 11,
+        "preview_term_hits": 11,
+        "preview_term_hit_rate": 1.0,
+        "source_count_match_rate": 1.0,
+        "blocked_term_hit_cases": 0,
+        "forbidden_term_clean_rate": 1.0,
+        "category_breakdown": {
+          "approval_summary": {
+            "count": 10,
+            "passed": 10,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.7224598312333834,
+              "high": 1.0
+            }
+          },
+          "cross_document": {
+            "count": 6,
+            "passed": 6,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.6096569663469354,
+              "high": 0.9999999999999999
+            }
+          },
+          "evidence_operation": {
+            "count": 9,
+            "passed": 9,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.7008472464490407,
+              "high": 1.0
+            }
+          },
+          "hard_refusal": {
+            "count": 3,
+            "passed": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.43849391955098227,
+              "high": 1.0
+            }
+          },
+          "long_document": {
+            "count": 4,
+            "passed": 4,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.5100999795960008,
+              "high": 1.0
+            }
+          },
+          "no_evidence": {
+            "count": 14,
+            "passed": 14,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.7846829880728186,
+              "high": 1.0
+            }
+          },
+          "process_boundary": {
+            "count": 12,
+            "passed": 12,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.7574992425007574,
+              "high": 1.0
+            }
+          },
+          "role_lookup": {
+            "count": 8,
+            "passed": 8,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.6755843804891231,
+              "high": 1.0
+            }
+          },
+          "scope_contract": {
+            "count": 4,
+            "passed": 4,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.5100999795960008,
+              "high": 1.0
+            }
+          },
+          "timeline_sla": {
+            "count": 8,
+            "passed": 8,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": {
+              "low": 0.6755843804891231,
+              "high": 1.0
+            }
+          }
+        }
+      },
+      "run_gates": {
+        "scope_pass_rate_min": {
+          "metric": "scope_pass_rate",
+          "actual": 1.0,
+          "minimum": 1.0,
+          "passed": true
+        },
+        "average_keypoint_coverage_min": {
+          "metric": "average_keypoint_coverage",
+          "actual": 1.0,
+          "minimum": 0.85,
+          "passed": true
+        },
+        "evidence_hit_rate_min": {
+          "metric": "evidence_hit_rate",
+          "actual": 1.0,
+          "minimum": 0.95,
+          "passed": true
+        },
+        "preview_resolvable_rate_min": {
+          "metric": "preview_resolvable_rate",
+          "actual": 1.0,
+          "minimum": 0.95,
+          "passed": true
+        },
+        "source_count_match_rate_min": {
+          "metric": "source_count_match_rate",
+          "actual": 1.0,
+          "minimum": 0.95,
+          "passed": true
+        },
+        "forbidden_term_clean_rate_min": {
+          "metric": "forbidden_term_clean_rate",
+          "actual": 1.0,
+          "minimum": 1.0,
+          "passed": true
+        }
+      },
+      "preview_stats": {
+        "requested_cases": 58,
+        "required_cases": 58,
+        "skipped_cases": 0
+      }
+    },
+    "cross_domain_regression_trend": [
+      {
+        "artifact": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite.json",
+        "pass_rate": 0.5306,
+        "positive_pass_rate": 0.303,
+        "negative_pass_rate": 1.0,
+        "turn_pass_rate": 0.5556,
+        "total": 49,
+        "failed": 23
+      },
+      {
+        "artifact": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-scope-merge.json",
+        "pass_rate": 0.898,
+        "positive_pass_rate": 0.8788,
+        "negative_pass_rate": 0.9333,
+        "turn_pass_rate": 0.9074,
+        "total": 49,
+        "failed": 5
+      },
+      {
+        "artifact": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-current-branch-check.json",
+        "pass_rate": 0.7551,
+        "positive_pass_rate": 0.6667,
+        "negative_pass_rate": 0.9333,
+        "turn_pass_rate": 0.7778,
+        "total": 49,
+        "failed": 12
+      },
+      {
+        "artifact": "docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report-v1-v6-suite-after-regression-closure.json",
+        "pass_rate": 1.0,
+        "positive_pass_rate": 1.0,
+        "negative_pass_rate": 1.0,
+        "turn_pass_rate": 1.0,
+        "total": 49,
+        "failed": 0
+      }
+    ]
+  },
+  "current_validation": {
+    "pytest": {
+      "command": "python -m pytest tests/api/test_chat_qa_metrics.py tests/api/test_chat_eval_runner.py tests/scripts/test_run_grain_retrieval_experiments.py tests/scripts/test_run_grain_qa_eval.py -q",
+      "result": "32 passed, 2 warnings in 26.45s"
+    },
+    "fixture_validation": {
+      "command": "python scripts/validate_rag_quality_fixtures.py --eval-cases tests/fixtures/rag_quality/eval_v6/cases.json --eval-schema tests/fixtures/rag_quality/eval_v6/schema.json --print-eval-summary",
+      "result": "passed"
+    },
+    "live_rerun_attempt": {
+      "command": "python -m scripts.run_grain_retrieval_experiments --cases data/grain-knowledge-base/qa/verified.jsonl --kb-id grain-knowledge-base --mode dist_based_score --mode relative_score --mode reciprocal_rerank --output docs/20260820-rag-eval-check/artifacts/grain-retrieval-current.json",
+      "result": "blocked",
+      "reason": "local embedding model cache missing at ./localmodels/BAAI/bge-small-zh-v1.5 and storage/kbs/grain-knowledge-base not populated (Loaded 0 indices)."
+    }
+  },
+  "interview_metric_system": {
+    "retrieval_layer": [
+      "Recall@5",
+      "MRR@5",
+      "retrieval_miss_count",
+      "rank_miss_count",
+      "source_noise_count"
+    ],
+    "answer_layer": [
+      "pass_rate",
+      "average_keypoint_coverage",
+      "keypoint_hit_rate"
+    ],
+    "grounding_layer": [
+      "citation_hit_rate",
+      "evidence_hit_rate",
+      "preview_resolvable_rate",
+      "source_count_match_rate"
+    ],
+    "safety_and_scope_layer": [
+      "refusal_accuracy",
+      "kb_isolation_rate",
+      "scope_pass_rate",
+      "forbidden_term_clean_rate"
+    ]
+  }
+}
