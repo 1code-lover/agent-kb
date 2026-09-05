@@ -3,7 +3,7 @@
 > 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构、验证证据和已知问题。
 > **维护规则**：每次有意义的提交后更新「当前进度」「测试与验证」「已知问题」「最近提交」四节；重大架构变化更新「架构」节。日期使用绝对日期。
 
-最近更新：2026-08-24
+最近更新：2026-09-05
 
 快速阅读建议：如果只想了解当前主线，请优先看第 3、4、6、7 节；第 5、8 节更多作为历史验证与提交账本。注意：第 5 节里很多 `--api-base http://127.0.0.1:18080` 都是当时真实运行记录，不应回推成当前唯一 source of truth；当前运行时契约以第 3、4 节里的 `KB_API_BASE_URL` / `KB_API_PORT` / `VITE_API_BASE_URL` 为准。
 
@@ -79,12 +79,22 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 - 当前对外主线已经明确收口为 **FastAPI + React + Electron**，并通过 `start_all.ps1` / `start_dev.ps1` / `scripts/dev-all.ps1` 统一本地调试叙事；desktop packaged runtime 也已切到 `requirements-runtime.txt`。
 - 浏览器侧 API base URL contract 已单独收口：优先 Electron preload bridge，其次 `VITE_API_BASE_URL`，最后回退 `http://127.0.0.1:18080`；`KB_API_BASE_URL` / `NORTHAGENT_API_BASE_URL` 等 alias 仍用于 Python 脚本、`run_api.py` 与桌面主进程，但不会直接暴露给浏览器。
-- `basic` / `knowledge` 模式已显式要求 active KB，前端不再把它包装成“全局检索”；请求级 `QueryRequest.top_k / response_mode / use_reranker / top_n / reranker_model` 也已经进入 chat 主链路。
+- `basic` / `knowledge` 模式已显式要求 active KB，前端不再把它包装成”全局检索”；请求级 `QueryRequest.top_k / response_mode / use_reranker / top_n / reranker_model` 也已经进入 chat 主链路。
 - 前端问答链路已改为 **query success + history best effort**：回答成功不再因为 history 写回失败被整体判成失败，当前由 `queryChatWithBestEffortHistory(...)` 和 `buildHistorySyncNotice(...)` 兜底。
 - 当前可信评测基线以 `docs/20260821-project-audit-remediation/` 下当前材料与 2026-08-24 复跑结果为准：layered suite `153 / 153`（Smoke `24 / 24`、Main `93 / 93`、Hard `36 / 36`）；targeted fact / preview / metrics 回归 `114 passed`；启动 / 文档入口 / requirements / cleanup / repo hygiene 契约 `83 passed`；startup / docker helper / repo hygiene bundle `108 passed`；Docker smoke helper 契约 `20 passed`；Desktop 全量 Node 单测 `136 passed`；Web 全量 Node 单测 `139 passed`；全量非慢测 `1299 passed, 4 deselected`。
 - 根目录治理已完成四轮实际 apply：累计归档 `114` 个日志、scratch OCR 脚本和临时探针对象；其中 2026-08-27 又追加归档了 `14` 个 root scratch 目录（`12` eval / `2` debug，约 `1.16 MB`）。当前 `python scripts/cleanup_local_artifacts.py --dry-run` 与 `python scripts/cleanup_local_artifacts.py --dry-run --include-directories` 都已回到 `managed_count = 0`，说明根目录文件模式与 root scratch 目录模式都已清零；`temp/`、`logs/`、`test_output/` 仍保留为约定输出目录，不会被默认自动搬走。
 - Docker / requirements 分层相比之前已清晰很多：Docker 默认已切到 `INSTALL_PROFILE=runtime` + API 模式，与本地脚本主线对齐；此前误导性的 `minimal` Docker profile 已退场。进一步排查后确认，runtime build 被 `llama-parse / llama-cloud-services` 拖慢的根因是 `requirements-runtime.txt` 里混入了顶层 `llama_index` metapackage；当前已改成只保留 `llama-index-core` + 仓库实际使用的 integrations，并把 dry-run 选出的 `langchain-core==0.3.63` / `langchain-text-splitters==0.3.8` 显式 pin 住以减少 resolver backtracking。最新 `pip --dry-run --report` 已确认不再出现 `llama-parse / llama-cloud-services / llama-cloud`；同时 `scripts/docker_smoke.py` 默认已经切到 Docker 自分配 loopback host port + `docker port` 回查映射，因此 README 里的 `docker run -p 18080:18080` 只应理解为固定端口复现实例，不是 Docker 侧当前唯一有效口径。Docker build smoke 也已进入正常依赖下载阶段，但仍需补一条完整 build/run 通过证据。
 - 工程化收尾仍未完成：`docs/project.md` 以下的历史章节仍保留多个阶段性结论，legacy 入口与 prompt/heuristic 职责边界还在继续收口。若只看当前状态，请优先参考 `docs/20260821-project-audit-remediation/` 目录下的审计与面试材料。
+
+### 4.0.1 2026-09-05 Agent QA Page Refactor 完成
+
+- **Agent 问答页重构完成**：`.planning/2026-07-17-agent-qa-page-refactor/` 下 5 个 Phase 全部完成。
+- **三体验模式落地**：`/agent` 页面现支持 basic（基础问答）、knowledge（知识库问答）、agent（高级模式）三种体验切换，用户可根据场景选择合适模式。
+- **知识库选择强制**：basic 和 knowledge 模式要求用户显式选择 active KB 才能提交问题，避免隐式全局检索的混乱。
+- **前端测试完整**：新增 `agentExperience.test.js`（13 测试）、`kbSelection.test.js`（9 测试）、`response.test.js`（2 测试），当前 Web 全量测试从 `139 passed` 增加到 `163 passed`。
+- **Agent 高级模式保留**：原有 timeline、审批、回执、证据等运行时能力完整保留在 agent 模式下，不因 UI 重构受损。
+- **构建验证通过**：Vite 构建成功（1.47s，391.82 KB gzipped 125.21 KB），格式检查无错误。
+- **文档同步**：PRD/FRD/RTM/Test Plan/Test Report/Progress 全部更新，project.md 已同步。
 
 ### 4.1 已完成的主干能力
 

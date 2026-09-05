@@ -11,11 +11,11 @@
 - 文档、测试方案、测试报告与项目概览同步
 
 ## Phases
-1. [in_progress] 固化本次 PRD/FRD/RTM/Plan/Test Plan
-2. [pending] 先写纯前端规则测试，固定问答模式与请求拼装行为
-3. [pending] 实现问答优先页面、知识库选择与高级模式收纳
-4. [pending] 执行 Node 测试、Vite 构建、必要手工烟测
-5. [pending] 更新测试报告、project.md、DOCS_INDEX 与阶段结论
+1. [completed] 固化本次 PRD/FRD/RTM/Plan/Test Plan
+2. [completed] 先写纯前端规则测试，固定问答模式与请求拼装行为
+3. [completed] 实现问答优先页面、知识库选择与高级模式收纳
+4. [completed] 执行 Node 测试、Vite 构建、必要手工烟测
+5. [completed] 更新测试报告、project.md、DOCS_INDEX 与阶段结论
 
 ## Constraints
 - 不改动后端问答协议，仅复用现有 `/api/chat/query`、`/api/chat/history`、`/api/agent/run`
