@@ -416,11 +416,21 @@ class RuntimeState:
                 return True
             return False
 
-    def build_query_engine(self, kb_ids: list[str] | None = None) -> Any:
+    def build_query_engine(
+        self,
+        kb_ids: list[str] | None = None,
+        *,
+        top_k: int | None = None,
+        response_mode: str | None = None,
+        use_reranker: bool | None = None,
+        top_n: int | None = None,
+        reranker_model: str | None = None,
+    ) -> Any:
         """构建查询引擎。
 
         当前 Stage 3 仅支持单知识库查询引擎；如果传入多个 kb_id，
         直接拒绝，避免在目录隔离尚未完全打通前退回共享索引行为。
+        请求级参数存在时优先覆盖当前配置，确保 QueryRequest 的检索设置真正生效。
         """
         from server.engine import create_query_engine
         from server.stores.config_store import CONFIG_STORE
@@ -438,13 +448,18 @@ class RuntimeState:
             manager.load_index()
 
         llm_settings = CONFIG_STORE.get("current_llm_settings") or {}
+        effective_use_reranker = llm_settings.get("use_reranker", config.USE_RERANKER) if use_reranker is None else use_reranker
+        effective_response_mode = llm_settings.get("response_mode", config.DEFAULT_RESPONSE_MODE) if response_mode is None else response_mode
+        effective_top_k = llm_settings.get("top_k", config.TOP_K) if top_k is None else top_k
+        effective_top_n = llm_settings.get("top_n", config.RERANKER_MODEL_TOP_N) if top_n is None else top_n
+        effective_reranker_model = llm_settings.get("reranker_model", config.DEFAULT_RERANKER_MODEL) if reranker_model is None else reranker_model
         return create_query_engine(
             index=manager.index,
-            use_reranker=llm_settings.get("use_reranker", config.USE_RERANKER),
-            response_mode=llm_settings.get("response_mode", config.DEFAULT_RESPONSE_MODE),
-            top_k=llm_settings.get("top_k", config.TOP_K),
-            top_n=llm_settings.get("top_n", config.RERANKER_MODEL_TOP_N),
-            reranker=llm_settings.get("reranker_model", config.DEFAULT_RERANKER_MODEL),
+            use_reranker=effective_use_reranker,
+            response_mode=effective_response_mode,
+            top_k=effective_top_k,
+            top_n=effective_top_n,
+            reranker=effective_reranker_model,
             kb_ids=unique_kb_ids or kb_ids,
         )
 

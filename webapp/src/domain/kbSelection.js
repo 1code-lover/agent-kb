@@ -4,6 +4,31 @@
  */
 
 export const EMPTY_KB_SELECTION = "";
+export const DEFAULT_KNOWLEDGE_SCOPE = Object.freeze({
+  kb_id: "default",
+  kb_name: "默认知识库",
+});
+
+function buildKnowledgeScope(kbId, kbName) {
+  return {
+    kb_id: kbId,
+    kb_name: kbName || kbId,
+  };
+}
+
+export function resolveKnowledgeScope({ selectedKb, selectedKbId, fallbackScope } = {}) {
+  if (selectedKb?.kb_id) {
+    return buildKnowledgeScope(selectedKb.kb_id, selectedKb.kb_name);
+  }
+
+  const normalizedSelectedKbId = typeof selectedKbId === "string" ? selectedKbId.trim() : "";
+  if (normalizedSelectedKbId) {
+    const fallbackName = fallbackScope?.kb_id === normalizedSelectedKbId ? fallbackScope?.kb_name : "";
+    return buildKnowledgeScope(normalizedSelectedKbId, fallbackName);
+  }
+
+  return { ...DEFAULT_KNOWLEDGE_SCOPE };
+}
 
 export function isActiveKb(kb) {
   return Boolean(kb?.kb_id) && kb.status === "active";

@@ -10,16 +10,17 @@ DEV_MODE = THINKRAG_ENV == "development"
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
-def _resolve_runtime_root(env_name: str, default_value: str | None = None) -> str | None:
-    """解析桌面运行时传入的绝对根目录，空值时保留开发模式默认行为。"""
-    value = os.getenv(env_name, "").strip()
-    if not value:
-        return default_value
-    return os.path.abspath(os.path.expanduser(value))
+def _resolve_runtime_root(*env_names: str, default_value: str | None = None) -> str | None:
+    """按优先级解析桌面运行时传入的绝对根目录，空值时保留开发模式默认行为。"""
+    for env_name in env_names:
+        value = os.getenv(env_name, "").strip()
+        if value:
+            return os.path.abspath(os.path.expanduser(value))
+    return default_value
 
 
-_DATA_ROOT = _resolve_runtime_root("NORTHAGENT_DATA_ROOT")
-_MODEL_ROOT = _resolve_runtime_root("NORTHAGENT_MODEL_ROOT")
+_DATA_ROOT = _resolve_runtime_root("KB_DATA_ROOT", "NORTHAGENT_DATA_ROOT", "THINKRAG_DATA_ROOT", "FOXGLOVE_DATA_ROOT")
+_MODEL_ROOT = _resolve_runtime_root("KB_MODEL_ROOT", "NORTHAGENT_MODEL_ROOT", "THINKRAG_MODEL_ROOT", "FOXGLOVE_MODEL_ROOT")
 
 # ============================================================
 # 路径配置

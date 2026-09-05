@@ -1,3 +1,5 @@
+import { DEFAULT_KNOWLEDGE_SCOPE } from "../domain/kbSelection.js";
+
 export const AGENT_MODES = [
   { value: "agent", label: "Agent" },
   { value: "kb_search", label: "知识检索" },
@@ -17,10 +19,7 @@ function normalizeTimelineItem(item, index) {
 export function createWorkspaceState() {
   return {
     currentMode: "agent",
-    knowledgeScope: {
-      kb_id: "default",
-      kb_name: "默认知识库",
-    },
+    knowledgeScope: { ...DEFAULT_KNOWLEDGE_SCOPE },
     taskGoal: "",
     draftQuestion: "",
     runState: "idle",
@@ -126,10 +125,7 @@ export function mapSessionSnapshot(snapshot) {
   const uiState = snapshot?.ui_state || {};
   return {
     currentMode: workspace.current_mode || "agent",
-    knowledgeScope: workspace.knowledge_scope || {
-      kb_id: "default",
-      kb_name: "默认知识库",
-    },
+    knowledgeScope: workspace.knowledge_scope || { ...DEFAULT_KNOWLEDGE_SCOPE },
     taskGoal: workspace.task_goal || "",
     draftQuestion: workspace.draft_question || "",
     runState: workspace.run_state || "idle",

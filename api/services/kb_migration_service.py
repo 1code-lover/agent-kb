@@ -8,6 +8,7 @@ import json
 import os
 import shutil
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable
@@ -33,7 +34,7 @@ def _sha256_bytes(value: bytes) -> str:
 
 
 def _atomic_write_json(path: Path, payload: Any) -> None:
-    """原子写入 JSON 文件。"""
+    """原子写入 JSON 文件，并在 Windows 上对临时锁做有限重试。"""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(f"{path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
     try:
@@ -41,7 +42,19 @@ def _atomic_write_json(path: Path, payload: Any) -> None:
             json.dump(payload, handle, ensure_ascii=False, indent=2, sort_keys=True)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(tmp, path)
+
+        last_exc: PermissionError | None = None
+        for attempt in range(5):
+            try:
+                os.replace(tmp, path)
+                last_exc = None
+                break
+            except PermissionError as exc:
+                last_exc = exc
+                time.sleep(0.02 * (attempt + 1))
+
+        if last_exc is not None:
+            raise last_exc
     finally:
         if tmp.exists():
             tmp.unlink(missing_ok=True)

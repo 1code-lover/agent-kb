@@ -5,7 +5,7 @@ from unittest.mock import patch
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.services import kb_service

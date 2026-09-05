@@ -3,20 +3,25 @@
 ## 1. 目的
 在正式手工测试 PDF 上传、切分、嵌入和问答之前，明确需要重点验证的链路和风险点。
 
-当前代码显示：
-- PDF 上传入口在 [frontend/KB_File.py](C:/Users/ethan1.zhao/Downloads/agent-kb-main/github-agent-kb/frontend/KB_File.py)
-- 后端导入逻辑在 [api/services/kb_service.py](C:/Users/ethan1.zhao/Downloads/agent-kb-main/github-agent-kb/api/services/kb_service.py)
-- 文件读取与索引写入在 [server/index.py](C:/Users/ethan1.zhao/Downloads/agent-kb-main/github-agent-kb/server/index.py)
-- 切分与嵌入在 [server/text_splitter.py](C:/Users/ethan1.zhao/Downloads/agent-kb-main/github-agent-kb/server/text_splitter.py) 和 [server/ingestion.py](C:/Users/ethan1.zhao/Downloads/agent-kb-main/github-agent-kb/server/ingestion.py)
-- 问答入口在 [frontend/Document_QA.py](C:/Users/ethan1.zhao/Downloads/agent-kb-main/github-agent-kb/frontend/Document_QA.py)
+当前主线代码入口：
+- PDF 上传与知识库工作台入口：`webapp/src/pages/KnowledgePage.jsx`
+- 后端导入逻辑：`api/services/kb_service.py`
+- 文件读取与索引写入：`server/index.py`
+- 切分与嵌入：`server/text_splitter.py`、`server/ingestion.py`
+- 问答入口：`webapp/src/pages/AgentPage.jsx`、`api/services/chat_service.py`
 
 ## 2. 当前高风险判断
-从当前仓库依赖和代码来看，没有看到明确的 OCR 专用依赖或扫描 PDF 专门处理逻辑。
+从当前仓库依赖和代码来看，项目已经具备：
+
+1. PDF 专用读取链路；
+2. PyMuPDF 文本层读取；
+3. PaddleOCR fallback 与 OCR 运行态诊断；
+4. 基于来源片段的问答与 evidence/preview 返回。
 
 这意味着：
-1. 文本型 PDF 可能可以正常解析。
-2. 扫描版 PDF、图片型 PDF、复杂表格 PDF 很可能不是稳定支持项。
-3. 这部分必须在手工测试中单独验证，不能默认“PDF 都能问答”。
+1. 文本型 PDF 已经是主线支持项；
+2. 扫描版 PDF、图片型 PDF、复杂表格 PDF 不是“完全没支持”，但仍然是最高风险样本；
+3. 这部分必须在手工测试中单独验证，不能因为已有 OCR fallback 就默认“所有 PDF 都稳”。
 
 ## 3. 必测样本
 手工测试时，至少准备下面 5 类 PDF：
@@ -43,7 +48,7 @@
 
 5. 扫描版 PDF
 说明：
-- 检查是否完全无法提取文本
+- 检查 OCR fallback 是否真的产出可索引文本
 - 这是当前最高风险样本
 
 ## 4. 手工测试链路
@@ -53,11 +58,13 @@
 - 能否成功选择并上传 PDF
 - 上传后文件名、类型、大小是否正常显示
 - 特殊文件名是否被安全清理
+- 导入结果是否明确展示 text-layer / OCR / empty-result 等诊断
 
 重点风险：
 - 大文件
 - 中文文件名
 - 重复文件名
+- 导入成功但 indexed chunk 实际为 0
 
 ### Step 2：切分阶段
 检查项：
@@ -85,11 +92,13 @@
 - 针对 PDF 中明确存在的信息提问，能否回答正确
 - 是否能返回来源文件和页码
 - 多轮提问是否稳定
+- preview/evidence 是否与最终答案一致
 
 重点风险：
 - 回答正确率低但无明显报错
 - 来源片段与答案不一致
 - 页码缺失或错误
+- 旧值或相似文档内容混入 preview
 
 ## 5. 关键验证问题
 手工测试时建议直接问这些问题：
@@ -109,6 +118,7 @@
 ### 针对扫描版 PDF
 - “系统是否能返回有效答案？”
 - “来源片段是否为空？”
+- “OCR 诊断里有没有失败或空文本提示？”
 
 ## 6. 判定标准
 
@@ -116,6 +126,7 @@
 - 纯文本 PDF 问答稳定
 - 多页 PDF 可召回正确页内容
 - 来源文件名和页码基本正确
+- 扫描版 PDF 若 OCR 失败，能明确暴露诊断，而不是伪装成正常导入
 
 ### 不可接受
 - 上传成功但实际没有有效 chunk
@@ -124,13 +135,13 @@
 - 扫描版 PDF 被系统误判为“已正常导入”但实际无可用文本
 
 ## 7. 当前最重要结论
-是的，PDF 问答识别、文本提取、切分和嵌入这条链路必须非常仔细地确保，尤其是：
+PDF 问答识别、文本提取、切分和嵌入这条链路必须非常仔细地确保，尤其是：
 
 1. PDF 是否真的提取到了有效文本
 2. 切分后的 chunk 是否保留语义
 3. 嵌入后检索是否能召回正确段落
 4. 来源是否能反映真实页码和真实片段
-5. 扫描版 PDF 是否需要明确标成“暂不支持”或后续补 OCR
+5. 扫描版 PDF 的 OCR fallback 与失败提示是否真实可信
 
 ## 8. 手工测试建议顺序
 1. 先测纯文本 PDF
@@ -139,8 +150,9 @@
 4. 最后单独测扫描版 PDF
 
 ## 9. 后续建议
-如果扫描版 PDF 是必须场景，当前代码形态下应尽快补：
+如果扫描版 PDF 是必须场景，当前应继续补强：
 - OCR 能力评估
 - 扫描 PDF 识别失败提示
 - 导入后空文本检测
 - 导入结果质量校验
+- answer / preview / evidence 的最小化与去噪

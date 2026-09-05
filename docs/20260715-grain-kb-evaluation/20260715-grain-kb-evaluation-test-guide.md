@@ -1,4 +1,4 @@
-﻿# 粮仓知识库导入、嵌入与问答测试指南
+# 粮仓知识库导入、嵌入与问答测试指南
 
 - 主题：Grain Knowledge Base / 粮仓知识库
 - 日期：2026-07-15
@@ -54,7 +54,7 @@ Codex 负责先跑不依赖人工判断的检查：
 ### 3.1 启动服务
 
 ```powershell
-cd C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb
+cd C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb
 .\start_dev.ps1
 ```
 
@@ -165,7 +165,7 @@ data/grain-knowledge-base/qa/grain-kb-import-report-<timestamp>.json
 常用命令：
 
 ```powershell
-cd C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb
+cd C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb
 
 # 只看前 5 个文件计划，不调用 API
 python scripts/import_grain_kb_batches.py --limit 5 --batch-size 5
@@ -285,7 +285,7 @@ data/grain-knowledge-base/qa/draft.jsonl     # 20 条
 
 ### 9.1 执行环境
 
-- 仓库路径：`C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb`
+- 仓库路径：`C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb`
 - API smoke 端口：`http://127.0.0.1:18082`
 - 使用知识库：`grain-knowledge-base`
 - 本轮模型配置：本地 BGE embedding + 已配置的百炼兼容 LLM（未在文档中记录或暴露密钥）
@@ -302,7 +302,7 @@ python scripts/import_grain_kb_batches.py --api-base-url http://127.0.0.1:18082 
 结果：
 
 - 导入接口返回成功；
-- 报告文件：`C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb\data\grain-knowledge-base\qa\grain-kb-import-report-20260715T084356Z.json`；
+- 报告文件：`C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb\data\grain-knowledge-base\qa\grain-kb-import-report-20260715T084356Z.json`；
 - 本批次成功导入 5 个 DOCX，`indexed_chunks=120`；
 - `GET /api/kb` 显示 `grain-knowledge-base.doc_count=25`；
 - `GET /api/kb/list?kb_id=default` 返回空 docs，未污染 default；
@@ -319,7 +319,7 @@ python scripts/import_grain_kb_batches.py --api-base-url http://127.0.0.1:18082 
 
 ### 9.4 HTTP 问答 smoke 结果
 
-最终 smoke 报告：`C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb\data\grain-knowledge-base\qa\grain-kb-query-smoke-20260715T092120Z.json`。
+最终 smoke 报告：`C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb\data\grain-knowledge-base\qa\grain-kb-query-smoke-20260715T092120Z.json`。
 
 | 编号 | 问题 | 结果 | 主要证据 |
 |---|---|---|---|
@@ -364,8 +364,8 @@ git diff --check
 
 - 临时知识库：`import-smoke-20260715-192353`
 - 测试文件：`northagent-import-smoke_ecebbba8.txt`
-- 导入后落盘路径：`C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb\data\import-smoke-20260715-192353\northagent-import-smoke_ecebbba8.txt`
-- 报告文件：`C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb\data\grain-knowledge-base\qa\import-function-smoke-20260715-192353.json`
+- 导入后落盘路径：`C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb\data\import-smoke-20260715-192353\northagent-import-smoke_ecebbba8.txt`
+- 报告文件：`C:\Users\ethan1.zhao\Desktop\xiangmu\agent-kb\data\grain-knowledge-base\qa\import-function-smoke-20260715-192353.json`
 
 验证结果：
 
@@ -430,4 +430,5 @@ git diff --check
 - 涉及 `question-groups.md` 中 A 组 12 个 smoke 问题与 verified 集的关系（具体结论已丢失，待补）。
 
 > 待办：如能找到本节原始记录（例如聊天记录、其他备份），请补齐完整中文描述后删除本提示。
+
 

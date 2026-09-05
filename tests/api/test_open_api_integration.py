@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 from llama_index.core import Settings, StorageContext, VectorStoreIndex, load_index_from_storage
 from llama_index.core.embeddings import MockEmbedding
 from llama_index.core.schema import TextNode
@@ -63,14 +63,32 @@ class _PhysicalRuntime:
     def __init__(self, storage_root):
         self.storage_root = storage_root
         self.selected: list[str] = []
+        self.query_engine_calls: list[dict] = []
 
-    def ensure_index_loaded(self):
+    def ensure_index_loaded(self, kb_id=None):
         return True
 
-    def build_query_engine(self, kb_ids=None):
+    def build_query_engine(
+        self,
+        kb_ids=None,
+        *,
+        top_k=None,
+        response_mode=None,
+        use_reranker=None,
+        top_n=None,
+        reranker_model=None,
+    ):
         assert kb_ids and len(kb_ids) == 1
         kb_id = kb_ids[0]
         self.selected.append(kb_id)
+        self.query_engine_calls.append({
+            "kb_ids": list(kb_ids),
+            "top_k": top_k,
+            "response_mode": response_mode,
+            "use_reranker": use_reranker,
+            "top_n": top_n,
+            "reranker_model": reranker_model,
+        })
         return _PhysicalEngine(self.storage_root / "kbs" / kb_id)
 
 
@@ -117,3 +135,43 @@ def test_open_api_reads_only_the_authorized_physical_kb(tmp_path, monkeypatch):
     )
     assert denied.status_code == 403
     assert runtime.selected == ["finance"]
+
+
+
+def test_open_api_answer_forwards_readonly_query_params_to_physical_runtime(tmp_path, monkeypatch):
+    """answer 路由的只读检索参数应进入单 KB 物理 runtime。"""
+    monkeypatch.setattr(Settings, "_embed_model", MockEmbedding(embed_dim=4))
+    storage_root = tmp_path / "storage"
+    _persist_kb(storage_root, "finance", "finance-1", "FINANCE_ONLY revenue 100", [1.0, 0.0, 0.0, 0.0])
+    runtime = _PhysicalRuntime(storage_root)
+
+    monkeypatch.setattr(open_api, "access_token_service", _Tokens())
+    monkeypatch.setattr(open_api, "kb_registry", _Registry())
+    monkeypatch.setattr(open_api, "open_api_audit", _Audit())
+    monkeypatch.setattr(chat_service, "runtime_state", runtime)
+    monkeypatch.setattr(query_scope, "_ensure_kb_active", lambda kb_id: {"kb_id": kb_id, "status": "active"})
+    monkeypatch.setattr(chat_service.model_service, "get_model_health", lambda: {"state": "ready"})
+
+    response = TestClient(app).post(
+        "/api/open/v1/answer",
+        headers={"Authorization": "Bearer finance-token"},
+        json={
+            "kb_id": "finance",
+            "question": "summarize revenue",
+            "top_k": 8,
+            "response_mode": "tree_summarize",
+            "use_reranker": False,
+            "top_n": 2,
+            "reranker_model": "bge-reranker-v2-m3",
+        },
+    )
+
+    assert response.status_code == 200
+    assert runtime.query_engine_calls == [{
+        "kb_ids": ["finance"],
+        "top_k": 8,
+        "response_mode": "tree_summarize",
+        "use_reranker": False,
+        "top_n": 2,
+        "reranker_model": "bge-reranker-v2-m3",
+    }]

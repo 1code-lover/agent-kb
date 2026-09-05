@@ -13,12 +13,14 @@ import fitz
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
-try:
-    from scripts.diag_roundtrip_support import wait_for_runtime_ready
-except ModuleNotFoundError:
-    from diag_roundtrip_support import wait_for_runtime_ready
+from server.utils.font_fallbacks import OCR_FONT_CANDIDATES, load_first_available_font
 
-DEFAULT_BASE_URL = "http://127.0.0.1:18081"
+try:
+    from scripts.diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url, wait_for_runtime_ready
+except ModuleNotFoundError:
+    from diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url, wait_for_runtime_ready
+
+DEFAULT_BASE_URL = f"http://127.0.0.1:{DEFAULT_LOCAL_API_PORT}"
 DEFAULT_RELATIVE_PATH = "pdf/diag-scan-fallback.pdf"
 SCAN_PAGES = [
     [
@@ -34,17 +36,7 @@ SCAN_PAGES = [
 ]
 QUESTION = "In the scanned diagnostic PDF, what should the scanned content become in the active knowledge base?"
 EXPECTED_TERMS = ["searchable evidence", "knowledge base"]
-FONT_CANDIDATES = [
-    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
-    Path("/System/Library/Fonts/Supplemental/Verdana.ttf"),
-    Path("/System/Library/Fonts/Helvetica.ttc"),
-    Path("/Library/Fonts/Arial.ttf"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
-    Path("C:/Windows/Fonts/arial.ttf"),
-    Path("C:/Windows/Fonts/calibri.ttf"),
-    Path("C:/Windows/Fonts/msyh.ttc"),
-]
+FONT_CANDIDATES = OCR_FONT_CANDIDATES
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -52,10 +44,14 @@ def _sha256_bytes(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """读取命令行参数。"""
     parser = argparse.ArgumentParser(description="诊断扫描 PDF OCR fallback 真实导入与问答链路")
-    parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="本地 API 地址")
+    parser.add_argument(
+        "--base-url",
+        default=resolve_api_base_url(),
+        help="本地 API 地址；优先读取 KB_API_BASE_URL，未设置时回退到 KB_API_PORT（默认 18080）",
+    )
     parser.add_argument("--kb-id", default=None, help="可选；指定知识库 ID")
     parser.add_argument(
         "--source-path",
@@ -65,7 +61,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--relative-path", default=DEFAULT_RELATIVE_PATH, help="导入到知识库内的相对路径")
     parser.add_argument("--timeout", type=float, default=240.0, help="HTTP 超时时间（秒）")
     parser.add_argument("--output-path", default=None, help="write JSON report directly to file in UTF-8")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def _request_json(method: str, url: str, *, timeout: float, **kwargs: Any) -> dict[str, Any]:
@@ -92,10 +88,7 @@ def _ensure_kb(base_url: str, kb_id: str, timeout: float) -> dict[str, Any]:
 
 def _pick_font(size: int = 30) -> tuple[ImageFont.ImageFont, str]:
     """选择可用字体，若都不存在则回退到默认字体。"""
-    for candidate in FONT_CANDIDATES:
-        if candidate.exists():
-            return ImageFont.truetype(str(candidate), size=size), str(candidate)
-    return ImageFont.load_default(), "default"
+    return load_first_available_font(size=size, candidates=FONT_CANDIDATES)
 
 
 def _extract_pdf_text(path: Path) -> str:

@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from scripts.validate_rag_quality_fixtures import (
+    summarize_eval_cases,
     summarize_semireal_cases,
     validate_files,
     validate_record,
@@ -120,3 +121,529 @@ def test_semireal_case_without_expected_doc_requires_zero_sources(tmp_path: Path
 
     with pytest.raises(ValueError, match="expected_source_count"):
         validate_semireal_cases_file(fixture, markdown_dir=SEMIREAL_DIR)
+
+
+def test_eval_summary_flags_missing_required_refusal_category(tmp_path: Path) -> None:
+    schema_path = tmp_path / "schema.json"
+    cases_path = tmp_path / "cases.json"
+    schema_path.write_text(
+        json.dumps(
+            {
+                "dataset_name": "tmp_eval_dataset",
+                "evaluation_mode": "healthy",
+                "required_fields": [
+                    "case_id",
+                    "dataset",
+                    "kb_id",
+                    "question",
+                    "source_doc",
+                    "source_locator",
+                    "expected_scope_type",
+                    "expected_isolation_level",
+                    "modality",
+                    "answer_style",
+                    "difficulty",
+                    "category",
+                    "answerable",
+                    "expected_keypoints",
+                    "required_evidence_docs",
+                    "expected_source_count",
+                    "preview_required",
+                    "preview_terms",
+                    "forbidden_terms",
+                    "judge_focus",
+                ],
+                "allowed_modalities": ["markdown"],
+                "allowed_answer_styles": ["fact", "refusal"],
+                "allowed_difficulties": ["simple"],
+                "allowed_categories": ["no_evidence", "scope_contract"],
+                "allowed_scope_types": ["single_kb"],
+                "allowed_isolation_levels": ["physical_isolated"],
+                "allowed_judge_dimensions": ["groundedness", "refusal_correctness"],
+                "required_refusal_categories": ["no_evidence", "scope_contract"],
+                "quality_gates": {
+                    "minimum_total_cases": 1,
+                    "minimum_cases_per_modality": 1,
+                    "minimum_cases_per_difficulty": 1,
+                    "minimum_no_evidence_cases": 1,
+                    "minimum_preview_required_cases": 1,
+                },
+                "run_gates": {"pass_rate_min": 0.0},
+                "rubric_dimensions": {"groundedness": {"weight": 1.0}},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    cases_path.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "tmp-refusal-1",
+                    "dataset": "tmp_eval_dataset",
+                    "kb_id": "kb-a",
+                    "question": "当前知识库里有 CAB ticket 吗？",
+                    "source_doc": None,
+                    "source_locator": None,
+                    "expected_scope_type": "single_kb",
+                    "expected_isolation_level": "physical_isolated",
+                    "modality": "markdown",
+                    "answer_style": "refusal",
+                    "difficulty": "simple",
+                    "category": "no_evidence",
+                    "answerable": False,
+                    "expected_keypoints": ["No confirmable information"],
+                    "required_evidence_docs": [],
+                    "expected_source_count": 0,
+                    "preview_required": False,
+                    "preview_terms": [],
+                    "forbidden_terms": ["CAB-2048"],
+                    "judge_focus": ["groundedness", "refusal_correctness"],
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    summary = summarize_eval_cases(cases_path, schema_path=schema_path)
+
+    assert summary["refusal_category_breakdown"] == {"no_evidence": 1}
+    assert summary["gate_checks"]["required_refusal_categories"] is False
+
+
+
+
+
+def test_eval_summary_flags_missing_required_negative_contract_category(tmp_path: Path) -> None:
+    schema_path = tmp_path / "schema.json"
+    cases_path = tmp_path / "cases.json"
+    schema_path.write_text(
+        json.dumps(
+            {
+                "dataset_name": "tmp_eval_dataset",
+                "evaluation_mode": "healthy",
+                "required_fields": [
+                    "case_id",
+                    "dataset",
+                    "kb_id",
+                    "question",
+                    "source_doc",
+                    "source_locator",
+                    "expected_scope_type",
+                    "expected_isolation_level",
+                    "modality",
+                    "answer_style",
+                    "difficulty",
+                    "category",
+                    "answerable",
+                    "expected_keypoints",
+                    "required_evidence_docs",
+                    "expected_source_count",
+                    "preview_required",
+                    "preview_terms",
+                    "forbidden_terms",
+                    "judge_focus",
+                ],
+                "allowed_modalities": ["markdown"],
+                "allowed_answer_styles": ["policy"],
+                "allowed_difficulties": ["simple"],
+                "allowed_categories": ["process_boundary", "scope_contract"],
+                "allowed_scope_types": ["single_kb"],
+                "allowed_isolation_levels": ["physical_isolated"],
+                "allowed_judge_dimensions": ["groundedness"],
+                "required_negative_contract_categories": ["process_boundary", "scope_contract"],
+                "quality_gates": {
+                    "minimum_total_cases": 1,
+                    "minimum_cases_per_modality": 1,
+                    "minimum_cases_per_difficulty": 1,
+                    "minimum_no_evidence_cases": 1,
+                    "minimum_preview_required_cases": 1,
+                    "minimum_negative_contract_cases_per_modality": 1,
+                },
+                "run_gates": {"pass_rate_min": 0.0},
+                "rubric_dimensions": {"groundedness": {"weight": 1.0}},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    cases_path.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "tmp-negative-1",
+                    "dataset": "tmp_eval_dataset",
+                    "kb_id": "kb-a",
+                    "question": "当前流程边界是什么？",
+                    "source_doc": "boundary.md",
+                    "source_locator": "chunk-1",
+                    "expected_scope_type": "single_kb",
+                    "expected_isolation_level": "physical_isolated",
+                    "modality": "markdown",
+                    "answer_style": "policy",
+                    "difficulty": "simple",
+                    "category": "process_boundary",
+                    "answerable": True,
+                    "expected_keypoints": ["boundary"],
+                    "required_evidence_docs": ["boundary.md"],
+                    "expected_source_count": 1,
+                    "preview_required": False,
+                    "preview_terms": [],
+                    "forbidden_terms": [],
+                    "judge_focus": ["groundedness"],
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    summary = summarize_eval_cases(cases_path, schema_path=schema_path)
+
+    assert summary["negative_contract_category_breakdown"] == {"process_boundary": 1}
+    assert summary["gate_checks"]["required_negative_contract_categories"] is False
+    assert summary["gate_checks"]["minimum_negative_contract_cases_per_modality"] is True
+
+def test_eval_summary_flags_missing_required_refusal_marker_by_category(tmp_path: Path) -> None:
+    schema_path = tmp_path / "schema.json"
+    cases_path = tmp_path / "cases.json"
+    schema_path.write_text(
+        json.dumps(
+            {
+                "dataset_name": "tmp_eval_dataset",
+                "evaluation_mode": "healthy",
+                "required_fields": [
+                    "case_id",
+                    "dataset",
+                    "kb_id",
+                    "question",
+                    "source_doc",
+                    "source_locator",
+                    "expected_scope_type",
+                    "expected_isolation_level",
+                    "modality",
+                    "answer_style",
+                    "difficulty",
+                    "category",
+                    "answerable",
+                    "expected_keypoints",
+                    "required_evidence_docs",
+                    "expected_source_count",
+                    "preview_required",
+                    "preview_terms",
+                    "forbidden_terms",
+                    "judge_focus",
+                ],
+                "allowed_modalities": ["markdown"],
+                "allowed_answer_styles": ["refusal"],
+                "allowed_difficulties": ["simple"],
+                "allowed_categories": ["no_evidence"],
+                "allowed_scope_types": ["single_kb"],
+                "allowed_isolation_levels": ["physical_isolated"],
+                "allowed_judge_dimensions": ["groundedness", "refusal_correctness"],
+                "required_refusal_markers_by_category": {
+                    "no_evidence": ["knowledge base"],
+                },
+                "quality_gates": {
+                    "minimum_total_cases": 1,
+                    "minimum_cases_per_modality": 1,
+                    "minimum_cases_per_difficulty": 1,
+                    "minimum_no_evidence_cases": 1,
+                    "minimum_preview_required_cases": 1,
+                },
+                "run_gates": {"pass_rate_min": 0.0},
+                "rubric_dimensions": {"groundedness": {"weight": 1.0}},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    cases_path.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "tmp-refusal-1",
+                    "dataset": "tmp_eval_dataset",
+                    "kb_id": "kb-a",
+                    "question": "当前知识库里有 CAB ticket 吗？",
+                    "source_doc": None,
+                    "source_locator": None,
+                    "expected_scope_type": "single_kb",
+                    "expected_isolation_level": "physical_isolated",
+                    "modality": "markdown",
+                    "answer_style": "refusal",
+                    "difficulty": "simple",
+                    "category": "no_evidence",
+                    "answerable": False,
+                    "expected_keypoints": ["No confirmable information"],
+                    "required_evidence_docs": [],
+                    "expected_source_count": 0,
+                    "preview_required": False,
+                    "preview_terms": [],
+                    "forbidden_terms": ["CAB-2048"],
+                    "judge_focus": ["groundedness", "refusal_correctness"],
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    summary = summarize_eval_cases(cases_path, schema_path=schema_path)
+
+    assert summary["refusal_marker_category_breakdown"] == {"no_evidence": {"knowledge base": 0}}
+    assert summary["gate_checks"]["required_refusal_markers_by_category"] is False
+
+
+
+def test_eval_summary_flags_missing_required_refusal_marker_in_required_modality(tmp_path: Path) -> None:
+    schema_path = tmp_path / "schema.json"
+    cases_path = tmp_path / "cases.json"
+    schema_path.write_text(
+        json.dumps(
+            {
+                "dataset_name": "tmp_eval_dataset",
+                "evaluation_mode": "healthy",
+                "required_fields": [
+                    "case_id",
+                    "dataset",
+                    "kb_id",
+                    "question",
+                    "source_doc",
+                    "source_locator",
+                    "expected_scope_type",
+                    "expected_isolation_level",
+                    "modality",
+                    "answer_style",
+                    "difficulty",
+                    "category",
+                    "answerable",
+                    "expected_keypoints",
+                    "required_evidence_docs",
+                    "expected_source_count",
+                    "preview_required",
+                    "preview_terms",
+                    "forbidden_terms",
+                    "judge_focus",
+                ],
+                "allowed_modalities": ["markdown", "pdf"],
+                "allowed_answer_styles": ["refusal"],
+                "allowed_difficulties": ["simple"],
+                "allowed_categories": ["no_evidence"],
+                "allowed_scope_types": ["single_kb"],
+                "allowed_isolation_levels": ["physical_isolated"],
+                "allowed_judge_dimensions": ["groundedness", "refusal_correctness"],
+                "required_refusal_markers_by_category": {
+                    "no_evidence": ["knowledge base"],
+                },
+                "quality_gates": {
+                    "minimum_total_cases": 2,
+                    "minimum_cases_per_modality": 1,
+                    "minimum_cases_per_difficulty": 2,
+                    "minimum_no_evidence_cases": 1,
+                    "minimum_preview_required_cases": 1,
+                    "minimum_refusal_cases_per_modality": 1,
+                },
+                "run_gates": {"pass_rate_min": 0.0},
+                "rubric_dimensions": {"groundedness": {"weight": 1.0}},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    cases_path.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "tmp-refusal-md-1",
+                    "dataset": "tmp_eval_dataset",
+                    "kb_id": "kb-a",
+                    "question": "markdown refusal",
+                    "source_doc": None,
+                    "source_locator": None,
+                    "expected_scope_type": "single_kb",
+                    "expected_isolation_level": "physical_isolated",
+                    "modality": "markdown",
+                    "answer_style": "refusal",
+                    "difficulty": "simple",
+                    "category": "no_evidence",
+                    "answerable": False,
+                    "expected_keypoints": ["No confirmable information", "knowledge base"],
+                    "required_evidence_docs": [],
+                    "expected_source_count": 0,
+                    "preview_required": False,
+                    "preview_terms": [],
+                    "forbidden_terms": ["CAB-2048"],
+                    "judge_focus": ["groundedness", "refusal_correctness"],
+                },
+                {
+                    "case_id": "tmp-refusal-pdf-1",
+                    "dataset": "tmp_eval_dataset",
+                    "kb_id": "kb-a",
+                    "question": "pdf refusal",
+                    "source_doc": None,
+                    "source_locator": None,
+                    "expected_scope_type": "single_kb",
+                    "expected_isolation_level": "physical_isolated",
+                    "modality": "pdf",
+                    "answer_style": "refusal",
+                    "difficulty": "simple",
+                    "category": "no_evidence",
+                    "answerable": False,
+                    "expected_keypoints": ["No confirmable information"],
+                    "required_evidence_docs": [],
+                    "expected_source_count": 0,
+                    "preview_required": False,
+                    "preview_terms": [],
+                    "forbidden_terms": ["CAB-2048"],
+                    "judge_focus": ["groundedness", "refusal_correctness"],
+                },
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    summary = summarize_eval_cases(cases_path, schema_path=schema_path)
+
+    assert summary["refusal_marker_category_breakdown"] == {"no_evidence": {"knowledge base": 1}}
+    assert summary["refusal_modality_marker_category_breakdown"] == {
+        "markdown": {"no_evidence": {"knowledge base": 1}},
+        "pdf": {"no_evidence": {"knowledge base": 0}},
+    }
+    assert summary["gate_checks"]["required_refusal_markers_by_category"] is True
+    assert summary["gate_checks"]["required_refusal_markers_by_category_per_modality"] is False
+
+
+
+def test_eval_summary_flags_missing_required_negative_contract_marker_in_required_modality(tmp_path: Path) -> None:
+    schema_path = tmp_path / "schema.json"
+    cases_path = tmp_path / "cases.json"
+    schema_path.write_text(
+        json.dumps(
+            {
+                "dataset_name": "tmp_eval_dataset",
+                "evaluation_mode": "healthy",
+                "required_fields": [
+                    "case_id",
+                    "dataset",
+                    "kb_id",
+                    "question",
+                    "source_doc",
+                    "source_locator",
+                    "expected_scope_type",
+                    "expected_isolation_level",
+                    "modality",
+                    "answer_style",
+                    "difficulty",
+                    "category",
+                    "answerable",
+                    "expected_keypoints",
+                    "required_evidence_docs",
+                    "expected_source_count",
+                    "preview_required",
+                    "preview_terms",
+                    "forbidden_terms",
+                    "judge_focus",
+                ],
+                "allowed_modalities": ["markdown", "pdf"],
+                "allowed_answer_styles": ["policy"],
+                "allowed_difficulties": ["simple"],
+                "allowed_categories": ["process_boundary", "scope_contract"],
+                "allowed_scope_types": ["single_kb"],
+                "allowed_isolation_levels": ["physical_isolated"],
+                "allowed_judge_dimensions": ["groundedness"],
+                "required_negative_contract_categories": ["process_boundary", "scope_contract"],
+                "required_negative_contract_markers_by_category": {
+                    "process_boundary": ["authorization boundary"],
+                },
+                "quality_gates": {
+                    "minimum_total_cases": 2,
+                    "minimum_cases_per_modality": 1,
+                    "minimum_cases_per_difficulty": 2,
+                    "minimum_no_evidence_cases": 1,
+                    "minimum_preview_required_cases": 1,
+                    "minimum_negative_contract_cases_per_modality": 1,
+                },
+                "run_gates": {"pass_rate_min": 0.0},
+                "rubric_dimensions": {"groundedness": {"weight": 1.0}},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    cases_path.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "tmp-neg-md-1",
+                    "dataset": "tmp_eval_dataset",
+                    "kb_id": "kb-a",
+                    "question": "markdown boundary",
+                    "source_doc": "boundary.md",
+                    "source_locator": "chunk-1",
+                    "expected_scope_type": "single_kb",
+                    "expected_isolation_level": "physical_isolated",
+                    "modality": "markdown",
+                    "answer_style": "policy",
+                    "difficulty": "simple",
+                    "category": "process_boundary",
+                    "answerable": True,
+                    "expected_keypoints": ["authorization boundary"],
+                    "required_evidence_docs": ["boundary.md"],
+                    "expected_source_count": 1,
+                    "preview_required": True,
+                    "preview_terms": ["authorization boundary"],
+                    "forbidden_terms": [],
+                    "judge_focus": ["groundedness"],
+                },
+                {
+                    "case_id": "tmp-neg-pdf-1",
+                    "dataset": "tmp_eval_dataset",
+                    "kb_id": "kb-a",
+                    "question": "pdf boundary",
+                    "source_doc": "boundary.pdf",
+                    "source_locator": "page-1",
+                    "expected_scope_type": "single_kb",
+                    "expected_isolation_level": "physical_isolated",
+                    "modality": "pdf",
+                    "answer_style": "policy",
+                    "difficulty": "simple",
+                    "category": "process_boundary",
+                    "answerable": True,
+                    "expected_keypoints": ["knowledge base"],
+                    "required_evidence_docs": ["boundary.pdf"],
+                    "expected_source_count": 1,
+                    "preview_required": True,
+                    "preview_terms": ["knowledge base"],
+                    "forbidden_terms": [],
+                    "judge_focus": ["groundedness"],
+                },
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    summary = summarize_eval_cases(cases_path, schema_path=schema_path)
+
+    assert summary["negative_contract_marker_category_breakdown"] == {
+        "process_boundary": {"authorization boundary": 1}
+    }
+    assert summary["negative_contract_modality_marker_category_breakdown"] == {
+        "markdown": {"process_boundary": {"authorization boundary": 1}},
+        "pdf": {"process_boundary": {"authorization boundary": 0}},
+    }
+    assert summary["gate_checks"]["required_negative_contract_markers_by_category"] is True
+    assert summary["gate_checks"]["required_negative_contract_markers_by_category_per_modality"] is False

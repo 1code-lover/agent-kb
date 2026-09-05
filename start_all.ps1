@@ -1,24 +1,48 @@
-# 一键启动前后端（需两个终端窗口）
-# 终端 1：后端 API
-# 终端 2：前端 Streamlit
+﻿# ThinkRAG / NorthAgent 统一启动入口
+# 当前主线：FastAPI API + React(Vite) Web
+# 用法：
+#   powershell -File .\start_all.ps1
+#   powershell -File .\start_all.ps1 -BackendPort 18095 -FrontendPort 5176
+#   powershell -File .\start_all.ps1 -Stop
+
+param(
+    [switch]$Stop,
+    [Nullable[int]]$BackendPort = $null,
+    [Nullable[int]]$FrontendPort = $null
+)
+
+$ROOT = Split-Path -Parent $PSCommandPath
+$DEV_RUNTIME_HELPERS = Join-Path $ROOT 'scripts\dev-runtime-helpers.ps1'
+if (-not (Test-Path $DEV_RUNTIME_HELPERS)) {
+    throw "未找到开发启动共享 helper：$DEV_RUNTIME_HELPERS"
+}
+. $DEV_RUNTIME_HELPERS
+
+$BackendPort = Resolve-BackendPort $BackendPort
+$FrontendPort = Resolve-FrontendPort $FrontendPort
+$DEV_SCRIPT = Join-Path $ROOT 'start_dev.ps1'
+
+if (-not (Test-Path $DEV_SCRIPT)) {
+    throw "未找到开发启动脚本：$DEV_SCRIPT"
+}
 
 Write-Host "==================================" -ForegroundColor Cyan
-Write-Host "  ThinkRAG 本地启动脚本" -ForegroundColor Cyan
+Write-Host "  ThinkRAG / NorthAgent 本地启动" -ForegroundColor Cyan
 Write-Host "==================================" -ForegroundColor Cyan
+Write-Host "主链路：FastAPI + React(Vite)" -ForegroundColor Green
+Write-Host "仓库根目录：$ROOT" -ForegroundColor Green
+Write-Host "后端端口：$BackendPort" -ForegroundColor Green
+Write-Host "前端端口：$FrontendPort" -ForegroundColor Green
 Write-Host ""
-Write-Host "请在两个终端分别执行：" -ForegroundColor Yellow
+
+if ($Stop) {
+    & $DEV_SCRIPT -Stop -BackendPort $BackendPort -FrontendPort $FrontendPort
+    exit $LASTEXITCODE
+}
+
+Write-Host "即将调用 start_dev.ps1 拉起前后端。" -ForegroundColor Yellow
+Write-Host "如果只需要停止服务，请执行：powershell -File .\start_all.ps1 -Stop" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "[终端 1] 启动 API 后端:" -ForegroundColor Green
-Write-Host '  $env:PYTHONPATH = "C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb"' -ForegroundColor White
-Write-Host '  python run_api.py' -ForegroundColor White
-Write-Host ""
-Write-Host "[终端 2] 启动前端 (Streamlit):" -ForegroundColor Green
-Write-Host '  $env:PYTHONPATH = "C:\Users\ethan1.zhao\Downloads\agent-kb-main\github-agent-kb"' -ForegroundColor White
-Write-Host '  streamlit run frontend/Document_QA.py' -ForegroundColor White
-Write-Host ""
-Write-Host "后端地址: http://127.0.0.1:18080" -ForegroundColor Cyan
-Write-Host "前端地址: http://192.168.1.24:8501 (Streamlit 启动后显示)" -ForegroundColor Cyan
-Write-Host "API 文档: http://127.0.0.1:18080/docs" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "按任意键退出..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
+& $DEV_SCRIPT -BackendPort $BackendPort -FrontendPort $FrontendPort
+exit $LASTEXITCODE

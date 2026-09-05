@@ -7,11 +7,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  buildAgentWorkbenchLink,
   buildKnowledgeAgentLink,
   buildKnowledgeWorkspaceLink,
+  parseAgentWorkbenchEntry,
   parseKnowledgeAgentEntry,
   parseKnowledgeWorkspaceEntry,
 } from './kbNavigation.js';
+
+test('buildAgentWorkbenchLink 会在 basic 模式下保留当前 kb_id', () => {
+  assert.equal(
+    buildAgentWorkbenchLink({ experience: 'basic', kbId: 'grain-knowledge-base' }),
+    '/agent?experience=basic&kb_id=grain-knowledge-base',
+  );
+});
+
+test('buildAgentWorkbenchLink 在 basic 且未选 kb 时回退到默认 agent 路由', () => {
+  assert.equal(buildAgentWorkbenchLink({ experience: 'basic', kbId: '' }), '/agent');
+});
 
 test('buildKnowledgeAgentLink 会携带 knowledge 体验与当前 kb_id', () => {
   assert.equal(
@@ -35,7 +48,17 @@ test('buildKnowledgeWorkspaceLink 在未传 kb_id 时回退到基础知识库页
   assert.equal(buildKnowledgeWorkspaceLink(''), '/knowledge');
 });
 
-test('parseKnowledgeAgentEntry 会从 query string 中提取显式范围', () => {
+test('parseAgentWorkbenchEntry 会识别 basic 模式的显式范围', () => {
+  assert.deepEqual(
+    parseAgentWorkbenchEntry('?experience=basic&kb_id=grain-knowledge-base'),
+    {
+      requestedKbId: 'grain-knowledge-base',
+      requestedExperience: 'basic',
+    },
+  );
+});
+
+test('parseKnowledgeAgentEntry 会从 query string 中提取 knowledge 显式范围', () => {
   assert.deepEqual(
     parseKnowledgeAgentEntry('?experience=knowledge&kb_id=grain-knowledge-base'),
     {

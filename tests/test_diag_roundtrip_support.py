@@ -9,10 +9,44 @@ import pytest
 import scripts.diag_roundtrip_support as support_module
 from scripts.diag_roundtrip_support import (
     find_file_result,
+    resolve_api_base_url,
+    resolve_api_port,
     resolve_saved_file_path,
     summarize_runtime_readiness,
     wait_for_runtime_ready,
 )
+
+
+
+
+def test_resolve_api_base_url_prefers_explicit_base_url_aliases() -> None:
+    """显式 API base URL 应优先于端口别名，并去掉尾部斜杠。"""
+    env = {
+        "KB_API_BASE_URL": "https://kb.example.com:18443/",
+        "KB_API_PORT": "19090",
+    }
+
+    assert resolve_api_base_url(env) == "https://kb.example.com:18443"
+    assert resolve_api_port(env) == 18443
+
+
+def test_resolve_api_base_url_falls_back_to_port_contract_when_base_url_missing() -> None:
+    """缺少 base URL 时，应回退到统一端口契约。"""
+    env = {"THINKRAG_API_PORT": "19091"}
+
+    assert resolve_api_base_url(env) == "http://127.0.0.1:19091"
+    assert resolve_api_port(env) == 19091
+
+
+def test_resolve_api_base_url_ignores_invalid_explicit_url() -> None:
+    """非法显式 URL 不应污染默认诊断地址。"""
+    env = {
+        "KB_API_BASE_URL": "127.0.0.1:19092",
+        "FOXGLOVE_API_PORT": "19093",
+    }
+
+    assert resolve_api_base_url(env) == "http://127.0.0.1:19093"
+    assert resolve_api_port(env) == 19093
 
 
 class _FakeResponse:

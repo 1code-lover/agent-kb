@@ -18,6 +18,11 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+try:
+    from scripts.diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url
+except ModuleNotFoundError:
+    from diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url
+
 PRIMARY_CATEGORY_PREFIXES = tuple(f"{idx:02d}-" for idx in range(1, 8))
 DEFAULT_EXCLUDED_PREFIXES = ("98-duplicates-to-review", "99-other")
 SUPPORTED_EXTENSIONS = {".docx", ".pdf", ".txt", ".md"}
@@ -396,11 +401,15 @@ def write_report(report: dict[str, Any], output_dir: str | Path) -> Path:
     return path
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="粮仓知识库分批导入工具")
     parser.add_argument("--kb-root", default="data/grain-knowledge-base")
     parser.add_argument("--kb-id", default="grain-knowledge-base")
-    parser.add_argument("--api-base-url", default="http://127.0.0.1:18080")
+    parser.add_argument(
+        "--api-base-url",
+        default=resolve_api_base_url(default_port=DEFAULT_LOCAL_API_PORT),
+        help="API 根地址；优先读取 KB_API_BASE_URL，未设置时回退到 KB_API_PORT（默认 18080）",
+    )
     parser.add_argument("--chunk-size", type=int, default=512)
     parser.add_argument("--chunk-overlap", type=int, default=50)
     parser.add_argument("--batch-size", type=int, default=5)
@@ -414,7 +423,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--stop-on-error", action="store_true")
     parser.add_argument("--output-dir", default="data/grain-knowledge-base/qa")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def main() -> None:

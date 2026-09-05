@@ -33,6 +33,10 @@ function fail(message) {
   process.exit(1);
 }
 
+function describePreflightMode(strict) {
+  return strict ? "strict release preflight" : "non-strict build preflight";
+}
+
 function getMissingReleaseEnv(env = process.env) {
   return resolveNotarizationCredentials(env).missing;
 }
@@ -96,6 +100,8 @@ function runPreflight(options = {}) {
   const reportFn = options.report || report;
   const failFn = options.fail || fail;
   const runXattrFn = options.runXattr || runXattr;
+
+  reportFn(`${describePreflightMode(strict)} validates local Apple prerequisites only; it does not prove the final app is already signed/notarized`);
 
   const summary = {
     ok: true,
@@ -204,6 +210,7 @@ module.exports = {
   checkNotaryTool,
   ensureExecutable,
   findDeveloperIdApplicationIdentities,
+  describePreflightMode,
   getMissingReleaseEnv,
   resolveLegacyAppBuilderBinaryPath,
   runPreflight,

@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import json
+from unittest.mock import MagicMock
+
+import pytest
+
 from api.services import session_store
 
 
@@ -34,3 +39,47 @@ def test_append_chat_message_supports_eval_style_session_id(monkeypatch, tmp_pat
     assert len(files) == 1
     assert ":" not in files[0].name
     assert session_store.load_session(session_id)["session_id"] == session_id
+
+
+
+def test_atomic_write_retries_permission_error_then_succeeds(monkeypatch, tmp_path) -> None:
+    """会话快照原子写入遇到临时锁时，应重试并最终成功。"""
+    path = tmp_path / "session.json"
+    real_replace = session_store.os.replace
+    attempts = {"count": 0}
+
+    def flaky_replace(src, dst):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise PermissionError("locked")
+        return real_replace(src, dst)
+
+    sleep = MagicMock()
+    monkeypatch.setattr(session_store.os, "replace", flaky_replace)
+    monkeypatch.setattr(session_store.time, "sleep", sleep)
+
+    session_store._atomic_write(path, {"ok": True})
+
+    assert attempts["count"] == 3
+    assert json.loads(path.read_text(encoding="utf-8")) == {"ok": True}
+    assert sleep.call_count == 2
+    assert list(path.parent.glob("session.json.tmp-*")) == []
+
+
+
+def test_atomic_write_raises_after_retries_and_cleans_tmp_file(monkeypatch, tmp_path) -> None:
+    """若重试耗尽仍失败，应抛错且清理遗留 tmp 文件。"""
+    path = tmp_path / "session.json"
+
+    monkeypatch.setattr(
+        session_store.os,
+        "replace",
+        MagicMock(side_effect=PermissionError("still locked")),
+    )
+    monkeypatch.setattr(session_store.time, "sleep", MagicMock())
+
+    with pytest.raises(PermissionError, match="still locked"):
+        session_store._atomic_write(path, {"ok": True})
+
+    assert not path.exists()
+    assert list(path.parent.glob("session.json.tmp-*")) == []

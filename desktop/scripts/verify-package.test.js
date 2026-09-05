@@ -5,6 +5,7 @@ const path = require("node:path");
 const test = require("node:test");
 
 const {
+  formatReadyMessage,
   requiredEmbeddingFiles,
   requiredRuntimeFiles,
   resolvePackageLayout,
@@ -226,4 +227,21 @@ test("verifyPackage rejects packaged test files inside app.asar", () => {
   assert.equal(result.ok, false);
   assert.match(result.failures.join("\n"), /test files should not be packaged/);
   assert.match(result.failures.join("\n"), /main\.test\.js/);
+});
+
+
+test("formatReadyMessage clarifies ad-hoc package verification scope", () => {
+  const result = {
+    artifactPaths: [
+      path.join("/tmp", "NorthAgent-0.1.0-arm64.dmg"),
+      path.join("/tmp", "NorthAgent-0.1.0-arm64-mac.zip"),
+    ],
+  };
+
+  const message = formatReadyMessage(result);
+
+  assert.match(message, /ad-hoc post-build verification/);
+  assert.match(message, /release:mac/);
+  assert.match(message, /verify:mac-release/);
+  assert.match(message, /NorthAgent-0\.1\.0-arm64\.dmg/);
 });

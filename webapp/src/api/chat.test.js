@@ -18,6 +18,33 @@ import {
 } from "./evidence.js";
 
 
+test("queryChat 会透传请求级 RAG 参数", async () => {
+  const originalPost = client.post;
+  const calls = [];
+  const payload = {
+    question: "what",
+    kb_ids: ["kb-a"],
+    top_k: 9,
+    response_mode: "tree_summarize",
+    use_reranker: false,
+    top_n: 2,
+    reranker_model: "bge-reranker-v2-m3",
+  };
+  client.post = async (...args) => {
+    calls.push(args);
+    return { code: 0, data: { answer: "done" } };
+  };
+
+  try {
+    const result = await queryChat(payload);
+    assert.equal(result.code, 0);
+    assert.deepEqual(calls[0], ["/api/chat/query", payload]);
+  } finally {
+    client.post = originalPost;
+  }
+});
+
+
 test("queryChat 会透传 evidence 字段", async () => {
   const originalPost = client.post;
   const calls = [];

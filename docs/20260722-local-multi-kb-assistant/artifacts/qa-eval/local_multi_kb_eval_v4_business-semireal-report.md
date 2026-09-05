@@ -1,23 +1,23 @@
 # 问答评测报告：local_multi_kb_eval_v4_business
 
-- 运行时间：2026-07-31T13:37:12.412504+00:00
+- 运行时间：2026-08-21T12:06:41.862628+00:00
 - 评测模式：healthy
 - 总用例数：54
-- 通过用例：54
-- 失败用例：0
-- 运行结论：通过
+- 通过用例：53
+- 失败用例：1
+- 运行结论：失败
 
 ## 1. Suite 摘要
 
 | 指标 | 数值 |
 | --- | --- |
-| pass_rate | 1.000 |
-| pass_rate_ci95 | [0.934, 1.000] |
+| pass_rate | 0.981 |
+| pass_rate_ci95 | [0.902, 0.997] |
 | scope_pass_rate | 1.000 |
-| average_keypoint_coverage | 1.000 |
+| average_keypoint_coverage | 0.988 |
 | total_keypoints | 100 |
-| matched_keypoints | 100 |
-| keypoint_hit_rate | 1.000 |
+| matched_keypoints | 98 |
+| keypoint_hit_rate | 0.980 |
 | evidence_expected_cases | 42 |
 | evidence_hit_cases | 42 |
 | evidence_hit_rate | 1.000 |
@@ -36,7 +36,7 @@
 | Gate | 指标 | 实际值 | 阈值 | 结果 |
 | --- | --- | --- | --- | --- |
 | scope_pass_rate_min | scope_pass_rate | 1.000 | 1.000 | 通过 |
-| average_keypoint_coverage_min | average_keypoint_coverage | 1.000 | 0.850 | 通过 |
+| average_keypoint_coverage_min | average_keypoint_coverage | 0.988 | 0.850 | 通过 |
 | evidence_hit_rate_min | evidence_hit_rate | 1.000 | 0.950 | 通过 |
 | preview_resolvable_rate_min | preview_resolvable_rate | 1.000 | 0.950 | 通过 |
 | source_count_match_rate_min | source_count_match_rate | 1.000 | 0.950 | 通过 |
@@ -62,22 +62,22 @@
 | total_indexed_chunks | 24 |
 | total_document_count | 24 |
 | total_node_count | 24 |
-| total_input_text_chars | 5900 |
+| total_input_text_chars | 5898 |
 | total_ocr_success_count | 5 |
 | total_asset_registered_count | 5 |
-| total_import_ms | 224.00 |
+| total_import_ms | 604.00 |
 
 | modality | kb_count | total_files | success | failed | empty | indexed_chunks | document_count | node_count | input_text_chars | ocr_success_count | asset_registered_count | import_total_ms |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| image_ocr | 1 | 5 | 5 | 0 | 0 | 5 | 5 | 5 | 911 | 5 | 5 | 30.02 |
-| markdown | 1 | 11 | 11 | 0 | 0 | 11 | 11 | 11 | 3058 | 0 | 0 | 99.03 |
-| pdf | 1 | 8 | 8 | 0 | 0 | 8 | 8 | 8 | 1931 | 0 | 0 | 94.95 |
+| image_ocr | 1 | 5 | 5 | 0 | 0 | 5 | 5 | 5 | 911 | 5 | 5 | 109.60 |
+| markdown | 1 | 11 | 11 | 0 | 0 | 11 | 11 | 11 | 3058 | 0 | 0 | 218.00 |
+| pdf | 1 | 8 | 8 | 0 | 0 | 8 | 8 | 8 | 1929 | 0 | 0 | 276.40 |
 
 | kb_id | modality | total_files | success | failed | empty | indexed_chunks | document_count | node_count | input_text_chars | ocr_success_count | asset_registered_count | import_total_ms |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| eval-kb-image | image_ocr | 5 | 5 | 0 | 0 | 5 | 5 | 5 | 911 | 5 | 5 | 30.02 |
-| eval-kb-markdown | markdown | 11 | 11 | 0 | 0 | 11 | 11 | 11 | 3058 | 0 | 0 | 99.03 |
-| eval-kb-pdf | pdf | 8 | 8 | 0 | 0 | 8 | 8 | 8 | 1931 | 0 | 0 | 94.95 |
+| eval-kb-image | image_ocr | 5 | 5 | 0 | 0 | 5 | 5 | 5 | 911 | 5 | 5 | 109.60 |
+| eval-kb-markdown | markdown | 11 | 11 | 0 | 0 | 11 | 11 | 11 | 3058 | 0 | 0 | 218.00 |
+| eval-kb-pdf | pdf | 8 | 8 | 0 | 0 | 8 | 8 | 8 | 1929 | 0 | 0 | 276.40 |
 
 ## 5. 导入质量与问答关联
 
@@ -92,13 +92,13 @@
 
 | kb_id | modality | quality_signal_tags | qa_total_cases | qa_failed_cases | evidence_miss_cases | preview_failure_cases | import_nodes_without_embedding_rate | import_total_ocr_failed_count | import_total_ocr_no_text_count | import_asset_registered_without_index_count |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| eval-kb-image | image_ocr | - | 18 | 0 | 0 | 0 | 0.000 | 0 | 0 | 0 |
+| eval-kb-image | image_ocr | - | 18 | 1 | 0 | 0 | 0.000 | 0 | 0 | 0 |
 | eval-kb-markdown | markdown | - | 18 | 0 | 0 | 0 | 0.000 | 0 | 0 | 0 |
 | eval-kb-pdf | pdf | - | 18 | 0 | 0 | 0 | 0.000 | 0 | 0 | 0 |
 
 | modality | quality_signal_tags | qa_total_cases | qa_failed_cases | evidence_miss_cases | preview_failure_cases | import_nodes_without_embedding_rate | import_total_ocr_failed_count | import_total_ocr_no_text_count | import_asset_registered_without_index_count |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| image_ocr | - | 18 | 0 | 0 | 0 | 0.000 | 0 | 0 | 0 |
+| image_ocr | - | 18 | 1 | 0 | 0 | 0.000 | 0 | 0 | 0 |
 | markdown | - | 18 | 0 | 0 | 0 | 0.000 | 0 | 0 | 0 |
 | pdf | - | 18 | 0 | 0 | 0 | 0.000 | 0 | 0 | 0 |
 
@@ -106,7 +106,7 @@
 
 | modality | count | passed | failed | pass_rate | pass_rate_ci95 | scope_pass_rate | average_keypoint_coverage | keypoint_hit_rate | evidence_hit_rate | preview_resolvable_rate | preview_term_hit_rate | source_count_match_rate | forbidden_term_clean_rate |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| image_ocr | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| image_ocr | 18 | 17 | 1 | 0.944 | [0.742, 0.990] | 1.000 | 0.963 | 0.943 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | markdown | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | pdf | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
@@ -114,7 +114,7 @@
 
 | difficulty | count | passed | failed | pass_rate | pass_rate_ci95 | scope_pass_rate | average_keypoint_coverage | keypoint_hit_rate | evidence_hit_rate | preview_resolvable_rate | preview_term_hit_rate | source_count_match_rate | forbidden_term_clean_rate |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| complex | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| complex | 18 | 17 | 1 | 0.944 | [0.742, 0.990] | 1.000 | 0.963 | 0.951 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | medium | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | simple | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
@@ -126,7 +126,7 @@
 | fact | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | policy | 9 | 9 | 0 | 1.000 | [0.701, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | refusal | 12 | 12 | 0 | 1.000 | [0.757, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| summary | 11 | 11 | 0 | 1.000 | [0.741, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| summary | 11 | 10 | 1 | 0.909 | [0.623, 0.984] | 1.000 | 0.939 | 0.929 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
 ## 9. category 分层统计
 
@@ -135,7 +135,7 @@
 | approval_summary | 9 | 9 | 0 | 1.000 | [0.701, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | evidence_operation | 6 | 6 | 0 | 1.000 | [0.610, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | no_evidence | 12 | 12 | 0 | 1.000 | [0.757, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| process_boundary | 11 | 11 | 0 | 1.000 | [0.741, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| process_boundary | 11 | 10 | 1 | 0.909 | [0.623, 0.984] | 1.000 | 0.939 | 0.913 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | role_lookup | 8 | 8 | 0 | 1.000 | [0.676, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | timeline_sla | 8 | 8 | 0 | 1.000 | [0.676, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
@@ -143,14 +143,18 @@
 
 | kb_id | count | passed | failed | pass_rate | pass_rate_ci95 | scope_pass_rate | average_keypoint_coverage | keypoint_hit_rate | evidence_hit_rate | preview_resolvable_rate | preview_term_hit_rate | source_count_match_rate | forbidden_term_clean_rate |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| eval-kb-image | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| eval-kb-image | 18 | 17 | 1 | 0.944 | [0.742, 0.990] | 1.000 | 0.963 | 0.943 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | eval-kb-markdown | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | eval-kb-pdf | 18 | 18 | 0 | 1.000 | [0.824, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
 ## 11. 失败阶段分布
 
-本次运行无失败阶段样本。
+| failure_stage | count |
+| --- | --- |
+| quality_gate | 1 |
 
 ## 12. 失败样本
 
-本次运行无失败样本。
+| case_id | kb_id | modality | category | difficulty | failure_stage | failure_message | keypoint_missed | returned_titles | source_count_match | evidence_hit | preview_resolvable | answer_excerpt | response_status_code | preview_status_code |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| eval-v4-img-016 | eval-kb-image | image_ocr | process_boundary | complex | quality_gate | contract or metric mismatch | 10<br>No confirmable information | escalation-whiteboard-business.png | True | True | True | folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. | 200 | 200 |

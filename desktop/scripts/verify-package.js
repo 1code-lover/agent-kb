@@ -8,7 +8,7 @@ const requiredRuntimeFiles = [
   "webapp/dist/index.html",
   "run_api.py",
   "config.py",
-  "requirements.txt",
+  "requirements-runtime.txt",
   "api/app.py",
   "server/index.py",
   "utils/logging_utils.py",
@@ -154,6 +154,14 @@ function verifyPackage(options = {}) {
   };
 }
 
+function formatReadyMessage(result) {
+  const artifactNames = Array.isArray(result?.artifactPaths)
+    ? result.artifactPaths.map((artifactPath) => path.basename(artifactPath)).filter(Boolean)
+    : [];
+  const artifactSummary = artifactNames.length > 0 ? artifactNames.join(", ") : "artifacts unresolved";
+  return `packaged runtime contents look ready for ad-hoc post-build verification (${artifactSummary}); final signed/notarized distribution still requires npm run release:mac and npm run verify:mac-release`;
+}
+
 function fail(message) {
   console.error(`[verify-package] ${message}`);
   process.exit(1);
@@ -164,7 +172,7 @@ function main() {
   if (!result.ok) {
     fail(result.failures.join("\n[verify-package] "));
   }
-  console.log("[verify-package] package contents look ready");
+  console.log(`[verify-package] ${formatReadyMessage(result)}`);
 }
 
 if (require.main === module) {
@@ -177,6 +185,7 @@ module.exports = {
   loadPackageJson,
   requiredRuntimeFiles,
   requiredEmbeddingFiles,
+  formatReadyMessage,
   resolvePackageLayout,
   verifyPackage,
 };

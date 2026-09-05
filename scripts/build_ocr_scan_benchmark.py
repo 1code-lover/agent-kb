@@ -10,19 +10,19 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
+from server.utils.font_fallbacks import OCR_FONT_CANDIDATES, load_first_available_font
+
+
+FONT_CANDIDATES = (
+    Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf"),
+    *OCR_FONT_CANDIDATES,
+)
+
 
 def _font(size: int = 28) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    """选择 macOS/Linux 常见字体，失败时回退 Pillow 默认字体。"""
-    for candidate in (
-        "/System/Library/Fonts/PingFang.ttc",
-        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    ):
-        try:
-            return ImageFont.truetype(candidate, size=size)
-        except OSError:
-            continue
-    return ImageFont.load_default()
+    """选择跨平台 OCR/扫描件字体，失败时回退 Pillow 默认字体。"""
+    font, _ = load_first_available_font(size=size, candidates=FONT_CANDIDATES)
+    return font
 
 
 def _render(lines: list[str], *, table: bool = False) -> Image.Image:

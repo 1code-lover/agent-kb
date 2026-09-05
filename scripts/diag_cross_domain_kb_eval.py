@@ -13,8 +13,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+try:
+    from scripts.diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url
+except ModuleNotFoundError:
+    from diag_roundtrip_support import DEFAULT_LOCAL_API_PORT, resolve_api_base_url
 
-DEFAULT_API_BASE = "http://127.0.0.1:18080"
+
+DEFAULT_API_BASE = f"http://127.0.0.1:{DEFAULT_LOCAL_API_PORT}"
 DEFAULT_TIMEOUT = 120.0
 DEFAULT_SLOW_THRESHOLD_MS = 5000.0
 CROSS_DOMAIN_ARTIFACT_DIR = Path("docs/20260810-model-fallback-desktop-e2e/artifacts")
@@ -1155,10 +1160,14 @@ def run_evaluation(
     return report, 0 if report["summary"]["failed"] == 0 else 1
 
 
-def main() -> None:
-    """命令行入口。"""
+def _build_arg_parser() -> argparse.ArgumentParser:
+    """构建命令行参数解析器。"""
     parser = argparse.ArgumentParser(description="跨知识库、跨领域真实问答诊断")
-    parser.add_argument("--api-base", default=DEFAULT_API_BASE, help="API 根地址")
+    parser.add_argument(
+        "--api-base",
+        default=resolve_api_base_url(),
+        help="API 根地址；优先读取 KB_API_BASE_URL，未设置时回退到 KB_API_PORT（默认 18080）",
+    )
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT, help="单条问答超时秒数")
     parser.add_argument(
         "--slow-threshold-ms",
@@ -1190,6 +1199,12 @@ def main() -> None:
         default="docs/20260810-model-fallback-desktop-e2e/artifacts/cross-domain-kb-eval-report.json",
         help="评测报告输出路径",
     )
+    return parser
+
+
+def main() -> None:
+    """命令行入口。"""
+    parser = _build_arg_parser()
     args = parser.parse_args()
 
     def _print_progress(index: int, total: int, case: dict[str, Any], result: dict[str, Any]) -> None:

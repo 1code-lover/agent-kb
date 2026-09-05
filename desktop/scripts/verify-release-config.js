@@ -12,7 +12,7 @@ const requiredExtraResources = [
   { from: "../utils", to: "utils" },
   { from: "../config.py", to: "config.py" },
   { from: "../run_api.py", to: "run_api.py" },
-  { from: "../requirements.txt", to: "requirements.txt" },
+  { from: "../requirements-runtime.txt", to: "requirements-runtime.txt" },
   { from: "../localmodels", to: "localmodels" },
 ];
 
@@ -112,6 +112,10 @@ function verifyReleaseConfig(pkg) {
   };
 }
 
+function formatReadyMessage() {
+  return "strict mac release config looks ready: build:mac stays ad-hoc packaging, and release:mac remains the signed/notarized distribution lane";
+}
+
 function fail(message) {
   console.error(`[verify-release-config] ${message}`);
   process.exit(1);
@@ -122,7 +126,7 @@ function main() {
   if (!result.ok) {
     fail(result.failures.join("\n[verify-release-config] "));
   }
-  console.log("[verify-release-config] release config looks ready");
+  console.log(`[verify-release-config] ${formatReadyMessage()}`);
 }
 
 if (require.main === module) {
@@ -131,6 +135,7 @@ if (require.main === module) {
 
 module.exports = {
   loadPackageJson,
+  formatReadyMessage,
   requiredExtraResources,
   verifyReleaseConfig,
 };

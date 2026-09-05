@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import secrets
 import time
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
@@ -20,13 +20,37 @@ router = APIRouter(prefix="/api/open/v1", tags=["open-readonly"])
 kb_registry = KBRegistry(get_storage_root() / "kb_registry.json")
 
 
-class OpenQueryRequest(BaseModel):
-    """开放问答请求，只接受只读字段。"""
+OpenAnswerResponseMode = Literal[
+    "compact",
+    "refine",
+    "tree_summarize",
+    "simple_summarize",
+    "accumulate",
+    "compact_accumulate",
+]
+
+
+class OpenReadonlyRequest(BaseModel):
+    """开放只读请求基类，只接受显式声明的只读字段。"""
 
     model_config = ConfigDict(extra="forbid")
     kb_id: str = Field(..., min_length=1, max_length=64)
     question: str = Field(..., min_length=1, max_length=20_000)
+
+
+class OpenSearchRequest(OpenReadonlyRequest):
+    """开放结构化检索请求，仅支持检索层安全参数。"""
+
     top_k: int | None = Field(default=None, ge=1, le=50)
+
+
+class OpenAnswerRequest(OpenSearchRequest):
+    """开放问答请求，支持与主链路一致的只读检索参数。"""
+
+    response_mode: OpenAnswerResponseMode | None = None
+    use_reranker: bool | None = None
+    top_n: int | None = Field(default=None, ge=1, le=50)
+    reranker_model: str | None = Field(default=None, min_length=1, max_length=128)
 
 
 def _bearer_token(authorization: str | None = None) -> str:
@@ -71,24 +95,35 @@ def list_authorized_knowledge_bases(request: Request, authorization: str | None 
     return success_response({"items": items})
 
 
-def _query(route_name: str, payload: OpenQueryRequest, request: Request, authorization: str | None) -> dict:
+def _run_open_executor(
+    *,
+    route_name: str,
+    kb_id: str,
+    request: Request,
+    authorization: str | None,
+    executor,
+    question: str,
+    **executor_kwargs,
+) -> dict:
     started = time.perf_counter()
     record = _authenticate(authorization)
     status_code = 200
     try:
-        access_token_service.authorize_kb(record, payload.kb_id)
-        executor = run_readonly_search if route_name == "/search" else run_readonly_query
+        access_token_service.authorize_kb(record, kb_id)
         result = executor(
             token_id=record["token_id"],
-            kb_id=payload.kb_id,
-            question=payload.question,
-            top_k=payload.top_k,
+            kb_id=kb_id,
+            question=question,
+            **executor_kwargs,
         )
         access_token_service.touch_last_used(record["token_id"])
         return success_response(result)
     except PermissionError as exc:
         status_code = 403
         raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ValueError as exc:
+        status_code = 400
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:
         status_code = 503
         raise HTTPException(status_code=503, detail=str(exc)) from exc
@@ -96,7 +131,7 @@ def _query(route_name: str, payload: OpenQueryRequest, request: Request, authori
         open_api_audit.append(
             token_id=record["token_id"],
             route=route_name,
-            kb_id=payload.kb_id,
+            kb_id=kb_id,
             status_code=status_code,
             duration_ms=round((time.perf_counter() - started) * 1000, 3),
             request_id=_request_id(request),
@@ -104,10 +139,32 @@ def _query(route_name: str, payload: OpenQueryRequest, request: Request, authori
 
 
 @router.post("/search")
-def search(payload: OpenQueryRequest, request: Request, authorization: str | None = Header(default=None)) -> dict:
-    return _query("/search", payload, request, authorization)
+def search(payload: OpenSearchRequest, request: Request, authorization: str | None = Header(default=None)) -> dict:
+    return _run_open_executor(
+        route_name="/search",
+        kb_id=payload.kb_id,
+        question=payload.question,
+        request=request,
+        authorization=authorization,
+        executor=run_readonly_search,
+        top_k=payload.top_k,
+    )
 
 
 @router.post("/answer")
-def answer(payload: OpenQueryRequest, request: Request, authorization: str | None = Header(default=None)) -> dict:
-    return _query("/answer", payload, request, authorization)
+def answer(payload: OpenAnswerRequest, request: Request, authorization: str | None = Header(default=None)) -> dict:
+    return _run_open_executor(
+        route_name="/answer",
+        kb_id=payload.kb_id,
+        question=payload.question,
+        request=request,
+        authorization=authorization,
+        executor=run_readonly_query,
+        top_k=payload.top_k,
+        response_mode=payload.response_mode,
+        use_reranker=payload.use_reranker,
+        top_n=payload.top_n,
+        reranker_model=payload.reranker_model,
+    )
+
+

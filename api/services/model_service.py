@@ -420,103 +420,126 @@ def _iter_provider_candidates(current_info: dict[str, Any]) -> list[dict[str, An
     return candidates
 
 
-def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> dict[str, Any]:
-    """遇到可恢复模型错误时，探测并切换到首个可用候选模型。"""
-    config_store = _get_config_store()
-    current_info = config_store.get("current_llm_info") or {}
-    error_kind = classify_model_error(error)
-    candidates = _iter_provider_candidates(current_info)
-    base_status = {
+def _build_fallback_base_status(
+    current_info: dict[str, Any],
+    *,
+    error: Any,
+    error_kind: str,
+    candidate_count: int,
+) -> dict[str, Any]:
+    """构造 fallback 探测开始前的基础健康状态。"""
+    return {
         "state": "degraded" if error_kind in RECOVERABLE_MODEL_ERROR_KINDS else "unavailable",
         "current_provider": current_info.get("service_provider", ""),
         "current_model": current_info.get("model", ""),
         "last_error_kind": error_kind,
         "last_error": str(error)[:500],
         "last_checked_at": now_iso(),
-        "candidate_count": len(candidates),
+        "candidate_count": candidate_count,
         "fallback_from": {
             "service_provider": current_info.get("service_provider", ""),
             "model": current_info.get("model", ""),
             "api_base": current_info.get("api_base", ""),
         },
     }
-    update_model_health(**base_status)
 
-    if error_kind not in RECOVERABLE_MODEL_ERROR_KINDS:
-        return {"applied": False, "reason": "non_recoverable", "error_kind": error_kind, "candidate_count": len(candidates)}
 
-    trace_id = new_trace_id("fallback")
-    probe_results: list[dict[str, Any]] = []
-    for candidate in candidates:
-        if _candidate_is_ollama(candidate):
-            if candidate.get("discovery_only"):
-                names, meta = _list_ollama_models(candidate["api_base"], trace_id)
-                reachable = False
-                detail = _ollama_discovery_detail(names, meta)
-            else:
-                reachable, detail, _meta = _check_ollama_model(candidate["model"], candidate["api_base"], trace_id)
-        else:
-            reachable, detail, _meta = _check_openai_compatible(
-                candidate["model"],
-                candidate["api_base"],
-                candidate["api_key"],
-                trace_id,
-            )
-        probe_results.append(
-            {
-                "service_provider": candidate["service_provider"],
-                "model": candidate["model"],
-                "api_base": candidate["api_base"],
-                "reachable": reachable,
-                "detail": detail,
-            }
-        )
-        if not reachable:
-            continue
-        attempt_summary = _summarize_fallback_attempts(probe_results)
-        selected = select_model(
-            ModelSelectRequest(
-                service_provider=candidate["service_provider"],
-                model=candidate["model"],
-                api_base=candidate["api_base"],
-                api_key=candidate["api_key"],
-                session_id=session_id,
-            ),
-            probe_result=(reachable, detail, _meta),
-        )
-        status = update_model_health(
-            state="fallback_applied",
-            current_provider=selected["service_provider"],
-            current_model=selected["model"],
-            last_error_kind=error_kind,
-            last_error=str(error)[:500],
-            last_checked_at=now_iso(),
-            last_fallback_at=now_iso(),
-            fallback_from=base_status["fallback_from"],
-            fallback_to={
-                "service_provider": selected["service_provider"],
-                "model": selected["model"],
-                "api_base": selected.get("api_base", ""),
-            },
-            candidate_count=len(candidates),
-            fallback_attempts=probe_results,
-            fallback_attempt_summary=attempt_summary,
-        )
-        return {
-            "applied": True,
-            "error_kind": error_kind,
-            "selected": selected,
-            "candidate_count": len(candidates),
-            "fallback_attempts": probe_results,
-            "fallback_attempt_summary": attempt_summary,
-            "health": status,
-        }
 
+def _probe_fallback_candidate(candidate: dict[str, Any], trace_id: str) -> tuple[bool, str, dict[str, Any]]:
+    """探测单个 fallback candidate 的可达性。"""
+    if _candidate_is_ollama(candidate):
+        if candidate.get("discovery_only"):
+            names, meta = _list_ollama_models(candidate["api_base"], trace_id)
+            return False, _ollama_discovery_detail(names, meta), meta
+        return _check_ollama_model(candidate["model"], candidate["api_base"], trace_id)
+    return _check_openai_compatible(
+        candidate["model"],
+        candidate["api_base"],
+        candidate["api_key"],
+        trace_id,
+    )
+
+
+
+def _build_fallback_attempt_entry(candidate: dict[str, Any], *, reachable: bool, detail: str) -> dict[str, Any]:
+    """归一化单次 fallback 探测结果，供 API/UI 展示。"""
+    return {
+        "service_provider": candidate["service_provider"],
+        "model": candidate["model"],
+        "api_base": candidate["api_base"],
+        "reachable": reachable,
+        "detail": detail,
+    }
+
+
+
+def _apply_successful_fallback(
+    candidate: dict[str, Any],
+    *,
+    session_id: str,
+    probe_result: tuple[bool, str, dict[str, Any]],
+    error: Any,
+    error_kind: str,
+    base_status: dict[str, Any],
+    candidate_count: int,
+    probe_results: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """对首个探活成功的候选执行 select_model 并回写健康状态。"""
+    reachable, detail, meta = probe_result
+    attempt_summary = _summarize_fallback_attempts(probe_results)
+    selected = select_model(
+        ModelSelectRequest(
+            service_provider=candidate["service_provider"],
+            model=candidate["model"],
+            api_base=candidate["api_base"],
+            api_key=candidate["api_key"],
+            session_id=session_id,
+        ),
+        probe_result=(reachable, detail, meta),
+    )
+    checked_at = now_iso()
+    status = update_model_health(
+        state="fallback_applied",
+        current_provider=selected["service_provider"],
+        current_model=selected["model"],
+        last_error_kind=error_kind,
+        last_error=str(error)[:500],
+        last_checked_at=checked_at,
+        last_fallback_at=checked_at,
+        fallback_from=base_status["fallback_from"],
+        fallback_to={
+            "service_provider": selected["service_provider"],
+            "model": selected["model"],
+            "api_base": selected.get("api_base", ""),
+        },
+        candidate_count=candidate_count,
+        fallback_attempts=probe_results,
+        fallback_attempt_summary=attempt_summary,
+    )
+    return {
+        "applied": True,
+        "error_kind": error_kind,
+        "selected": selected,
+        "candidate_count": candidate_count,
+        "fallback_attempts": probe_results,
+        "fallback_attempt_summary": attempt_summary,
+        "health": status,
+    }
+
+
+
+def _build_failed_fallback_response(
+    *,
+    error_kind: str,
+    candidate_count: int,
+    probe_results: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """全部候选失败时，统一构造 unavailable 返回与健康状态。"""
     attempt_summary = _summarize_fallback_attempts(probe_results)
     status = update_model_health(
         state="unavailable",
         last_checked_at=now_iso(),
-        candidate_count=len(candidates),
+        candidate_count=candidate_count,
         fallback_attempts=probe_results,
         fallback_attempt_summary=attempt_summary,
     )
@@ -524,11 +547,62 @@ def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> d
         "applied": False,
         "reason": "no_reachable_candidate",
         "error_kind": error_kind,
-        "candidate_count": len(candidates),
+        "candidate_count": candidate_count,
         "fallback_attempts": probe_results,
         "fallback_attempt_summary": attempt_summary,
         "health": status,
     }
+
+
+
+def attempt_model_fallback(error: Any, session_id: str = "desktop-default") -> dict[str, Any]:
+    """遇到可恢复模型错误时，探测并切换到首个可用候选模型。"""
+    config_store = _get_config_store()
+    current_info = config_store.get("current_llm_info") or {}
+    error_kind = classify_model_error(error)
+    candidates = _iter_provider_candidates(current_info)
+    candidate_count = len(candidates)
+    base_status = _build_fallback_base_status(
+        current_info,
+        error=error,
+        error_kind=error_kind,
+        candidate_count=candidate_count,
+    )
+    update_model_health(**base_status)
+
+    if error_kind not in RECOVERABLE_MODEL_ERROR_KINDS:
+        return {
+            "applied": False,
+            "reason": "non_recoverable",
+            "error_kind": error_kind,
+            "candidate_count": candidate_count,
+        }
+
+    trace_id = new_trace_id("fallback")
+    probe_results: list[dict[str, Any]] = []
+    for candidate in candidates:
+        probe_result = _probe_fallback_candidate(candidate, trace_id)
+        reachable, detail, _meta = probe_result
+        probe_results.append(_build_fallback_attempt_entry(candidate, reachable=reachable, detail=detail))
+        if not reachable:
+            continue
+        return _apply_successful_fallback(
+            candidate,
+            session_id=session_id,
+            probe_result=probe_result,
+            error=error,
+            error_kind=error_kind,
+            base_status=base_status,
+            candidate_count=candidate_count,
+            probe_results=probe_results,
+        )
+
+    return _build_failed_fallback_response(
+        error_kind=error_kind,
+        candidate_count=candidate_count,
+        probe_results=probe_results,
+    )
+
 
 
 def _save_custom_providers(providers: list[dict[str, Any]]) -> None:

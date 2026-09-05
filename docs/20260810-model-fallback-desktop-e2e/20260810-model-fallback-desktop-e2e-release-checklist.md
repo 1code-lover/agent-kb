@@ -20,7 +20,7 @@
 - Python cwd、日志、session、KB、receipt 和 config 写入 userData/runtime；退出后 Python 进程已回收。
 - packaged Agent Ollama 直连和坏云端到动态 Ollama 候选 fallback 均通过，报告为 `artifacts/packaged-runtime-release-e2e-report-20260816.json`。
 - 当前验证使用 `/opt/miniconda3/envs/agent-kb/bin/python` 3.12.13；安装包尚未内置 Python 解释器和依赖，不能宣称清洁机自包含。
-- `verify:python-runtime` 已进入 build/release preflight，强制 CPython 3.12、核心模块、`llama-index=0.11.19`、`llama-index-core=0.11.19` 和 `pip check`；显式 override 失败时不会回退其他 Python。
+- `verify:python-runtime` 已进入 build/release preflight，强制 CPython 3.12、核心模块、`llama-index-core=0.11.19` 和 `pip check`；通过 `llama_index` import probe 覆盖 namespace / integration 可用性，但不再把顶层 `llama_index` metapackage 当成默认 runtime gate；显式 override 失败时不会回退其他 Python。
 
 ## 凭证要求
 
@@ -75,7 +75,7 @@ cd desktop && npm run release:preflight
 cd desktop && npm run verify:python-runtime
 ```
 
-通过标准：输出 `ok=true`、CPython 3.12、核心模块完整、两个 LlamaIndex 包均为 `0.11.19` 且 `pipCheck` 通过；只记录必要版本和安全摘要，不输出完整环境清单。
+通过标准：输出 `ok=true`、CPython 3.12、核心模块完整、`llama-index-core=0.11.19` 且 `pipCheck` 通过；通过 `llama_index` import probe 证明 namespace / integration 可用，但不要求额外安装顶层 `llama_index` metapackage；只记录必要版本和安全摘要，不输出完整环境清单。
 
 ```bash
 cd desktop && npm run build:preflight
@@ -93,7 +93,7 @@ cd desktop && npm run release:mac
 cd desktop && npm run verify:package
 ```
 
-通过标准：packaged resources 包含 `webapp/dist`、Python API、`server/`、`utils/`、`run_api.py`、`config.py` 和 `requirements.txt`，且 `app.asar` 不包含 `.test.js`。
+通过标准：packaged resources 包含 `webapp/dist`、Python API、`server/`、`utils/`、`run_api.py`、`config.py` 和 `requirements-runtime.txt`，且 `app.asar` 不包含 `.test.js`。
 同时必须包含 `localmodels/BAAI/bge-small-zh-v1.5/config.json`、`model.safetensors`、`tokenizer.json`、`vocab.txt`、`modules.json` 和 `1_Pooling/config.json`。
 
 ## 安装后回归
@@ -107,6 +107,8 @@ cd desktop && npm run verify:package
 - runtime log 和 Python cwd 必须位于 userData/runtime，不得在 `Contents/Resources` 生成运行文件或 `__pycache__`。
 
 继续执行桌面工作流诊断：
+
+> `http://127.0.0.1:18080` 下面只是安装后仍使用默认本地端口时的固定示例；如果桌面运行时通过 `KB_API_BASE_URL` / `KB_API_PORT` 改过 API 端口，请改成实际 resolved API base，不要把 `18080` 误读成安装后的唯一口径。
 
 ```bash
 /opt/miniconda3/envs/agent-kb/bin/python -m scripts.diag_desktop_model_workflow \

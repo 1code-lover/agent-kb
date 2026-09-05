@@ -4,17 +4,29 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+AnswerResponseMode = Literal[
+    "compact",
+    "refine",
+    "tree_summarize",
+    "simple_summarize",
+    "accumulate",
+    "compact_accumulate",
+]
 
 
 class QueryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     question: str = Field(..., min_length=1)
-    session_id: str = Field(default="default")
-    top_k: int | None = None
-    response_mode: str | None = None
+    session_id: str = Field(default="default", min_length=1)
+    top_k: int | None = Field(default=None, ge=1, le=50)
+    response_mode: AnswerResponseMode | None = None
     use_reranker: bool | None = None
-    top_n: int | None = None
-    reranker_model: str | None = None
+    top_n: int | None = Field(default=None, ge=1, le=50)
+    reranker_model: str | None = Field(default=None, min_length=1, max_length=128)
     kb_ids: list[str] | None = None
 
 

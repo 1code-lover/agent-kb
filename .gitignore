@@ -199,6 +199,7 @@ webapp/node_modules/
 #.idea/
 # Local runtime and debug temp files
 .dev-runtime/
+desktop/log.txt
 temp/
 temp-node-utf8-test.txt
 temp-powershell-utf8-test.txt
@@ -213,3 +214,8 @@ tmp_unicode_test.txt
 
 # 本地 API 临时进程文件
 temp-live-api.pid
+
+# Local frontend caches
+.npm-cache/
+.vite/
+

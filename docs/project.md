@@ -3,7 +3,9 @@
 > 本文档面向所有协作者（含 AI 助手），用于快速了解项目当前进度、架构、验证证据和已知问题。
 > **维护规则**：每次有意义的提交后更新「当前进度」「测试与验证」「已知问题」「最近提交」四节；重大架构变化更新「架构」节。日期使用绝对日期。
 
-最近更新：2026-08-12
+最近更新：2026-08-24
+
+快速阅读建议：如果只想了解当前主线，请优先看第 3、4、6、7 节；第 5、8 节更多作为历史验证与提交账本。注意：第 5 节里很多 `--api-base http://127.0.0.1:18080` 都是当时真实运行记录，不应回推成当前唯一 source of truth；当前运行时契约以第 3、4 节里的 `KB_API_BASE_URL` / `KB_API_PORT` / `VITE_API_BASE_URL` 为准。
 
 ---
 
@@ -32,9 +34,9 @@
 | API 服务层 | `api/`：routers、services、schemas、runtime |
 | Web 前端 | React 18 + Vite 8 + React Query + Zustand + 项目内轻量 router |
 | 桌面端 | Electron 43，`desktop/` 启动 Python API 后加载 Web |
-| 旧前端 | Streamlit：`app.py` + `frontend/`，保留为迁移回退，不代表当前主线体验 |
+| 历史入口 | `app.py` + `frontend/` 仍保留用于阅读旧实现或临时排障，但不再作为默认运行链路 |
 | PDF/OCR | PyMuPDF + PaddleOCR |
-| 本地 LLM | Ollama 0.3.3；README 仍提示 0.4 与当前依赖组合不兼容 |
+| 本地 LLM | Ollama 0.32.13（本机已完成真实 Agent fallback 验证）；服务需独立运行 |
 
 ---
 
@@ -62,20 +64,33 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 主要运行入口：
 
-- 后端 API：`python run_api.py`，默认 `127.0.0.1:18080`
-- Web 前端：`cd webapp && npm run dev`
-- 桌面端：`cd desktop && npm run dev`
-- 旧 Streamlit：`streamlit run app.py`
+- Windows 统一入口：`powershell -File .\start_all.ps1`（默认拉起 FastAPI + React；支持 `-BackendPort/-FrontendPort/-Stop`）
+- 后端 API（手动）：`python run_api.py`，默认本地 fallback 地址为 `127.0.0.1:18080`；客户端探活、诊断脚本和评测 harness 优先使用 `KB_API_BASE_URL`，仅在本机端口变更时再退回 `KB_API_PORT`。兼容阶段也会继续读取 `NORTHAGENT_API_PORT` / `THINKRAG_API_PORT` / `FOXGLOVE_API_PORT`
+- Docker smoke / regression（手动）：`python scripts/docker_smoke.py --install-profile smoke --app-runtime-mode api`；默认让 Docker 分配 loopback host port，再通过 `docker port` 回查映射，避免 smoke helper 自身把 `18080` 固化成唯一有效口径。README 里的 `docker run -p 18080:18080` 只是无冲突时的固定端口复现实例
+- Web 前端（手动）：`cd webapp && npm run dev`；若后端不在默认端口，需设置 `VITE_API_BASE_URL`。浏览器端只认 Electron preload bridge 注入的 `apiBaseUrl` 与 `VITE_API_BASE_URL`，不直接读取 Python/Node 侧 `KB_API_BASE_URL` 等兼容别名
+- 桌面端（手动）：`cd desktop && npm run dev`；若需要 API / Web / Electron 统一联调，可使用 `powershell -File .\scripts\dev-all.ps1`。该脚本会先委托 `start_dev.ps1` 拉起 API + React，再启动 Electron，并在 `.dev-runtime/desktop.pid` 维护桌面进程；可通过 `powershell -File .\scripts\dev-all.ps1 -Stop` 一键停止。当前 `scripts/dev-runtime-helpers.ps1` 是启动契约的共享实现，负责统一 API base fallback、frontend loopback URL、extra dev origins 与桌面 runtime env 注入，避免 `dev-all.ps1` / `desktop-dev.ps1` / `start_dev.ps1` 再各自复制一份。
+- 旧 `app.py` + `frontend/` 仅保留为 legacy 参考入口，不建议继续作为日常开发或验收主链路；当前 `app.py` 默认会提示改用 `start_all.ps1` / `start_dev.ps1`，只有显式设置 `KB_ALLOW_LEGACY_STREAMLIT=1` 时才允许进入历史 Streamlit UI。
 
 ---
 
-## 4. 当前进度
+## 4. 当前主线状态（快速阅读）
+
+### 4.0 2026-08-24 当前可信快照
+
+- 当前对外主线已经明确收口为 **FastAPI + React + Electron**，并通过 `start_all.ps1` / `start_dev.ps1` / `scripts/dev-all.ps1` 统一本地调试叙事；desktop packaged runtime 也已切到 `requirements-runtime.txt`。
+- 浏览器侧 API base URL contract 已单独收口：优先 Electron preload bridge，其次 `VITE_API_BASE_URL`，最后回退 `http://127.0.0.1:18080`；`KB_API_BASE_URL` / `NORTHAGENT_API_BASE_URL` 等 alias 仍用于 Python 脚本、`run_api.py` 与桌面主进程，但不会直接暴露给浏览器。
+- `basic` / `knowledge` 模式已显式要求 active KB，前端不再把它包装成“全局检索”；请求级 `QueryRequest.top_k / response_mode / use_reranker / top_n / reranker_model` 也已经进入 chat 主链路。
+- 前端问答链路已改为 **query success + history best effort**：回答成功不再因为 history 写回失败被整体判成失败，当前由 `queryChatWithBestEffortHistory(...)` 和 `buildHistorySyncNotice(...)` 兜底。
+- 当前可信评测基线以 `docs/20260821-project-audit-remediation/` 下当前材料与 2026-08-24 复跑结果为准：layered suite `153 / 153`（Smoke `24 / 24`、Main `93 / 93`、Hard `36 / 36`）；targeted fact / preview / metrics 回归 `114 passed`；启动 / 文档入口 / requirements / cleanup / repo hygiene 契约 `83 passed`；startup / docker helper / repo hygiene bundle `108 passed`；Docker smoke helper 契约 `20 passed`；Desktop 全量 Node 单测 `136 passed`；Web 全量 Node 单测 `139 passed`；全量非慢测 `1299 passed, 4 deselected`。
+- 根目录治理已完成四轮实际 apply：累计归档 `114` 个日志、scratch OCR 脚本和临时探针对象；其中 2026-08-27 又追加归档了 `14` 个 root scratch 目录（`12` eval / `2` debug，约 `1.16 MB`）。当前 `python scripts/cleanup_local_artifacts.py --dry-run` 与 `python scripts/cleanup_local_artifacts.py --dry-run --include-directories` 都已回到 `managed_count = 0`，说明根目录文件模式与 root scratch 目录模式都已清零；`temp/`、`logs/`、`test_output/` 仍保留为约定输出目录，不会被默认自动搬走。
+- Docker / requirements 分层相比之前已清晰很多：Docker 默认已切到 `INSTALL_PROFILE=runtime` + API 模式，与本地脚本主线对齐；此前误导性的 `minimal` Docker profile 已退场。进一步排查后确认，runtime build 被 `llama-parse / llama-cloud-services` 拖慢的根因是 `requirements-runtime.txt` 里混入了顶层 `llama_index` metapackage；当前已改成只保留 `llama-index-core` + 仓库实际使用的 integrations，并把 dry-run 选出的 `langchain-core==0.3.63` / `langchain-text-splitters==0.3.8` 显式 pin 住以减少 resolver backtracking。最新 `pip --dry-run --report` 已确认不再出现 `llama-parse / llama-cloud-services / llama-cloud`；同时 `scripts/docker_smoke.py` 默认已经切到 Docker 自分配 loopback host port + `docker port` 回查映射，因此 README 里的 `docker run -p 18080:18080` 只应理解为固定端口复现实例，不是 Docker 侧当前唯一有效口径。Docker build smoke 也已进入正常依赖下载阶段，但仍需补一条完整 build/run 通过证据。
+- 工程化收尾仍未完成：`docs/project.md` 以下的历史章节仍保留多个阶段性结论，legacy 入口与 prompt/heuristic 职责边界还在继续收口。若只看当前状态，请优先参考 `docs/20260821-project-audit-remediation/` 目录下的审计与面试材料。
 
 ### 4.1 已完成的主干能力
 
 - **API/Web/Desktop 骨架已落地**：FastAPI、React/Vite、Electron 壳、会话快照、设置存储、运行日志与本地健康检查已具备。
 - **多知识库最小闭环已完成**：KB registry、KB CRUD、`kb_id` 范围查询、Agent `knowledge_scope.kb_id` 透传、网页/文件导入目标 KB 透传、证据返回真实 `kb_id`。
-- **原始文件目录化存储已完成**：新导入文件按 `data/{kb_id}/` 保存；导入前校验 KB active；list/delete 与问答链路按 metadata 做逻辑隔离。
+- **原始文件与索引物理隔离已完成**：新导入文件按 `data/{kb_id}/` 保存；`default` 继续兼容 `storage/`，非 default 知识库使用 `storage/kbs/{kb_id}/` 维护独立 doc/index/vector store；list/delete/问答链路继续叠加 metadata scope 作为第二道防线。
 - **导入对象模型已显著增强**：支持逐文件导入结果、导入回执、stage timings、文件夹树、Markdown 内嵌资产抽取、资产 registry、图片 OCR 路径、证据预览。
 - **DOCX 文档类型识别已补齐**：`api/services/kb_service.py` 已显式识别当前依赖验证可导入的 `.docx` 与对应 MIME，避免 DOCX zip 容器被当作二进制提前拒绝；`pptx/xlsx/odt/ods` 在补齐依赖和真实导入测试前仍按不支持类型处理。
 - **LlamaIndex 0.11.19 适配已推进**：`server/ingestion.py` 避免依赖缺失的私有 `_update_docstore`；`server/retriever.py` 改为通过当前版本的 `_build_node_list_from_query_result` 组装节点，并保留 stale vector id / 维度不兼容 embedding 的过滤。
@@ -89,6 +104,10 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 ### 4.2 质量与评测进展
 
 - **本地多知识库助手 Stage 3 评测闭环已形成**：`docs/20260722-local-multi-kb-assistant/` 是当前正式基线，包含 PRD/FRD/RTM/spec/plan/test-plan/test-report 与 artifacts。
+- **refusal / negative contract 已形成三层闭环，而不是只靠一排 1.0 指标**：
+  - 数据集覆盖层：`eval_v7` / `eval_v8_main` / `eval_v8_hard` 的 schema 已锁定 `minimum_refusal_cases_per_modality`、`required_refusal_categories`、`required_refusal_markers_by_category`、`minimum_cases_per_judge_dimension`
+  - 单 case 正确性层：缺失 required marker、拒答文案编造、命中 forbidden term 会直接判 case fail
+  - 报告可见层：最终 JSON / Markdown 报告会输出 `refusal_summary` 与 `Refusal 覆盖摘要`，能直接说明 refusal 一共测了多少条、哪些 category 覆盖了、哪些 marker 命中了
 - **2026-07-31 测试报告给出的当前工作树证据**：
   - 全量 Python 回归：`667 passed, 2 warnings`
   - `api + server` 覆盖率：`82%`，高于仓库 `>= 80%` 门禁
@@ -120,6 +139,7 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
   - `a17a01f feat(chat): ground preview answers from sources`
   - `898a142 chore: update dev story capture state`
 - 当前优化状态：模型 fallback、`fallback_attempts` / `fallback_attempt_summary` / `probeSummary` UI 展示、Ollama 本地候选提示、Ollama 动态发现失败诊断候选、模型选择后即时探活、桌面 CSP、发布配置校验、release preflight、notarize hook、packaged resources 校验、mac release 后置签名/公证校验和跨领域真实门禁均已落地；`release:mac` 现已串起 `build:preflight` + `release:preflight` + `electron-builder --mac` + `verify:package` + `verify:mac-release`。embedding 本地缓存诊断、runtime 默认禁止远程下载、Knowledge Workspace 缓存缺失提示和 `scripts.prepare_embedding_model_cache` 已完成，本机已通过 ModelScope 准备 `bge-small-zh-v1.5`，当前 API health 显示 `load_source=local` 且 embedding/OCR warmup 均为 ready。source-backed 边界、scope、preview、精确短语和多事实合并兜底已完成，最终 v1-v6 真实评测达到 `49/49 cases`、`54/54 turns`，正向、负向和 contract 通过率均为 `100%`。正式 macOS 签名、公证、stapling 和安装后回归仍未完成，原因是本机尚未配置 Keychain profile、App Store Connect API Key、Apple ID 三种公证策略中的任一种，且缺少 Developer ID Application 证书。
+- `scripts/build-desktop.ps1` / `scripts/build-desktop.sh` 当前只负责本地 `webapp/dist` + Electron bundle 构建，默认使用 `requirements-runtime.txt` 且优先读取 `KB_PYTHON`；它们不应被当作正式发布 source of truth。当前真正的 mac 打包 / 签名 / 公证主链路仍是 `desktop/package.json` 里的 `build:mac` / `release:mac`，而 `scripts/package-python-runtime.ps1` 仅保留为 API-only PyInstaller 兼容 helper。
 
 ### 4.4 下一步建议
 
@@ -134,7 +154,9 @@ app.py + frontend/ (旧 Streamlit 入口，保留)
 
 ---
 
-## 5. 测试与验证
+## 5. 历史测试与验证账本
+
+> 本节主要保留阶段性验证命令和历史结果，方便追溯证据；判断当前主线时，请优先结合第 4、6、7 节阅读。若历史命令里直接写了 `--api-base http://127.0.0.1:18080`，默认视为当时真实运行记录，而不是当前唯一有效口径。
 
 ### 5.1 可复用命令
 
@@ -171,7 +193,7 @@ cd webapp && npm run build
 
 ### 5.2 2026-08-07 本机复核结果
 
-本次复核使用 `/opt/miniconda3/envs/agent-kb/bin/python`（Python 3.12.13，`llama-index==0.11.19`）作为权威 Python 环境；默认 `/opt/miniconda3/bin/python` 是 base Python 3.13，不适合作为项目测试环境。
+本次复核使用 `/opt/miniconda3/envs/agent-kb/bin/python`（Python 3.12.13，LlamaIndex 0.11.19 stack，核心锁版本 `llama-index-core==0.11.19`）作为权威 Python 环境；默认 `/opt/miniconda3/bin/python` 是 base Python 3.13，不适合作为项目测试环境。
 
 - `/opt/miniconda3/envs/agent-kb/bin/python -m pytest -q`：`677 passed, 35 warnings in 7.62s`
 - `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`75 passed`
@@ -215,7 +237,7 @@ cd webapp && npm run build
 - `node --test webapp/src/domain/*.test.js webapp/src/api/*.test.js webapp/src/store/*.test.js`：`80 passed`。
 - `node --test desktop/scripts/*.test.js desktop/src/*.test.js`：`8 passed`。
 - `cd webapp && npm run build`：通过。
-- `cd desktop && npm run build:mac && npm run verify:package`：通过，产物包括 `desktop/dist/NorthAgent-0.1.0-arm64.dmg` 和 `desktop/dist/NorthAgent-0.1.0-arm64-mac.zip`；packaged resources 包含 `webapp/dist`、`run_api.py`、`config.py`、`requirements.txt`、`api/`、`server/` 和 `utils/`。
+- `cd desktop && npm run build:mac && npm run verify:package`：通过，产物包括 `desktop/dist/NorthAgent-0.1.0-arm64.dmg` 和 `desktop/dist/NorthAgent-0.1.0-arm64-mac.zip`；packaged resources 包含 `webapp/dist`、`run_api.py`、`config.py`、`requirements-runtime.txt`、`api/`、`server/` 和 `utils/`。
 - 直接从 packaged app resources 启动 API 并检查 `/api/health`、`/api/model/options`：通过。
 - packaged app 主进程启动验证：通过，加载 packaged `webapp/dist/index.html`，前端请求 `/api/model/options`、`/api/kb`、`/api/chat/history`。
 - `node desktop/scripts/release-preflight.js`：通过非严格预检，确认 Electron bundle 存在；当前本机缺少 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 和 Developer ID Application 证书，但 `notarytool` 可用，严格签名/公证预检需补齐凭证后再跑。
@@ -485,10 +507,10 @@ cd webapp && npm run build
 ### 5.36 2026-08-16 外部 Python runtime 发布门禁
 
 - packaged app 当前依赖安装机器的外部 Python；此前 build/release preflight 不检查解释器和依赖，错误 Python 版本、模块缺失或 LlamaIndex 版本漂移仍可能生成不可启动的安装包。
-- 新增 `desktop/scripts/verify-python-runtime.js`：按桌面端 override 优先级解析解释器，显式失败 fail-closed；默认候选可继续探测。强制 CPython 3.12、五个核心模块、`llama-index=0.11.19`、`llama-index-core=0.11.19` 和 `pip check`。
+- 新增 `desktop/scripts/verify-python-runtime.js`：按桌面端 override 优先级解析解释器，显式失败 fail-closed；默认候选可继续探测。强制 CPython 3.12、五个核心模块、`llama-index-core=0.11.19` 和 `pip check`；通过 `llama_index` import probe 覆盖 namespace / integration 可用性，但不再把顶层 `llama_index` metapackage 当成默认 runtime / release gate。
 - verifier 输出稳定结构，外部诊断折叠换行并截断为 500 字符，不输出 `pip freeze` 或其他环境变量值。
 - `build:preflight`、严格 `release:preflight`、macOS `build-target` 和 release config verifier 已接入该门禁，Python 失败时不会继续 release preflight 或 electron-builder。
-- TDD 红灯为 `5 failed, 6 passed`；代码评审补充秘密脱敏红灯后，最终定向 `24 passed`、Electron 全量 `86 passed`。真实 runtime 为 `/opt/miniconda3/envs/agent-kb/bin/python`、CPython `3.12.13`，两个 LlamaIndex 包均为 `0.11.19`，`pip check` 通过；外部诊断中的 secret-like 环境变量值会替换为 `[REDACTED]`。
+- TDD 红灯为 `5 failed, 6 passed`；代码评审补充秘密脱敏红灯后，最终定向 `24 passed`、Electron 全量 `86 passed`。真实 runtime 为 `/opt/miniconda3/envs/agent-kb/bin/python`、CPython `3.12.13`，`llama-index-core=0.11.19`，`pip check` 通过；`llama_index` namespace import 也可用，外部诊断中的 secret-like 环境变量值会替换为 `[REDACTED]`。
 - `npm run build:preflight`、`npm run build:mac`、`npm run verify:package` 均通过；Python 非 slow 全量仍为 `791 passed, 1 deselected, 35 warnings`，Web `89 passed` 且 Vite build 通过。
 - 严格 `release:preflight` 会先通过 Python 门禁，再因 `0 valid identities found` 和三类公证凭证均缺失按预期退出 `1`；正式签名、公证、stapling、Gatekeeper 和安装回归仍是外部阻塞。
 
@@ -498,12 +520,11 @@ cd webapp && npm run build
 
 - **macOS 要使用 conda `agent-kb` 环境**：默认 `python` 仍可能指向 Miniconda base 3.13，缺项目依赖；非交互命令建议直接用 `/opt/miniconda3/envs/agent-kb/bin/python`。
 - **mixed batch 正向问答会返回多个候选 sources**：2026-08-07 真实 roundtrip 中 4 个正向用例的首要/目标文档、preview 和核心关键词均命中，但精确 `source_count_match/evidence_count_match` 为 false，因为接口会返回多个相关候选证据；这不影响当前核心 gate，但后续若产品要求“一问一证据”或更少引用噪声，需要收口 rerank/top-k 或前端展示策略。
-- **多知识库仍是逻辑隔离，不是物理多索引隔离**：原始文件已按 `data/{kb_id}/` 目录化，但 `storage/` 仍是共享索引/共享存储，隔离主要依赖 metadata filter。
-- **旧数据兼容仍可能放宽过滤**：迁移期对缺失 `kb_id` metadata 的历史节点仍需谨慎处理；真实数据重建或清理策略仍是后续工作。
-- **粮仓知识库检索质量已收口，下一步转向跨领域正向泛化**：QA 期望文档已达到 `docstore=82/82`、正确 `kb_id=82/82`；本轮检索-only 与 API QA 均达到 `Recall@5=1.0`、`MRR@5=1.0`。跨 KB 泛化已有默认 23 条正/负向/契约用例门禁，并支持通过 `--extra-cases` 或 `--suite v1-v6` 追加外部真实样本、`turns` 多轮追问样本、来源文件级断言和 evidence 文本级断言；当前 v1-v6 全量 suite 已提升到 `49/49 cases`、`54/54 turns`，正向、负向、contract、多轮、source grounding 和 evidence text 门禁均通过；后续重点转为持续扩样本和不同模型配置下的回归监控。
+- **历史共享索引的非 default 数据仍需显式迁移**：当前物理隔离已经完成，但旧共享索引里的非 default 数据不会被静默标记为已迁移；升级后仍需通过 migration scan/start/rollback 或重新导入来完成收口。
+- **粮仓知识库检索质量已收口，后续重点转向跨领域持续扩样本**：当前 layered suite 已到 `153 / 153`，source grounding / evidence text / refusal / contract 主能力均已闭环；下一步重点是继续扩真实题、不同模型配置、长文与多源题回归，而不是停留在单一高分结果。
 - **embedding 初始化风险已从启动阻塞转为缓存运维问题**：本机已通过 ModelScope 准备 `localmodels/BAAI/bge-small-zh-v1.5`，新 API health 显示本地加载约 `4.5s`；runtime 仍默认禁用远程下载，缓存缺失时快速失败并给出诊断。后续风险主要是新机器或清理 `localmodels/` 后需要重新执行 `scripts.prepare_embedding_model_cache --download --provider modelscope` 或通过 `--source-dir` 离线导入。
-- **OCR 质量口径仍偏基础**：当前主要关注 OCR 成功、关键词/问答命中和回执诊断，尚未系统覆盖 CER、表格结构、版面顺序等细指标。
-- **README 与实际主线有代际差异**：README 仍以 ThinkRAG + Streamlit 为主叙述，当前实际主线是 FastAPI + React + Electron + Agent 工作台。
+- **OCR 指标口径已经扩到关键词召回、行顺序和表格单元格召回，但真实扫描分布仍不够广**：当前 semireal / deterministic 基线已具备，后续仍需要更多真实设备扫描、版面畸变和 CER 视角的补充样本。
+- **`docs/project.md` 仍是当前最容易发生叙事漂移的文件**：README 与 runbook 主入口口径已经切到 FastAPI + React + Electron，但本总览保留了大量阶段性纪要，需要继续做历史章节收敛与分层。
 - **命名仍在过渡**：仓库、README、Web package 仍出现 ThinkRAG；桌面端 package/product 已使用 NorthAgent。
 - **桌面端正式发布尚未完成**：已补 CSP、外部 Python runtime 门禁、macOS release preflight、hardened runtime、entitlements、dmg/zip 打包、packaged app 启动验证、包内容校验和 mac release 后置签名/公证校验；preflight 已能检查 Python 3.12/核心依赖、Apple Developer 环境变量、Developer ID Application 证书和 `notarytool`，`verify-mac-release` 已能检查 codesign、Gatekeeper 和 stapler，但本机尚未配置实际签名/公证凭证和 Developer ID 证书，不能宣称已完成正式公证发布。
 - **Ollama 服务需要独立运行**：本机已用 Ollama `0.32.13` + `qwen2.5:0.5b` 完成真实 Agent 原生推理和动态 fallback E2E；NorthAgent 只连接 `127.0.0.1:11434`，不会自动安装、启动或拉取 Ollama 模型，新机器仍需单独准备运行时。
@@ -551,13 +572,18 @@ cd webapp && npm run build
 | `docs/20260717-agent-qa-page-refactor/` | `/agent` 页面重构与 retriever 加固专题 |
 | `docs/spec/desktop_api_contract.md` | 页面到 API 契约 |
 | `docs/spec/desktop_project_design.md` | 桌面端设计 |
+| `docs/20260821-project-audit-remediation/20260821-project-audit-remediation-interview-brief.md` | 当前面试 / 汇报口播主稿 |
+| `docs/20260825-p0-p2-status-closure/20260825-p0-p2-status-closure-plan.md` | 当前整改优先级 / Route A 与 Route B 切换总览 |
+| `docs/20260825-p0-p2-status-closure/20260825-p0-p2-status-closure-interview-complete-guide.md` | 当前完整面试总览稿（串联讲稿 / 状态 / 证据 / 边界） |
+| `docs/interview/ThinkRAG_面试问答.md` | 当前扩展问答主稿（追问 / 指标 / 反质疑回答） |
+| `docs/interview/ThinkRAG_面试全集_合并版.md` | 当前导航版（只负责跳转，不再承载长正文） |
 | `docs/troubleshooting/` | 排障记录 |
 | `docs/interview/dev-stories/` | 开发故事沉淀 |
 | `评审建议.txt` | 最新评审意见 |
 
 ---
 
-## 8. 最近提交
+## 8. 历史提交账本
 
 | hash | 说明 |
 |---|---|
@@ -582,8 +608,9 @@ cd webapp && npm run build
 
 查看完整历史：`git log --oneline -30`
 
+> 以下 8.1 / 8.2 仅保留阶段性归档纪要，便于追溯当时的整改范围；判断当前主线状态时，仍以第 4 节当前可信快照和 `docs/20260821-project-audit-remediation/` 为准。
 
-## 2026-08-17：物理隔离、Embedding 缓存恢复与 OCR 版面增强
+### 8.1 2026-08-17：物理隔离、Embedding 缓存恢复与 OCR 版面增强
 
 - 证书、签名和公证按当前决策暂时跳过，不阻塞本地功能开发；正式 macOS 发布仍保持外部阻塞状态。
 - 非 default 知识库改为 `storage/kbs/{kb_id}/` 物理索引隔离，显式 `persist_dir` 在所有环境均创建/恢复独立 StorageContext；`default` 继续兼容 `storage/`。
@@ -593,7 +620,7 @@ cd webapp && npm run build
 - `scripts/pdf_ocr_quality.py` 增加行顺序和表格单元格召回指标。
 - 历史共享索引中的非 default 数据不会被静默标记为已迁移；升级后需重新导入或重建对应知识库。
 
-## 2026-08-18：迁移、只读开放接口、OCR 基准和 Embedding 缓存
+### 8.2 2026-08-18：迁移、只读开放接口、OCR 基准和 Embedding 缓存
 
 本阶段新增的运维入口：
 
@@ -615,3 +642,5 @@ curl -X POST -H "Authorization: Bearer ${TOKEN}" \
 ```
 
 本地管理员密钥只用于 loopback 管理接口，不应注入 renderer、React bundle 或开放 Agent 请求。
+
+

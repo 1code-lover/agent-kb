@@ -6,14 +6,14 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.services import asset_service, kb_service
 from server.asset_registry import KBAssetRegistry
 from server.kb_registry import KBRegistry
 from server.utils.file import get_kb_data_dir
-from tests.api._semireal_chat_support import FakeUploadFile, SemirealIndexManager, SemirealQueryEngine
+from tests.api._semireal_chat_support import FakeUploadFile, SemirealIndexManager, SemirealQueryEngine, run_follow_up_case
 from tests.api.chat_qa_metrics import build_chat_case_report, summarize_chat_case_reports
 
 client = TestClient(app)
@@ -94,6 +94,30 @@ IMAGE_CASES = [
         "expected_source_count": 0,
     },
 ]
+IMAGE_FOLLOW_UP_CASES = [
+    {
+        "case_id": "image-follow-up-evidence-fields",
+        "category": "policy-follow-up",
+        "history_turns": ["先看一下 evidence board。"],
+        "question": "那里面至少要带哪两个字段？",
+        "expected_doc": "evidence-board.png",
+        "expected_keypoints": ["doc_id", "preview_locator"],
+        "must_not_contain": ["empty evidence"],
+        "preview_terms": ["doc_id", "preview_locator"],
+        "expected_source_count": 1,
+    },
+    {
+        "case_id": "image-follow-up-no-evidence-refusal",
+        "category": "refusal-follow-up",
+        "history_turns": ["先看一下 folder board。"],
+        "question": "那里面有写 tenant shard checksum escrow 吗？",
+        "expected_doc": None,
+        "expected_keypoints": ["No confirmable information is available", "knowledge base"],
+        "must_not_contain": ["tenant-shard-001"],
+        "preview_terms": [],
+        "expected_source_count": 0,
+    },
+]
 
 
 @pytest.fixture(autouse=True)
@@ -123,10 +147,9 @@ def image_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "ensure_index_loaded",
         MagicMock(side_effect=lambda kb_id=None: manager.check_index_exists()),
     )
-    build_query_engine = MagicMock(side_effect=lambda kb_ids=None: SemirealQueryEngine(manager))
+    build_query_engine = MagicMock(side_effect=lambda kb_ids=None, **kwargs: SemirealQueryEngine(manager))
     monkeypatch.setattr(chat_service.runtime_state, "build_query_engine", build_query_engine)
     monkeypatch.setattr(chat_service.runtime_state, "get_index_manager", MagicMock(return_value=manager))
-    monkeypatch.setattr(chat_service, "append_chat_message", lambda *args, **kwargs: None)
 
     def _fake_extract_image_ocr_result(path: Path, content_type: str):
         payload = IMAGE_IMPORTS[path.name]
@@ -305,7 +328,72 @@ def test_chat_image_ocr_semireal_contract(case: dict[str, object], imported_imag
         assert report["preview_resolvable"] is True
         assert report["preview_term_coverage"] == 1.0
 
-    build_query_engine.assert_called_once_with(kb_ids=[KB_ID])
+    build_query_engine.assert_called_once_with(
+        kb_ids=[KB_ID],
+        top_k=None,
+        response_mode=None,
+        use_reranker=None,
+        top_n=None,
+        reranker_model=None,
+    )
+
+@pytest.mark.parametrize("case", IMAGE_FOLLOW_UP_CASES, ids=[case["case_id"] for case in IMAGE_FOLLOW_UP_CASES])
+def test_chat_image_ocr_semireal_follow_up_contract(case: dict[str, object], imported_image_kb: dict[str, object]) -> None:
+    """验证 image OCR semireal 真实复用同一 session 的 follow-up 契约。"""
+    build_query_engine: MagicMock = imported_image_kb["build_query_engine"]
+
+    warmups, payload, preview, history_messages = run_follow_up_case(client, kb_id=KB_ID, case=case)
+
+    assert len(warmups) == len(case["history_turns"])
+    assert payload["session_id"].endswith("::follow-up")
+    assert payload["requested_scope_type"] == "single_kb"
+    assert payload["requested_kb_ids"] == [KB_ID]
+    assert payload["effective_scope_type"] == "single_kb"
+    assert payload["effective_kb_ids"] == [KB_ID]
+    assert payload["is_default_deny_applied"] is False
+    assert payload["isolation_level"] == "physical_isolated"
+
+    answer = payload["answer"]
+    for keypoint in case["expected_keypoints"]:
+        assert keypoint in answer
+    for blocked in case["must_not_contain"]:
+        assert blocked not in answer
+
+    expected_source_count = int(case.get("expected_source_count", 1))
+    assert len(payload["sources"]) == expected_source_count
+    assert len(payload["evidence"]) == expected_source_count
+
+    if expected_source_count == 0:
+        assert preview is None
+        assert payload["sources"] == []
+        assert payload["evidence"] == []
+    else:
+        evidence = payload["evidence"][0]
+        assert payload["sources"][0]["file"] == case["expected_doc"]
+        assert evidence["title"] == case["expected_doc"]
+        assert preview is not None
+        assert preview["doc_id"] == evidence["doc_id"]
+        for term in case["preview_terms"]:
+            assert term in preview["excerpt"]
+
+    assert len(history_messages) == 2 * (len(case["history_turns"]) + 1)
+    assert history_messages[0]["content"] == case["history_turns"][0]
+    assert history_messages[-2]["content"] == case["question"]
+
+    report = build_chat_case_report(
+        case,
+        payload,
+        expected_kb_ids=[KB_ID],
+        expected_isolation_level="physical_isolated",
+        preview_payload=preview,
+    )
+    assert report["passed"] is True
+    assert report["scope_passed"] is True
+    if report["preview_required"]:
+        assert report["preview_resolvable"] is True
+
+    assert build_query_engine.call_count == len(case["history_turns"]) + 1
+
 
 
 def test_chat_image_ocr_semireal_suite_metrics(imported_image_kb: dict[str, object]) -> None:

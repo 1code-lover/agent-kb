@@ -34,6 +34,7 @@ _EXACT_SOURCE_PHRASES = (
     "OCR fallback",
     "Evidence preview",
     "evidence preview",
+    "must not fabricate from outside memory",
     "Knowledge Base",
     "Knowledge Base remains the authorization boundary",
     "Folder remains organization only",
@@ -183,6 +184,25 @@ def question_supports_source_term(question: str, term: str, *, hooks: SourceAnsw
     return len(overlap) >= min(2, len(term_tokens))
 
 
+def answer_covers_source_term_tokens(answer_text: str, term: str, *, hooks: SourceAnswerRepairHooks) -> bool:
+    """判断回答是否已覆盖 source 短语的核心 token，避免非 exact 题被过度替换。"""
+    answer_tokens = tokenize_source_term_support_text(
+        answer_text,
+        ascii_token_re=hooks.ascii_token_re,
+        cjk_token_re=hooks.cjk_token_re,
+        question_stopwords=hooks.question_stopwords,
+    )
+    term_tokens = tokenize_source_term_support_text(
+        term,
+        ascii_token_re=hooks.ascii_token_re,
+        cjk_token_re=hooks.cjk_token_re,
+        question_stopwords=hooks.question_stopwords,
+    )
+    if not answer_tokens or not term_tokens:
+        return False
+    return term_tokens.issubset(answer_tokens)
+
+
 def extract_exact_source_terms(text: str) -> list[str]:
     """从 source 文本中抽取适合保真的精确 token/短语。"""
     raw = str(text or "")
@@ -234,6 +254,8 @@ def maybe_repair_exact_terms_from_sources(
             continue
         for term in extract_exact_source_terms(source_text):
             if term in repaired_terms or contains_exact_phrase(answer_text, term, cjk_token_re=hooks.cjk_token_re):
+                continue
+            if not requests_exact_phrase and answer_covers_source_term_tokens(answer_text, term, hooks=hooks):
                 continue
             term_tokens = hooks.tokenize_text(term)
             term_is_supported_by_question = requests_exact_phrase or question_supports_source_term(question, term, hooks=hooks)

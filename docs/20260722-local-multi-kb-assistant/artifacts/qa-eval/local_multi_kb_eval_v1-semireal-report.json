@@ -1,14 +1,15 @@
 {
   "dataset_name": "local_multi_kb_eval_v1",
-  "run_at": "2026-07-30T03:37:11.840042+00:00",
+  "evaluation_mode": "healthy",
+  "run_at": "2026-08-21T12:00:22.408385+00:00",
   "suite_summary": {
     "total_cases": 54,
-    "passed_cases": 54,
-    "failed_cases": 0,
-    "pass_rate": 1.0,
+    "passed_cases": 52,
+    "failed_cases": 2,
+    "pass_rate": 0.9629629629629629,
     "pass_rate_ci95": {
-      "low": 0.9335841332189981,
-      "high": 1.0
+      "low": 0.8746459065659669,
+      "high": 0.9897838464145869
     },
     "scope_pass_rate": 1.0,
     "average_keypoint_coverage": 1.0,
@@ -25,7 +26,7 @@
     "preview_term_total": 0,
     "preview_term_hits": 0,
     "preview_term_hit_rate": 1.0,
-    "source_count_match_rate": 1.0,
+    "source_count_match_rate": 0.9629629629629629,
     "blocked_term_hit_cases": 0,
     "forbidden_term_clean_rate": 1.0,
     "category_breakdown": {
@@ -40,11 +41,11 @@
       },
       "folder_model": {
         "count": 10,
-        "passed": 10,
-        "pass_rate": 1.0,
+        "passed": 9,
+        "pass_rate": 0.9,
         "pass_rate_ci95": {
-          "low": 0.7224598312333834,
-          "high": 1.0
+          "low": 0.5958436145024278,
+          "high": 0.9821242504842788
         }
       },
       "ingestion_priority": {
@@ -85,11 +86,11 @@
       },
       "scope_contract": {
         "count": 12,
-        "passed": 12,
-        "pass_rate": 1.0,
+        "passed": 11,
+        "pass_rate": 0.9166666666666666,
         "pass_rate_ci95": {
-          "low": 0.7574992425007574,
-          "high": 1.0
+          "low": 0.6461140782014047,
+          "high": 0.9851352905492264
         }
       },
       "suite_metrics": {
@@ -130,7 +131,7 @@
     },
     "source_count_match_rate_min": {
       "metric": "source_count_match_rate",
-      "actual": 1.0,
+      "actual": 0.9629629629629629,
       "minimum": 0.95,
       "passed": true
     },
@@ -141,17 +142,17 @@
       "passed": true
     }
   },
-  "run_passed": true,
+  "run_passed": false,
   "breakdowns": {
     "modality": {
       "image_ocr": {
         "count": 18,
-        "passed": 18,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 17,
+        "failed": 1,
+        "pass_rate": 0.9444444444444444,
         "pass_rate_ci95": {
-          "low": 0.8241154494176252,
-          "high": 1.0
+          "low": 0.7424220019799247,
+          "high": 0.9901250641690756
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -167,7 +168,7 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.9444444444444444,
         "forbidden_term_clean_rate": 1.0
       },
       "markdown": {
@@ -198,12 +199,12 @@
       },
       "pdf": {
         "count": 18,
-        "passed": 18,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 17,
+        "failed": 1,
+        "pass_rate": 0.9444444444444444,
         "pass_rate_ci95": {
-          "low": 0.8241154494176252,
-          "high": 1.0
+          "low": 0.7424220019799247,
+          "high": 0.9901250641690756
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -219,19 +220,19 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.9444444444444444,
         "forbidden_term_clean_rate": 1.0
       }
     },
     "difficulty": {
       "complex": {
         "count": 18,
-        "passed": 18,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 16,
+        "failed": 2,
+        "pass_rate": 0.8888888888888888,
         "pass_rate_ci95": {
-          "low": 0.8241154494176252,
-          "high": 1.0
+          "low": 0.6719975513339578,
+          "high": 0.9689811315464172
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -247,7 +248,7 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.8888888888888888,
         "forbidden_term_clean_rate": 1.0
       },
       "medium": {
@@ -306,12 +307,12 @@
     "answer_style": {
       "comparison": {
         "count": 8,
-        "passed": 8,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 2,
+        "pass_rate": 0.75,
         "pass_rate_ci95": {
-          "low": 0.6755843804891231,
-          "high": 1.0
+          "low": 0.40926987910258916,
+          "high": 0.9285223111419724
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -327,7 +328,7 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.75,
         "forbidden_term_clean_rate": 1.0
       },
       "fact": {
@@ -490,12 +491,12 @@
       },
       "folder_model": {
         "count": 10,
-        "passed": 10,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 9,
+        "failed": 1,
+        "pass_rate": 0.9,
         "pass_rate_ci95": {
-          "low": 0.7224598312333834,
-          "high": 1.0
+          "low": 0.5958436145024278,
+          "high": 0.9821242504842788
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -511,7 +512,7 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.9,
         "forbidden_term_clean_rate": 1.0
       },
       "ingestion_priority": {
@@ -620,12 +621,12 @@
       },
       "scope_contract": {
         "count": 12,
-        "passed": 12,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 1,
+        "pass_rate": 0.9166666666666666,
         "pass_rate_ci95": {
-          "low": 0.7574992425007574,
-          "high": 1.0
+          "low": 0.6461140782014047,
+          "high": 0.9851352905492264
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -641,7 +642,7 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.9166666666666666,
         "forbidden_term_clean_rate": 1.0
       },
       "suite_metrics": {
@@ -674,12 +675,12 @@
     "kb_id": {
       "eval-kb-image": {
         "count": 18,
-        "passed": 18,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 17,
+        "failed": 1,
+        "pass_rate": 0.9444444444444444,
         "pass_rate_ci95": {
-          "low": 0.8241154494176252,
-          "high": 1.0
+          "low": 0.7424220019799247,
+          "high": 0.9901250641690756
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -695,7 +696,7 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.9444444444444444,
         "forbidden_term_clean_rate": 1.0
       },
       "eval-kb-markdown": {
@@ -726,12 +727,12 @@
       },
       "eval-kb-pdf": {
         "count": 18,
-        "passed": 18,
-        "failed": 0,
-        "pass_rate": 1.0,
+        "passed": 17,
+        "failed": 1,
+        "pass_rate": 0.9444444444444444,
         "pass_rate_ci95": {
-          "low": 0.8241154494176252,
-          "high": 1.0
+          "low": 0.7424220019799247,
+          "high": 0.9901250641690756
         },
         "scope_pass_rate": 1.0,
         "average_keypoint_coverage": 1.0,
@@ -747,7 +748,7 @@
         "preview_term_total": 0,
         "preview_term_hits": 0,
         "preview_term_hit_rate": 1.0,
-        "source_count_match_rate": 1.0,
+        "source_count_match_rate": 0.9444444444444444,
         "forbidden_term_clean_rate": 1.0
       }
     }
@@ -757,11 +758,15 @@
     "required_cases": 45,
     "skipped_cases": 0
   },
-  "failure_stage_breakdown": {},
+  "failure_stage_breakdown": {
+    "quality_gate": 2
+  },
   "case_results": [
     {
       "case_id": "eval-md-001",
       "category": "scope_contract",
+      "answer": "Single-kb chat responses must echo the following fields exactly:\n- requested_scope_type\n- requested_kb_ids\n- effective_scope_type\n- effective_kb_ids\n- is_default_deny_applied\n- isolation_level\nThe effective scope must stay inside the explicitly requested knowledge base.\n中文补充：回答必须回显 requested_scope_type、requested_kb_ids、effective_scope_type、effective_kb_ids、is_default_deny_applied 和 isolation_level。\n即使换成中文提问，回答范围也只能落在显式声明的单个知识库内。",
+      "preview_excerpt": "# Single KB Scope Contract\n\nSingle-kb chat responses must echo the following fields exactly:\n- requested_scope_type\n- requested_kb_ids\n- effective_scope_type\n- effective_kb_ids\n- is_default_deny_applied\n- isolation_level\n\nThe effective scope must stay inside the explicitly requested knowledge base.\n中文补充：回答必须回显 requested_scope_type、requested_kb_ids、effective_scope_type、effective_kb_ids、is_default_deny_applied 和 isolation_level。\n即使换成中文提问，回答范围也只能落在显式声明的单个知识库内。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -817,6 +822,8 @@
     {
       "case_id": "eval-md-002",
       "category": "scope_contract",
+      "answer": "Single-kb chat responses must echo the following fields exactly:\n- requested_scope_type\n- requested_kb_ids\n- effective_scope_type\n- effective_kb_ids\n- is_default_deny_applied\n- isolation_level\nThe effective scope must stay inside the explicitly requested knowledge base.\n中文补充：回答必须回显 requested_scope_type、requested_kb_ids、effective_scope_type、effective_kb_ids、is_default_deny_applied 和 isolation_level。\n即使换成中文提问，回答范围也只能落在显式声明的单个知识库内。",
+      "preview_excerpt": "# Single KB Scope Contract\n\nSingle-kb chat responses must echo the following fields exactly:\n- requested_scope_type\n- requested_kb_ids\n- effective_scope_type\n- effective_kb_ids\n- is_default_deny_applied\n- isolation_level\n\nThe effective scope must stay inside the explicitly requested knowledge base.\n中文补充：回答必须回显 requested_scope_type、requested_kb_ids、effective_scope_type、effective_kb_ids、is_default_deny_applied 和 isolation_level。\n即使换成中文提问，回答范围也只能落在显式声明的单个知识库内。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -872,6 +879,8 @@
     {
       "case_id": "eval-md-003",
       "category": "scope_contract",
+      "answer": "Single-kb chat responses must echo the following fields exactly:\n- requested_scope_type\n- requested_kb_ids\n- effective_scope_type\n- effective_kb_ids\n- is_default_deny_applied\n- isolation_level\nThe effective scope must stay inside the explicitly requested knowledge base.\n中文补充：回答必须回显 requested_scope_type、requested_kb_ids、effective_scope_type、effective_kb_ids、is_default_deny_applied 和 isolation_level。\n即使换成中文提问，回答范围也只能落在显式声明的单个知识库内。",
+      "preview_excerpt": "# Single KB Scope Contract\n\nSingle-kb chat responses must echo the following fields exactly:\n- requested_scope_type\n- requested_kb_ids\n- effective_scope_type\n- effective_kb_ids\n- is_default_deny_applied\n- isolation_level\n\nThe effective scope must stay inside the explicitly requested knowledge base.\n中文补充：回答必须回显 requested_scope_type、requested_kb_ids、effective_scope_type、effective_kb_ids、is_default_deny_applied 和 isolation_level。\n即使换成中文提问，回答范围也只能落在显式声明的单个知识库内。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -930,6 +939,8 @@
     {
       "case_id": "eval-md-004",
       "category": "evidence_preview",
+      "answer": "Evidence items should include title, source, excerpt, doc_id, and preview_locator.\nThese fields let the frontend render an evidence preview, show source location, and jump back to the originating document.",
+      "preview_excerpt": "# Evidence Preview Contract\n\nEvidence items should include title, source, excerpt, doc_id, and preview_locator.\nThese fields let the frontend render an evidence preview, show source location, and jump back to the originating document.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -985,6 +996,8 @@
     {
       "case_id": "eval-md-005",
       "category": "evidence_preview",
+      "answer": "Evidence items should include title, source, excerpt, doc_id, and preview_locator.\nThese fields let the frontend render an evidence preview, show source location, and jump back to the originating document.",
+      "preview_excerpt": "# Evidence Preview Contract\n\nEvidence items should include title, source, excerpt, doc_id, and preview_locator.\nThese fields let the frontend render an evidence preview, show source location, and jump back to the originating document.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1040,6 +1053,8 @@
     {
       "case_id": "eval-md-006",
       "category": "evidence_preview",
+      "answer": "Evidence items should include title, source, excerpt, doc_id, and preview_locator.\nThese fields let the frontend render an evidence preview, show source location, and jump back to the originating document.",
+      "preview_excerpt": "# Evidence Preview Contract\n\nEvidence items should include title, source, excerpt, doc_id, and preview_locator.\nThese fields let the frontend render an evidence preview, show source location, and jump back to the originating document.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1096,6 +1111,8 @@
     {
       "case_id": "eval-md-007",
       "category": "refusal_policy",
+      "answer": "If the current knowledge base has no confirmable evidence, the assistant should explicitly say that no confirmable information is available and must not fabricate an answer.",
+      "preview_excerpt": "# Refusal Guideline\n\nIf the current knowledge base has no confirmable evidence, the assistant should explicitly say that no confirmable information is available and must not fabricate an answer.\nThe reply should stay inside the active knowledge base instead of guessing from outside memory.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1150,6 +1167,8 @@
     {
       "case_id": "eval-md-008",
       "category": "refusal_policy",
+      "answer": "If the current knowledge base has no confirmable evidence, the assistant should explicitly say that no confirmable information is available and must not fabricate an answer.\nThe reply should stay inside the active knowledge base instead of guessing from outside memory.",
+      "preview_excerpt": "# Refusal Guideline\n\nIf the current knowledge base has no confirmable evidence, the assistant should explicitly say that no confirmable information is available and must not fabricate an answer.\nThe reply should stay inside the active knowledge base instead of guessing from outside memory.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1205,6 +1224,8 @@
     {
       "case_id": "eval-md-009",
       "category": "per_case_metrics",
+      "answer": "Per-case QA reports should record scope correctness, keypoint coverage, evidence hit, and preview resolvability.\nPass or fail alone is not enough for evaluating answer quality.",
+      "preview_excerpt": "# QA Evaluation Metrics\n\nPer-case QA reports should record scope correctness, keypoint coverage, evidence hit, and preview resolvability.\nPass or fail alone is not enough for evaluating answer quality.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1261,6 +1282,8 @@
     {
       "case_id": "eval-md-010",
       "category": "per_case_metrics",
+      "answer": "Per-case QA reports should record scope correctness, keypoint coverage, evidence hit, and preview resolvability.\nPass or fail alone is not enough for evaluating answer quality.",
+      "preview_excerpt": "# QA Evaluation Metrics\n\nPer-case QA reports should record scope correctness, keypoint coverage, evidence hit, and preview resolvability.\nPass or fail alone is not enough for evaluating answer quality.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1316,6 +1339,8 @@
     {
       "case_id": "eval-md-011",
       "category": "folder_model",
+      "answer": "Folders are organizational objects inside one knowledge base.\nThey help import tree display and browsing, but they do not create a separate authorization boundary.\nQuery scope and access control still stay at the knowledge-base level.\n中文补充：文件夹只是知识库内部的组织对象，不应被当成新的授权边界。\n中文补充：查询范围和访问控制仍然以知识库为边界。",
+      "preview_excerpt": "# Folder Boundary Model\n\nFolders are organizational objects inside one knowledge base.\nThey help import tree display and browsing, but they do not create a separate authorization boundary.\nQuery scope and access control still stay at the knowledge-base level.\n中文补充：文件夹只是知识库内部的组织对象，不应被当成新的授权边界。\n中文补充：查询范围和访问控制仍然以知识库为边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1371,6 +1396,8 @@
     {
       "case_id": "eval-md-012",
       "category": "folder_model",
+      "answer": "Folders are organizational objects inside one knowledge base.\nThey help import tree display and browsing, but they do not create a separate authorization boundary.\nQuery scope and access control still stay at the knowledge-base level.\n中文补充：文件夹只是知识库内部的组织对象，不应被当成新的授权边界。\n中文补充：查询范围和访问控制仍然以知识库为边界。",
+      "preview_excerpt": "# Folder Boundary Model\n\nFolders are organizational objects inside one knowledge base.\nThey help import tree display and browsing, but they do not create a separate authorization boundary.\nQuery scope and access control still stay at the knowledge-base level.\n中文补充：文件夹只是知识库内部的组织对象，不应被当成新的授权边界。\n中文补充：查询范围和访问控制仍然以知识库为边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1428,6 +1455,8 @@
     {
       "case_id": "eval-md-013",
       "category": "ingestion_priority",
+      "answer": "﻿# Ingestion Readiness Priority\nThe current QA program should stabilize Markdown import, indexing, single-kb query, evidence output, and preview before expanding PDF text-layer and image OCR baselines.\nDependency readiness for fitz and paddleocr should be visible in testing instead of being hidden behind generic failures.",
+      "preview_excerpt": "﻿# Ingestion Readiness Priority\n\nThe current QA program should stabilize Markdown import, indexing, single-kb query, evidence output, and preview before expanding PDF text-layer and image OCR baselines.\nDependency readiness for fitz and paddleocr should be visible in testing instead of being hidden behind generic failures.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1484,6 +1513,8 @@
     {
       "case_id": "eval-md-014",
       "category": "ingestion_priority",
+      "answer": "﻿# Ingestion Readiness Priority\nThe current QA program should stabilize Markdown import, indexing, single-kb query, evidence output, and preview before expanding PDF text-layer and image OCR baselines.\nDependency readiness for fitz and paddleocr should be visible in testing instead of being hidden behind generic failures.",
+      "preview_excerpt": "﻿# Ingestion Readiness Priority\n\nThe current QA program should stabilize Markdown import, indexing, single-kb query, evidence output, and preview before expanding PDF text-layer and image OCR baselines.\nDependency readiness for fitz and paddleocr should be visible in testing instead of being hidden behind generic failures.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1539,6 +1570,8 @@
     {
       "case_id": "eval-md-015",
       "category": "suite_metrics",
+      "answer": "﻿# QA Gate Metrics\nA QA baseline report should track scope pass rate, keypoint coverage, evidence hit rate, preview resolvability rate, source count match rate, and forbidden-term clean rate.\nA passing exit code alone is not enough to judge knowledge-grounded answer quality.",
+      "preview_excerpt": "﻿# QA Gate Metrics\n\nA QA baseline report should track scope pass rate, keypoint coverage, evidence hit rate, preview resolvability rate, source count match rate, and forbidden-term clean rate.\nA passing exit code alone is not enough to judge knowledge-grounded answer quality.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1595,6 +1628,8 @@
     {
       "case_id": "eval-md-016",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1643,6 +1678,8 @@
     {
       "case_id": "eval-md-017",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Please answer from the active knowledge base only. You must not fabricate from outside memory.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1691,6 +1728,8 @@
     {
       "case_id": "eval-md-018",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-markdown"
@@ -1740,6 +1779,8 @@
     {
       "case_id": "eval-pdf-001",
       "category": "scope_contract",
+      "answer": "Scope contract for PDF knowledge base queries.\nrequested_scope_type must remain single_kb.\neffective_kb_ids must echo the active PDF knowledge base.\nisolation_level remains physical_isolated in the current architecture.",
+      "preview_excerpt": "Scope contract for PDF knowledge base queries.\n        requested_scope_type must remain single_kb.\n        effective_kb_ids must echo the active PDF knowledge base.\n        isolation_level remains physical_isolated in the current architecture.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1794,6 +1835,8 @@
     {
       "case_id": "eval-pdf-002",
       "category": "scope_contract",
+      "answer": "Scope contract for PDF knowledge base queries.\nrequested_scope_type must remain single_kb.\neffective_kb_ids must echo the active PDF knowledge base.\nisolation_level remains physical_isolated in the current architecture.",
+      "preview_excerpt": "Scope contract for PDF knowledge base queries.\n        requested_scope_type must remain single_kb.\n        effective_kb_ids must echo the active PDF knowledge base.\n        isolation_level remains physical_isolated in the current architecture.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1848,6 +1891,8 @@
     {
       "case_id": "eval-pdf-003",
       "category": "scope_contract",
+      "answer": "Scope contract for PDF knowledge base queries.\nrequested_scope_type must remain single_kb.\neffective_kb_ids must echo the active PDF knowledge base.\nisolation_level remains physical_isolated in the current architecture.",
+      "preview_excerpt": "Scope contract for PDF knowledge base queries.\n        requested_scope_type must remain single_kb.\n        effective_kb_ids must echo the active PDF knowledge base.\n        isolation_level remains physical_isolated in the current architecture.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1859,7 +1904,7 @@
         "effective_kb_ids",
         "active PDF knowledge base",
         "isolation_level",
-        "logical_filter_only"
+        "physical_isolated"
       ],
       "keypoint_missed": [],
       "keypoint_coverage": 1.0,
@@ -1906,6 +1951,8 @@
     {
       "case_id": "eval-pdf-004",
       "category": "scope_contract",
+      "answer": "Scope contract for PDF knowledge base queries.\nrequested_scope_type must remain single_kb.\neffective_kb_ids must echo the active PDF knowledge base.\nisolation_level remains physical_isolated in the current architecture.",
+      "preview_excerpt": "Scope contract for PDF knowledge base queries.\n        requested_scope_type must remain single_kb.\n        effective_kb_ids must echo the active PDF knowledge base.\n        isolation_level remains physical_isolated in the current architecture.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -1913,7 +1960,7 @@
       "keypoint_total": 2,
       "keypoint_hits": [
         "isolation_level",
-        "logical_filter_only"
+        "physical_isolated"
       ],
       "keypoint_missed": [],
       "keypoint_coverage": 1.0,
@@ -1960,6 +2007,8 @@
     {
       "case_id": "eval-pdf-005",
       "category": "evidence_preview",
+      "answer": "Evidence preview for PDF imports.\nEvery answer should carry doc_id and preview_locator.\npreview excerpt must resolve back to the original PDF chunk.",
+      "preview_excerpt": "Evidence preview for PDF imports.\n        Every answer should carry doc_id and preview_locator.\n        ??????? PDF ????????? doc_id ? preview_locator??????????\n        preview excerpt must resolve back to the original PDF chunk.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2014,6 +2063,8 @@
     {
       "case_id": "eval-pdf-006",
       "category": "evidence_preview",
+      "answer": "Evidence preview for PDF imports.\nEvery answer should carry doc_id and preview_locator.\n???????\nPDF ?????????\ndoc_id ?\npreview_locator??????????\npreview excerpt must resolve back to the original PDF chunk.",
+      "preview_excerpt": "Evidence preview for PDF imports.\n        Every answer should carry doc_id and preview_locator.\n        ??????? PDF ????????? doc_id ? preview_locator??????????\n        preview excerpt must resolve back to the original PDF chunk.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2068,6 +2119,8 @@
     {
       "case_id": "eval-pdf-007",
       "category": "evidence_preview",
+      "answer": "Evidence preview for PDF imports.\nEvery answer should carry doc_id and preview_locator.\n???????\nPDF ?????????\ndoc_id ?\npreview_locator??????????\npreview excerpt must resolve back to the original PDF chunk.",
+      "preview_excerpt": "Evidence preview for PDF imports.\n        Every answer should carry doc_id and preview_locator.\n        ??????? PDF ????????? doc_id ? preview_locator??????????\n        preview excerpt must resolve back to the original PDF chunk.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2123,6 +2176,8 @@
     {
       "case_id": "eval-pdf-008",
       "category": "evidence_preview",
+      "answer": "Evidence preview for PDF imports.\nEvery answer should carry doc_id and preview_locator.\n???????\nPDF ?????????\ndoc_id ?\npreview_locator??????????\npreview excerpt must resolve back to the original PDF chunk.",
+      "preview_excerpt": "Evidence preview for PDF imports.\n        Every answer should carry doc_id and preview_locator.\n        ??????? PDF ????????? doc_id ? preview_locator??????????\n        preview excerpt must resolve back to the original PDF chunk.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2179,6 +2234,8 @@
     {
       "case_id": "eval-pdf-009",
       "category": "folder_model",
+      "answer": "Folder boundary note for the PDF suite.\nFolder is an organization object and not an authorization boundary.\nKnowledge Base remains the range and authorization boundary.",
+      "preview_excerpt": "Folder boundary note for the PDF suite.\n        Folder is an organization object and not an authorization boundary.\n        Knowledge Base remains the range and authorization boundary.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2233,6 +2290,8 @@
     {
       "case_id": "eval-pdf-010",
       "category": "folder_model",
+      "answer": "Folder boundary note for the PDF suite.\nFolder is an organization object and not an authorization boundary.\nKnowledge Base remains the range and authorization boundary.",
+      "preview_excerpt": "Folder boundary note for the PDF suite.\n        Folder is an organization object and not an authorization boundary.\n        Knowledge Base remains the range and authorization boundary.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2288,6 +2347,8 @@
     {
       "case_id": "eval-pdf-011",
       "category": "folder_model",
+      "answer": "Folder boundary note for the PDF suite.\nFolder is an organization object and not an authorization boundary.\nKnowledge Base remains the range and authorization boundary.",
+      "preview_excerpt": "Folder boundary note for the PDF suite.\n        Folder is an organization object and not an authorization boundary.\n        Knowledge Base remains the range and authorization boundary.\nMetrics gate for PDF suite execution.\n        pass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\n        preview_resolvable_rate should also remain one point zero for evidence-backed cases.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2305,15 +2366,16 @@
       "blocked_term_clean": true,
       "forbidden_term_clean_rate": 1.0,
       "expected_source_count": 1,
-      "actual_source_count": 1,
-      "actual_evidence_count": 1,
-      "source_count_match": true,
+      "actual_source_count": 2,
+      "actual_evidence_count": 2,
+      "source_count_match": false,
       "expected_doc": "folder-boundary.pdf",
       "required_evidence_docs": [
         "folder-boundary.pdf"
       ],
       "returned_titles": [
-        "folder-boundary.pdf"
+        "folder-boundary.pdf",
+        "metrics-gate.pdf"
       ],
       "evidence_hit": true,
       "preview_required": true,
@@ -2321,7 +2383,7 @@
       "preview_term_total": 0,
       "preview_term_hits": [],
       "preview_term_coverage": 1.0,
-      "passed": true,
+      "passed": false,
       "modality": "pdf",
       "difficulty": "complex",
       "answer_style": "comparison",
@@ -2343,6 +2405,8 @@
     {
       "case_id": "eval-pdf-012",
       "category": "suite_metrics",
+      "answer": "Metrics gate for PDF suite execution.\npass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\npreview_resolvable_rate should also remain one point zero for evidence-backed cases.",
+      "preview_excerpt": "Metrics gate for PDF suite execution.\n        pass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\n        preview_resolvable_rate should also remain one point zero for evidence-backed cases.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2398,6 +2462,8 @@
     {
       "case_id": "eval-pdf-013",
       "category": "suite_metrics",
+      "answer": "preview_resolvable_rate should also remain one point zero for evidence-backed cases.",
+      "preview_excerpt": "Metrics gate for PDF suite execution.\n        pass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\n        preview_resolvable_rate should also remain one point zero for evidence-backed cases.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2453,6 +2519,8 @@
     {
       "case_id": "eval-pdf-014",
       "category": "suite_metrics",
+      "answer": "Metrics gate for PDF suite execution.\npass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\npreview_resolvable_rate should also remain one point zero for evidence-backed cases.",
+      "preview_excerpt": "Metrics gate for PDF suite execution.\n        pass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\n        preview_resolvable_rate should also remain one point zero for evidence-backed cases.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2510,6 +2578,8 @@
     {
       "case_id": "eval-pdf-015",
       "category": "suite_metrics",
+      "answer": "Metrics gate for PDF suite execution.\npass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\npreview_resolvable_rate should also remain one point zero for evidence-backed cases.",
+      "preview_excerpt": "Metrics gate for PDF suite execution.\n        pass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\n        preview_resolvable_rate should also remain one point zero for evidence-backed cases.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2565,6 +2635,8 @@
     {
       "case_id": "eval-pdf-016",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Please answer from the active PDF knowledge base only. You must not fabricate from outside memory.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2613,6 +2685,8 @@
     {
       "case_id": "eval-pdf-017",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2661,6 +2735,8 @@
     {
       "case_id": "eval-pdf-018",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-pdf"
@@ -2710,6 +2786,8 @@
     {
       "case_id": "eval-img-001",
       "category": "scope_contract",
+      "answer": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base.\nKnowledge Base remains the authorization boundary for this scope board.",
+      "preview_excerpt": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base. Knowledge Base remains the authorization boundary for this scope board.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2764,6 +2842,8 @@
     {
       "case_id": "eval-img-002",
       "category": "scope_contract",
+      "answer": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base.\nKnowledge Base remains the authorization boundary for this scope board.",
+      "preview_excerpt": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base. Knowledge Base remains the authorization boundary for this scope board.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2818,6 +2898,8 @@
     {
       "case_id": "eval-img-003",
       "category": "scope_contract",
+      "answer": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base.\nKnowledge Base remains the authorization boundary for this scope board.",
+      "preview_excerpt": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base. Knowledge Base remains the authorization boundary for this scope board.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2874,6 +2956,8 @@
     {
       "case_id": "eval-img-004",
       "category": "scope_contract",
+      "answer": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base.\nKnowledge Base remains the authorization boundary for this scope board.",
+      "preview_excerpt": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base. Knowledge Base remains the authorization boundary for this scope board.",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2928,6 +3012,8 @@
     {
       "case_id": "eval-img-005",
       "category": "scope_contract",
+      "answer": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base.\nKnowledge Base remains the authorization boundary for this scope board.",
+      "preview_excerpt": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base. Knowledge Base remains the authorization boundary for this scope board.\nFolders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -2946,14 +3032,15 @@
       "blocked_term_clean": true,
       "forbidden_term_clean_rate": 1.0,
       "expected_source_count": 1,
-      "actual_source_count": 1,
-      "actual_evidence_count": 1,
-      "source_count_match": true,
+      "actual_source_count": 2,
+      "actual_evidence_count": 2,
+      "source_count_match": false,
       "expected_doc": "scope-board.png",
       "required_evidence_docs": [
         "scope-board.png"
       ],
       "returned_titles": [
+        "folder-board.png",
         "scope-board.png"
       ],
       "evidence_hit": true,
@@ -2962,7 +3049,7 @@
       "preview_term_total": 0,
       "preview_term_hits": [],
       "preview_term_coverage": 1.0,
-      "passed": true,
+      "passed": false,
       "modality": "image_ocr",
       "difficulty": "complex",
       "answer_style": "comparison",
@@ -2984,6 +3071,8 @@
     {
       "case_id": "eval-img-006",
       "category": "folder_model",
+      "answer": "Folders are organizational objects inside one knowledge base.\nFolder is an organization object, 中文补充：文件夹只是知识库内部的组织对象.",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3038,6 +3127,8 @@
     {
       "case_id": "eval-img-007",
       "category": "folder_model",
+      "answer": "Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3092,6 +3183,8 @@
     {
       "case_id": "eval-img-008",
       "category": "folder_model",
+      "answer": "Folders are organizational objects inside one knowledge base.\nFolder is an organization object, 中文补充：文件夹只是知识库内部的组织对象.\nKnowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3148,6 +3241,8 @@
     {
       "case_id": "eval-img-009",
       "category": "folder_model",
+      "answer": "Folders are organizational objects inside one knowledge base.\nFolder is an organization object, 中文补充：文件夹只是知识库内部的组织对象.\nKnowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3203,6 +3298,8 @@
     {
       "case_id": "eval-img-010",
       "category": "folder_model",
+      "answer": "Folders are organizational objects inside one knowledge base.\nFolder is an organization object, 中文补充：文件夹只是知识库内部的组织对象.\nKnowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
+      "preview_excerpt": "Folders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3258,6 +3355,8 @@
     {
       "case_id": "eval-img-011",
       "category": "evidence_preview",
+      "answer": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets.",
+      "preview_excerpt": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets. 中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3312,6 +3411,8 @@
     {
       "case_id": "eval-img-012",
       "category": "evidence_preview",
+      "answer": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets.\n中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
+      "preview_excerpt": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets. 中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3366,6 +3467,8 @@
     {
       "case_id": "eval-img-013",
       "category": "evidence_preview",
+      "answer": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets.\n中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
+      "preview_excerpt": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets. 中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3422,6 +3525,8 @@
     {
       "case_id": "eval-img-014",
       "category": "evidence_preview",
+      "answer": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets.\n中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
+      "preview_excerpt": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets. 中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3476,6 +3581,8 @@
     {
       "case_id": "eval-img-015",
       "category": "evidence_preview",
+      "answer": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets.\n中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
+      "preview_excerpt": "Evidence output should include doc_id preview_locator and a resolvable excerpt for OCR derived assets. 中文补充：证据结果至少要包含 doc_id 和 preview_locator。",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3530,6 +3637,8 @@
     {
       "case_id": "eval-img-016",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Please answer from the active knowledge base only. You must not fabricate from outside memory.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3578,6 +3687,8 @@
     {
       "case_id": "eval-img-017",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3626,6 +3737,8 @@
     {
       "case_id": "eval-img-018",
       "category": "no_evidence",
+      "answer": "No confirmable information is available in the current knowledge base. Stay inside the active knowledge base and the assistant must not fabricate an answer.",
+      "preview_excerpt": "",
       "scope_passed": true,
       "expected_kb_ids": [
         "eval-kb-image"
@@ -3673,25 +3786,116 @@
       "failure_message": ""
     }
   ],
-  "failures": [],
+  "failures": [
+    {
+      "case_id": "eval-pdf-011",
+      "kb_id": "eval-kb-pdf",
+      "modality": "pdf",
+      "difficulty": "complex",
+      "category": "folder_model",
+      "failure_stage": "quality_gate",
+      "failure_message": "contract or metric mismatch",
+      "keypoint_missed": [],
+      "blocked_term_hits": [],
+      "returned_titles": [
+        "folder-boundary.pdf",
+        "metrics-gate.pdf"
+      ],
+      "answer": "Folder boundary note for the PDF suite.\nFolder is an organization object and not an authorization boundary.\nKnowledge Base remains the range and authorization boundary.",
+      "preview_excerpt": "Folder boundary note for the PDF suite.\n        Folder is an organization object and not an authorization boundary.\n        Knowledge Base remains the range and authorization boundary.\nMetrics gate for PDF suite execution.\n        pass_rate scope_pass_rate and evidence_hit_rate should all stay at one point zero.\n        preview_resolvable_rate should also remain one point zero for evidence-backed cases.",
+      "source_count_match": false,
+      "evidence_hit": true,
+      "preview_resolvable": true,
+      "preview_requested": true,
+      "response_status_code": 200,
+      "preview_status_code": 200
+    },
+    {
+      "case_id": "eval-img-005",
+      "kb_id": "eval-kb-image",
+      "modality": "image_ocr",
+      "difficulty": "complex",
+      "category": "scope_contract",
+      "failure_stage": "quality_gate",
+      "failure_message": "contract or metric mismatch",
+      "keypoint_missed": [],
+      "blocked_term_hits": [],
+      "returned_titles": [
+        "folder-board.png",
+        "scope-board.png"
+      ],
+      "answer": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base.\nKnowledge Base remains the authorization boundary for this scope board.",
+      "preview_excerpt": "requested_scope_type must remain single_kb and effective_kb_ids should echo the declared image knowledge base. Knowledge Base remains the authorization boundary for this scope board.\nFolders are organizational objects inside one knowledge base. Folder is an organization object, 中文补充：文件夹只是知识库内部的组织对象. Knowledge Base is the authorization boundary for image OCR answers, 中文补充：图片 OCR 回答也必须遵守知识库边界。",
+      "source_count_match": false,
+      "evidence_hit": true,
+      "preview_resolvable": true,
+      "preview_requested": true,
+      "response_status_code": 200,
+      "preview_status_code": 200
+    }
+  ],
   "import_summary": {
     "total_kbs": 3,
     "total_files": 14,
+    "success_count": 14,
+    "failed_count": 0,
+    "empty_count": 0,
     "total_success_count": 14,
     "total_failed_count": 0,
     "total_empty_count": 0,
+    "indexed_chunks": 14,
     "total_indexed_chunks": 14,
+    "document_count": 14,
     "total_document_count": 14,
+    "node_count": 14,
     "total_node_count": 14,
-    "total_input_text_chars": 3396,
+    "nodes_with_embedding_count": 14,
+    "total_nodes_with_embedding_count": 14,
+    "nodes_without_embedding_count": 0,
+    "total_nodes_without_embedding_count": 0,
+    "input_text_chars": 3528,
+    "total_input_text_chars": 3528,
+    "ocr_success_count": 3,
     "total_ocr_success_count": 3,
+    "ocr_no_text_count": 0,
+    "total_ocr_no_text_count": 0,
+    "ocr_failed_count": 0,
+    "total_ocr_failed_count": 0,
+    "ocr_skipped_count": 0,
+    "total_ocr_skipped_count": 0,
+    "indexed_from_ocr_count": 3,
+    "total_indexed_from_ocr_count": 3,
+    "embedded_ocr_attempted_count": 0,
+    "total_embedded_ocr_attempted_count": 0,
+    "embedded_ocr_success_count": 0,
+    "total_embedded_ocr_success_count": 0,
+    "embedded_ocr_no_text_count": 0,
+    "total_embedded_ocr_no_text_count": 0,
+    "embedded_ocr_failed_count": 0,
+    "total_embedded_ocr_failed_count": 0,
+    "embedded_ocr_skipped_count": 0,
+    "total_embedded_ocr_skipped_count": 0,
+    "embedded_indexed_from_ocr_count": 0,
+    "total_embedded_indexed_from_ocr_count": 0,
+    "dependency_missing_count": 0,
+    "total_dependency_missing_count": 0,
+    "asset_registered_count": 3,
     "total_asset_registered_count": 3,
-    "total_import_ms": 308.045,
+    "import_total_ms": 263.584,
+    "total_import_ms": 263.584,
+    "asset_registered_without_index_count": 0,
+    "success_rate": 1.0,
+    "failed_rate": 0.0,
+    "empty_rate": 0.0,
+    "avg_input_text_chars_per_doc": 252.0,
+    "avg_indexed_chunks_per_doc": 1.0,
+    "nodes_without_embedding_rate": 0.0,
+    "quality_signal_tags": [],
     "kb_breakdown": {
       "eval-kb-image": {
         "kb_id": "eval-kb-image",
         "modality": "image_ocr",
-        "receipt_id": "kb-file-import-c695445444134f3eac768b2ef0ea66b1",
+        "receipt_id": "kb-file-import-7cfd15d776af4297bebff6a27f29faa7",
         "import_mode": "preserve_tree",
         "headline": "成功导入 3 个文件",
         "total_files": 3,
@@ -3701,15 +3905,38 @@
         "indexed_chunks": 3,
         "document_count": 3,
         "node_count": 3,
-        "input_text_chars": 402,
+        "nodes_with_embedding_count": 3,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 536,
         "ocr_success_count": 3,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 3,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
         "asset_registered_count": 3,
-        "import_total_ms": 32.827
+        "import_total_ms": 47.137,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 178.66666666666666,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
       },
       "eval-kb-markdown": {
         "kb_id": "eval-kb-markdown",
         "modality": "markdown",
-        "receipt_id": "kb-file-import-3634cce1afb04237918de8b6cc60b75c",
+        "receipt_id": "kb-file-import-270a4a612b274230b33076b7297ed1cc",
         "import_mode": "preserve_tree",
         "headline": "成功导入 7 个文件",
         "total_files": 7,
@@ -3719,15 +3946,38 @@
         "indexed_chunks": 7,
         "document_count": 7,
         "node_count": 7,
+        "nodes_with_embedding_count": 7,
+        "nodes_without_embedding_count": 0,
         "input_text_chars": 2111,
         "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 194.065
+        "import_total_ms": 117.451,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 301.57142857142856,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
       },
       "eval-kb-pdf": {
         "kb_id": "eval-kb-pdf",
         "modality": "pdf",
-        "receipt_id": "kb-file-import-4d7a0274879d4c75bdd602211c376511",
+        "receipt_id": "kb-file-import-2f89296d9bb24eeb8210f229a13d61f1",
         "import_mode": "preserve_tree",
         "headline": "成功导入 4 个文件",
         "total_files": 4,
@@ -3737,14 +3987,38 @@
         "indexed_chunks": 4,
         "document_count": 4,
         "node_count": 4,
-        "input_text_chars": 883,
+        "nodes_with_embedding_count": 4,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 881,
         "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 81.153
+        "import_total_ms": 98.996,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 220.25,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
       }
     },
     "modality_breakdown": {
       "image_ocr": {
+        "modality": "image_ocr",
         "kb_count": 1,
         "total_files": 3,
         "success_count": 3,
@@ -3753,12 +4027,36 @@
         "indexed_chunks": 3,
         "document_count": 3,
         "node_count": 3,
-        "input_text_chars": 402,
+        "nodes_with_embedding_count": 3,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 536,
         "ocr_success_count": 3,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 3,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
         "asset_registered_count": 3,
-        "import_total_ms": 32.827
+        "import_total_ms": 47.137,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 178.66666666666666,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
       },
       "markdown": {
+        "modality": "markdown",
         "kb_count": 1,
         "total_files": 7,
         "success_count": 7,
@@ -3767,12 +4065,36 @@
         "indexed_chunks": 7,
         "document_count": 7,
         "node_count": 7,
+        "nodes_with_embedding_count": 7,
+        "nodes_without_embedding_count": 0,
         "input_text_chars": 2111,
         "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 194.065
+        "import_total_ms": 117.451,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 301.57142857142856,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
       },
       "pdf": {
+        "modality": "pdf",
         "kb_count": 1,
         "total_files": 4,
         "success_count": 4,
@@ -3781,15 +4103,220 @@
         "indexed_chunks": 4,
         "document_count": 4,
         "node_count": 4,
-        "input_text_chars": 883,
+        "nodes_with_embedding_count": 4,
+        "nodes_without_embedding_count": 0,
+        "input_text_chars": 881,
         "ocr_success_count": 0,
+        "ocr_no_text_count": 0,
+        "ocr_failed_count": 0,
+        "ocr_skipped_count": 0,
+        "indexed_from_ocr_count": 0,
+        "embedded_ocr_attempted_count": 0,
+        "embedded_ocr_success_count": 0,
+        "embedded_ocr_no_text_count": 0,
+        "embedded_ocr_failed_count": 0,
+        "embedded_ocr_skipped_count": 0,
+        "embedded_indexed_from_ocr_count": 0,
+        "dependency_missing_count": 0,
         "asset_registered_count": 0,
-        "import_total_ms": 81.153
+        "import_total_ms": 98.996,
+        "asset_registered_without_index_count": 0,
+        "total_ocr_failed_count": 0,
+        "total_ocr_no_text_count": 0,
+        "success_rate": 1.0,
+        "failed_rate": 0.0,
+        "empty_rate": 0.0,
+        "avg_input_text_chars_per_doc": 220.25,
+        "avg_indexed_chunks_per_doc": 1.0,
+        "nodes_without_embedding_rate": 0.0,
+        "quality_signal_tags": []
+      }
+    }
+  },
+  "import_qa_correlation": {
+    "weak_signal_kb_count": 0,
+    "weak_signal_kb_ids": [],
+    "weak_signal_modality_count": 0,
+    "weak_signal_modalities": [],
+    "signal_breakdown": {},
+    "kb_alignment": {
+      "eval-kb-image": {
+        "kb_id": "eval-kb-image",
+        "modality": "image_ocr",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 18,
+        "qa_passed_cases": 17,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.9444444444444444,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 1.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 1,
+        "import_total_files": 3,
+        "import_success_count": 3,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 3,
+        "import_input_text_chars": 536,
+        "import_avg_input_text_chars_per_doc": 178.66666666666666,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      },
+      "eval-kb-markdown": {
+        "kb_id": "eval-kb-markdown",
+        "modality": "markdown",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 18,
+        "qa_passed_cases": 18,
+        "qa_failed_cases": 0,
+        "qa_pass_rate": 1.0,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 1.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "import_total_files": 7,
+        "import_success_count": 7,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 7,
+        "import_input_text_chars": 2111,
+        "import_avg_input_text_chars_per_doc": 301.57142857142856,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      },
+      "eval-kb-pdf": {
+        "kb_id": "eval-kb-pdf",
+        "modality": "pdf",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 18,
+        "qa_passed_cases": 17,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.9444444444444444,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 1.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 1,
+        "import_total_files": 4,
+        "import_success_count": 4,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 4,
+        "import_input_text_chars": 881,
+        "import_avg_input_text_chars_per_doc": 220.25,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      }
+    },
+    "modality_alignment": {
+      "image_ocr": {
+        "modality": "image_ocr",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 18,
+        "qa_passed_cases": 17,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.9444444444444444,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 1.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 1,
+        "import_total_files": 3,
+        "import_success_count": 3,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 3,
+        "import_input_text_chars": 536,
+        "import_avg_input_text_chars_per_doc": 178.66666666666666,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      },
+      "markdown": {
+        "modality": "markdown",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 18,
+        "qa_passed_cases": 18,
+        "qa_failed_cases": 0,
+        "qa_pass_rate": 1.0,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 1.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 0,
+        "import_total_files": 7,
+        "import_success_count": 7,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 7,
+        "import_input_text_chars": 2111,
+        "import_avg_input_text_chars_per_doc": 301.57142857142856,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
+      },
+      "pdf": {
+        "modality": "pdf",
+        "quality_signal_tags": [],
+        "signal_count": 0,
+        "qa_total_cases": 18,
+        "qa_passed_cases": 17,
+        "qa_failed_cases": 1,
+        "qa_pass_rate": 0.9444444444444444,
+        "qa_scope_pass_rate": 1.0,
+        "qa_evidence_hit_rate": 1.0,
+        "qa_preview_resolvable_rate": 1.0,
+        "evidence_miss_cases": 0,
+        "preview_failure_cases": 0,
+        "source_count_mismatch_cases": 1,
+        "import_total_files": 4,
+        "import_success_count": 4,
+        "import_failed_count": 0,
+        "import_empty_count": 0,
+        "import_document_count": 4,
+        "import_input_text_chars": 881,
+        "import_avg_input_text_chars_per_doc": 220.25,
+        "import_nodes_without_embedding_count": 0,
+        "import_nodes_without_embedding_rate": 0.0,
+        "import_total_ocr_failed_count": 0,
+        "import_total_ocr_no_text_count": 0,
+        "import_dependency_missing_count": 0,
+        "import_asset_registered_without_index_count": 0
       }
     }
   },
   "artifacts": {
-    "json": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v1-semireal-report.json",
-    "markdown": "C:\\Users\\ethan1.zhao\\Downloads\\agent-kb-main\\github-agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v1-semireal-report.md"
+    "json": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v1-semireal-report.json",
+    "markdown": "C:\\Users\\ethan1.zhao\\Desktop\\xiangmu\\agent-kb\\docs\\20260722-local-multi-kb-assistant\\artifacts\\qa-eval\\local_multi_kb_eval_v1-semireal-report.md"
   }
 }

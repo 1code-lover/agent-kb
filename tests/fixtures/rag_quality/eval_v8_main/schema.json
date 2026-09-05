@@ -1,0 +1,169 @@
+{
+  "dataset_name": "local_multi_kb_eval_v8_layered_main",
+  "evaluation_mode": "diagnostic",
+  "required_fields": [
+    "case_id",
+    "dataset",
+    "kb_id",
+    "question",
+    "source_doc",
+    "source_locator",
+    "expected_scope_type",
+    "expected_isolation_level",
+    "modality",
+    "answer_style",
+    "difficulty",
+    "category",
+    "answerable",
+    "expected_keypoints",
+    "required_evidence_docs",
+    "expected_source_count",
+    "preview_required",
+    "preview_terms",
+    "forbidden_terms",
+    "judge_focus"
+  ],
+  "allowed_modalities": [
+    "markdown",
+    "pdf",
+    "image_ocr"
+  ],
+  "allowed_answer_styles": [
+    "fact",
+    "summary",
+    "policy",
+    "comparison",
+    "refusal"
+  ],
+  "allowed_difficulties": [
+    "simple",
+    "medium",
+    "complex"
+  ],
+  "allowed_categories": [
+    "role_lookup",
+    "timeline_sla",
+    "approval_summary",
+    "evidence_operation",
+    "process_boundary",
+    "no_evidence",
+    "long_document",
+    "cross_document",
+    "hard_refusal",
+    "scope_contract"
+  ],
+  "allowed_scope_types": [
+    "single_kb"
+  ],
+  "allowed_isolation_levels": [
+    "physical_isolated"
+  ],
+  "allowed_judge_dimensions": [
+    "factual_accuracy",
+    "completeness",
+    "citation_accuracy",
+    "groundedness",
+    "refusal_correctness"
+  ],
+  "required_weak_signal_tags": [
+    "ocr_no_text",
+    "ocr_failed",
+    "dependency_missing",
+    "nodes_without_embedding",
+    "zero_text_content",
+    "asset_registered_without_index"
+  ],
+  "quality_gates": {
+    "minimum_total_cases": 93,
+    "minimum_cases_per_modality": 28,
+    "minimum_cases_per_difficulty": 24,
+    "minimum_no_evidence_cases": 20,
+    "minimum_preview_required_cases": 60,
+    "minimum_refusal_cases_per_modality": 6,
+    "minimum_cases_per_answer_style": 8,
+    "minimum_cases_per_category": 5,
+    "minimum_cases_per_judge_dimension": 20,
+    "minimum_cjk_cases": 54,
+    "minimum_cjk_cases_per_modality": 18,
+    "minimum_weak_signal_cases": 5,
+    "minimum_negative_contract_cases_per_modality": 5,
+    "minimum_history_grounded_cases": 6,
+    "minimum_history_grounded_cases_per_modality": 2
+  },
+  "run_gates": {
+    "scope_pass_rate_min": 1.0,
+    "average_keypoint_coverage_min": 0.85,
+    "evidence_hit_rate_min": 0.95,
+    "preview_resolvable_rate_min": 0.95,
+    "source_count_match_rate_min": 0.95,
+    "forbidden_term_clean_rate_min": 1.0
+  },
+  "diagnostic_gates": {
+    "case_expectation_match_rate_min": 1.0,
+    "minimum_weak_signal_kb_count": 3,
+    "minimum_weak_signal_modality_count": 2,
+    "required_signal_tags": [
+      "ocr_no_text",
+      "ocr_failed",
+      "dependency_missing",
+      "nodes_without_embedding",
+      "zero_text_content",
+      "asset_registered_without_index"
+    ]
+  },
+  "rubric_dimensions": {
+    "factual_accuracy": {
+      "weight": 0.3,
+      "min": 0.85
+    },
+    "completeness": {
+      "weight": 0.25,
+      "min": 0.75
+    },
+    "citation_accuracy": {
+      "weight": 0.2,
+      "min": 0.9
+    },
+    "groundedness": {
+      "weight": 0.15,
+      "min": 0.9
+    },
+    "refusal_correctness": {
+      "weight": 0.1,
+      "min": 0.95
+    }
+  },
+  "required_refusal_categories": [
+    "no_evidence",
+    "hard_refusal",
+    "scope_contract"
+  ],
+  "required_refusal_markers_by_category": {
+    "no_evidence": [
+      "No confirmable information",
+      "knowledge base"
+    ],
+    "hard_refusal": [
+      "No confirmable information",
+      "knowledge base"
+    ],
+    "scope_contract": [
+      "must not fabricate",
+      "knowledge base"
+    ]
+  },
+  "required_negative_contract_categories": [
+    "process_boundary",
+    "scope_contract"
+  ],
+  "required_negative_contract_markers_by_category": {
+    "process_boundary": [
+      "authorization boundary",
+      "knowledge base"
+    ],
+    "scope_contract": [
+      "must not fabricate",
+      "effective_kb_ids"
+    ]
+  }
+}

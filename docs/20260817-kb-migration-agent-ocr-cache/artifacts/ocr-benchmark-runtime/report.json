@@ -26,7 +26,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 39279.76,
+        "ocr_total_ms": 24598.046,
         "error": null
       }
     },
@@ -44,7 +44,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 5555.276,
+        "ocr_total_ms": 5201.397,
         "error": null
       }
     },
@@ -62,7 +62,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 5657.05,
+        "ocr_total_ms": 4829.778,
         "error": null
       }
     },
@@ -80,7 +80,7 @@
         "merged_block_count": 1,
         "continued_page_count": 1,
         "removed_repeated_header_count": 1,
-        "ocr_total_ms": 20727.961
+        "ocr_total_ms": 13839.347
       }
     },
     {
@@ -97,7 +97,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 7104.655,
+        "ocr_total_ms": 4225.724,
         "error": null
       }
     },
@@ -115,7 +115,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 9211.185,
+        "ocr_total_ms": 6515.105,
         "error": null
       }
     },
@@ -133,7 +133,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 8962.919,
+        "ocr_total_ms": 3907.055,
         "error": null
       }
     },
@@ -151,7 +151,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 4747.987,
+        "ocr_total_ms": 3693.792,
         "error": null
       }
     },
@@ -169,7 +169,7 @@
         "merged_block_count": 0,
         "continued_page_count": 0,
         "removed_repeated_header_count": 0,
-        "ocr_total_ms": 5518.607,
+        "ocr_total_ms": 3782.409,
         "error": null
       }
     }

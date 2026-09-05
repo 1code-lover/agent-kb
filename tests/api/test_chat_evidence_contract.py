@@ -7,10 +7,11 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.services import asset_service
+from api.services.evidence_service import parse_evidence_id
 from server.asset_registry import KBAssetRegistry
 from server.kb_registry import KBRegistry
 
@@ -180,6 +181,7 @@ def test_sources_and_evidence_field_mapping_consistent(monkeypatch, isolated_reg
     assert source["page"] == evidence["page"]
     assert source["kb_id"] == evidence["kb_id"]
     assert source["asset_id"] == evidence["asset_id"]
+    assert parse_evidence_id(evidence["id"])["excerpt"] == evidence["excerpt"]
 
 
 def test_chat_evidence_receipt_id_nullable(monkeypatch, isolated_registry):

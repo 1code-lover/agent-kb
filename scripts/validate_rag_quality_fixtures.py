@@ -66,6 +66,24 @@ def _resolve_repo_path(raw_path: str | Path) -> Path:
 
 
 
+def _resolve_eval_dataset_paths(
+    raw_path: str | Path,
+    *,
+    schema_path: str | Path | None = None,
+) -> tuple[Path, Path | None]:
+    dataset_path = _resolve_repo_path(raw_path)
+    inferred_schema_path = _resolve_repo_path(schema_path) if schema_path is not None else None
+    if dataset_path.is_dir():
+        dataset_dir = dataset_path
+        dataset_path = dataset_dir / "cases.json"
+        if inferred_schema_path is None:
+            candidate_schema = dataset_dir / "schema.json"
+            if candidate_schema.exists():
+                inferred_schema_path = candidate_schema
+    return dataset_path, inferred_schema_path
+
+
+
 def _contains_cjk(value: Any) -> bool:
     """判断任意嵌套值里是否包含 CJK 字符。"""
     if isinstance(value, str):
@@ -86,6 +104,39 @@ def _validate_string_list(values: Any, *, field_name: str, source: Path, allow_e
     if not allow_empty and not normalized:
         raise ValueError(f"{source}: {field_name} 必须是非空列表")
     return normalized
+
+
+def _expected_keypoints_contain_marker(record: dict[str, Any], marker: str) -> bool:
+    normalized_marker = str(marker).strip().lower()
+    if not normalized_marker:
+        return False
+    return any(normalized_marker in str(item).lower() for item in list(record.get("expected_keypoints") or []))
+
+
+def _build_modality_marker_breakdown(
+    records: list[dict[str, Any]],
+    *,
+    allowed_modalities: list[str],
+    marker_mapping: dict[str, list[str]],
+) -> dict[str, dict[str, dict[str, int]]]:
+    breakdown: dict[str, dict[str, dict[str, int]]] = {}
+    if not marker_mapping:
+        return breakdown
+
+    tracked_categories = set(marker_mapping)
+    for modality in allowed_modalities:
+        modality_records = [record for record in records if str(record.get("modality")) == modality]
+        category_names = sorted({str(record.get("category")) for record in modality_records} & tracked_categories)
+        if not category_names:
+            continue
+        breakdown[modality] = {}
+        for category in category_names:
+            category_records = [record for record in modality_records if str(record.get("category")) == category]
+            breakdown[modality][category] = {
+                marker: sum(1 for record in category_records if _expected_keypoints_contain_marker(record, marker))
+                for marker in marker_mapping.get(category, [])
+            }
+    return breakdown
 
 
 def validate_record(record: dict[str, Any], *, source: Path) -> None:
@@ -273,6 +324,85 @@ def load_eval_schema(schema_path: str | Path | None = None) -> dict[str, Any]:
             source=path,
         )
 
+    required_refusal_categories = data.get("required_refusal_categories")
+    if required_refusal_categories is not None:
+        normalized_refusal_categories = _validate_string_list(
+            required_refusal_categories,
+            field_name="required_refusal_categories",
+            source=path,
+        )
+        invalid_refusal_categories = [
+            item for item in normalized_refusal_categories if item not in set(data["allowed_categories"])
+        ]
+        if invalid_refusal_categories:
+            raise ValueError(
+                f"{path}: required_refusal_categories 包含未声明的 category: {sorted(invalid_refusal_categories)}"
+            )
+        data["required_refusal_categories"] = normalized_refusal_categories
+
+    required_negative_contract_categories = data.get("required_negative_contract_categories")
+    if required_negative_contract_categories is not None:
+        normalized_negative_contract_categories = _validate_string_list(
+            required_negative_contract_categories,
+            field_name="required_negative_contract_categories",
+            source=path,
+        )
+        invalid_negative_contract_categories = [
+            item for item in normalized_negative_contract_categories if item not in set(data["allowed_categories"])
+        ]
+        if invalid_negative_contract_categories:
+            raise ValueError(
+                f"{path}: required_negative_contract_categories 包含未声明的 category: {sorted(invalid_negative_contract_categories)}"
+            )
+        data["required_negative_contract_categories"] = normalized_negative_contract_categories
+
+    required_refusal_markers_by_category = data.get("required_refusal_markers_by_category")
+    if required_refusal_markers_by_category is not None:
+        if not isinstance(required_refusal_markers_by_category, dict) or not required_refusal_markers_by_category:
+            raise ValueError(f"{path}: required_refusal_markers_by_category 必须是非空对象")
+        normalized_marker_mapping: dict[str, list[str]] = {}
+        allowed_categories = set(data["allowed_categories"])
+        for raw_category, raw_markers in required_refusal_markers_by_category.items():
+            normalized_category = str(raw_category).strip()
+            if not normalized_category:
+                raise ValueError(f"{path}: required_refusal_markers_by_category 不能包含空 category")
+            if normalized_category not in allowed_categories:
+                raise ValueError(
+                    f"{path}: required_refusal_markers_by_category 包含未声明的 category: {normalized_category}"
+                )
+            normalized_marker_mapping[normalized_category] = _validate_string_list(
+                raw_markers,
+                field_name=f"required_refusal_markers_by_category.{normalized_category}",
+                source=path,
+            )
+        data["required_refusal_markers_by_category"] = dict(sorted(normalized_marker_mapping.items()))
+
+    required_negative_contract_markers_by_category = data.get("required_negative_contract_markers_by_category")
+    if required_negative_contract_markers_by_category is not None:
+        if (
+            not isinstance(required_negative_contract_markers_by_category, dict)
+            or not required_negative_contract_markers_by_category
+        ):
+            raise ValueError(f"{path}: required_negative_contract_markers_by_category 必须是非空对象")
+        normalized_negative_marker_mapping: dict[str, list[str]] = {}
+        allowed_categories = set(data["allowed_categories"])
+        for raw_category, raw_markers in required_negative_contract_markers_by_category.items():
+            normalized_category = str(raw_category).strip()
+            if not normalized_category:
+                raise ValueError(f"{path}: required_negative_contract_markers_by_category 不能包含空 category")
+            if normalized_category not in allowed_categories:
+                raise ValueError(
+                    f"{path}: required_negative_contract_markers_by_category 包含未声明的 category: {normalized_category}"
+                )
+            normalized_negative_marker_mapping[normalized_category] = _validate_string_list(
+                raw_markers,
+                field_name=f"required_negative_contract_markers_by_category.{normalized_category}",
+                source=path,
+            )
+        data["required_negative_contract_markers_by_category"] = dict(
+            sorted(normalized_negative_marker_mapping.items())
+        )
+
     quality_gates = data.get("quality_gates")
     if not isinstance(quality_gates, dict):
         raise ValueError(f"{path}: quality_gates ?????")
@@ -286,7 +416,12 @@ def load_eval_schema(schema_path: str | Path | None = None) -> dict[str, Any]:
     optional_quality_gate_keys = [
         "minimum_cases_per_answer_style",
         "minimum_cases_per_category",
+        "minimum_cases_per_judge_dimension",
         "minimum_weak_signal_cases",
+        "minimum_refusal_cases_per_modality",
+        "minimum_negative_contract_cases_per_modality",
+        "minimum_history_grounded_cases",
+        "minimum_history_grounded_cases_per_modality",
     ]
     for key in required_quality_gate_keys + [
         name for name in optional_quality_gate_keys if name in quality_gates
@@ -401,6 +536,9 @@ def validate_eval_case_record(record: dict[str, Any], *, source: Path, schema: d
     if "weak_signal_tags" in record:
         _validate_string_list(record.get("weak_signal_tags"), field_name="weak_signal_tags", source=source, allow_empty=True)
 
+    if "history_turns" in record:
+        _validate_string_list(record.get("history_turns"), field_name="history_turns", source=source)
+
     expected_case_passed = record.get("expected_case_passed")
     if expected_case_passed is not None and not isinstance(expected_case_passed, bool):
         raise ValueError(f"{source}: expected_case_passed ??????")
@@ -457,13 +595,13 @@ def validate_eval_case_record(record: dict[str, Any], *, source: Path, schema: d
 
 def validate_eval_cases_file(path: str | Path, *, schema_path: str | Path | None = None) -> None:
     """校验问答评测数据集文件，并检查 case_id 唯一性。"""
-    case_path = _resolve_repo_path(path)
+    case_path, resolved_schema_path = _resolve_eval_dataset_paths(path, schema_path=schema_path)
     if not case_path.exists():
         raise ValueError(f"eval case 文件不存在: {case_path}")
     if "data" in case_path.parts:
         raise ValueError(f"eval case 不能放在 data 目录: {case_path}")
 
-    schema = load_eval_schema(schema_path)
+    schema = load_eval_schema(resolved_schema_path)
     records = json.loads(case_path.read_text(encoding="utf-8"))
     if not isinstance(records, list) or not records:
         raise ValueError(f"{case_path}: eval case 文件必须是非空数组")
@@ -480,22 +618,74 @@ def validate_eval_cases_file(path: str | Path, *, schema_path: str | Path | None
 
 def summarize_eval_cases(path: str | Path, *, schema_path: str | Path | None = None) -> dict[str, Any]:
     """?????????????????????"""
-    case_path = _resolve_repo_path(path)
-    schema = load_eval_schema(schema_path)
+    case_path, resolved_schema_path = _resolve_eval_dataset_paths(path, schema_path=schema_path)
+    schema = load_eval_schema(resolved_schema_path)
     records = json.loads(case_path.read_text(encoding="utf-8"))
 
     modality_counter = Counter(str(record["modality"]) for record in records)
     difficulty_counter = Counter(str(record["difficulty"]) for record in records)
     answer_style_counter = Counter(str(record["answer_style"]) for record in records)
     category_counter = Counter(str(record["category"]) for record in records)
+    judge_dimension_counter = Counter(
+        str(dimension)
+        for record in records
+        for dimension in list(record.get("judge_focus") or [])
+    )
     answerable_counter = Counter("answerable" if record.get("answerable") else "no_evidence" for record in records)
     weak_signal_records = [record for record in records if list(record.get("weak_signal_tags") or [])]
+    history_grounded_records = [record for record in records if list(record.get("history_turns") or [])]
     weak_signal_counter = Counter(
         str(signal)
         for record in records
         for signal in list(record.get("weak_signal_tags") or [])
     )
     weak_signal_modality_counter = Counter(str(record["modality"]) for record in weak_signal_records)
+    history_grounded_modality_counter = Counter(str(record["modality"]) for record in history_grounded_records)
+    refusal_records = [record for record in records if str(record.get("answer_style")) == "refusal"]
+    refusal_modality_counter = Counter(str(record["modality"]) for record in refusal_records)
+    refusal_category_counter = Counter(str(record["category"]) for record in refusal_records)
+    negative_contract_categories = [str(item) for item in list(schema.get("required_negative_contract_categories") or [])]
+    negative_contract_records = [
+        record for record in records if str(record.get("category") or "") in set(negative_contract_categories)
+    ]
+    negative_contract_modality_counter = Counter(str(record["modality"]) for record in negative_contract_records)
+    negative_contract_category_counter = Counter(str(record["category"]) for record in negative_contract_records)
+    refusal_marker_mapping = {
+        str(category): [str(marker) for marker in list(markers or [])]
+        for category, markers in dict(schema.get("required_refusal_markers_by_category") or {}).items()
+    }
+    refusal_marker_category_breakdown: dict[str, dict[str, int]] = {}
+    if refusal_marker_mapping:
+        for category, markers in refusal_marker_mapping.items():
+            category_records = [record for record in refusal_records if str(record.get("category")) == category]
+            refusal_marker_category_breakdown[category] = {
+                marker: sum(1 for record in category_records if _expected_keypoints_contain_marker(record, marker))
+                for marker in markers
+            }
+    refusal_modality_marker_category_breakdown = _build_modality_marker_breakdown(
+        refusal_records,
+        allowed_modalities=[str(item) for item in list(schema["allowed_modalities"])],
+        marker_mapping=refusal_marker_mapping,
+    )
+    negative_contract_marker_mapping = {
+        str(category): [str(marker) for marker in list(markers or [])]
+        for category, markers in dict(schema.get("required_negative_contract_markers_by_category") or {}).items()
+    }
+    negative_contract_marker_category_breakdown: dict[str, dict[str, int]] = {}
+    if negative_contract_marker_mapping:
+        for category, markers in negative_contract_marker_mapping.items():
+            category_records = [
+                record for record in negative_contract_records if str(record.get("category")) == category
+            ]
+            negative_contract_marker_category_breakdown[category] = {
+                marker: sum(1 for record in category_records if _expected_keypoints_contain_marker(record, marker))
+                for marker in markers
+            }
+    negative_contract_modality_marker_category_breakdown = _build_modality_marker_breakdown(
+        negative_contract_records,
+        allowed_modalities=[str(item) for item in list(schema["allowed_modalities"])],
+        marker_mapping=negative_contract_marker_mapping,
+    )
     cjk_records = [
         record
         for record in records
@@ -504,10 +694,20 @@ def summarize_eval_cases(path: str | Path, *, schema_path: str | Path | None = N
     cjk_modality_counter = Counter(str(record["modality"]) for record in cjk_records)
 
     modality_difficulty_breakdown: dict[str, dict[str, int]] = {}
+    modality_judge_dimension_breakdown: dict[str, dict[str, int]] = {}
     for modality in schema["allowed_modalities"]:
         modality_records = [record for record in records if str(record["modality"]) == modality]
         modality_difficulty_breakdown[modality] = dict(
             sorted(Counter(str(record["difficulty"]) for record in modality_records).items())
+        )
+        modality_judge_dimension_breakdown[modality] = dict(
+            sorted(
+                Counter(
+                    str(dimension)
+                    for record in modality_records
+                    for dimension in list(record.get("judge_focus") or [])
+                ).items()
+            )
         )
 
     quality_gates = schema["quality_gates"]
@@ -535,6 +735,11 @@ def summarize_eval_cases(path: str | Path, *, schema_path: str | Path | None = N
             category_counter.get(category, 0) >= quality_gates["minimum_cases_per_category"]
             for category in schema["allowed_categories"]
         )
+    if "minimum_cases_per_judge_dimension" in quality_gates:
+        gate_checks["minimum_cases_per_judge_dimension"] = all(
+            judge_dimension_counter.get(dimension, 0) >= quality_gates["minimum_cases_per_judge_dimension"]
+            for dimension in schema["allowed_judge_dimensions"]
+        )
     if "minimum_cjk_cases" in quality_gates:
         gate_checks["minimum_cjk_cases"] = len(cjk_records) >= quality_gates["minimum_cjk_cases"]
     if "minimum_cjk_cases_per_modality" in quality_gates:
@@ -544,9 +749,65 @@ def summarize_eval_cases(path: str | Path, *, schema_path: str | Path | None = N
         )
     if "minimum_weak_signal_cases" in quality_gates:
         gate_checks["minimum_weak_signal_cases"] = len(weak_signal_records) >= quality_gates["minimum_weak_signal_cases"]
+    if "minimum_refusal_cases_per_modality" in quality_gates:
+        gate_checks["minimum_refusal_cases_per_modality"] = all(
+            refusal_modality_counter.get(modality, 0) >= quality_gates["minimum_refusal_cases_per_modality"]
+            for modality in schema["allowed_modalities"]
+        )
+    if "minimum_negative_contract_cases_per_modality" in quality_gates:
+        gate_checks["minimum_negative_contract_cases_per_modality"] = all(
+            negative_contract_modality_counter.get(modality, 0)
+            >= quality_gates["minimum_negative_contract_cases_per_modality"]
+            for modality in schema["allowed_modalities"]
+        )
+    if "minimum_history_grounded_cases" in quality_gates:
+        gate_checks["minimum_history_grounded_cases"] = (
+            len(history_grounded_records) >= quality_gates["minimum_history_grounded_cases"]
+        )
+    if "minimum_history_grounded_cases_per_modality" in quality_gates:
+        gate_checks["minimum_history_grounded_cases_per_modality"] = all(
+            history_grounded_modality_counter.get(modality, 0)
+            >= quality_gates["minimum_history_grounded_cases_per_modality"]
+            for modality in schema["allowed_modalities"]
+        )
     if schema.get("required_weak_signal_tags"):
         required_tags = [str(item) for item in schema["required_weak_signal_tags"]]
         gate_checks["required_weak_signal_tags"] = all(weak_signal_counter.get(tag, 0) > 0 for tag in required_tags)
+    if schema.get("required_refusal_categories"):
+        required_refusal_categories = [str(item) for item in schema["required_refusal_categories"]]
+        gate_checks["required_refusal_categories"] = all(
+            refusal_category_counter.get(category, 0) > 0 for category in required_refusal_categories
+        )
+    if refusal_marker_mapping:
+        gate_checks["required_refusal_markers_by_category"] = all(
+            refusal_marker_category_breakdown.get(category, {}).get(marker, 0) > 0
+            for category, markers in refusal_marker_mapping.items()
+            for marker in markers
+        )
+        if "minimum_refusal_cases_per_modality" in quality_gates:
+            gate_checks["required_refusal_markers_by_category_per_modality"] = all(
+                count > 0
+                for modality_item in refusal_modality_marker_category_breakdown.values()
+                for marker_item in modality_item.values()
+                for count in marker_item.values()
+            )
+    if negative_contract_categories:
+        gate_checks["required_negative_contract_categories"] = all(
+            negative_contract_category_counter.get(category, 0) > 0 for category in negative_contract_categories
+        )
+    if negative_contract_marker_mapping:
+        gate_checks["required_negative_contract_markers_by_category"] = all(
+            negative_contract_marker_category_breakdown.get(category, {}).get(marker, 0) > 0
+            for category, markers in negative_contract_marker_mapping.items()
+            for marker in markers
+        )
+        if "minimum_negative_contract_cases_per_modality" in quality_gates:
+            gate_checks["required_negative_contract_markers_by_category_per_modality"] = all(
+                count > 0
+                for modality_item in negative_contract_modality_marker_category_breakdown.values()
+                for marker_item in modality_item.values()
+                for count in marker_item.values()
+            )
 
     return {
         "dataset_name": schema["dataset_name"],
@@ -555,14 +816,28 @@ def summarize_eval_cases(path: str | Path, *, schema_path: str | Path | None = N
         "difficulty_breakdown": dict(sorted(difficulty_counter.items())),
         "answer_style_breakdown": dict(sorted(answer_style_counter.items())),
         "category_breakdown": dict(sorted(category_counter.items())),
+        "judge_dimension_breakdown": dict(sorted(judge_dimension_counter.items())),
         "answerable_breakdown": dict(sorted(answerable_counter.items())),
+        "refusal_case_count": len(refusal_records),
+        "refusal_modality_breakdown": dict(sorted(refusal_modality_counter.items())),
+        "refusal_category_breakdown": dict(sorted(refusal_category_counter.items())),
+        "refusal_marker_category_breakdown": refusal_marker_category_breakdown,
+        "refusal_modality_marker_category_breakdown": refusal_modality_marker_category_breakdown,
+        "negative_contract_case_count": len(negative_contract_records),
+        "negative_contract_modality_breakdown": dict(sorted(negative_contract_modality_counter.items())),
+        "negative_contract_category_breakdown": dict(sorted(negative_contract_category_counter.items())),
+        "negative_contract_marker_category_breakdown": negative_contract_marker_category_breakdown,
+        "negative_contract_modality_marker_category_breakdown": negative_contract_modality_marker_category_breakdown,
         "weak_signal_case_count": len(weak_signal_records),
         "weak_signal_breakdown": dict(sorted(weak_signal_counter.items())),
         "weak_signal_modality_breakdown": dict(sorted(weak_signal_modality_counter.items())),
+        "history_grounded_case_count": len(history_grounded_records),
+        "history_grounded_modality_breakdown": dict(sorted(history_grounded_modality_counter.items())),
         "preview_required_cases": preview_required_cases,
         "cjk_case_count": len(cjk_records),
         "cjk_modality_breakdown": dict(sorted(cjk_modality_counter.items())),
         "modality_difficulty_breakdown": modality_difficulty_breakdown,
+        "modality_judge_dimension_breakdown": modality_judge_dimension_breakdown,
         "gate_checks": gate_checks,
     }
 

@@ -470,6 +470,76 @@ def test_classify_model_error_covers_quota_auth_forbidden_and_unavailable() -> N
     assert model_service.classify_model_error("other") == "unknown"
 
 
+def test_probe_fallback_candidate_translates_ollama_discovery_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    """discovery_only 的 Ollama candidate 应被归一化成可展示的不可达结果。"""
+
+    meta = {"result": "exception", "detail": "connection refused", "trace_id": "fallback-trace"}
+    monkeypatch.setattr(model_service, "_list_ollama_models", lambda api_base, trace_id: ([], meta))
+
+    reachable, detail, returned_meta = model_service._probe_fallback_candidate(
+        {
+            "service_provider": "Ollama",
+            "model": "",
+            "api_base": "http://localhost:11434",
+            "api_key": "",
+            "discovery_only": True,
+        },
+        "fallback-trace",
+    )
+
+    assert reachable is False
+    assert detail == "ollama_unreachable"
+    assert returned_meta == meta
+
+
+
+def test_attempt_model_fallback_returns_non_recoverable_without_probing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """非可恢复错误应直接返回，不进入 candidate 探测。"""
+
+    store = _DummyStore(
+        {
+            "current_llm_info": {
+                "service_provider": "Acme",
+                "model": "bad-chat",
+                "api_base": "https://acme.example/v1",
+                "api_key": "bad-key",
+            },
+            "custom_llm_providers": [
+                {
+                    "name": "Acme",
+                    "provider": "Acme",
+                    "api_base": "https://acme.example/v1",
+                    "models": ["bad-chat", "good-chat"],
+                    "api_key": "acme-key",
+                }
+            ],
+        }
+    )
+    monkeypatch.setattr(model_service, "_get_config_store", lambda: store)
+    monkeypatch.setattr(model_service.config, "LLM_API_LIST", {}, raising=False)
+    monkeypatch.setattr(model_service, "now_iso", lambda: "2026-08-26T10:00:00Z")
+
+    def _should_not_probe(*_args, **_kwargs):
+        raise AssertionError("non-recoverable fallback should not probe candidates")
+
+    monkeypatch.setattr(model_service, "_check_openai_compatible", _should_not_probe)
+    monkeypatch.setattr(model_service, "_check_ollama_model", _should_not_probe)
+
+    result = model_service.attempt_model_fallback("some unknown runtime explosion", session_id="sess-non-recoverable")
+
+    assert result == {
+        "applied": False,
+        "reason": "non_recoverable",
+        "error_kind": "unknown",
+        "candidate_count": 1,
+    }
+    assert store.values["model_health_status"]["state"] == "unavailable"
+    assert store.values["model_health_status"]["candidate_count"] == 1
+    assert store.values["model_health_status"]["last_error_kind"] == "unknown"
+    assert store.values["model_health_status"]["fallback_attempts"] == []
+
+
+
 def test_attempt_model_fallback_selects_first_reachable_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
     """fallback 应跳过当前模型并选择首个探活成功候选。"""
 

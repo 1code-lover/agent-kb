@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import threading
+import time
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -143,10 +146,32 @@ def _safe_read_snapshot(path: Path, session_id: str) -> dict[str, Any]:
 
 def _atomic_write(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = path.with_suffix(f"{path.suffix}.tmp")
-    tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    json.loads(tmp_path.read_text(encoding="utf-8"))
-    tmp_path.replace(path)
+    tmp_path = path.with_name(f"{path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
+    serialized = json.dumps(payload, ensure_ascii=False, indent=2)
+    try:
+        with tmp_path.open("w", encoding="utf-8") as fh:
+            fh.write(serialized)
+            fh.flush()
+            os.fsync(fh.fileno())
+        json.loads(tmp_path.read_text(encoding="utf-8"))
+
+        last_exc: PermissionError | None = None
+        for attempt in range(5):
+            try:
+                os.replace(tmp_path, path)
+                last_exc = None
+                break
+            except PermissionError as exc:
+                last_exc = exc
+                time.sleep(0.02 * (attempt + 1))
+        if last_exc is not None:
+            raise last_exc
+    finally:
+        if tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
 
 
 def load_session(session_id: str = "desktop-default") -> dict[str, Any]:

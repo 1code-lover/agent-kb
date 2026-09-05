@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from server.kb_registry import KBRegistry
@@ -36,6 +36,14 @@ def _load_smoke_cases() -> list[dict]:
 
 
 _SMOKE_CASES = _load_smoke_cases()
+
+
+def _find_smoke_case_by_type(case_type: str) -> dict:
+    """按题型选择一个 smoke case，避免额外测试依赖 fixture 顺序。"""
+    for case in _SMOKE_CASES:
+        if case.get("type") == case_type:
+            return case
+    raise AssertionError(f"missing smoke case type: {case_type}")
 
 
 @pytest.fixture
@@ -88,19 +96,29 @@ def _stub_chat_runtime(monkeypatch, case: dict) -> MagicMock:
 
 
 
-def _run_smoke_case(case: dict, *, monkeypatch, isolated_registry) -> tuple[dict, MagicMock]:
+def _run_smoke_case(
+    case: dict,
+    *,
+    monkeypatch,
+    isolated_registry,
+    request_overrides: dict | None = None,
+) -> tuple[dict, MagicMock]:
     """执行单条 smoke case，并返回 payload 与构建器 mock。"""
     if isolated_registry.get_kb(case["kb_id"]) is None:
         isolated_registry.create_kb(case["kb_id"], case.get("kb_name", case["kb_id"]))
     mock_build = _stub_chat_runtime(monkeypatch, case)
 
+    payload = {
+        "question": case["question"],
+        "session_id": case["case_id"],
+        "kb_ids": [case["kb_id"]],
+    }
+    if request_overrides:
+        payload.update(request_overrides)
+
     resp = client.post(
         "/api/chat/query",
-        json={
-            "question": case["question"],
-            "session_id": case["case_id"],
-            "kb_ids": [case["kb_id"]],
-        },
+        json=payload,
     )
 
     assert resp.status_code == 200
@@ -185,7 +203,59 @@ def test_single_kb_qa_smoke_contract(case, monkeypatch, isolated_registry):
     assert report["keypoint_coverage"] == 1.0
     assert report["evidence_hit"] is True
     assert report["source_count_match"] is True
-    mock_build.assert_called_once_with(kb_ids=[case["kb_id"]])
+    mock_build.assert_called_once_with(
+        kb_ids=[case["kb_id"]],
+        top_k=None,
+        response_mode=None,
+        use_reranker=None,
+        top_n=None,
+        reranker_model=None,
+    )
+
+
+def test_single_kb_smoke_allows_non_default_query_request_params(monkeypatch, isolated_registry) -> None:
+    """单库 smoke 主链路应能承接非默认 QueryRequest 参数而不破坏 scope / evidence 基线。"""
+    case = _find_smoke_case_by_type("positive")
+
+    data, mock_build = _run_smoke_case(
+        case,
+        monkeypatch=monkeypatch,
+        isolated_registry=isolated_registry,
+        request_overrides={
+            "session_id": f'{case["case_id"]}-custom-rag',
+            "top_k": 3,
+            "response_mode": "compact",
+            "use_reranker": False,
+            "top_n": 1,
+            "reranker_model": "custom-reranker",
+        },
+    )
+
+    assert data["requested_scope_type"] == "single_kb"
+    assert data["requested_kb_ids"] == [case["kb_id"]]
+    assert data["effective_scope_type"] == "single_kb"
+    assert data["effective_kb_ids"] == [case["kb_id"]]
+    assert data["is_default_deny_applied"] is False
+    assert data["isolation_level"] == "physical_isolated"
+
+    answer = data["answer"]
+    for keypoint in case["expected_keypoints"]:
+        assert keypoint in answer
+
+    returned_titles = {item["file"] for item in data["sources"]}
+    returned_titles.update(item["title"] for item in data["evidence"])
+    returned_titles.update(item["source"] for item in data["evidence"])
+    for expected_title in case["expected_evidence"]:
+        assert expected_title in returned_titles
+
+    mock_build.assert_called_once_with(
+        kb_ids=[case["kb_id"]],
+        top_k=3,
+        response_mode="compact",
+        use_reranker=False,
+        top_n=1,
+        reranker_model="custom-reranker",
+    )
 
 
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 import math
+import re
 from typing import Any
 
 
@@ -10,7 +11,89 @@ def _normalize_string_list(values: list[Any] | None) -> list[str]:
 
 
 def _contains_case_insensitive(haystack: str, needle: str) -> bool:
-    return needle.lower() in haystack.lower()
+    haystack_text = str(haystack or "")
+    needle_text = str(needle or "")
+    if not needle_text:
+        return False
+
+    haystack_lower = haystack_text.lower()
+    needle_lower = needle_text.lower()
+    if needle_lower not in haystack_lower:
+        return False
+
+    if any(char.isascii() and (char.isalnum() or char == "_") for char in needle_text):
+        boundary_pattern = re.compile(rf"(?<![A-Za-z0-9_]){re.escape(needle_text)}(?![A-Za-z0-9_])", re.IGNORECASE)
+        return boundary_pattern.search(haystack_text) is not None
+
+    return True
+
+
+def _iter_case_insensitive_matches(haystack: str, needle: str) -> list[re.Match[str]]:
+    haystack_text = str(haystack or "")
+    needle_text = str(needle or "")
+    if not needle_text:
+        return []
+
+    if any(char.isascii() and (char.isalnum() or char == "_") for char in needle_text):
+        pattern = re.compile(rf"(?<![A-Za-z0-9_]){re.escape(needle_text)}(?![A-Za-z0-9_])", re.IGNORECASE)
+    else:
+        pattern = re.compile(re.escape(needle_text), re.IGNORECASE)
+    return list(pattern.finditer(haystack_text))
+
+
+def _blocked_term_is_contextually_negated(answer: str, blocked_term: str) -> bool:
+    answer_text = str(answer or "")
+    blocked_text = str(blocked_term or "")
+    if not answer_text or not blocked_text:
+        return False
+
+    safe_before_hints = (
+        "not ",
+        "never ",
+        "don't ",
+        "do not ",
+        "must not ",
+        "should not ",
+        "cannot ",
+        "can't ",
+        "instead of ",
+        "rather than ",
+        "legacy ",
+        "retired ",
+    )
+    safe_after_hints = (
+        " is retired",
+        " retired",
+        " is deprecated",
+        " deprecated",
+        " is obsolete",
+        " is legacy",
+        " is wrong",
+        " is incorrect",
+        " is not valid",
+        " is not the live answer",
+        " must not be used",
+        " should not be used",
+        " should be ignored",
+        " should be avoided",
+        " should be replaced",
+        " must be ignored",
+        " must be avoided",
+        " must be replaced",
+        " is retired and must not be used",
+        " is retired and should not be used",
+    )
+
+    for match in _iter_case_insensitive_matches(answer_text, blocked_text):
+        start, end = match.span()
+        before = answer_text[max(0, start - 32):start].lower()
+        after = answer_text[end:min(len(answer_text), end + 64)].lower()
+        if any(before.endswith(hint) for hint in safe_before_hints):
+            continue
+        if any(hint in after for hint in safe_after_hints):
+            continue
+        return False
+    return True
 
 
 def _confidence_interval_wilson(successes: int, total: int, *, z: float = 1.96) -> dict[str, float]:
@@ -58,7 +141,11 @@ def build_chat_case_report(
     matched_keypoints = [item for item in expected_keypoints if _contains_case_insensitive(answer, item)]
 
     blocked_terms = _normalize_string_list(case.get("must_not_contain"))
-    blocked_hits = [item for item in blocked_terms if _contains_case_insensitive(answer, item)]
+    blocked_hits = [
+        item
+        for item in blocked_terms
+        if _contains_case_insensitive(answer, item) and not _blocked_term_is_contextually_negated(answer, item)
+    ]
 
     sources = list(payload.get("sources", []))
     evidence = list(payload.get("evidence", []))
@@ -119,6 +206,8 @@ def build_chat_case_report(
     return {
         "case_id": case.get("case_id", "<unknown>"),
         "category": case.get("category") or case.get("type") or "uncategorized",
+        "answer": answer,
+        "preview_excerpt": preview_excerpt,
         "scope_passed": scope_passed,
         "expected_kb_ids": list(expected_kb_ids),
         "keypoint_total": len(expected_keypoints),

@@ -120,3 +120,36 @@ def test_create_embedding_model_fails_fast_when_cache_missing_and_remote_disable
 
     assert embedding_module.create_embedding_model("bge-small-zh-v1.5") is None
     assert Settings._embed_model is None
+
+
+
+def test_create_embedding_model_reports_runtime_agnostic_cache_guidance(
+    monkeypatch,
+    tmp_path: Path,
+    capsys,
+) -> None:
+    """缓存缺失报错应提示通用 python 命令，而不是机器绝对路径。"""
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(Settings, "_embed_model", None, raising=False)
+    monkeypatch.setattr(embedding_module, "MODEL_DIR", "localmodels")
+    monkeypatch.setattr(
+        embedding_module,
+        "EMBEDDING_MODEL_PATH",
+        {"bge-small-zh-v1.5": "BAAI/bge-small-zh-v1.5"},
+    )
+
+    class ForbiddenEmbedding:
+        def __init__(self, *args, **kwargs) -> None:
+            raise AssertionError("HuggingFaceEmbedding should not be initialized without local cache")
+
+    fake_module = type("FakeEmbeddingModule", (), {"HuggingFaceEmbedding": ForbiddenEmbedding})
+    monkeypatch.setitem(__import__("sys").modules, "llama_index.embeddings.huggingface", fake_module)
+
+    assert embedding_module.create_embedding_model("bge-small-zh-v1.5") is None
+
+    captured = capsys.readouterr()
+    output = f"{captured.out}\n{captured.err}"
+    assert "python -m scripts.prepare_embedding_model_cache --download" in output
+    assert "KB_PYTHON" in output
+    assert "/opt/miniconda3/envs/agent-kb/bin/python" not in output

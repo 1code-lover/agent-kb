@@ -130,10 +130,15 @@ ragCore --> knowledgeStore[Index/Doc/Vector/Chat/Config]
 ## 8. 发布与运维
 
 - 开发联调脚本：`scripts/dev-all.ps1`
-- 桌面打包脚本：
+- 本地 desktop build helper（仅用于准备 `webapp/dist` + Electron bundle 供本地验证，不替代正式 release）：
   - Windows：`scripts/build-desktop.ps1`
   - macOS/Linux：`scripts/build-desktop.sh`
-- Python 可执行打包：`scripts/package-python-runtime.ps1`
+  - 默认优先 `KB_PYTHON`，默认安装 `requirements-runtime.txt`
+- API-only PyInstaller 兼容 helper：`scripts/package-python-runtime.ps1`
+- 当前正式 macOS 打包 / 发布主链路（current source of truth）：
+  - ad-hoc 本地包验证：`cd desktop && npm run build:mac && npm run verify:package`
+  - 严格签名 / 公证链路：`cd desktop && npm run release:preflight && npm run release:mac`
+  - `verify:python-runtime` 以 CPython 3.12、核心 import probe、`llama-index-core==0.11.19` 和 `pip check` 为 gate，不再把顶层 `llama_index` metapackage 当成默认 runtime baseline
 - 运行手册：`docs/guide/desktop_runbook.md`
 - 回归清单：`docs/test/desktop_regression_checklist.md`
 

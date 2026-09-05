@@ -1,0 +1,124 @@
+{
+  "dataset_name": "local_multi_kb_eval_v8_layered_hard",
+  "evaluation_mode": "healthy",
+  "required_fields": [
+    "case_id",
+    "dataset",
+    "kb_id",
+    "question",
+    "source_doc",
+    "source_locator",
+    "expected_scope_type",
+    "expected_isolation_level",
+    "modality",
+    "answer_style",
+    "difficulty",
+    "category",
+    "answerable",
+    "expected_keypoints",
+    "required_evidence_docs",
+    "expected_source_count",
+    "preview_required",
+    "preview_terms",
+    "forbidden_terms",
+    "judge_focus"
+  ],
+  "allowed_modalities": [
+    "markdown",
+    "pdf",
+    "image_ocr"
+  ],
+  "allowed_answer_styles": [
+    "comparison",
+    "policy",
+    "refusal"
+  ],
+  "allowed_difficulties": [
+    "medium",
+    "complex"
+  ],
+  "allowed_categories": [
+    "similar_document_confusion",
+    "stale_version_conflict",
+    "chunk_boundary",
+    "paraphrase_rewrite",
+    "evidence_insufficient",
+    "scope_isolation_trap"
+  ],
+  "allowed_scope_types": [
+    "single_kb"
+  ],
+  "allowed_isolation_levels": [
+    "physical_isolated"
+  ],
+  "allowed_judge_dimensions": [
+    "factual_accuracy",
+    "completeness",
+    "citation_accuracy",
+    "groundedness",
+    "refusal_correctness"
+  ],
+  "quality_gates": {
+    "minimum_total_cases": 36,
+    "minimum_cases_per_modality": 12,
+    "minimum_cases_per_difficulty": 12,
+    "minimum_no_evidence_cases": 6,
+    "minimum_preview_required_cases": 30,
+    "minimum_refusal_cases_per_modality": 2,
+    "minimum_cases_per_answer_style": 6,
+    "minimum_cases_per_category": 6,
+    "minimum_cases_per_judge_dimension": 6,
+    "minimum_negative_contract_cases_per_modality": 2,
+    "minimum_history_grounded_cases": 6,
+    "minimum_history_grounded_cases_per_modality": 2
+  },
+  "run_gates": {
+    "scope_pass_rate_min": 1.0,
+    "average_keypoint_coverage_min": 0.75,
+    "evidence_hit_rate_min": 0.85,
+    "preview_resolvable_rate_min": 0.85,
+    "source_count_match_rate_min": 0.85,
+    "forbidden_term_clean_rate_min": 1.0
+  },
+  "rubric_dimensions": {
+    "factual_accuracy": {
+      "weight": 0.3,
+      "min": 0.8
+    },
+    "completeness": {
+      "weight": 0.25,
+      "min": 0.7
+    },
+    "citation_accuracy": {
+      "weight": 0.2,
+      "min": 0.85
+    },
+    "groundedness": {
+      "weight": 0.15,
+      "min": 0.85
+    },
+    "refusal_correctness": {
+      "weight": 0.1,
+      "min": 0.95
+    }
+  },
+  "required_refusal_categories": [
+    "evidence_insufficient"
+  ],
+  "required_refusal_markers_by_category": {
+    "evidence_insufficient": [
+      "No confirmable information",
+      "knowledge base"
+    ]
+  },
+  "required_negative_contract_categories": [
+    "scope_isolation_trap"
+  ],
+  "required_negative_contract_markers_by_category": {
+    "scope_isolation_trap": [
+      "authorization boundary",
+      "must not fabricate",
+      "effective_kb_ids"
+    ]
+  }
+}

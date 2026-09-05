@@ -4,6 +4,8 @@ const test = require("node:test");
 const {
   REQUIRED_MODULES,
   LOCKED_PACKAGES,
+  PYTHON_OVERRIDE_KEYS,
+  defaultPythonCandidates,
   runVerifier,
 } = require("./verify-python-runtime");
 
@@ -13,8 +15,8 @@ function probe(overrides = {}) {
     version: "3.12.13",
     missingModules: [],
     packageVersions: {
-      "llama-index": "0.11.19",
       "llama-index-core": "0.11.19",
+      "httpx": "0.27.2",
     },
     ...overrides,
   };
@@ -40,7 +42,7 @@ test("runVerifier accepts an explicit CPython 3.12 with required modules and cle
   const { calls, spawn } = fakeSpawn();
 
   const result = runVerifier({
-    env: { NORTHAGENT_PYTHON: "/custom/python" },
+    env: { KB_PYTHON: "/custom/python" },
     platform: "darwin",
     spawn,
   });
@@ -52,8 +54,8 @@ test("runVerifier accepts an explicit CPython 3.12 with required modules and cle
   assert.equal(result.version, "3.12.13");
   assert.deepEqual(result.missingModules, []);
   assert.deepEqual(result.packageVersions, {
-    "llama-index": "0.11.19",
     "llama-index-core": "0.11.19",
+    "httpx": "0.27.2",
   });
   assert.equal(result.pipCheck, "passed");
   assert.equal(calls.length, 2);
@@ -62,28 +64,46 @@ test("runVerifier accepts an explicit CPython 3.12 with required modules and cle
   assert.deepEqual(result.failures, []);
 });
 
-test("runVerifier follows the desktop Python override precedence", () => {
+test("defaultPythonCandidates prefer active conda and virtualenv interpreters before project fallbacks", () => {
+  const candidates = defaultPythonCandidates("darwin", "/workspace/project", {
+    CONDA_PREFIX: "/opt/conda/envs/agent-kb",
+    VIRTUAL_ENV: "/tmp/venv",
+  });
+
+  assert.deepEqual(candidates, [
+    "/opt/conda/envs/agent-kb/bin/python",
+    "/tmp/venv/bin/python",
+    "/workspace/project/.venv/bin/python",
+    "/workspace/project/venv/bin/python",
+    "python3",
+    "python",
+  ]);
+});
+
+test("runVerifier follows the KB-first desktop Python override precedence", () => {
   const { spawn } = fakeSpawn();
 
   const result = runVerifier({
     env: {
       FOXGLOVE_PYTHON: "/foxglove/python",
-      NORTHAGENT_PYTHON: "/northagent/python",
       THINKRAG_PYTHON: "/thinkrag/python",
+      NORTHAGENT_PYTHON: "/northagent/python",
+      KB_PYTHON: "/kb/python",
     },
     spawn,
   });
 
   assert.equal(result.ok, true);
-  assert.equal(result.pythonCommand, "/northagent/python");
+  assert.equal(result.pythonCommand, "/kb/python");
   assert.equal(result.attempts.length, 1);
+  assert.deepEqual(PYTHON_OVERRIDE_KEYS, ["KB_PYTHON", "NORTHAGENT_PYTHON", "THINKRAG_PYTHON", "FOXGLOVE_PYTHON"]);
 });
 
 test("runVerifier rejects a non-3.12 interpreter before the pip gate", () => {
   const { calls, spawn } = fakeSpawn({ probeResult: probe({ version: "3.11.9" }) });
 
   const result = runVerifier({
-    env: { NORTHAGENT_PYTHON: "/custom/python" },
+    env: { KB_PYTHON: "/custom/python" },
     spawn,
   });
 
@@ -98,7 +118,7 @@ test("runVerifier reports missing core modules", () => {
   const missingModules = ["fastapi", "llama_index", "sentence_transformers"];
   const { spawn } = fakeSpawn({ probeResult: probe({ missingModules }) });
 
-  const result = runVerifier({ env: { NORTHAGENT_PYTHON: "/custom/python" }, spawn });
+  const result = runVerifier({ env: { KB_PYTHON: "/custom/python" }, spawn });
 
   assert.equal(result.ok, false);
   assert.deepEqual(result.missingModules, missingModules);
@@ -106,20 +126,20 @@ test("runVerifier reports missing core modules", () => {
   assert.match(result.failures.join("\n"), /sentence_transformers/);
 });
 
-test("runVerifier rejects llama-index lock version drift", () => {
+test("runVerifier rejects llama-index-core lock version drift", () => {
   const { spawn } = fakeSpawn({
     probeResult: probe({
       packageVersions: {
-        "llama-index": "0.11.20",
-        "llama-index-core": "0.11.19",
+        "llama-index-core": "0.11.20",
+        "httpx": "0.27.2",
       },
     }),
   });
 
-  const result = runVerifier({ env: { NORTHAGENT_PYTHON: "/custom/python" }, spawn });
+  const result = runVerifier({ env: { KB_PYTHON: "/custom/python" }, spawn });
 
   assert.equal(result.ok, false);
-  assert.equal(result.packageVersions["llama-index"], "0.11.20");
+  assert.equal(result.packageVersions["llama-index-core"], "0.11.20");
   assert.match(result.failures.join("\n"), /llama-index/);
   assert.match(result.failures.join("\n"), /0\.11\.19/);
 });
@@ -130,7 +150,7 @@ test("runVerifier reports pip check failures", () => {
     pipStderr: "fastapi 0.115.0 has requirement starlette<0.39.0, but you have starlette 0.40.0",
   });
 
-  const result = runVerifier({ env: { NORTHAGENT_PYTHON: "/custom/python" }, spawn });
+  const result = runVerifier({ env: { KB_PYTHON: "/custom/python" }, spawn });
 
   assert.equal(result.ok, false);
   assert.match(result.pipCheck, /starlette/);
@@ -169,7 +189,7 @@ test("runVerifier fails closed for an explicit interpreter and does not fall bac
   const { calls, spawn } = fakeSpawn({ probeStatus: 1, probeStderr: "No such file or directory" });
 
   const result = runVerifier({
-    env: { NORTHAGENT_PYTHON: "/missing/python" },
+    env: { KB_PYTHON: "/missing/python" },
     candidates: ["/other/python"],
     spawn,
   });
@@ -183,9 +203,8 @@ test("runVerifier fails closed for an explicit interpreter and does not fall bac
 });
 
 test("runVerifier reports a missing command as a structured failure", () => {
-  const { spawn } = fakeSpawn();
   const result = runVerifier({
-    env: { NORTHAGENT_PYTHON: "/missing/python" },
+    env: { KB_PYTHON: "/missing/python" },
     spawn: () => ({ status: null, error: new Error("spawn ENOENT") }),
   });
 
@@ -196,7 +215,7 @@ test("runVerifier reports a missing command as a structured failure", () => {
 
 test("runVerifier rejects invalid JSON probe output", () => {
   const result = runVerifier({
-    env: { NORTHAGENT_PYTHON: "/custom/python" },
+    env: { KB_PYTHON: "/custom/python" },
     spawn: () => ({ status: 0, stdout: "not-json", stderr: "" }),
   });
 
@@ -208,7 +227,7 @@ test("diagnostics collapse newlines and truncate at 500 characters", () => {
   const longMessage = `${"x".repeat(300)}\n${"y".repeat(300)}`;
   const { spawn } = fakeSpawn({ pipStatus: 1, pipStderr: longMessage });
 
-  const result = runVerifier({ env: { NORTHAGENT_PYTHON: "/custom/python" }, spawn });
+  const result = runVerifier({ env: { KB_PYTHON: "/custom/python" }, spawn });
   const diagnostic = result.failures.find((failure) => failure.includes("pip check"));
 
   assert.ok(diagnostic);
@@ -225,7 +244,7 @@ test("external diagnostics redact secret-like environment values", () => {
 
   const result = runVerifier({
     env: {
-      NORTHAGENT_PYTHON: "/custom/python",
+      KB_PYTHON: "/custom/python",
       PRIVATE_API_TOKEN: secret,
     },
     spawn,
@@ -245,7 +264,7 @@ test("runtime verifier constants cover the required module and package contracts
     "httpx",
   ]);
   assert.deepEqual(LOCKED_PACKAGES, {
-    "llama-index": "0.11.19",
     "llama-index-core": "0.11.19",
+    "httpx": "0.27.2",
   });
 });

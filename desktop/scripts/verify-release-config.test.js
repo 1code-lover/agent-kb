@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 
-const { verifyReleaseConfig } = require("./verify-release-config");
+const { formatReadyMessage, verifyReleaseConfig } = require("./verify-release-config");
 
 function buildPackage(overrides = {}) {
   const pkg = {
@@ -26,7 +26,7 @@ function buildPackage(overrides = {}) {
         { from: "../utils", to: "utils", filter: ["**/*.py"] },
         { from: "../config.py", to: "config.py" },
         { from: "../run_api.py", to: "run_api.py" },
-        { from: "../requirements.txt", to: "requirements.txt" },
+        { from: "../requirements-runtime.txt", to: "requirements-runtime.txt" },
         { from: "../localmodels", to: "localmodels" },
       ],
       mac: {
@@ -144,4 +144,14 @@ test("verifyReleaseConfig rejects a missing Python runtime verifier command", ()
 
   assert.equal(result.ok, false);
   assert.match(result.failures.join("\n"), /verify:python-runtime.*verify-python-runtime\.js/);
+});
+
+
+test("formatReadyMessage distinguishes ad-hoc packaging from formal release lane", () => {
+  const message = formatReadyMessage();
+
+  assert.match(message, /build:mac/);
+  assert.match(message, /ad-hoc packaging/);
+  assert.match(message, /release:mac/);
+  assert.match(message, /signed\/notarized distribution lane/);
 });

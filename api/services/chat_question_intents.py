@@ -218,6 +218,20 @@ _TARGETED_EXACT_HINTS = (
     "resolve back",
     "preview excerpt",
 )
+_RECENT_DOC_PAIR_EN_RE = re.compile(r"\b(?:those|the)\s+two\s+(?:pdfs?|docs?|documents?)\b", re.IGNORECASE)
+_RECENT_DOC_ACTION_EN_RE = re.compile(r"\b(?:we|i)\s+(?:just\s+)?(?:opened|viewed|looked\s+at|read)\b|\b(?:just|recently)\s+(?:opened|viewed|looked\s+at|read)\b", re.IGNORECASE)
+_RECENT_DOC_PAIR_CJK_RE = re.compile(r"(?:刚才|前面|上面).{0,8}(?:看的|打开的|那|这)?(?:两份|两个).{0,6}(?:文档|资料|pdf|PDF)")
+_TARGETED_MULTI_FACT_PROMPT_RE = re.compile(r"\b(?:who|what|which|when|where|how many)\b", re.IGNORECASE)
+_TARGETED_CJK_FACT_MARKERS = (
+    "谁",
+    "哪位",
+    "哪个",
+    "什么",
+    "几分钟",
+    "多久",
+    "何时",
+    "多少",
+)
 
 
 def question_requests_entity(question: str) -> bool:
@@ -392,6 +406,15 @@ def split_parallel_cjk_targeted_fact_question(question: str) -> list[str]:
 
 
 
+def question_mentions_recent_doc_pair(question: str) -> bool:
+    """判断问题是否在引用“刚打开/刚看的两份文档”这类历史双文档上下文。"""
+    raw = str(question or "")
+    lowered = raw.lower()
+    has_recent_english_pair = bool(_RECENT_DOC_PAIR_EN_RE.search(lowered) and _RECENT_DOC_ACTION_EN_RE.search(lowered))
+    has_recent_cjk_pair = bool(_RECENT_DOC_PAIR_CJK_RE.search(raw))
+    return has_recent_english_pair or has_recent_cjk_pair
+
+
 def question_requests_targeted_fact_answer(
     question: str,
     *,
@@ -407,7 +430,8 @@ def question_requests_targeted_fact_answer(
         return True
 
     has_targeted_split_signal = any(pattern.search(raw) for pattern in _TARGETED_FACT_SPLIT_PATTERNS)
-    if not has_targeted_split_signal:
+    recent_doc_pair = question_mentions_recent_doc_pair(question)
+    if not has_targeted_split_signal and not recent_doc_pair:
         return False
 
     if question_requests_negative_contract(question):
@@ -419,6 +443,13 @@ def question_requests_targeted_fact_answer(
 
     if any(marker in lowered for marker in _TARGETED_FACT_MARKERS):
         return True
+
+    if recent_doc_pair:
+        cjk_fact_hits = sum(raw.count(marker) for marker in _TARGETED_CJK_FACT_MARKERS if marker in raw)
+        english_fact_hits = len(_TARGETED_MULTI_FACT_PROMPT_RE.findall(raw))
+        has_clause_split = any(separator in raw for separator in ("，", ",", "；", ";"))
+        if has_clause_split and (cjk_fact_hits >= 2 or english_fact_hits >= 2):
+            return True
 
     return question_prefers_cross_source_fact_assembly(question) and any(marker in lowered for marker in _TARGETED_CROSS_SOURCE_MARKERS)
 
@@ -456,7 +487,7 @@ def question_may_need_exact_term_repair(
 def question_prefers_cross_source_fact_assembly(question: str) -> bool:
     """判断问题是否明确要求跨文档/跨看板拼装事实。"""
     lowered = str(question or "").lower()
-    return "across" in lowered or "compare" in lowered
+    return "across" in lowered or "compare" in lowered or question_mentions_recent_doc_pair(question)
 
 
 

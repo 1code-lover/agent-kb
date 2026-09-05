@@ -11,7 +11,7 @@ from typing import Any, Iterable
 from unittest.mock import MagicMock
 
 import fitz
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from api.app import app
@@ -21,24 +21,36 @@ from scripts.validate_rag_quality_fixtures import load_eval_schema, validate_eva
 from server.asset_registry import KBAssetRegistry
 from server.kb_registry import KBRegistry
 from server.readers.pdf_ocr import PDFOCRReader
+from server.utils.font_fallbacks import OCR_FONT_CANDIDATES, load_first_available_font
 from server.utils.file import get_kb_data_dir
 from tests.api._semireal_chat_support import FakeUploadFile, SemirealIndexManager, SemirealQueryEngine
-from tests.api.chat_qa_metrics import _confidence_interval_wilson, build_chat_case_report, summarize_chat_case_reports
+from tests.api.chat_eval_contracts import (
+    build_negative_contract_summary,
+    build_refusal_summary,
+    evaluate_contract_gates,
+    evaluate_report_run_passed,
+)
+from tests.api.chat_eval_suite_reporting import (
+    build_eval_suite_layer_summary,
+    load_eval_suite_manifest,
+)
+from tests.api.chat_qa_metrics import (
+    _confidence_interval_wilson,
+    build_chat_case_report,
+    summarize_chat_case_reports,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_EVAL_CASES_PATH = REPO_ROOT / "tests" / "fixtures" / "rag_quality" / "eval_v1" / "cases.json"
 DEFAULT_EVAL_SCHEMA_PATH = REPO_ROOT / "tests" / "fixtures" / "rag_quality" / "eval_v1" / "schema.json"
+DEFAULT_LAYERED_SUITE_PATH = REPO_ROOT / "tests" / "fixtures" / "rag_quality" / "eval_layered_suite.json"
 DEFAULT_REPORT_DIR = REPO_ROOT / "docs" / "20260722-local-multi-kb-assistant" / "artifacts" / "qa-eval"
 MARKDOWN_FIXTURE_DIR = REPO_ROOT / "tests" / "fixtures" / "rag_quality" / "semireal_markdown"
 MARKDOWN_KB_ID = "eval-kb-markdown"
 PDF_KB_ID = "eval-kb-pdf"
 PDF_ZERO_KB_ID = "eval-kb-pdf-zero"
 IMAGE_KB_ID = "eval-kb-image"
-FONT_CANDIDATES = [
-    Path("C:/Windows/Fonts/arial.ttf"),
-    Path("C:/Windows/Fonts/calibri.ttf"),
-    Path("C:/Windows/Fonts/msyh.ttc"),
-]
+FONT_CANDIDATES = OCR_FONT_CANDIDATES
 EVAL_KB_MODALITIES = {
     MARKDOWN_KB_ID: "markdown",
     PDF_KB_ID: "pdf",
@@ -60,6 +72,8 @@ MARKDOWN_EXTRA_IMPORTS = {
     "workflow-boundary.md": "business/architecture/workflow-boundary.md",
     "utf8-boundary.md": "business/architecture/utf8-boundary.md",
     "long-cutover-handbook.md": "business/cutover/long-cutover-handbook.md",
+    "refusal-wording-note.md": "qa/policies/refusal-wording-note.md",
+    "scope-refusal-bridge.md": "qa/contracts/scope-refusal-bridge.md",
 }
 BASE_PDF_IMPORTS = {
     "scope-manual.pdf": {
@@ -188,6 +202,17 @@ PDF_EXTRA_IMPORTS = {
         If the active knowledge base has no confirmable evidence, the answer must say No confirmable information is available in the current knowledge base.
         """,
     },
+    "scope-refusal-bridge.pdf": {
+        "relative_path": "pdf/contracts/scope-refusal-bridge.pdf",
+        "text": """
+        PDF title: Scope refusal bridge.
+        Scope refusal bridge rule: the assistant must not fabricate from outside memory when the current PDF knowledge base has no confirmable evidence.
+        Scope refusal bridge also requires the assistant to stay inside the current PDF knowledge base.
+        Knowledge Base remains the authorization boundary for this PDF scope bridge.
+        Exact field name for scope echo: effective_kb_ids.
+        If the active scope still needs an explicit field name, effective_kb_ids must stay aligned with the current PDF knowledge base.
+        """,
+    },
 }
 IMAGE_EXTRA_IMPORTS = {
     "long-cutover-handbook-board.png": {
@@ -211,9 +236,9 @@ IMAGE_EXTRA_IMPORTS = {
         "image_lines": [
             "Low-contrast policy board for OCR stress checks",
             "If OCR remains sparse, say no confirmable information",
-            "Active knowledge base only. No fabricated memory",
+            "Active knowledge base only. Must not fabricate from outside memory",
         ],
-        "ocr_text": "low contrast OCR fallback. no confirmable information. active knowledge base only. no fabricated memory.",
+        "ocr_text": "low contrast OCR fallback. no confirmable information. active knowledge base only. must not fabricate from outside memory.",
     },
     "weak-no-text-board.png": {
         "relative_path": "images/weak-signals/weak-no-text-board.png",
@@ -267,6 +292,15 @@ IMAGE_EXTRA_IMPORTS = {
             "No confirmable information when evidence is missing",
         ],
         "ocr_text": "P1 cutover issues must escalate to on-call manager Liu Chang within 10 minutes. folder is not an authorization boundary. Knowledge base remains the authorization boundary for this escalation board. If evidence is missing, reply No confirmable information is available in the current knowledge base.",
+    },
+    "boundary-knowledge-board.png": {
+        "relative_path": "images/architecture/boundary-knowledge-board.png",
+        "image_lines": [
+            "OCR boundary knowledge board",
+            "folder path is not an authorization boundary",
+            "knowledge base remains the authorization boundary",
+        ],
+        "ocr_text": "OCR boundary knowledge board. Folder path is not an authorization boundary. Knowledge base remains the authorization boundary for image OCR answers.",
     },
 }
 
@@ -358,6 +392,29 @@ def _normalize_eval_case(case: dict[str, Any]) -> dict[str, Any]:
         "preview_terms": list(case.get("preview_terms", [])),
         "expected_source_count": int(case.get("expected_source_count", 0)),
     }
+
+
+def _normalize_history_turns(case: dict[str, Any]) -> list[str]:
+    """清理 case 中可选的 history_turns，供 follow-up 评测预热复用。"""
+    turns: list[str] = []
+    for item in list(case.get("history_turns") or []):
+        normalized = str(item).strip()
+        if normalized:
+            turns.append(normalized)
+    return turns
+
+
+def _attach_history_metadata(report: dict[str, Any], history_turns: list[str] | None = None) -> dict[str, Any]:
+    """把 history-grounded 评测元信息挂到 case report 上。"""
+    normalized_turns = [str(item) for item in list(history_turns or [])]
+    report.update(
+        {
+            "history_grounded": bool(normalized_turns),
+            "history_turn_count": len(normalized_turns),
+            "history_turns": normalized_turns,
+        }
+    )
+    return report
 
 
 def _build_breakdown(reports: Iterable[dict[str, Any]], field_name: str) -> dict[str, dict[str, Any]]:
@@ -1010,49 +1067,53 @@ def _build_transport_failure_report(
     status_code: int | None,
     message: str,
     preview_requested: bool,
+    history_turns: list[str] | None = None,
 ) -> dict[str, Any]:
     """在 chat 或 preview 请求失败时构造统一失败报告。"""
     expected_source_count = int(case.get("expected_source_count", 0))
-    return {
-        "case_id": case["case_id"],
-        "category": case["category"],
-        "modality": case["modality"],
-        "difficulty": case["difficulty"],
-        "answer_style": case["answer_style"],
-        "kb_id": case["kb_id"],
-        "question": case["question"],
-        "answerable": bool(case.get("answerable")),
-        "judge_focus": list(case.get("judge_focus", [])),
-        "scope_passed": False,
-        "expected_kb_ids": [case["kb_id"]],
-        "keypoint_total": len(case.get("expected_keypoints", [])),
-        "keypoint_hits": [],
-        "keypoint_missed": list(case.get("expected_keypoints", [])),
-        "keypoint_coverage": 0.0,
-        "blocked_term_total": len(case.get("forbidden_terms", [])),
-        "blocked_term_hits": [],
-        "blocked_term_clean": True,
-        "forbidden_term_clean_rate": 1.0,
-        "expected_source_count": expected_source_count,
-        "actual_source_count": 0,
-        "actual_evidence_count": 0,
-        "source_count_match": expected_source_count == 0,
-        "expected_doc": case["source_doc"] if case.get("answerable") else None,
-        "required_evidence_docs": list(case.get("required_evidence_docs", [])),
-        "returned_titles": [],
-        "evidence_hit": False if expected_source_count > 0 else True,
-        "preview_required": bool(case.get("preview_required")) and expected_source_count > 0,
-        "preview_resolvable": False if case.get("preview_required") and expected_source_count > 0 else True,
-        "preview_term_total": 0,
-        "preview_term_hits": [],
-        "preview_term_coverage": 0.0 if case.get("preview_required") and expected_source_count > 0 else 1.0,
-        "passed": False,
-        "response_status_code": status_code,
-        "preview_status_code": None,
-        "preview_requested": preview_requested,
-        "failure_stage": stage,
-        "failure_message": message,
-    }
+    return _attach_history_metadata(
+        {
+            "case_id": case["case_id"],
+            "category": case["category"],
+            "modality": case["modality"],
+            "difficulty": case["difficulty"],
+            "answer_style": case["answer_style"],
+            "kb_id": case["kb_id"],
+            "question": case["question"],
+            "answerable": bool(case.get("answerable")),
+            "judge_focus": list(case.get("judge_focus", [])),
+            "scope_passed": False,
+            "expected_kb_ids": [case["kb_id"]],
+            "keypoint_total": len(case.get("expected_keypoints", [])),
+            "keypoint_hits": [],
+            "keypoint_missed": list(case.get("expected_keypoints", [])),
+            "keypoint_coverage": 0.0,
+            "blocked_term_total": len(case.get("forbidden_terms", [])),
+            "blocked_term_hits": [],
+            "blocked_term_clean": True,
+            "forbidden_term_clean_rate": 1.0,
+            "expected_source_count": expected_source_count,
+            "actual_source_count": 0,
+            "actual_evidence_count": 0,
+            "source_count_match": expected_source_count == 0,
+            "expected_doc": case["source_doc"] if case.get("answerable") else None,
+            "required_evidence_docs": list(case.get("required_evidence_docs", [])),
+            "returned_titles": [],
+            "evidence_hit": False if expected_source_count > 0 else True,
+            "preview_required": bool(case.get("preview_required")) and expected_source_count > 0,
+            "preview_resolvable": False if case.get("preview_required") and expected_source_count > 0 else True,
+            "preview_term_total": 0,
+            "preview_term_hits": [],
+            "preview_term_coverage": 0.0 if case.get("preview_required") and expected_source_count > 0 else 1.0,
+            "passed": False,
+            "response_status_code": status_code,
+            "preview_status_code": None,
+            "preview_requested": preview_requested,
+            "failure_stage": stage,
+            "failure_message": message,
+        },
+        history_turns,
+    )
 
 
 def build_eval_case_report(
@@ -1063,6 +1124,7 @@ def build_eval_case_report(
     response_status_code: int = 200,
     preview_status_code: int | None = None,
     preview_requested: bool = False,
+    history_turns: list[str] | None = None,
 ) -> dict[str, Any]:
     """把单个 case 的预览需求规整为布尔值。"""
     report = build_chat_case_report(
@@ -1093,7 +1155,7 @@ def build_eval_case_report(
             "failure_message": "",
         }
     )
-    return report
+    return _attach_history_metadata(report, history_turns)
 
 
 def evaluate_run_gates(summary: dict[str, Any], schema: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -1129,6 +1191,11 @@ def _build_failures(reports: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
                 "keypoint_missed": list(report.get("keypoint_missed", [])),
                 "blocked_term_hits": list(report.get("blocked_term_hits", [])),
                 "returned_titles": list(report.get("returned_titles", [])),
+                "answer": str(report.get("answer") or ""),
+                "preview_excerpt": str(report.get("preview_excerpt") or ""),
+                "source_count_match": bool(report.get("source_count_match")),
+                "evidence_hit": bool(report.get("evidence_hit")),
+                "preview_resolvable": bool(report.get("preview_resolvable")),
                 "preview_requested": bool(report.get("preview_requested")),
                 "response_status_code": report.get("response_status_code"),
                 "preview_status_code": report.get("preview_status_code"),
@@ -1144,15 +1211,68 @@ def run_chat_eval_cases(
     *,
     dataset_name: str | None = None,
 ) -> dict[str, Any]:
-    """??? case ?? chat ? preview ????????"""
+    """执行 eval case 的 chat / preview 链路，并支持可选的同 session follow-up 预热。"""
     reports: list[dict[str, Any]] = []
 
     for case in cases:
+        session_id = f"eval::{case['case_id']}"
+        history_turns = _normalize_history_turns(case)
+        chat_service.clear_history(session_id)
+
+        prewarm_failed = False
+        for turn_index, history_turn in enumerate(history_turns, start=1):
+            prewarm_response = client.post(
+                "/api/chat/query",
+                json={
+                    "question": history_turn,
+                    "session_id": session_id,
+                    "kb_ids": [case["kb_id"]],
+                },
+            )
+            if prewarm_response.status_code != 200:
+                body = (
+                    prewarm_response.json()
+                    if prewarm_response.headers.get("content-type", "").startswith("application/json")
+                    else {}
+                )
+                message = str(body.get("detail") or body.get("message") or prewarm_response.text)
+                reports.append(
+                    _build_transport_failure_report(
+                        case,
+                        stage="chat_query",
+                        status_code=prewarm_response.status_code,
+                        message=f"history prewarm turn {turn_index} failed: {message}",
+                        preview_requested=False,
+                        history_turns=history_turns,
+                    )
+                )
+                prewarm_failed = True
+                break
+
+            prewarm_body = prewarm_response.json()
+            prewarm_payload = prewarm_body.get("data") if isinstance(prewarm_body, dict) else None
+            if not isinstance(prewarm_payload, dict):
+                reports.append(
+                    _build_transport_failure_report(
+                        case,
+                        stage="chat_query",
+                        status_code=prewarm_response.status_code,
+                        message=f"history prewarm turn {turn_index} returned no data payload",
+                        preview_requested=False,
+                        history_turns=history_turns,
+                    )
+                )
+                prewarm_failed = True
+                break
+
+        if prewarm_failed:
+            continue
+
         response = client.post(
             "/api/chat/query",
             json={
                 "question": case["question"],
-                "session_id": f"eval::{case['case_id']}",
+                "session_id": session_id,
                 "kb_ids": [case["kb_id"]],
             },
         )
@@ -1166,6 +1286,7 @@ def run_chat_eval_cases(
                     status_code=response.status_code,
                     message=message,
                     preview_requested=False,
+                    history_turns=history_turns,
                 )
             )
             continue
@@ -1180,6 +1301,7 @@ def run_chat_eval_cases(
                     status_code=response.status_code,
                     message="response data is missing",
                     preview_requested=False,
+                    history_turns=history_turns,
                 )
             )
             continue
@@ -1219,6 +1341,7 @@ def run_chat_eval_cases(
                                 status_code=preview_status_code,
                                 message=message,
                                 preview_requested=True,
+                                history_turns=history_turns,
                             )
                         )
                         preview_failed = True
@@ -1235,6 +1358,7 @@ def run_chat_eval_cases(
                             status_code=preview_status_code,
                             message="preview payload missing data",
                             preview_requested=True,
+                            history_turns=history_turns,
                         )
                     )
                     continue
@@ -1247,11 +1371,15 @@ def run_chat_eval_cases(
                 response_status_code=response.status_code,
                 preview_status_code=preview_status_code,
                 preview_requested=preview_requested,
+                history_turns=history_turns,
             )
         )
 
     suite_summary = summarize_chat_case_reports(reports)
+    refusal_summary = build_refusal_summary(reports, schema)
+    negative_contract_summary = build_negative_contract_summary(reports, schema)
     run_gates = evaluate_run_gates(suite_summary, schema)
+    contract_gates = evaluate_contract_gates(refusal_summary, negative_contract_summary)
     failures = _build_failures(reports)
     failure_stage_breakdown = dict(sorted(Counter(item["failure_stage"] for item in failures).items()))
     preview_required_cases = sum(1 for item in reports if item.get("preview_required"))
@@ -1262,9 +1390,16 @@ def run_chat_eval_cases(
         "evaluation_mode": evaluation_mode,
         "run_at": datetime.now(timezone.utc).isoformat(),
         "suite_summary": suite_summary,
+        "refusal_summary": refusal_summary,
+        "negative_contract_summary": negative_contract_summary,
         "run_gates": run_gates,
-        "run_passed": all(item["passed"] for item in run_gates.values())
-        and (evaluation_mode != "healthy" or suite_summary["failed_cases"] == 0),
+        "contract_gates": contract_gates,
+        "run_passed": evaluate_report_run_passed(
+            evaluation_mode=evaluation_mode,
+            suite_summary=suite_summary,
+            run_gates=run_gates,
+            contract_gates=contract_gates,
+        ),
         "breakdowns": {
             "modality": _build_breakdown(reports, "modality"),
             "difficulty": _build_breakdown(reports, "difficulty"),
@@ -1309,10 +1444,19 @@ def _render_table(rows: list[list[str]], headers: list[str]) -> str:
     return "\n".join(lines)
 
 
+def _format_contract_gate_detail(item: dict[str, Any]) -> str:
+    """格式化 Contract Gate 的缺口细节。"""
+    detail = dict(item).get("detail")
+    if detail is not None:
+        return json.dumps(detail, ensure_ascii=False)
+    return json.dumps(dict(item).get("missing", []), ensure_ascii=False)
+
+
 def build_eval_markdown_report(report: dict[str, Any]) -> str:
     """?????????? Markdown ???"""
     summary = dict(report.get("suite_summary") or {})
     run_gates = dict(report.get("run_gates") or {})
+    contract_gates = dict(report.get("contract_gates") or {})
     import_summary = dict(report.get("import_summary") or {})
     import_qa_correlation = dict(report.get("import_qa_correlation") or {})
     preview_stats = dict(report.get("preview_stats") or {})
@@ -1387,6 +1531,27 @@ def build_eval_markdown_report(report: dict[str, Any]) -> str:
         )
     else:
         lines.append("本次运行未配置 Run Gate。")
+
+    lines.extend(["", "### Contract Gate", ""])
+    if contract_gates:
+        lines.append(
+            _render_table(
+                [
+                    [
+                        gate_name,
+                        str(item.get("metric", "-")),
+                        f"{float(item.get('actual', 0.0)):.3f}",
+                        f"{float(item.get('minimum', 0.0)):.3f}",
+                        "通过" if item.get("passed") else "失败",
+                        _format_contract_gate_detail(item),
+                    ]
+                    for gate_name, item in contract_gates.items()
+                ],
+                ["Gate", "指标", "实际值", "阈值", "结果", "details"],
+            )
+        )
+    else:
+        lines.append("本次运行未配置 Contract Gate。")
     lines.extend([
         "",
         "## 3. Preview 请求摘要",
@@ -1402,7 +1567,165 @@ def build_eval_markdown_report(report: dict[str, Any]) -> str:
         "",
     ])
 
-    section_index = 4
+    refusal_summary = dict(report.get("refusal_summary") or {})
+    refusal_category_breakdown = dict(refusal_summary.get("category_breakdown") or {})
+    refusal_modality_breakdown = dict(refusal_summary.get("modality_breakdown") or {})
+    refusal_overview_rows = [
+        ["refusal_case_count", str(refusal_summary.get("refusal_case_count", 0))],
+        ["passed_refusal_cases", str(refusal_summary.get("passed_refusal_cases", 0))],
+        ["failed_refusal_cases", str(refusal_summary.get("failed_refusal_cases", 0))],
+        ["refusal_pass_rate", f"{float(refusal_summary.get('refusal_pass_rate', 0.0)):.3f}"],
+        ["required_categories_passed", "通过" if refusal_summary.get("required_categories_passed") else "失败"],
+        ["required_marker_coverage_passed", "通过" if refusal_summary.get("required_marker_coverage_passed") else "失败"],
+        ["required_modalities_passed", "通过" if refusal_summary.get("required_modalities_passed") else "失败"],
+        ["missing_required_categories", ", ".join(refusal_summary.get("missing_required_categories") or []) or "-"],
+        [
+            "required_categories_without_passed_cases",
+            ", ".join(refusal_summary.get("required_categories_without_passed_cases") or []) or "-",
+        ],
+        ["missing_required_modalities", ", ".join(refusal_summary.get("missing_required_modalities") or []) or "-"],
+        [
+            "required_modalities_without_passed_cases",
+            ", ".join(refusal_summary.get("required_modalities_without_passed_cases") or []) or "-",
+        ],
+    ]
+    lines.extend([
+        "## 4. Refusal 覆盖摘要",
+        "",
+        _render_table(refusal_overview_rows, ["指标", "数值"]),
+        "",
+    ])
+    if refusal_category_breakdown:
+        lines.extend([
+            _render_table(
+                [
+                    [
+                        category,
+                        str(item.get("count", 0)),
+                        str(item.get("passed", 0)),
+                        str(item.get("failed", 0)),
+                        f"{float(item.get('pass_rate', 0.0)):.3f}",
+                        "; ".join(
+                            f"{marker}:{marker_item.get('hit_cases', 0)}({'通过' if marker_item.get('covered') else '失败'})"
+                            for marker, marker_item in dict(item.get("required_markers") or {}).items()
+                        ) or "-",
+                    ]
+                    for category, item in refusal_category_breakdown.items()
+                ],
+                ["category", "count", "passed", "failed", "pass_rate", "required_markers"],
+            ),
+            "",
+        ])
+    if refusal_modality_breakdown:
+        lines.extend([
+            _render_table(
+                [
+                    [
+                        modality,
+                        str(item.get("count", 0)),
+                        str(item.get("passed", 0)),
+                        str(item.get("failed", 0)),
+                        f"{float(item.get('pass_rate', 0.0)):.3f}",
+                    ]
+                    for modality, item in refusal_modality_breakdown.items()
+                ],
+                ["modality", "count", "passed", "failed", "pass_rate"],
+            ),
+            "",
+        ])
+
+    negative_contract_summary = dict(report.get("negative_contract_summary") or {})
+    negative_contract_category_breakdown = dict(negative_contract_summary.get("category_breakdown") or {})
+    negative_contract_modality_breakdown = dict(negative_contract_summary.get("modality_breakdown") or {})
+    has_negative_contract_section = bool(
+        negative_contract_summary.get("negative_contract_case_count", 0)
+        or negative_contract_summary.get("required_categories")
+        or negative_contract_summary.get("required_modalities")
+        or negative_contract_category_breakdown
+        or negative_contract_modality_breakdown
+    )
+    section_index = 5
+    if has_negative_contract_section:
+        negative_contract_rows = [
+            ["negative_contract_case_count", str(negative_contract_summary.get("negative_contract_case_count", 0))],
+            [
+                "passed_negative_contract_cases",
+                str(negative_contract_summary.get("passed_negative_contract_cases", 0)),
+            ],
+            [
+                "failed_negative_contract_cases",
+                str(negative_contract_summary.get("failed_negative_contract_cases", 0)),
+            ],
+            [
+                "negative_contract_pass_rate",
+                f"{float(negative_contract_summary.get('negative_contract_pass_rate', 0.0)):.3f}",
+            ],
+            [
+                "required_categories_passed",
+                "通过" if negative_contract_summary.get("required_categories_passed") else "失败",
+            ],
+            [
+                "required_modalities_passed",
+                "通过" if negative_contract_summary.get("required_modalities_passed") else "失败",
+            ],
+            [
+                "missing_required_categories",
+                ", ".join(negative_contract_summary.get("missing_required_categories") or []) or "-",
+            ],
+            [
+                "required_categories_without_passed_cases",
+                ", ".join(negative_contract_summary.get("required_categories_without_passed_cases") or []) or "-",
+            ],
+            [
+                "missing_required_modalities",
+                ", ".join(negative_contract_summary.get("missing_required_modalities") or []) or "-",
+            ],
+            [
+                "required_modalities_without_passed_cases",
+                ", ".join(negative_contract_summary.get("required_modalities_without_passed_cases") or []) or "-",
+            ],
+        ]
+        lines.extend([
+            "## 5. Negative Contract 覆盖摘要",
+            "",
+            _render_table(negative_contract_rows, ["指标", "数值"]),
+            "",
+        ])
+        if negative_contract_category_breakdown:
+            lines.extend([
+                _render_table(
+                    [
+                        [
+                            category,
+                            str(item.get("count", 0)),
+                            str(item.get("passed", 0)),
+                            str(item.get("failed", 0)),
+                            f"{float(item.get('pass_rate', 0.0)):.3f}",
+                        ]
+                        for category, item in negative_contract_category_breakdown.items()
+                    ],
+                    ["category", "count", "passed", "failed", "pass_rate"],
+                ),
+                "",
+            ])
+        if negative_contract_modality_breakdown:
+            lines.extend([
+                _render_table(
+                    [
+                        [
+                            modality,
+                            str(item.get("count", 0)),
+                            str(item.get("passed", 0)),
+                            str(item.get("failed", 0)),
+                            f"{float(item.get('pass_rate', 0.0)):.3f}",
+                        ]
+                        for modality, item in negative_contract_modality_breakdown.items()
+                    ],
+                    ["modality", "count", "passed", "failed", "pass_rate"],
+                ),
+                "",
+            ])
+        section_index = 6
     if import_summary:
         lines.extend([
             f"## {section_index}. 导入基线摘要",
@@ -1797,6 +2120,10 @@ def build_eval_markdown_report(report: dict[str, Any]) -> str:
                         item.get("failure_message", "-"),
                         "<br>".join(item.get("keypoint_missed", [])) or "-",
                         "<br>".join(item.get("returned_titles", [])) or "-",
+                        str(item.get("source_count_match")),
+                        str(item.get("evidence_hit")),
+                        str(item.get("preview_resolvable")),
+                        (item.get("answer", "") or "-")[:160],
                         str(item.get("response_status_code") or "-"),
                         str(item.get("preview_status_code") or "-"),
                     ]
@@ -1812,6 +2139,10 @@ def build_eval_markdown_report(report: dict[str, Any]) -> str:
                     "failure_message",
                     "keypoint_missed",
                     "returned_titles",
+                    "source_count_match",
+                    "evidence_hit",
+                    "preview_resolvable",
+                    "answer_excerpt",
                     "response_status_code",
                     "preview_status_code",
                 ],
@@ -1829,12 +2160,50 @@ def write_eval_markdown_report(report: dict[str, Any], output_path: str | Path) 
     return path
 
 
+def _format_gate_detail_value(value: Any) -> str:
+    if isinstance(value, float):
+        return f"{value:.3f}"
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False)
+    return str(value)
+
+
+
+def _render_failed_gate_detail_lines(title: str, details: dict[str, Any] | None) -> list[str]:
+    detail_items = dict(details or {})
+    if not detail_items:
+        return [f"- {title}：-", ""]
+
+    lines = [f"- {title}："]
+    for gate_name, item in detail_items.items():
+        gate = dict(item or {})
+        parts: list[str] = []
+        for key in (
+            "metric",
+            "actual",
+            "minimum",
+            "required_count",
+            "covered_count",
+            "missing",
+            "required_categories_without_passed_cases",
+            "required_modalities_without_passed_cases",
+            "detail",
+        ):
+            if key not in gate:
+                continue
+            value = gate.get(key)
+            if value in (None, "", [], {}):
+                continue
+            parts.append(f"{key}={_format_gate_detail_value(value)}")
+        lines.append(f"  - {gate_name}: {'; '.join(parts) or '-'}")
+    lines.append("")
+    return lines
+
+
 def _pick_font(size: int = 28) -> ImageFont.ImageFont:
     """为评测图片 fixture 选择可用字体，避免不同环境完全失真。"""
-    for candidate in FONT_CANDIDATES:
-        if candidate.exists():
-            return ImageFont.truetype(str(candidate), size=size)
-    return ImageFont.load_default()
+    font, _ = load_first_available_font(size=size, candidates=FONT_CANDIDATES)
+    return font
 
 
 def _text_to_image_lines(text: str, *, width: int = 48, max_lines: int = 5) -> list[str]:
@@ -2097,10 +2466,9 @@ class EvalV1SemirealHarness:
         chat_service.runtime_state.ensure_index_loaded = MagicMock(return_value=True)
         chat_service.runtime_state.build_query_engine = MagicMock(side_effect=self._build_query_engine)
         chat_service.runtime_state.get_index_manager = MagicMock(side_effect=lambda kb_id=None: self.managers[str(kb_id)])
-        chat_service.append_chat_message = lambda *args, **kwargs: None
         kb_service._extract_image_ocr_result = self._fake_extract_image_ocr_result
 
-    def _build_query_engine(self, kb_ids: list[str] | None = None) -> SemirealQueryEngine:
+    def _build_query_engine(self, kb_ids: list[str] | None = None, **kwargs: Any) -> SemirealQueryEngine:
         normalized = list(kb_ids or [])
         if len(normalized) != 1:
             raise ValueError(f"semireal eval expects exactly one kb_id, got: {normalized}")
@@ -2202,13 +2570,108 @@ class EvalV1SemirealHarness:
         )
 
 
-def run_eval_v1_semireal(
+
+
+
+
+
+
+
+def build_eval_suite_markdown_report(report: dict[str, Any]) -> str:
+    """渲染分层 semireal suite 的总览报告。"""
+    totals = dict(report.get("totals") or {})
+    layer_summaries = list(report.get("layer_summaries") or [])
+    lines: list[str] = [
+        f"# 问答分层评测报告：{report['suite_name']}",
+        "",
+        f"- 运行时间：{report['run_at']}",
+        f"- 分层策略：{report.get('strategy') or '-'}",
+        f"- suite 是否通过：{'是' if report.get('suite_passed') else '否'}",
+        "",
+        "## 1. Suite 汇总",
+        "",
+        _render_table(
+            [[
+                str(totals.get('target_cases') or 0),
+                str(totals.get('actual_cases') or 0),
+                str(totals.get('passed_cases') or 0),
+                str(totals.get('failed_cases') or 0),
+                f"{float(totals.get('pass_rate') or 0.0):.4f}",
+                str(totals.get('passed_layers') or 0),
+                str(totals.get('failed_layers') or 0),
+            ]],
+            ['target_cases', 'actual_cases', 'passed_cases', 'failed_cases', 'pass_rate', 'passed_layers', 'failed_layers'],
+        ),
+        "",
+        "## 2. 各层结果",
+        "",
+    ]
+    if layer_summaries:
+        lines.extend([
+            _render_table(
+                [
+                    [
+                        str(item.get('name') or '-'),
+                        str(item.get('dataset_name') or '-'),
+                        str(item.get('evaluation_mode') or '-'),
+                        str(item.get('target_case_count') or 0),
+                        str(item.get('actual_case_count') or 0),
+                        str(item.get('failed_cases') or 0),
+                        f"{float(item.get('pass_rate') or 0.0):.4f}",
+                        ', '.join(
+                            list(item.get('failed_run_gates') or [])
+                            + list(item.get('failed_contract_gates') or [])
+                            + list(item.get('failed_diagnostic_gates') or [])
+                        ) or '-',
+                        '; '.join(
+                            f"{cat['category']}({cat['pass_rate']:.2f}/{cat['count']})"
+                            for cat in list(item.get('weakest_categories') or [])
+                        ) or '-',
+                    ]
+                    for item in layer_summaries
+                ],
+                ['layer', 'dataset', 'mode', 'target_cases', 'actual_cases', 'failed_cases', 'pass_rate', 'failed_gates', 'weakest_categories'],
+            ),
+            '',
+        ])
+    else:
+        lines.extend(['当前没有 layer 结果。', ''])
+
+    lines.extend(['## 3. 分层瓶颈', ''])
+    for index, item in enumerate(layer_summaries, start=1):
+        lines.extend([
+            f"### 3.{index} {item.get('name')}",
+            '',
+            f"- purpose：{item.get('purpose') or '-'}",
+            f"- run_passed：{item.get('run_passed')}",
+            f"- failed_run_gates：{', '.join(item.get('failed_run_gates') or []) or '-'}",
+            f"- failed_contract_gates：{', '.join(item.get('failed_contract_gates') or []) or '-'}",
+            f"- failed_diagnostic_gates：{', '.join(item.get('failed_diagnostic_gates') or []) or '-'}",
+            f"- top_failure_cases：{', '.join(item.get('failure_case_ids') or []) or '-'}",
+            f"- markdown_artifact：{dict(item.get('artifacts') or {}).get('markdown') or '-'}",
+            '',
+        ])
+        lines.extend(_render_failed_gate_detail_lines('failed_run_gate_details', item.get('failed_run_gate_details')))
+        lines.extend(_render_failed_gate_detail_lines('failed_contract_gate_details', item.get('failed_contract_gate_details')))
+        lines.extend(_render_failed_gate_detail_lines('failed_diagnostic_gate_details', item.get('failed_diagnostic_gate_details')))
+    return "\n".join(lines).strip() + "\n"
+
+
+def write_eval_suite_markdown_report(report: dict[str, Any], output_path: str | Path) -> Path:
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(build_eval_suite_markdown_report(report), encoding="utf-8")
+    return path
+
+
+
+def run_eval_semireal(
     *,
     cases_path: str | Path = DEFAULT_EVAL_CASES_PATH,
     schema_path: str | Path = DEFAULT_EVAL_SCHEMA_PATH,
     output_dir: str | Path = DEFAULT_REPORT_DIR,
 ) -> dict[str, Any]:
-    """?? semireal ???????? JSON/Markdown ???"""
+    """运行 semireal 问答评测并输出 JSON/Markdown 报告。"""
     schema, cases = load_eval_cases(cases_path, schema_path=schema_path)
     import_catalog = build_semireal_import_catalog(cases)
     with EvalV1SemirealHarness(import_catalog=import_catalog) as harness:
@@ -2225,6 +2688,10 @@ def run_eval_v1_semireal(
 
     evaluation_mode = str(schema.get("evaluation_mode") or report.get("evaluation_mode") or "healthy")
     report["evaluation_mode"] = evaluation_mode
+    report["contract_gates"] = evaluate_contract_gates(
+        report.get("refusal_summary"),
+        report.get("negative_contract_summary"),
+    )
     if evaluation_mode == "diagnostic":
         diagnostic_summary = build_diagnostic_summary(
             cases,
@@ -2234,23 +2701,107 @@ def run_eval_v1_semireal(
         diagnostic_gates = evaluate_diagnostic_gates(diagnostic_summary, schema)
         report["diagnostic_summary"] = diagnostic_summary
         report["diagnostic_gates"] = diagnostic_gates
-        report["run_passed"] = all(item["passed"] for item in report["run_gates"].values()) and all(
-            item["passed"] for item in diagnostic_gates.values()
+        report["run_passed"] = evaluate_report_run_passed(
+            evaluation_mode=evaluation_mode,
+            suite_summary=report.get("suite_summary"),
+            run_gates=report.get("run_gates"),
+            contract_gates=report.get("contract_gates"),
+            diagnostic_gates=diagnostic_gates,
         )
     else:
-        report["run_passed"] = all(item["passed"] for item in report["run_gates"].values()) and report[
-            "suite_summary"
-        ]["failed_cases"] == 0
+        report["run_passed"] = evaluate_report_run_passed(
+            evaluation_mode=evaluation_mode,
+            suite_summary=report.get("suite_summary"),
+            run_gates=report.get("run_gates"),
+            contract_gates=report.get("contract_gates"),
+            diagnostic_gates=report.get("diagnostic_gates"),
+        )
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / f"{schema['dataset_name']}-semireal-report.json"
     markdown_path = output_dir / f"{schema['dataset_name']}-semireal-report.md"
-    write_eval_json_report(report, json_path)
-    write_eval_markdown_report(report, markdown_path)
     report["artifacts"] = {
         "json": str(json_path.resolve()),
         "markdown": str(markdown_path.resolve()),
     }
     write_eval_json_report(report, json_path)
+    write_eval_markdown_report(report, markdown_path)
     return report
+
+
+
+def run_eval_v1_semireal(
+    *,
+    cases_path: str | Path = DEFAULT_EVAL_CASES_PATH,
+    schema_path: str | Path = DEFAULT_EVAL_SCHEMA_PATH,
+    output_dir: str | Path = DEFAULT_REPORT_DIR,
+) -> dict[str, Any]:
+    """兼容旧命名的 semireal runner 别名。"""
+    return run_eval_semireal(cases_path=cases_path, schema_path=schema_path, output_dir=output_dir)
+
+
+
+def run_eval_semireal_suite(
+    *,
+    suite_path: str | Path = DEFAULT_LAYERED_SUITE_PATH,
+    output_dir: str | Path = DEFAULT_REPORT_DIR,
+) -> dict[str, Any]:
+    """按 smoke/main/hard manifest 依次执行 semireal 评测并输出总览报告。"""
+    manifest = load_eval_suite_manifest(suite_path)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    layer_summaries: list[dict[str, Any]] = []
+    layer_reports: dict[str, dict[str, Any]] = {}
+    for layer in manifest["layers"]:
+        layer_name = str(layer["name"])
+        layer_report = run_eval_semireal(
+            cases_path=layer["cases_path"],
+            schema_path=layer["schema_path"],
+            output_dir=output_dir / layer_name,
+        )
+        layer_reports[layer_name] = {
+            "dataset_name": layer_report.get("dataset_name"),
+            "evaluation_mode": layer_report.get("evaluation_mode"),
+            "run_passed": layer_report.get("run_passed"),
+            "suite_summary": layer_report.get("suite_summary"),
+            "run_gates": layer_report.get("run_gates"),
+            "contract_gates": layer_report.get("contract_gates"),
+            "diagnostic_summary": layer_report.get("diagnostic_summary"),
+            "diagnostic_gates": layer_report.get("diagnostic_gates"),
+            "artifacts": layer_report.get("artifacts"),
+        }
+        layer_summaries.append(build_eval_suite_layer_summary(layer, layer_report))
+
+    total_target_cases = sum(int(item.get("target_case_count") or 0) for item in layer_summaries)
+    total_cases = sum(int(item.get("actual_case_count") or 0) for item in layer_summaries)
+    passed_cases = sum(int(item.get("passed_cases") or 0) for item in layer_summaries)
+    failed_cases = sum(int(item.get("failed_cases") or 0) for item in layer_summaries)
+    suite_report = {
+        "suite_name": str(manifest.get("suite_name") or "chat_eval_suite"),
+        "strategy": str(manifest.get("strategy") or ""),
+        "suite_path": str(manifest.get("suite_path") or ""),
+        "run_at": datetime.now(timezone.utc).isoformat(),
+        "suite_passed": all(bool(item.get("run_passed")) for item in layer_summaries),
+        "totals": {
+            "target_cases": total_target_cases,
+            "actual_cases": total_cases,
+            "passed_cases": passed_cases,
+            "failed_cases": failed_cases,
+            "pass_rate": _safe_ratio(passed_cases, total_cases),
+            "passed_layers": sum(1 for item in layer_summaries if item.get("run_passed")),
+            "failed_layers": sum(1 for item in layer_summaries if not item.get("run_passed")),
+        },
+        "layer_summaries": layer_summaries,
+        "layer_reports": layer_reports,
+    }
+    json_path = output_dir / f"{suite_report['suite_name']}-suite-report.json"
+    markdown_path = output_dir / f"{suite_report['suite_name']}-suite-report.md"
+    suite_report["artifacts"] = {
+        "json": str(json_path.resolve()),
+        "markdown": str(markdown_path.resolve()),
+    }
+    write_eval_json_report(suite_report, json_path)
+    write_eval_suite_markdown_report(suite_report, markdown_path)
+    return suite_report

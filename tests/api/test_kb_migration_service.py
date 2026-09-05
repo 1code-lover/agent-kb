@@ -7,10 +7,12 @@ import hashlib
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 from llama_index.core.schema import TextNode
 
+from api.services import kb_migration_service as migration_module
 from api.services.kb_migration_service import KBMigrationService
 
 
@@ -284,3 +286,41 @@ def test_backup_copy_failure_cleans_partial_backup_and_never_creates_target(tmp_
 
     assert not (storage_root / "migrations" / "backups" / "permission-failure").exists()
     assert not (storage_root / "kbs" / "finance").exists()
+
+
+def test_atomic_write_json_retries_permission_error_then_succeeds(tmp_path, monkeypatch):
+    """迁移 manifest/plan JSON 落盘遇到临时锁时，应重试并成功。"""
+    path = tmp_path / "manifest.json"
+    real_replace = migration_module.os.replace
+    attempts = {"count": 0}
+
+    def flaky_replace(src, dst):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise PermissionError("locked")
+        return real_replace(src, dst)
+
+    sleep = MagicMock()
+    monkeypatch.setattr(migration_module.os, "replace", flaky_replace)
+    monkeypatch.setattr(migration_module.time, "sleep", sleep)
+
+    migration_module._atomic_write_json(path, {"ok": True})
+
+    assert attempts["count"] == 3
+    assert sleep.call_count == 2
+    assert json.loads(path.read_text(encoding="utf-8")) == {"ok": True}
+    assert list(path.parent.glob("manifest.json.tmp-*")) == []
+
+
+def test_atomic_write_json_raises_after_retries_and_cleans_tmp_file(tmp_path, monkeypatch):
+    """迁移 JSON 连续 replace 失败时，应抛错且不遗留 tmp 文件。"""
+    path = tmp_path / "manifest.json"
+
+    monkeypatch.setattr(migration_module.os, "replace", MagicMock(side_effect=PermissionError("still locked")))
+    monkeypatch.setattr(migration_module.time, "sleep", MagicMock())
+
+    with pytest.raises(PermissionError, match="still locked"):
+        migration_module._atomic_write_json(path, {"ok": True})
+
+    assert not path.exists()
+    assert list(path.parent.glob("manifest.json.tmp-*")) == []

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
+from tests.api._testclient import TestClient
 
 from api.app import app
 from api.routers import health as health_router
